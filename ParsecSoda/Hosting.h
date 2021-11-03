@@ -82,6 +82,7 @@ public:
 
 	AudioIn audioIn;
 	AudioOut audioOut;
+	HWND mainWindow;
 
 private:
 	void initAllModules();
@@ -89,9 +90,10 @@ private:
 	void mainLoopControl();
 	void pollEvents();
 	void pollInputs();
+	void pollLatency();
 	bool parsecArcadeStart();
 	bool isFilteredCommand(ACommand* command);
-	void onGuestStateChange(ParsecGuestState& state, Guest& guest);
+	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
 	// Attributes
 	AudioMix _audioMix;
@@ -116,6 +118,7 @@ private:
 	bool _isMediaThreadRunning = false;
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
+	bool _isLatencyThreadRunning = false;
 
 	Stopwatch _mediaClock;
 
@@ -123,10 +126,12 @@ private:
 	thread _mediaThread;
 	thread _inputThread;
 	thread _eventThread;
+	thread _latencyThread;
 	thread _createGamepadsThread;
 	thread _connectGamepadsThread;
 
 	mutex _mediaMutex;
 	mutex _inputMutex;
 	mutex _eventMutex;
+	mutex _latencyMutex;
 };

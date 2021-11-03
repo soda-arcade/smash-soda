@@ -424,6 +424,7 @@ void DX11::setScreen(UINT index)
 
 UINT DX11::getScreen()
 {
+	_currentScreen = MetadataCache::preferences.monitor;
 	return _currentScreen;
 }
 

@@ -13,7 +13,8 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 			(
 				guests[i].name,
 				guests[i].userID,
-				guests[i].id
+				guests[i].id,
+				guests[i].metrics[0]
 			)
 		);
 
@@ -27,6 +28,16 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 vector<Guest>& GuestList::getGuests()
 {
     return _guests;
+}
+
+void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
+{
+	for (size_t i = 0; i < guestCount; i++)
+	{
+		if (i <= _guests.size()) {
+			_guests[i].metrics = guests[i].metrics[0];
+		}
+	}
 }
 
 void GuestList::clear()

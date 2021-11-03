@@ -21,15 +21,15 @@ bool LogWidget::render()
     {
         if ((*it)[0] == '@')
         {
-            AppStyle::pushPositive();
-            ImGui::TextWrapped((*it).c_str());
-            AppStyle::pop();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.75f, 0.0f, 1.00f));
+            ImGui::TextWrapped((*it).substr(1).c_str());
+            ImGui::PopStyleColor();
         }
         else if ((*it)[0] == '!')
         {
-            AppStyle::pushNegative();
-            ImGui::TextWrapped((*it).c_str());
-            AppStyle::pop();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
+            ImGui::TextWrapped((*it).substr(1).c_str());
+            ImGui::PopStyleColor();
         }
         else
         {

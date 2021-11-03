@@ -311,6 +311,7 @@ void Hosting::startHosting()
 				_mediaThread = thread ( [this]() {liveStreamMedia(); } );
 				_inputThread = thread ([this]() {pollInputs(); });
 				_eventThread = thread ([this]() {pollEvents(); });
+				_latencyThread = thread([this]() {pollLatency(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
 			}
 		}
@@ -498,14 +499,15 @@ void Hosting::pollEvents()
 		if (ParsecHostPollEvents(_parsec, 30, &event)) {
 			ParsecGuest parsecGuest = event.guestStateChange.guest;
 			ParsecGuestState state = parsecGuest.state;
-			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id);
+			ParsecStatus status = event.guestStateChange.status;
+			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id, parsecGuest.metrics[0]);
 			guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 			_guestList.setGuests(guests, guestCount);
 
 			switch (event.type)
 			{
 			case HOST_EVENT_GUEST_STATE_CHANGE:
-				onGuestStateChange(state, guest);
+				onGuestStateChange(state, guest, status);
 				break;
 
 			case HOST_EVENT_USER_DATA:
@@ -526,6 +528,23 @@ void Hosting::pollEvents()
 	_isEventThreadRunning = false;
 	_eventMutex.unlock();
 	_eventThread.detach();
+}
+
+void Hosting::pollLatency()
+{
+	_latencyMutex.lock();
+	_isLatencyThreadRunning = true;
+	int guestCount = 0;
+	ParsecGuest* guests = nullptr;
+	while (_isRunning)
+	{
+		Sleep(2000);
+		guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
+		_guestList.updateMetrics(guests, guestCount);
+	}
+	_isLatencyThreadRunning = false;
+	_latencyMutex.unlock();
+	_latencyThread.detach();
 }
 
 void Hosting::pollInputs()
@@ -579,7 +598,7 @@ bool Hosting::isFilteredCommand(ACommand* command)
 	return false;
 }
 
-void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest)
+void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status)
 {
 	static string logMessage;
 
@@ -588,6 +607,12 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest)
 		ParsecHostKickGuest(_parsec, guest.id);
 		logMessage = _chatBot->formatBannedGuestMessage(guest);
 		broadcastChatMessage(logMessage);
+		_chatLog.logCommand(logMessage);
+	}
+	else if (state == GUEST_FAILED)
+	{
+		logMessage = _chatBot->formatFailedConnection(guest, status);
+		_chatLog.logCommand(logMessage);
 	}
 	else if (state == GUEST_CONNECTED || state == GUEST_DISCONNECTED)
 	{

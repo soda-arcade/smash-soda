@@ -64,7 +64,7 @@ bool HostSettingsWidget::render(HWND& hwnd)
     if (_hosting.isRunning() && isDirty())
     {
         cursor = ImGui::GetCursorPos();
-        ImGui::SetCursorPos(ImVec2(size.x - 30.0f, 35.0f));
+        ImGui::SetCursorPos(ImVec2(size.x - 30.0f, 25.0f));
 
         if (IconButton::render(AppIcons::submit, AppColors::primary))
         {

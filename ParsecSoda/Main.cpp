@@ -79,6 +79,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         NULL, NULL, wc.hInstance, NULL
     );
 
+    g_hosting.mainWindow = hwnd;
+
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
     {
@@ -95,6 +97,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -128,15 +131,26 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     HostInfoWidget hostInfoWidget(g_hosting);
     MasterOfPuppetsWidget masterOfPuppets(g_hosting);
     
-    FLASHWINFO fi;
-    fi.cbSize = sizeof(FLASHWINFO);
-    fi.hwnd = hwnd;
-    fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
-    fi.uCount = 0;
-    fi.dwTimeout = 0;
-    ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
-        FlashWindowEx(&fi);
-    });
+    //ITaskbarList3* m_pTaskBarlist;
+    //CoCreateInstance(
+    //    CLSID_TaskbarList, NULL, CLSCTX_ALL,
+    //    IID_ITaskbarList3, (void**)&m_pTaskBarlist);
+
+    //m_pTaskBarlist->SetProgressState(hwnd, TBPF_ERROR);
+    //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
+
+    ChatWidget chatWindow(g_hosting);
+    //FLASHWINFO fi;
+    //fi.cbSize = sizeof(FLASHWINFO);
+    //fi.hwnd = hwnd;
+    ////fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+    //fi.dwFlags = FLASHW_TRAY;
+    ////fi.uCount = 0;
+    //fi.uCount = 1;
+    //fi.dwTimeout = 0;
+    //ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
+    //    FlashWindowEx(&fi);
+    //});
 
     ImVec4 clear_color = ImVec4(0.01f, 0.01f, 0.01f, 1.00f);
     ImGui::loadStyle();
@@ -148,7 +162,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showGamepads = true;
     bool showMasterOfPuppets = false;
     bool showAudio = false;
-    bool showVideo = false;
+    bool showVideo = true;
     bool showStyles = true;
     bool showInfo = false;
     bool showLogin = true;
@@ -238,7 +252,19 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-        g_pSwapChain->Present(1, 0); // Present with vsync
+
+        static UINT presentFlags = 0;
+
+        if (g_pSwapChain->Present(1, presentFlags) == DXGI_STATUS_OCCLUDED) {
+            presentFlags = DXGI_PRESENT_TEST;
+            Sleep(20);
+        }
+        else {
+            presentFlags = 0;
+        }
+
+
+        //g_pSwapChain->Present(1, 0); // Present with vsync
         //g_pSwapChain->Present(0, 0); // Present without vsync
     }
 

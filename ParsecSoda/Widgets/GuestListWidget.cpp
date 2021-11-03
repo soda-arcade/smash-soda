@@ -156,11 +156,20 @@ void GuestListWidget::renderOnlineGuests()
 
         cursor = ImGui::GetCursorPos();
         ImGui::BeginGroup();
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("(# %d)\t", userID);
-        AppStyle::pop();
+        //AppStyle::pushLabel();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
+        uint32_t fastRTs = _guests[i].metrics.fastRTs;
+        uint32_t slowRTs = _guests[i].metrics.slowRTs;
+        uint32_t que = _guests[i].metrics.queuedFrames;
+        float encLat = static_cast<float>(_guests[i].metrics.encodeLatency);
+        float decLat = static_cast<float>(_guests[i].metrics.decodeLatency);
+        int netLat = static_cast<int>(_guests[i].metrics.networkLatency);
+        float bitM = static_cast<float>(_guests[i].metrics.bitrate);
+        ImGui::Text("%dms  B:%.1f  D:%.1f  E:%.1f  Q:%u  N:%u/%u", netLat, bitM, decLat, encLat, que, slowRTs, fastRTs);
+        //AppStyle::pop();
+        ImGui::PopStyleColor();
         AppStyle::pushInput();
-        ImGui::TextWrapped(name.c_str());
+        ImGui::Text((name +" #"+ to_string(userID)).c_str());
         AppStyle::pop();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();

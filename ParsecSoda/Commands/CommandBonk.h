@@ -68,29 +68,29 @@ public:
 			if (_sender.userID == _targetGuest.userID)
 			{
 				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " self-bonked. *Bonk!*\0";
-				try
-				{
-					PlaySound(TEXT("./sfx/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
+				//try
+				//{
+				//	PlaySound(TEXT("./sfx/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				//}
+				//catch (const std::exception&) {}
 			}
 			else if (Dice::roll(BONK_CHANCE))
 			{
 				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " bonked " + _targetGuest.name + ". *Bonk!*\0";
-				try
-				{
-					PlaySound(TEXT("./sfx/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
+				//try
+				//{
+				//	PlaySound(TEXT("./sfx/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				//}
+				//catch (const std::exception&) {}
 			}
 			else
 			{
 				_replyMessage = std::string() + "[ChatBot] | " + _targetGuest.name + " dodged " + _sender.name + "'s bonk. *Swoosh!*\0";
-				try
-				{
-					PlaySound(TEXT("./sfx/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
+				//try
+				//{
+				//	PlaySound(TEXT("./sfx/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				//}
+				//catch (const std::exception&) {}
 			}
 			break;
 		

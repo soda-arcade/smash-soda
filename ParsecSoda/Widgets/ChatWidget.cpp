@@ -1,7 +1,9 @@
 #include "ChatWidget.h"
 
-ChatWidget::ChatWidget(Hosting& hosting, function<void(void)> onMessageCallback)
-    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0), _onMessageCallback(onMessageCallback)
+//ChatWidget::ChatWidget(Hosting& hosting, function<void(void)> onMessageCallback)
+//    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0), _onMessageCallback(onMessageCallback)
+ChatWidget::ChatWidget(Hosting& hosting)
+    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0)
 {
     setSendBuffer("\0");
 }
@@ -34,14 +36,14 @@ bool ChatWidget::render()
     renderTopBar(isWindowLocked, isClearChat);
     ImGui::Separator();
 
-    ImGui::BeginChild("Chat Log", ImVec2(size.x, size.y - 210));
+    ImGui::BeginChild("Chat Log", ImVec2(size.x, size.y - 85));
     for (; it != _chatLog.end(); ++it)
     {
         static float textHeight;
         cursor = ImGui::GetCursorPos();
         
         ImGui::TextWrapped((*it).c_str());
-        textHeight = ImGui::GetCursorPosY() - cursor.y;
+        textHeight = ImGui::GetCursorPosY() - cursor.y - 4;
 
         ImGui::SetCursorPos(cursor);
         if (ImGui::Button(
@@ -69,14 +71,12 @@ bool ChatWidget::render()
     }
     ImGui::EndChild();
 
+    //ImGui::BeginChild("Message Preview", ImVec2(size.x, 60));
+    //ImGui::Separator();
+    //ImGui::TextWrapped(_sendBuffer);
+    //ImGui::EndChild();
+    ImGui::Dummy(ImVec2(0, 1.0f));
 
-    ImGui::BeginChild("Message Preview", ImVec2(size.x, 60));
-    ImGui::Separator();
-    ImGui::TextWrapped(_previewBuffer);
-    ImGui::EndChild();
-
-    if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
-        ImGui::SetKeyboardFocusHere(0);
     ImGui::SetNextItemWidth(size.x);
     try
     {
@@ -101,26 +101,34 @@ bool ChatWidget::render()
         catch (const std::exception&) {}
     }
 
-    cursor = ImGui::GetCursorPos();
-    ImGui::Dummy(ImVec2(0, 5));
-    if (_chatLog.size() > 0 && stopwatch.getRemainingTime() > 0)
-    {
-        static float fill = 1.0f;
-        fill = (float)stopwatch.getRemainingTime() / stopwatch.getDuration();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, fill*fill), "Message copied.");
+    if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
+        ImGui::SetKeyboardFocusHere(-1);
+    // Activate chat when not foreground window and not selected any other box
+    if (!ImGui::IsAnyItemActive() && GetForegroundWindow() != _hosting.mainWindow) {
+        //_chatLog.push_back("activated");
+        ImGui::SetKeyboardFocusHere(-1);
     }
 
-    ImGui::SetCursorPos(cursor);
+    //cursor = ImGui::GetCursorPos();
+    //ImGui::Dummy(ImVec2(0, 5));
+    //if (_chatLog.size() > 0 && stopwatch.getRemainingTime() > 0)
+    //{
+    //    static float fill = 1.0f;
+    //    fill = (float)stopwatch.getRemainingTime() / stopwatch.getDuration();
+    //    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, fill*fill), "Message copied.");
+    //}
 
-    ImGui::Indent(size.x - 50);
-    
-    if (ToggleIconButtonWidget::render(
-        AppIcons::send, AppIcons::send, isDirty(),
-        AppColors::primary, AppColors::alpha(AppColors::primary, 0.25f)
-    ))
-    {
-        sendMessage();
-    }
+    //ImGui::SetCursorPos(cursor);
+
+    //ImGui::Indent(size.x - 50);
+    //
+    //if (ToggleIconButtonWidget::render(
+    //    AppIcons::send, AppIcons::send, isDirty(),
+    //    AppColors::primary, AppColors::alpha(AppColors::primary, 0.25f)
+    //))
+    //{
+    //    sendMessage();
+    //}
 
     AppStyle::pop();
     ImGui::End();
@@ -152,7 +160,9 @@ bool ChatWidget::renderTopBar(bool& isWindowLocked, bool& isClearChat)
     {
         if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30)))
         {
-            isDeletingChat = true;
+            isClearChat = true;
+            result = true;
+            //isDeletingChat = true;
         }
         TitleTooltipWidget::render("Clear Chat", "Deletes all chat messages.");
     }

@@ -4,8 +4,8 @@ Guest::Guest()
 	: name(""), userID(0), id(0), status(Status::INVALID)
 {}
 
-Guest::Guest(string name, uint32_t userID, uint32_t id, Status status)
-	: name(name), userID(userID), id(id), status(status)
+Guest::Guest(string name, uint32_t userID, uint32_t id, ParsecMetrics metrics, Status status)
+	: name(name), userID(userID), id(id), metrics(metrics), status(status)
 {}
 
 Guest::Guest(ParsecGuest guest)

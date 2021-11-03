@@ -67,11 +67,11 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 	std::ostringstream reply;
 	if (state == GUEST_CONNECTED)
 	{
-		reply << "@ >>  joined \t " << guest.name << " \t(#" << guest.userID << ")\0";
+		reply << "@join \t\t " << guest.name << " #" << guest.userID << "\0";
 	}
 	else
 	{
-		reply << "! <<  quit \t\t  " << guest.name << " \t(#" << guest.userID << ")\0";
+		reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
 	}
 
 	const std::string formattedMessage = reply.str();
@@ -80,10 +80,17 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 	return formattedMessage;
 }
 
+const std::string ChatBot::formatFailedConnection(Guest guest, ParsecStatus status)
+{
+	std::ostringstream reply;
+	reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
+	return reply.str();
+}
+
 const std::string ChatBot::formatBannedGuestMessage(Guest guest)
 {
 	std::ostringstream reply;
-	reply << "[ChatBot] | None shall pass! Banned guests don't join us:\n\t\t" << guest.name << " \t (#" << guest.userID << ")\0";
+	reply << "!ban \t\t " << guest.name << " #" << guest.userID << "\0";
 
 	return reply.str();
 }

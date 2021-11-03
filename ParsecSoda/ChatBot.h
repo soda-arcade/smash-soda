@@ -67,6 +67,7 @@ public:
 
 	const std::string formatGuestConnection(Guest guest, ParsecGuestState state);
 	const std::string formatBannedGuestMessage(Guest guest);
+	const std::string formatFailedConnection(Guest guest, ParsecStatus status);
 	CommandBotMessage sendBotMessage(const char * msg);
 
 private:

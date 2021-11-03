@@ -38,11 +38,11 @@ public:
 				_replyMessage = std::string() + "[ChatBot] | " + _targetGuest.name+ " was kicked by " + _sender.name + "!\0";
 				ParsecHostKickGuest(_parsec, _targetGuest.id);
 				
-				try
-				{
-					PlaySound(TEXT("./sfx/kick.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
+				//try
+				//{
+				//	PlaySound(TEXT("./sfx/kick.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				//}
+				//catch (const std::exception&) {}
 
 				return true;
 			}
