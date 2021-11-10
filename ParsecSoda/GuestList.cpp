@@ -32,10 +32,15 @@ vector<Guest>& GuestList::getGuests()
 
 void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
 {
-	for (size_t i = 0; i < guestCount; i++)
+	for (size_t mi = 0; mi < guestCount; mi++)
 	{
-		if (i <= _guests.size()) {
-			_guests[i].metrics = guests[i].metrics[0];
+		vector<Guest>::iterator i;
+		for (i = _guests.begin(); i != _guests.end(); ++i)
+		{
+			if ((*i).id == guests[mi].id)
+			{
+				(*i).metrics = guests[mi].metrics[0];
+			}
 		}
 	}
 }

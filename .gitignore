@@ -391,5 +391,5 @@ FodyWeavers.xsd
 *.sln.iml
 Builds
 ParsecSoda/sfx/custom/
-!Dependencies/vigem/[Bb]in
+!Dependencies/vigem/[Ll]ib/**
 !Dependencies/sdl/[Ll]ib/**
