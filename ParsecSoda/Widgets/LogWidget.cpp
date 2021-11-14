@@ -38,7 +38,7 @@ bool LogWidget::render()
     }
     if (_messageCount != _commandLog.size())
     {
-        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 10)
+        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 100)
         {
             ImGui::SetScrollHereY(1.0f);
         }

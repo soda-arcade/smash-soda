@@ -95,7 +95,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\32;$(SolutionDir)Dependencies\vigem\bin\debug32;$(SolutionDir)Dependencies\sdl\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\32;$(SolutionDir)Dependencies\vigem\lib\debug\x86;$(SolutionDir)Dependencies\sdl\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec32.lib;libucrtd.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libucrt.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -131,7 +131,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\bin\debug64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\lib\debug\x64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec.lib;libucrtd.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libucrt.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

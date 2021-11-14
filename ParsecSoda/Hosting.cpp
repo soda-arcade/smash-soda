@@ -540,7 +540,9 @@ void Hosting::pollLatency()
 	{
 		Sleep(2000);
 		guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
-		_guestList.updateMetrics(guests, guestCount);
+		if (guestCount > 0) {
+			_guestList.updateMetrics(guests, guestCount);
+		}
 	}
 	_isLatencyThreadRunning = false;
 	_latencyMutex.unlock();

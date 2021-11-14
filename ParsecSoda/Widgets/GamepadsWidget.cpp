@@ -174,7 +174,7 @@ bool GamepadsWidget::render()
         }
         else {
             id = "    ";
-            name = gi.owner.guest.name;
+            name = "    ";
         }
 
         AppStyle::pushLabel();

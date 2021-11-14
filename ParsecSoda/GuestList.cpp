@@ -14,7 +14,8 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 				guests[i].name,
 				guests[i].userID,
 				guests[i].id,
-				guests[i].metrics[0]
+				guests[i].metrics[0],
+				false
 			)
 		);
 
@@ -39,6 +40,14 @@ void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
 		{
 			if ((*i).id == guests[mi].id)
 			{
+				if (guests[mi].metrics[0].fastRTs > (*i).metrics.fastRTs || guests[mi].metrics[0].slowRTs > (*i).metrics.slowRTs)
+				{
+					(*i).congested = true;
+				}
+				else
+				{
+					(*i).congested = false;
+				}
 				(*i).metrics = guests[mi].metrics[0];
 			}
 		}

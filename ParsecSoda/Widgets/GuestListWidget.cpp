@@ -72,6 +72,7 @@ void GuestListWidget::renderOnlineGuests()
     static size_t popupIndex;
     static string name;
     static uint32_t userID;
+    static ParsecMetrics metrics;
     static ImVec2 cursor;
 
     // Guests
@@ -85,6 +86,7 @@ void GuestListWidget::renderOnlineGuests()
     {
         name = _guests[i].name;
         userID = _guests[i].userID;
+        metrics = _guests[i].metrics;
 
         filterTextStr = _filterText;
         if (!filterTextStr.empty())
@@ -157,16 +159,24 @@ void GuestListWidget::renderOnlineGuests()
         cursor = ImGui::GetCursorPos();
         ImGui::BeginGroup();
         //AppStyle::pushLabel();
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
-        if (_guests[i].metrics.packetsSent > 60) {
+        if (_guests[i].congested)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
+        }
+        if (metrics.packetsSent > 60)
+        {
             ImGui::Text("%.0fms  B:%.1f  D:%u/%.1f  E:%.1f  N:%u/%u",
-                _guests[i].metrics.networkLatency,
-                _guests[i].metrics.bitrate,
-                _guests[i].metrics.queuedFrames,
-                _guests[i].metrics.decodeLatency,
-                _guests[i].metrics.encodeLatency,
-                _guests[i].metrics.slowRTs,
-                _guests[i].metrics.fastRTs
+                metrics.networkLatency,
+                metrics.bitrate,
+                metrics.queuedFrames,
+                metrics.decodeLatency,
+                metrics.encodeLatency,
+                metrics.slowRTs,
+                metrics.fastRTs
             );
         }
         else {

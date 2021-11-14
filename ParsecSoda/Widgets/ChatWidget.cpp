@@ -58,7 +58,7 @@ bool ChatWidget::render()
     }
     if (_messageCount != _chatLog.size())
     {
-        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 10)
+        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 100)
         {
             ImGui::SetScrollHereY(1.0f);
         }

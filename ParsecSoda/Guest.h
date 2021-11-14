@@ -26,7 +26,7 @@ public:
 	 * @param userId Unique user ID.
 	 * @param id Internal id for specific methods.
 	 */
-	Guest(string name, uint32_t userID, uint32_t id, ParsecMetrics metrics, Status status = Status::OK);
+	Guest(string name, uint32_t userID, uint32_t id, ParsecMetrics metrics, bool congested = false, Status status = Status::OK);
 	
 	/**
 	 * Compatibility constructor.
@@ -43,5 +43,6 @@ public:
 	uint32_t userID;
 	uint32_t id;
 	ParsecMetrics metrics;
+	bool congested;
 	Status status;
 };
