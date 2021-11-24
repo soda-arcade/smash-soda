@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include <Windows.h>
 #include <Xinput.h>
 #include "ViGEm/Client.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include "../imgui/imgui.h"
 #include "../Hosting.h"
 #include "../AudioTools.h"

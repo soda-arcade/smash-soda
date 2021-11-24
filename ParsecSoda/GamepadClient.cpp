@@ -1,4 +1,6 @@
 #include "GamepadClient.h"
+#include "Hosting.h"
+extern Hosting g_hosting;
 
 // =============================================================
 //
@@ -445,10 +447,26 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 		return false;
 	}
 	
+	int i{ 0 };
 	return reduceUntilFirst([&](Gamepad& gamepad) {
+		++i;
 		if (!(isPuppetMaster && gamepad.isPuppet) && (gamepad.isAttached() && !gamepad.owner.guest.isValid()))
 		{
 			gamepad.setOwner(guest, deviceID, isKeyboard);
+
+			WebSocket &_ws = g_hosting.getWebSocket();
+			if (_ws.connected())
+			{
+				MTY_JSON* jmsg = MTY_JSONObjCreate();
+				//MTY_JSONObjSetItem
+				MTY_JSONObjSetString(jmsg, "type", "gamepadconnect");
+				MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
+				MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
+				MTY_JSONObjSetUInt(jmsg, "index", i);
+				char* finmsg = MTY_JSONSerialize(jmsg);
+				_ws.handle_message(finmsg);
+			}
+
 			return true;
 		}
 

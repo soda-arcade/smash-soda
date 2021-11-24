@@ -31,6 +31,7 @@ public:
 	static ID3D11ShaderResourceView* speakersOff;
 
 	static ID3D11ShaderResourceView* video;
+	static ID3D11ShaderResourceView* websocket;
 
 	static ID3D11ShaderResourceView* refresh;
 	static ID3D11ShaderResourceView* sort;
@@ -96,6 +97,7 @@ private:
 	static Texture _speakersOn;
 	static Texture _speakersOff;
 
+	static Texture _websocket;
 	static Texture _video;
 	
 	static Texture _refresh;

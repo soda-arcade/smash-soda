@@ -1,4 +1,5 @@
 #include "Hosting.h"
+#include "WebSocket.h"
 
 using namespace std;
 
@@ -112,6 +113,8 @@ void Hosting::init()
 		_hostConfig, _parsecSession, _sfxList, _tierList,
 		_isRunning, _host
 	);
+
+	//_webSocket = new WebSocket;
 
 	CommandBonk::init();
 }
@@ -355,6 +358,20 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	{
 		Tier tier = _tierList.getTier(guest.userID);
 
+		if (_webSocket.connected())
+		{
+			MTY_JSON* jmsg = MTY_JSONObjCreate();
+			//MTY_JSONObjSetItem
+			MTY_JSONObjSetString(jmsg, "type", "chat");
+			MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
+			MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
+			//MTY_JSONObjSetUInt(jmsg, "usertier", tier);
+			MTY_JSONObjSetString(jmsg, "content", message);
+			//string msg = "{\"type\":\"chat\",\"userid\":\""+ to_string(guest.userID) +"\",\"username\":\""+ string(guest.name) +"\",\"content\":\"" + string(message) + "\"}";
+			char* finmsg = MTY_JSONSerialize(jmsg);
+			_webSocket.handle_message(finmsg);
+		}
+
 		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier);
 		defaultMessage.run();
 		_chatBot->setLastUserId(guest.userID);
@@ -372,6 +389,21 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	// Chatbot's command reply
 	if (!command->replyMessage().empty() && command->type() != COMMAND_TYPE::DEFAULT_MESSAGE)
 	{
+
+		if (_webSocket.connected())
+		{
+			MTY_JSON* jmsg = MTY_JSONObjCreate();
+			//MTY_JSONObjSetItem
+			MTY_JSONObjSetString(jmsg, "type", "command");
+			MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
+			MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
+			//MTY_JSONObjSetUInt(jmsg, "usertier", tier);
+			MTY_JSONObjSetString(jmsg, "content", command->replyMessage().c_str());
+			//string msg = "{\"type\":\"chat\",\"userid\":\""+ to_string(guest.userID) +"\",\"username\":\""+ string(guest.name) +"\",\"content\":\"" + string(message) + "\"}";
+			char* finmsg = MTY_JSONSerialize(jmsg);
+			_webSocket.handle_message(finmsg);
+		}
+
 		broadcastChatMessage(command->replyMessage());
 		_chatLog.logCommand(command->replyMessage());
 		_chatBot->setLastUserId();
@@ -573,6 +605,42 @@ void Hosting::pollInputs()
 	_inputThread.detach();
 }
 
+void Hosting::webSocketStart(string uri)
+{
+	if (!_isWebSocketThreadRunning)
+	{
+		_webSocketThread = thread([this,uri]() {webSocketRun(uri); });
+	}
+}
+
+void Hosting::webSocketStop()
+{
+	if (_webSocket.connected())
+	{
+		_webSocket.close();
+	}
+}
+
+WebSocket& Hosting::getWebSocket()
+{
+	return _webSocket;
+}
+
+void Hosting::webSocketRun(string uri)
+{
+	_webSocketMutex.lock();
+	_isWebSocketThreadRunning = true;
+
+	//_webSocket.start("ws://localhost:9002");
+	_webSocket.start(uri);
+	//_webSocketThread.join();
+
+	_isWebSocketThreadRunning = false;
+	_webSocketMutex.unlock();
+	_webSocketThread.detach();
+}
+
+
 bool Hosting::parsecArcadeStart()
 {
 	if (isReady()) {
@@ -603,6 +671,18 @@ bool Hosting::isFilteredCommand(ACommand* command)
 void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status)
 {
 	static string logMessage;
+
+	if (_webSocket.connected())
+	{
+		MTY_JSON* jmsg = MTY_JSONObjCreate();
+		MTY_JSONObjSetString(jmsg, "type", "gueststate");
+		MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
+		MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
+		MTY_JSONObjSetUInt(jmsg, "state", state);
+		MTY_JSONObjSetUInt(jmsg, "status", status);
+		char* finmsg = MTY_JSONSerialize(jmsg);
+		_webSocket.handle_message(finmsg);
+	}
 
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && _banList.isBanned(guest.userID))
 	{

@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include <thread>
 #include <Windows.h>
 #include <shellapi.h>

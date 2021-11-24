@@ -2,6 +2,7 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
+#define _WINSOCKAPI_
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
@@ -33,6 +34,7 @@
 #include "Widgets/VersionWidget.h"
 #include "Widgets/ThumbnailsWidget.h"
 #include "Widgets/MasterOfPuppetsWidget.h"
+#include "Widgets/WebSocketWidget.h"
 
 using namespace std;
 
@@ -130,7 +132,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     VideoWidget videoWidget(g_hosting);
     HostInfoWidget hostInfoWidget(g_hosting);
     MasterOfPuppetsWidget masterOfPuppets(g_hosting);
-    
+    WebSocketWidget webSocketWidget(g_hosting);
+
     //ITaskbarList3* m_pTaskBarlist;
     //CoCreateInstance(
     //    CLSID_TaskbarList, NULL, CLSCTX_ALL,
@@ -167,6 +170,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showInfo = false;
     bool showLogin = true;
     bool showThumbs = false;
+    bool showWebSocket = true;
 
     ParsecSession& g_session = g_hosting.getSession();
     vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
@@ -231,10 +235,11 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showVideo)              videoWidget.render();
             if (showInfo)               InfoWidget::render();
             if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
+            if (showWebSocket)          webSocketWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showWebSocket
             );
             hostInfoWidget.render();
         }

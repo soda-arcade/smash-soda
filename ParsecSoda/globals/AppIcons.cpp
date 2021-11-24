@@ -23,6 +23,7 @@ ID3D11ShaderResourceView* AppIcons::speakersOn;
 ID3D11ShaderResourceView* AppIcons::speakersOff;
 
 ID3D11ShaderResourceView* AppIcons::video;
+ID3D11ShaderResourceView* AppIcons::websocket;
 
 ID3D11ShaderResourceView* AppIcons::refresh;
 ID3D11ShaderResourceView* AppIcons::sort;
@@ -88,6 +89,7 @@ Texture AppIcons::_speakersOn;
 Texture AppIcons::_speakersOff;
 
 Texture AppIcons::_video;
+Texture AppIcons::_websocket;
 
 Texture AppIcons::_refresh;
 Texture AppIcons::_sort;
@@ -156,6 +158,7 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _speakersOff.loadFromFile(pd3dDevice, "./icons/speakers-off.png");
 
     _video.loadFromFile(pd3dDevice, "./icons/video.png");
+    _websocket.loadFromFile(pd3dDevice, "./icons/websocket.png");
 
     _refresh.loadFromFile(pd3dDevice, "./icons/refresh.png");
     _sort.loadFromFile(pd3dDevice, "./icons/sort.png");
@@ -221,6 +224,7 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     speakersOff = _speakersOff.texture;
     
     video = _video.texture;
+    websocket = _websocket.texture;
 
     refresh = _refresh.texture;
     sort = _sort.texture;

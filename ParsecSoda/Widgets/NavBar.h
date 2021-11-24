@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include "../imgui/imgui.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
@@ -23,7 +25,8 @@ public:
         bool& showLog,
         bool& showAudio,
         bool& showVideo,
-        bool& showInfo
+        bool& showInfo,
+        bool& showWebSocket
     );
 
 private:

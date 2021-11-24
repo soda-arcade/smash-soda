@@ -1,4 +1,6 @@
 #include "GamepadsWidget.h"
+#include "../Hosting.h"
+extern Hosting g_hosting;
 
 GamepadsWidget::GamepadsWidget(Hosting& hosting)
     : _hosting(hosting), _gamepads(hosting.getGamepads())
@@ -96,6 +98,7 @@ bool GamepadsWidget::render()
         padIndex = xboxIndex + 1;
         static bool isIndexSuccess = false;
         isIndexSuccess = gi.isConnected() && padIndex > 0 && padIndex <= 4;
+        WebSocket& _ws = g_hosting.getWebSocket();
 
         ImGui::BeginGroup();
         if (isIndexSuccess)
@@ -131,6 +134,16 @@ bool GamepadsWidget::render()
 
         if (IconButton::render(AppIcons::back, AppColors::primary))
         {
+            if (gi.isOwned() && _ws.connected())
+            {
+                MTY_JSON* jmsg = MTY_JSONObjCreate();
+                MTY_JSONObjSetString(jmsg, "type", "gamepadstrip");
+                MTY_JSONObjSetUInt(jmsg, "userid", gi.owner.guest.userID);
+                MTY_JSONObjSetString(jmsg, "username", gi.owner.guest.name.c_str());
+                MTY_JSONObjSetUInt(jmsg, "index", i);
+                char* finmsg = MTY_JSONSerialize(jmsg);
+                _ws.handle_message(finmsg);
+            }
             gi.clearOwner();
         }
         TitleTooltipWidget::render("Strip gamepad", "Unlink current user from this gamepad.");
@@ -222,7 +235,23 @@ bool GamepadsWidget::render()
                     int guestIndex = *(const int*)payload->Data;
                     if (guestIndex >= 0 && guestIndex < _hosting.getGuestList().size())
                     {
+                        MTY_JSON* jmsg = MTY_JSONObjCreate();
+                        if (_ws.connected())
+                        {
+                            MTY_JSONObjSetString(jmsg, "type", "gamepadassign");
+                            MTY_JSONObjSetUInt(jmsg, "fromuserid", gi.owner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "fromusername", gi.owner.guest.name.c_str());
+                            MTY_JSONObjSetUInt(jmsg, "index", i);
+                        }
+
                         gi.owner.guest.copy(_hosting.getGuestList()[guestIndex]);
+                        if (_ws.connected())
+                        {
+                            MTY_JSONObjSetUInt(jmsg, "touserid", gi.owner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "tousername", gi.owner.guest.name.c_str());
+                            char* finmsg = MTY_JSONSerialize(jmsg);
+                            _ws.handle_message(finmsg);
+                        }
                     }
                 }
             }
@@ -240,6 +269,19 @@ bool GamepadsWidget::render()
                         _gamepads[sourceIndex].owner.copy(backupOwner);
                         _gamepads[i].clearState();
                         _gamepads[sourceIndex].clearState();
+                        if (_ws.connected())
+                        {
+                            MTY_JSON* jmsg = MTY_JSONObjCreate();
+                            MTY_JSONObjSetString(jmsg, "type", "gamepadmove");
+                            MTY_JSONObjSetUInt(jmsg, "fromuserid", backupOwner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "fromusername", backupOwner.guest.name.c_str());
+                            MTY_JSONObjSetUInt(jmsg, "touserid", _gamepads[i].owner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "tousername", _gamepads[i].owner.guest.name.c_str());
+                            MTY_JSONObjSetUInt(jmsg, "fromindex", sourceIndex);
+                            MTY_JSONObjSetUInt(jmsg, "toindex", i);
+                            char* finmsg = MTY_JSONSerialize(jmsg);
+                            _ws.handle_message(finmsg);
+                        }
                     }
                 }
             }

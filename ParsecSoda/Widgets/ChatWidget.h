@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include "ToggleIconButtonWidget.h"
 #include "TitleTooltipWidget.h"
 #include "../imgui/imgui.h"

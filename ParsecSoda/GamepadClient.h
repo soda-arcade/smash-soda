@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include "Gamepad.h"
 #include <Windows.h>
 #include <Xinput.h>

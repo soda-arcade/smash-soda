@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #define D3D_DEBUG_INFO
 
 #include <iostream>
@@ -28,6 +29,7 @@
 #include "CompilerDirectives.h"
 #include "Stopwatch.h"
 #include "MasterOfPuppets.h"
+#include "WebSocket.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -76,6 +78,10 @@ public:
 	void stopHosting();
 	void stripGamepad(int index);
 	void setOwner(Gamepad& gamepad, Guest newOwner, int padId);
+	WebSocket& getWebSocket();
+	void webSocketStart(string uri);
+	void webSocketRun(string uri);
+	void webSocketStop();
 
 	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false);
 	void sendHostMessage(const char* message, bool isHidden = false);
@@ -105,7 +111,8 @@ private:
 	GamepadClient _gamepadClient;
 	GuestList _guestList;
 	MasterOfPuppets _masterOfPuppets;
-	
+	WebSocket _webSocket;
+
 	ParsecDSO* _parsec;
 	ParsecHostConfig _hostConfig;
 	ParsecSession _parsecSession;
@@ -119,6 +126,7 @@ private:
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
 	bool _isLatencyThreadRunning = false;
+	bool _isWebSocketThreadRunning = false;
 
 	Stopwatch _mediaClock;
 
@@ -127,6 +135,7 @@ private:
 	thread _inputThread;
 	thread _eventThread;
 	thread _latencyThread;
+	thread _webSocketThread;
 	thread _createGamepadsThread;
 	thread _connectGamepadsThread;
 
@@ -134,4 +143,5 @@ private:
 	mutex _inputMutex;
 	mutex _eventMutex;
 	mutex _latencyMutex;
+	mutex _webSocketMutex;
 };
