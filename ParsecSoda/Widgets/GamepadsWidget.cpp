@@ -192,13 +192,13 @@ bool GamepadsWidget::render()
 
         if (IconButton::render(AppIcons::back, AppColors::primary))
         {
-            if (gi.isOwned() && _ws.connected())
+            if (gi->isOwned() && _ws.connected())
             {
                 MTY_JSON* jmsg = MTY_JSONObjCreate();
                 MTY_JSONObjSetString(jmsg, "type", "gamepadstrip");
-                MTY_JSONObjSetUInt(jmsg, "id", gi.owner.guest.id);
-                MTY_JSONObjSetUInt(jmsg, "userid", gi.owner.guest.userID);
-                MTY_JSONObjSetString(jmsg, "username", gi.owner.guest.name.c_str());
+                MTY_JSONObjSetUInt(jmsg, "id", gi->owner.guest.id);
+                MTY_JSONObjSetUInt(jmsg, "userid", gi->owner.guest.userID);
+                MTY_JSONObjSetString(jmsg, "username", gi->owner.guest.name.c_str());
                 MTY_JSONObjSetUInt(jmsg, "index", i);
                 char* finmsg = MTY_JSONSerialize(jmsg);
                 _ws.handle_message(finmsg);
@@ -318,17 +318,17 @@ bool GamepadsWidget::render()
                         if (wsConnected)
                         {
                             MTY_JSONObjSetString(jmsg, "type", "gamepadassign");
-                            MTY_JSONObjSetUInt(jmsg, "fromid", gi.owner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "fromuserid", gi.owner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "fromusername", gi.owner.guest.name.c_str());
+                            MTY_JSONObjSetUInt(jmsg, "fromid", gi->owner.guest.id);
+                            MTY_JSONObjSetUInt(jmsg, "fromuserid", gi->owner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "fromusername", gi->owner.guest.name.c_str());
                             MTY_JSONObjSetUInt(jmsg, "index", i);
                         }
                         gi->owner.guest.copy(_hosting.getGuestList()[guestIndex]);
                         if (wsConnected)
                         {
-                            MTY_JSONObjSetUInt(jmsg, "toid", gi.owner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "touserid", gi.owner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "tousername", gi.owner.guest.name.c_str());
+                            MTY_JSONObjSetUInt(jmsg, "toid", gi->owner.guest.id);
+                            MTY_JSONObjSetUInt(jmsg, "touserid", gi->owner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "tousername", gi->owner.guest.name.c_str());
                             char* finmsg = MTY_JSONSerialize(jmsg);
                             _ws.handle_message(finmsg);
                         }
@@ -356,9 +356,9 @@ bool GamepadsWidget::render()
                             MTY_JSONObjSetUInt(jmsg, "fromid", backupOwner.guest.id);
                             MTY_JSONObjSetUInt(jmsg, "fromuserid", backupOwner.guest.userID);
                             MTY_JSONObjSetString(jmsg, "fromusername", backupOwner.guest.name.c_str());
-                            MTY_JSONObjSetUInt(jmsg, "toid", _gamepads[i].owner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "touserid", _gamepads[i].owner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "tousername", _gamepads[i].owner.guest.name.c_str());
+                            MTY_JSONObjSetUInt(jmsg, "toid", _gamepads[i]->owner.guest.id);
+                            MTY_JSONObjSetUInt(jmsg, "touserid", _gamepads[i]->owner.guest.userID);
+                            MTY_JSONObjSetString(jmsg, "tousername", _gamepads[i]->owner.guest.name.c_str());
                             MTY_JSONObjSetUInt(jmsg, "fromindex", sourceIndex);
                             MTY_JSONObjSetUInt(jmsg, "toindex", i);
                             char* finmsg = MTY_JSONSerialize(jmsg);

@@ -533,7 +533,9 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 		return false;
 	}
 	
+	int i{ 0 };
 	return reduceUntilFirst([&](AGamepad* gamepad) {
+		++i;
 		if (!(isPuppetMaster && gamepad->isPuppet) && (!gamepad->isLocked() && gamepad->isAttached() && !gamepad->owner.guest.isValid()))
 		{
 			gamepad->setOwner(guest, deviceID, isKeyboard);
