@@ -8,12 +8,10 @@
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
-//typedef client::connection_ptr connection_ptr;
 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
-
 
 class connection_metadata {
 public:
@@ -58,21 +56,12 @@ class WebSocket {
 public:
     WebSocket();
     bool connected();
-    //typedef WebSocket ws;
-    //void start(std::string uri);
     void start(string uri);
-    //void on_socket_init(websocketpp::connection_hdl hdl);
-    //void on_fail(websocketpp::connection_hdl hdl);
-    //void on_open(websocketpp::connection_hdl hdl);
-    //void on_message(websocketpp::connection_hdl hdl, message_ptr msg);
-    //void on_close(websocketpp::connection_hdl hdl);
     void close();
     void handle_message(string msg);
+    void sendMetrics(vector<ParsecMetrics> metrics);
     int con_id{ -1 };
     websocket_endpoint endpoint;
 
-private:
-    //client::connection_ptr con;
-    //WebSocket& _ws;
 
 };

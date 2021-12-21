@@ -11,6 +11,8 @@
 #include <string>
 #include <mutex>
 #include "MetadataCache.h"
+#include <locale>
+#include <codecvt>
 
 using namespace std;
 

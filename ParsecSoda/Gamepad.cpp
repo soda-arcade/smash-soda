@@ -1,6 +1,4 @@
 #include "Gamepad.h"
-#include "Hosting.h"
-extern Hosting g_hosting;
 
 Gamepad::Gamepad()
 	: parsec(nullptr)
@@ -213,20 +211,6 @@ Gamepad::Keyboard& Gamepad::getKeyboard()
 
 void Gamepad::setOwner(Guest& guest, uint32_t deviceID, bool isKeyboard)
 {
-	//WebSocket &_ws = g_hosting.getWebSocket();
-	//if (_ws.connected)
-	//{
-	//	MTY_JSON* jmsg = MTY_JSONObjCreate();
-	//	//MTY_JSONObjSetItem
-	//	MTY_JSONObjSetString(jmsg, "type", "gamepadconnect");
-	//	MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
-	//	MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
-	//	MTY_JSONObjSetUInt(jmsg, "deviceid", deviceID);
-	//	//MTY_JSONObjSetString(jmsg, "content", message);
-	//	//string msg = "{\"type\":\"chat\",\"userid\":\""+ to_string(guest.userID) +"\",\"username\":\""+ string(guest.name) +"\",\"content\":\"" + string(message) + "\"}";
-	//	char* finmsg = MTY_JSONSerialize(jmsg);
-	//	_ws.handle_message(finmsg);
-	//}
 	owner.guest.copy(guest);
 	owner.deviceID = deviceID;
 	owner.isKeyboard = isKeyboard;

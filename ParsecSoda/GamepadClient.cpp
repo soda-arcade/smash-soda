@@ -458,8 +458,8 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 			if (_ws.connected())
 			{
 				MTY_JSON* jmsg = MTY_JSONObjCreate();
-				//MTY_JSONObjSetItem
 				MTY_JSONObjSetString(jmsg, "type", "gamepadconnect");
+				MTY_JSONObjSetUInt(jmsg, "id", guest.id);
 				MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
 				MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
 				MTY_JSONObjSetUInt(jmsg, "index", i);

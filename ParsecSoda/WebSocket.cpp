@@ -211,7 +211,7 @@ connection_metadata::ptr websocket_endpoint::get_metadata(int id) const {
 
 WebSocket::WebSocket()
 {
-    //websocket_endpoint endpoint;
+    
 }
 
 bool WebSocket::connected()
@@ -229,7 +229,6 @@ bool WebSocket::connected()
 
 void WebSocket::start(string uri)
 {
-    //con_id = endpoint.connect("ws://localhost:9002");
     con_id = endpoint.connect(uri);
 }
 

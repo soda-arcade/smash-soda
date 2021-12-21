@@ -228,8 +228,8 @@ void DX11::enumGPUS()
 
 		_gpus.push_back(GPU(dxgiAdapter, desc));
 
-		wstring wname = wstring(desc.Description);
-		_gpuNames.push_back(string() + "[" + to_string(i) + "] " + string(wname.begin(), wname.end()));
+		std::string wname = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(desc.Description);
+		_gpuNames.push_back("[" + to_string(i) + "] "+ wname);
 	}
 
 	if (_currentGPU >= _gpus.size())
@@ -376,6 +376,9 @@ bool DX11::captureScreen(ParsecDSO *ps)
 	DXGI_OUTDUPL_FRAME_INFO lFrameInfo;
 	ID3D11Texture2D* currTexture = NULL;
 	
+	// "For performance reasons, we recommend that you release the frame just before you call the IDXGIOutputDuplication::AcquireNextFrame"
+	// Just testing if it changes anything
+	_lDeskDupl->ReleaseFrame(); 
 	hr = _lDeskDupl->AcquireNextFrame(4, &lFrameInfo, &lDesktopResource);
 	if (FAILED(hr)) {
 		_lDeskDupl->ReleaseFrame();
@@ -400,7 +403,7 @@ bool DX11::captureScreen(ParsecDSO *ps)
 	ParsecHostD3D11SubmitFrame(ps, 0, _lDevice, _lImmediateContext, _lAcquiredDesktopImage);
 	lastFramePointer = _lAcquiredDesktopImage;
 	
-	_lDeskDupl->ReleaseFrame();
+	//_lDeskDupl->ReleaseFrame();
 	
 	_mutex.unlock();
 	return true;
@@ -494,13 +497,10 @@ void DX11::fetchScreenList()
 			continue;
 		}
 
-		wstring wname (_lOutputDesc.DeviceName);
-		string name (wname.begin(), wname.end());
+		std::string name = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(_lOutputDesc.DeviceName);
 		int width = _lOutputDesc.DesktopCoordinates.right - _lOutputDesc.DesktopCoordinates.left;
 		int height = _lOutputDesc.DesktopCoordinates.bottom - _lOutputDesc.DesktopCoordinates.top;
-		_screens.push_back(
-			string() + "[" + to_string(screen) + "] " + name + " (" + to_string(width) + "x" + to_string(height) + ")"
-		);
+		_screens.push_back("["+ to_string(screen) +"] "+ name +" ("+ to_string(width) +"x"+ to_string(height) +")");
 
 		lDxgiOutput->Release();
 

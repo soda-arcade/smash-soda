@@ -15,8 +15,6 @@ bool GuestListWidget::render()
 
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    static vector<Guest>::iterator it;
-    it = _guests.begin();
     ImGui::BeginChild("Guest List", ImVec2(size.x, size.y));
 
     AppStyle::pushLabel();

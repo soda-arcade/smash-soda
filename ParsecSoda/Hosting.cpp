@@ -361,13 +361,11 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 		if (_webSocket.connected())
 		{
 			MTY_JSON* jmsg = MTY_JSONObjCreate();
-			//MTY_JSONObjSetItem
 			MTY_JSONObjSetString(jmsg, "type", "chat");
+			MTY_JSONObjSetUInt(jmsg, "id", guest.id);
 			MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
 			MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
-			//MTY_JSONObjSetUInt(jmsg, "usertier", tier);
 			MTY_JSONObjSetString(jmsg, "content", message);
-			//string msg = "{\"type\":\"chat\",\"userid\":\""+ to_string(guest.userID) +"\",\"username\":\""+ string(guest.name) +"\",\"content\":\"" + string(message) + "\"}";
 			char* finmsg = MTY_JSONSerialize(jmsg);
 			_webSocket.handle_message(finmsg);
 		}
@@ -393,13 +391,11 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 		if (_webSocket.connected())
 		{
 			MTY_JSON* jmsg = MTY_JSONObjCreate();
-			//MTY_JSONObjSetItem
 			MTY_JSONObjSetString(jmsg, "type", "command");
+			MTY_JSONObjSetUInt(jmsg, "id", guest.id);
 			MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
 			MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
-			//MTY_JSONObjSetUInt(jmsg, "usertier", tier);
 			MTY_JSONObjSetString(jmsg, "content", command->replyMessage().c_str());
-			//string msg = "{\"type\":\"chat\",\"userid\":\""+ to_string(guest.userID) +"\",\"username\":\""+ string(guest.name) +"\",\"content\":\"" + string(message) + "\"}";
 			char* finmsg = MTY_JSONSerialize(jmsg);
 			_webSocket.handle_message(finmsg);
 		}
@@ -572,6 +568,26 @@ void Hosting::pollLatency()
 	{
 		Sleep(2000);
 		guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
+		if (_webSocket.connected())
+		{
+			MTY_JSON* jmsg = MTY_JSONObjCreate();
+			MTY_JSON* jdata = MTY_JSONArrayCreate();
+			for (size_t mi = 0; mi < guestCount; mi++)
+			{
+				MTY_JSON* jmetric = MTY_JSONObjCreate();
+				MTY_JSONObjSetUInt(jmetric, "id", guests[mi].id);
+				MTY_JSONObjSetUInt(jmetric, "userid", guests[mi].userID);
+				MTY_JSONObjSetString(jmetric, "username", guests[mi].name);
+				MTY_JSONObjSetFloat(jmetric, "networkLatency", guests[mi].metrics[0].networkLatency);
+				MTY_JSONObjSetUInt(jmetric, "fastRTs", guests[mi].metrics[0].fastRTs);
+				MTY_JSONObjSetUInt(jmetric, "slowRTs", guests[mi].metrics[0].slowRTs);
+				MTY_JSONArrayAppendItem(jdata, jmetric);
+			}
+			MTY_JSONObjSetString(jmsg, "type", "metrics");
+			MTY_JSONObjSetItem(jmsg, "content", jdata);
+			char* finmsg = MTY_JSONSerialize(jmsg);
+			_webSocket.handle_message(finmsg);
+		}
 		if (guestCount > 0) {
 			_guestList.updateMetrics(guests, guestCount);
 		}
@@ -676,6 +692,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 	{
 		MTY_JSON* jmsg = MTY_JSONObjCreate();
 		MTY_JSONObjSetString(jmsg, "type", "gueststate");
+		MTY_JSONObjSetUInt(jmsg, "id", guest.id);
 		MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
 		MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
 		MTY_JSONObjSetUInt(jmsg, "state", state);

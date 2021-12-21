@@ -14,26 +14,30 @@ bool LogWidget::render()
 
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    static vector<string>::iterator it;
-    it = _commandLog.begin();
-    ImGui::BeginChild("Log text", ImVec2(size.x, size.y));
-    for (; it != _commandLog.end(); ++it)
+    if (_commandLog.size() > CHATLOG_COMMAND_LENGTH)
     {
-        if ((*it)[0] == '@')
+        vector<string>::iterator it = _commandLog.begin();
+        _commandLog.erase(it, it + CHATLOG_COMMAND_LENGTH/2);
+    }
+
+    ImGui::BeginChild("Log text", ImVec2(size.x, size.y));
+    for (size_t i = 0; i < _commandLog.size(); ++i)
+    {
+        if (_commandLog[i][0] == '@')
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.75f, 0.0f, 1.00f));
-            ImGui::TextWrapped((*it).substr(1).c_str());
+            ImGui::TextWrapped(_commandLog[i].substr(1).c_str());
             ImGui::PopStyleColor();
         }
-        else if ((*it)[0] == '!')
+        else if (_commandLog[i][0] == '!')
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
-            ImGui::TextWrapped((*it).substr(1).c_str());
+            ImGui::TextWrapped(_commandLog[i].substr(1).c_str());
             ImGui::PopStyleColor();
         }
         else
         {
-            ImGui::TextWrapped((*it).c_str());
+            ImGui::TextWrapped(_commandLog[i].c_str());
         }
     }
     if (_messageCount != _commandLog.size())
