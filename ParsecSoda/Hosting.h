@@ -61,7 +61,7 @@ public:
 	vector<Guest>& getGuestList();
 	vector<GuestData>& getGuestHistory();
 	BanList& getBanList();
-	vector<Gamepad>& getGamepads();
+	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
 	const char** getGuestNames();
@@ -77,7 +77,7 @@ public:
 	void startHosting();
 	void stopHosting();
 	void stripGamepad(int index);
-	void setOwner(Gamepad& gamepad, Guest newOwner, int padId);
+	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
 	WebSocket& getWebSocket();
 	void webSocketStart(string uri);
 	void webSocketRun(string uri);
