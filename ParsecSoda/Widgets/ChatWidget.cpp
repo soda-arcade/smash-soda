@@ -27,34 +27,33 @@ bool ChatWidget::render()
 
     ImVec2 cursor;
 
-    static size_t index;
-    index = 0;
-
-    static vector<string>::iterator it;
-    it = _chatLog.begin();
+    if (_chatLog.size() > CHATLOG_MESSAGE_LENGTH)
+    {
+        vector<string>::iterator itd = _chatLog.begin();
+        _chatLog.erase(itd, itd + CHATLOG_MESSAGE_LENGTH/2);
+    }
 
     renderTopBar(isWindowLocked, isClearChat);
     ImGui::Separator();
 
     ImGui::BeginChild("Chat Log", ImVec2(size.x, size.y - 85));
-    for (; it != _chatLog.end(); ++it)
+    for (size_t i = 0; i < _chatLog.size(); ++i)
     {
         static float textHeight;
         cursor = ImGui::GetCursorPos();
         
-        ImGui::TextWrapped((*it).c_str());
+        ImGui::TextWrapped(_chatLog[i].c_str());
         textHeight = ImGui::GetCursorPosY() - cursor.y - 4;
 
         ImGui::SetCursorPos(cursor);
         if (ImGui::Button(
-            (string() + "### Chat Message " + to_string(index)).c_str(),
+            (string() + "### Chat Message " + to_string(i)).c_str(),
             ImVec2(size.x, textHeight)
         ))
         {
-            toClipboard((*it));
+            toClipboard(_chatLog[i]);
             stopwatch.reset();
         }
-        ++index;
     }
     if (_messageCount != _chatLog.size())
     {

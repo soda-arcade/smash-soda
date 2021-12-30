@@ -2,7 +2,7 @@
 
 void ChatLog::logCommand(string message)
 {
-	tryCleanOldCommands();
+	//tryCleanOldCommands();
 	_commandLog.push_back(message);
 }
 
@@ -15,7 +15,7 @@ void ChatLog::logMessage(string message)
 		message[0] != '['
 	)
 	{
-		tryCleanOldMessages();
+		//tryCleanOldMessages();
 		_messageLog.push_back(message);
 	}
 	else
