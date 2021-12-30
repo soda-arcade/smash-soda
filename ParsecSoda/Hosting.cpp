@@ -570,6 +570,28 @@ void Hosting::pollLatency()
 		guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 		if (_webSocket.connected())
 		{
+			// submit all gamepads
+			MTY_JSON* jmsg2 = MTY_JSONObjCreate();
+			MTY_JSON* jdata2 = MTY_JSONArrayCreate();
+			for (size_t gi = 0; gi < _gamepadClient.gamepads.size(); ++gi)
+			{
+				MTY_JSON* jmetric = MTY_JSONObjCreate();
+				MTY_JSONObjSetUInt(jmetric, "index", gi);
+				if (_gamepadClient.gamepads[gi]->isOwned())
+				{
+					//MTY_JSONObjSetUInt(jmetric, "windowsxinputindex", _gamepadClient.gamepads[gi]->getIndex());
+					MTY_JSONObjSetUInt(jmetric, "id", _gamepadClient.gamepads[gi]->owner.guest.id);
+					MTY_JSONObjSetUInt(jmetric, "userid", _gamepadClient.gamepads[gi]->owner.guest.userID);
+					MTY_JSONObjSetString(jmetric, "username", _gamepadClient.gamepads[gi]->owner.guest.name.c_str());
+				}
+				MTY_JSONArrayAppendItem(jdata2, jmetric);
+			}
+			MTY_JSONObjSetString(jmsg2, "type", "gamepadall");
+			MTY_JSONObjSetItem(jmsg2, "content", jdata2);
+			char* finmsg2 = MTY_JSONSerialize(jmsg2);
+			_webSocket.handle_message(finmsg2);
+
+			// submit metrics
 			MTY_JSON* jmsg = MTY_JSONObjCreate();
 			MTY_JSON* jdata = MTY_JSONArrayCreate();
 			for (size_t mi = 0; mi < guestCount; mi++)
