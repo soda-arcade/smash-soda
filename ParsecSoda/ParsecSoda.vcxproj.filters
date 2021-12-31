@@ -256,6 +256,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WebSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="DualshockGamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -637,6 +639,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WebSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="DualshockGamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
