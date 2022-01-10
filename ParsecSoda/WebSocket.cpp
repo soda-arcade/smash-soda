@@ -14,35 +14,58 @@ connection_metadata::connection_metadata(int id, websocketpp::connection_hdl hdl
 void connection_metadata::on_open(client* c, websocketpp::connection_hdl hdl) {
     m_status = "Open";
 
-    client::connection_ptr con = c->get_con_from_hdl(hdl);
-    m_server = con->get_response_header("Server");
+    //client::connection_ptr con = c->get_con_from_hdl(hdl);
+    //m_server = con->get_response_header("Server");
     //Guest host = g_hosting.getHost();
     //con->send("name:"+ host.name);
 }
 
 void connection_metadata::on_fail(client* c, websocketpp::connection_hdl hdl) {
     m_status = "Failed";
-
-    client::connection_ptr con = c->get_con_from_hdl(hdl);
-    m_server = con->get_response_header("Server");
-    m_error_reason = con->get_ec().message();
+    //client::connection_ptr con = c->get_con_from_hdl(hdl);
+    //m_server = con->get_response_header("Server");
+    //m_error_reason = con->get_ec().message();
 }
 
 void connection_metadata::on_close(client* c, websocketpp::connection_hdl hdl) {
     m_status = "Closed";
-    client::connection_ptr con = c->get_con_from_hdl(hdl);
-    std::stringstream s;
-    s << "close code: " << con->get_remote_close_code() << " ("
-        << websocketpp::close::status::get_string(con->get_remote_close_code())
-        << "), close reason: " << con->get_remote_close_reason();
-    m_error_reason = s.str();
+    //client::connection_ptr con = c->get_con_from_hdl(hdl);
+    //std::stringstream s;
+    //s << "close code: " << con->get_remote_close_code() << " ("
+    //    << websocketpp::close::status::get_string(con->get_remote_close_code())
+    //    << "), close reason: " << con->get_remote_close_reason();
+    //m_error_reason = s.str();
 }
 
 void connection_metadata::on_message(websocketpp::connection_hdl, client::message_ptr msg) {
     if (msg->get_opcode() == websocketpp::frame::opcode::text) {
         //m_messages.push_back("<< " + msg->get_payload());
-        g_hosting.sendHostMessage(msg->get_payload().c_str());
-        //MTY_JSON *jmsg = MTY_JSONParse(msg->get_payload().c_str());
+        //g_hosting.sendHostMessage(msg->get_payload().c_str());
+        MTY_JSON *jmsg = MTY_JSONParse(msg->get_payload().c_str());
+        if (jmsg)
+        {
+            //{"type":"chat", "id" : 0, "userid" : 7466020, "username" : "v6 [Europe]", "content" : "123"}
+            uint32_t id;
+            uint32_t userid;
+            char msg[1023];
+            char name[GUEST_NAME_LEN];
+            char type;
+            MTY_JSONObjGetString(jmsg, "type", &type, 32);
+            //if (&type == "chat")
+            //{
+                MTY_JSONObjGetUInt(jmsg, "id", &id);
+                MTY_JSONObjGetUInt(jmsg, "userid", &userid);
+                MTY_JSONObjGetString(jmsg, "username", name, GUEST_NAME_LEN);
+                MTY_JSONObjGetString(jmsg, "content", msg, 1023);
+                Guest guest;
+                guest.id = 0; // don't process this as a locally connected player
+                guest.userID = userid;
+                guest.name = string(name);
+                guest.status = Guest::Status::OK;
+                g_hosting.handleMessage(msg, guest, false, false, true);
+            //}
+        }
+
         //if (!jmsg) {
         //    g_hosting.sendHostMessage(("NO: "+ msg->get_payload()).c_str());
         //}
@@ -69,7 +92,6 @@ std::string connection_metadata::get_status() const {
 
 void connection_metadata::record_sent_message(std::string message) {
     //m_messages.push_back(">> " + message);
-    
 }
 
 

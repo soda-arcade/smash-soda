@@ -27,7 +27,8 @@ bool WebSocketWidget::render()
 
     if (_ws.connected())
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
+        //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
+        AppStyle::pushNegative();
         if (ImGui::Button("Disconnect"))
         {
             _hosting.webSocketStop();
@@ -35,7 +36,8 @@ bool WebSocketWidget::render()
     }
     else
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
+        //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
+        AppStyle::pushPositive();
         if (ImGui::Button("Connect"))
         {
             string conUri(_ws_uri);
@@ -44,8 +46,8 @@ bool WebSocketWidget::render()
     }
     //ImGui::Checkbox("Enable WebSockets", &_websocketsEnabled);
 
-
-    ImGui::PopStyleColor();
+    AppStyle::pop();
+    //ImGui::PopStyleColor();
     //ImGui::Text("Adapters");
 
 

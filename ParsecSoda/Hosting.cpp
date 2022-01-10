@@ -146,6 +146,11 @@ bool& Hosting::isGamepadLock()
 	return _gamepadClient.lock;
 }
 
+bool& Hosting::isGamepadLockStart()
+{
+	return _gamepadClient.lockStart;
+}
+
 Guest& Hosting::getHost()
 {
 	return _host;
@@ -238,6 +243,11 @@ void Hosting::toggleGamepadLock()
 	_gamepadClient.toggleLock();
 }
 
+void Hosting::toggleGamepadLockStart()
+{
+	_gamepadClient.toggleLockStart();
+}
+
 void Hosting::setGameID(string gameID)
 {
 	try
@@ -312,6 +322,7 @@ void Hosting::startHosting()
 			if (_parsec != nullptr)
 			{
 				_mediaThread = thread ( [this]() {liveStreamMedia(); } );
+				//_videoThread = thread([this]() {liveStreamVideo(); });
 				_inputThread = thread ([this]() {pollInputs(); });
 				_eventThread = thread ([this]() {pollEvents(); });
 				_latencyThread = thread([this]() {pollLatency(); });
@@ -348,7 +359,7 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 	}
 }
 
-void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden)
+void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside)
 {
 	ACommand* command = _chatBot->identifyUserDataMessage(message, guest, isHost);
 	command->run();
@@ -358,7 +369,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	{
 		Tier tier = _tierList.getTier(guest.userID);
 
-		if (_webSocket.connected())
+		if (_webSocket.connected() && !outside)
 		{
 			MTY_JSON* jmsg = MTY_JSONObjCreate();
 			MTY_JSONObjSetString(jmsg, "type", "chat");
@@ -487,6 +498,21 @@ void Hosting::liveStreamMedia()
 	_mediaThread.detach();
 }
 
+void Hosting::liveStreamVideo()
+{
+	_videoMutex.lock();
+	_isVideoThreadRunning = true;
+
+	while (_isRunning)
+	{
+		_dx11.captureScreen(_parsec);
+	}
+
+	_isVideoThreadRunning = false;
+	_videoMutex.unlock();
+	_videoThread.detach();
+}
+
 void Hosting::mainLoopControl()
 {
 	do
@@ -570,6 +596,25 @@ void Hosting::pollLatency()
 		guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 		if (_webSocket.connected())
 		{
+			// submit guests/metrics
+			MTY_JSON* jmsg = MTY_JSONObjCreate();
+			MTY_JSON* jdata = MTY_JSONArrayCreate();
+			for (size_t mi = 0; mi < guestCount; mi++)
+			{
+				MTY_JSON* jmetric = MTY_JSONObjCreate();
+				MTY_JSONObjSetUInt(jmetric, "id", guests[mi].id);
+				MTY_JSONObjSetUInt(jmetric, "userid", guests[mi].userID);
+				MTY_JSONObjSetString(jmetric, "username", guests[mi].name);
+				MTY_JSONObjSetFloat(jmetric, "networkLatency", guests[mi].metrics[0].networkLatency);
+				MTY_JSONObjSetUInt(jmetric, "fastRTs", guests[mi].metrics[0].fastRTs);
+				MTY_JSONObjSetUInt(jmetric, "slowRTs", guests[mi].metrics[0].slowRTs);
+				MTY_JSONArrayAppendItem(jdata, jmetric);
+			}
+			MTY_JSONObjSetString(jmsg, "type", "metrics");
+			MTY_JSONObjSetItem(jmsg, "content", jdata);
+			char* finmsg = MTY_JSONSerialize(jmsg);
+			_webSocket.handle_message(finmsg);
+
 			// submit all gamepads
 			MTY_JSON* jmsg2 = MTY_JSONObjCreate();
 			MTY_JSON* jdata2 = MTY_JSONArrayCreate();
@@ -590,25 +635,6 @@ void Hosting::pollLatency()
 			MTY_JSONObjSetItem(jmsg2, "content", jdata2);
 			char* finmsg2 = MTY_JSONSerialize(jmsg2);
 			_webSocket.handle_message(finmsg2);
-
-			// submit metrics
-			MTY_JSON* jmsg = MTY_JSONObjCreate();
-			MTY_JSON* jdata = MTY_JSONArrayCreate();
-			for (size_t mi = 0; mi < guestCount; mi++)
-			{
-				MTY_JSON* jmetric = MTY_JSONObjCreate();
-				MTY_JSONObjSetUInt(jmetric, "id", guests[mi].id);
-				MTY_JSONObjSetUInt(jmetric, "userid", guests[mi].userID);
-				MTY_JSONObjSetString(jmetric, "username", guests[mi].name);
-				MTY_JSONObjSetFloat(jmetric, "networkLatency", guests[mi].metrics[0].networkLatency);
-				MTY_JSONObjSetUInt(jmetric, "fastRTs", guests[mi].metrics[0].fastRTs);
-				MTY_JSONObjSetUInt(jmetric, "slowRTs", guests[mi].metrics[0].slowRTs);
-				MTY_JSONArrayAppendItem(jdata, jmetric);
-			}
-			MTY_JSONObjSetString(jmsg, "type", "metrics");
-			MTY_JSONObjSetItem(jmsg, "content", jdata);
-			char* finmsg = MTY_JSONSerialize(jmsg);
-			_webSocket.handle_message(finmsg);
 		}
 		if (guestCount > 0) {
 			_guestList.updateMetrics(guests, guestCount);
@@ -617,6 +643,11 @@ void Hosting::pollLatency()
 	_isLatencyThreadRunning = false;
 	_latencyMutex.unlock();
 	_latencyThread.detach();
+}
+
+bool Hosting::isLatencyRunning()
+{
+	return _isLatencyThreadRunning;
 }
 
 void Hosting::pollInputs()
@@ -633,7 +664,15 @@ void Hosting::pollInputs()
 		{
 			if (!_gamepadClient.lock)
 			{
-				_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
+				if (_gamepadClient.lockStart && inputGuestMsg.type == MESSAGE_GAMEPAD_STATE && (inputGuestMsg.gamepadState.buttons & 0x0010)) {
+					// pressed start
+				}
+				else if (_gamepadClient.lockStart && inputGuestMsg.type == MESSAGE_GAMEPAD_BUTTON && (inputGuestMsg.gamepadButton.button == GAMEPAD_BUTTON_START)) {
+					// pressed start
+				}
+				else {
+					_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
+				}
 			}
 		}
 	}

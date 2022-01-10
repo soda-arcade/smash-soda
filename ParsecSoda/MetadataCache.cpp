@@ -289,12 +289,20 @@ vector<GuestData> MetadataCache::loadBannedUsers()
                 
                 char name [128] = "";
                 uint32_t userID = 0;
+                char reason[128] = "";
                 bool nameSuccess = MTY_JSONObjGetString(guest, "name", name, 128);
                 bool userIDSuccess = MTY_JSONObjGetUInt(guest, "userID", &userID);
+                bool reasonSuccess = MTY_JSONObjGetString(guest, "reason", reason, 128);
 
                 if (nameSuccess && userIDSuccess)
                 {
-                    result.push_back(GuestData(name, userID));
+                    if (reasonSuccess)
+                    {
+                        result.push_back(GuestData(name, userID, reason));
+                    }
+                    else {
+                        result.push_back(GuestData(name, userID, ""));
+                    }
                 }
             }
 
@@ -326,6 +334,7 @@ bool MetadataCache::saveBannedUsers(vector<GuestData> guests)
 
             MTY_JSONObjSetString(guest, "name", (*gi).name.c_str());
             MTY_JSONObjSetUInt(guest, "userID", (*gi).userID);
+            MTY_JSONObjSetString(guest, "reason", (*gi).reason.c_str());
             MTY_JSONArrayAppendItem(json, guest);
         }
 

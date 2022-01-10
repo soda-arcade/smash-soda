@@ -378,7 +378,7 @@ bool DX11::captureScreen(ParsecDSO *ps)
 	
 	// "For performance reasons, we recommend that you release the frame just before you call the IDXGIOutputDuplication::AcquireNextFrame"
 	// Just testing if it changes anything
-	_lDeskDupl->ReleaseFrame(); 
+	//_lDeskDupl->ReleaseFrame(); 
 	hr = _lDeskDupl->AcquireNextFrame(4, &lFrameInfo, &lDesktopResource);
 	if (FAILED(hr)) {
 		_lDeskDupl->ReleaseFrame();
@@ -403,7 +403,7 @@ bool DX11::captureScreen(ParsecDSO *ps)
 	ParsecHostD3D11SubmitFrame(ps, 0, _lDevice, _lImmediateContext, _lAcquiredDesktopImage);
 	lastFramePointer = _lAcquiredDesktopImage;
 	
-	//_lDeskDupl->ReleaseFrame();
+	_lDeskDupl->ReleaseFrame();
 	
 	_mutex.unlock();
 	return true;

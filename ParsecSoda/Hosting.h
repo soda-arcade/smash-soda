@@ -49,7 +49,9 @@ public:
 	void release();
 	bool isReady();
 	bool isRunning();
+	bool isLatencyRunning();
 	bool& isGamepadLock();
+	bool& isGamepadLockStart();
 	Guest& getHost();
 	ParsecSession& getSession();
 	void fetchAccountData(bool sync = false);
@@ -66,6 +68,7 @@ public:
 	MasterOfPuppets& getMasterOfPuppets();
 	const char** getGuestNames();
 	void toggleGamepadLock();
+	void toggleGamepadLockStart();
 	void setGameID(string gameID);
 	void setMaxGuests(uint8_t maxGuests);
 	void setHostConfig(string roomName, string gameId, uint8_t roomSlots, bool isPublicRoom);
@@ -83,7 +86,7 @@ public:
 	void webSocketRun(string uri);
 	void webSocketStop();
 
-	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false);
+	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false, bool outside = false);
 	void sendHostMessage(const char* message, bool isHidden = false);
 
 	AudioIn audioIn;
@@ -93,6 +96,7 @@ public:
 private:
 	void initAllModules();
 	void liveStreamMedia();
+	void liveStreamVideo();
 	void mainLoopControl();
 	void pollEvents();
 	void pollInputs();
@@ -123,6 +127,7 @@ private:
 
 	bool _isRunning = false;
 	bool _isMediaThreadRunning = false;
+	bool _isVideoThreadRunning = false;
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
 	bool _isLatencyThreadRunning = false;
@@ -132,6 +137,7 @@ private:
 
 	thread _mainLoopControlThread;
 	thread _mediaThread;
+	thread _videoThread;
 	thread _inputThread;
 	thread _eventThread;
 	thread _latencyThread;
@@ -140,6 +146,7 @@ private:
 	thread _connectGamepadsThread;
 
 	mutex _mediaMutex;
+	mutex _videoMutex;
 	mutex _inputMutex;
 	mutex _eventMutex;
 	mutex _latencyMutex;

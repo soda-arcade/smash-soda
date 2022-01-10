@@ -62,7 +62,9 @@ public:
 	void resize(size_t xboxCount, size_t dualshockCount);
 	void resetAll();
 	void toggleLock();
+	void toggleLockStart();
 	void toggleLockGamepad(int index);
+	void toggleLockStartGamepad(int index);
 	AGamepad* connectNextGamepad();
 	void release();
 	AGamepad* getGamepad(int index);
@@ -85,6 +87,7 @@ public:
 	vector<GuestPreferences> guestPreferences;
 
 	bool lock = false;
+	bool lockStart = false;
 	bool isPuppetMaster = false;
 
 

@@ -15,7 +15,7 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 				guests[i].userID,
 				guests[i].id,
 				guests[i].metrics[0],
-				false
+				0
 			)
 		);
 
@@ -35,22 +35,45 @@ void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
 {
 	for (size_t mi = 0; mi < guestCount; mi++)
 	{
-		vector<Guest>::iterator i;
-		for (i = _guests.begin(); i != _guests.end(); ++i)
+		for (size_t gi = 0; gi < _guests.size(); ++gi)
 		{
-			if ((*i).id == guests[mi].id)
+			if (guests[mi].id == _guests[gi].id)
 			{
-				if (guests[mi].metrics[0].fastRTs > (*i).metrics.fastRTs || guests[mi].metrics[0].slowRTs > (*i).metrics.slowRTs)
+				if (guests[mi].metrics[0].slowRTs > _guests[gi].metrics.slowRTs)
 				{
-					(*i).congested = true;
+					_guests[gi].congested = 2;
+				}
+				else if (guests[mi].metrics[0].fastRTs > _guests[gi].metrics.fastRTs)
+				{
+					_guests[gi].congested = 1;
 				}
 				else
 				{
-					(*i).congested = false;
+					_guests[gi].congested = 0;
 				}
-				(*i).metrics = guests[mi].metrics[0];
+				_guests[gi].metrics = guests[mi].metrics[0];
 			}
 		}
+		//vector<Guest>::iterator i;
+		//for (i = _guests.begin(); i != _guests.end(); ++i)
+		//{
+		//	if ((*i).id == guests[mi].id)
+		//	{
+		//		if (guests[mi].metrics[0].slowRTs > (*i).metrics.slowRTs)
+		//		{
+		//			(*i).congested = 2;
+		//		}
+		//		else if (guests[mi].metrics[0].fastRTs > (*i).metrics.fastRTs)
+		//		{
+		//			(*i).congested = 1;
+		//		}
+		//		else
+		//		{
+		//			(*i).congested = 0;
+		//		}
+		//		(*i).metrics = guests[mi].metrics[0];
+		//	}
+		//}
 	}
 }
 

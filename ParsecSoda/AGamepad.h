@@ -69,8 +69,11 @@ public:
 	const bool isOwned();
 	bool isConnected() const;
 	const bool isLocked() const;
+	const bool isLockedStart() const;
 	void setLocked(const bool value);
+	void setLockedStart(const bool value);
 	void toggleLocked();
+	void toggleLockedStart();
 
 	// Child specific implementations
 	virtual bool alloc() = 0;
@@ -93,6 +96,7 @@ protected:
 	bool _isAlive = false;
 	bool _isConnected = false;
 	bool _isLocked = false;
+	bool _isLockedStart = false;
 
 	XINPUT_STATE _currentState;
 };
