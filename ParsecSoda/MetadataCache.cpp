@@ -117,25 +117,25 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             MTY_JSON *json = MTY_JSONReadFile(filepath.c_str());
             char roomName[256] = "", gameID[72] = "", secret[32] = "";
 
-            if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
-                preferences.audioInputDevice = 0;
-            }
+            //if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
+            //    preferences.audioInputDevice = 0;
+            //}
             
             if (!MTY_JSONObjGetUInt(json, "audioOutputDevice", &preferences.audioOutputDevice)) {
                 preferences.audioOutputDevice = 0;
             }
 
-            if (!MTY_JSONObjGetUInt(json, "micFrequency", &preferences.micFrequency)) {
-                preferences.micFrequency = 44100;
-            }
+            //if (!MTY_JSONObjGetUInt(json, "micFrequency", &preferences.micFrequency)) {
+            //    preferences.micFrequency = 44100;
+            //}
 
-            if (!MTY_JSONObjGetUInt(json, "micVolume", &preferences.micVolume)) {
-                preferences.micVolume = 80;
-            }
+            //if (!MTY_JSONObjGetUInt(json, "micVolume", &preferences.micVolume)) {
+            //    preferences.micVolume = 80;
+            //}
             
-            if (!MTY_JSONObjGetBool(json, "micEnabled", &preferences.micEnabled)) {
-                preferences.micEnabled = true;
-            }
+            //if (!MTY_JSONObjGetBool(json, "micEnabled", &preferences.micEnabled)) {
+            //    preferences.micEnabled = true;
+            //}
 
             if (!MTY_JSONObjGetUInt(json, "speakersFrequency", &preferences.speakersFrequency)) {
                 preferences.speakersFrequency = 44100;
@@ -230,11 +230,11 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
 
         MTY_JSON *json = MTY_JSONObjCreate();
             
-        MTY_JSONObjSetUInt(json, "audioInputDevice", preferences.audioInputDevice);
+        //MTY_JSONObjSetUInt(json, "audioInputDevice", preferences.audioInputDevice);
         MTY_JSONObjSetUInt(json, "audioOutputDevice", preferences.audioOutputDevice);
-        MTY_JSONObjSetUInt(json, "micFrequency", preferences.micFrequency);
-        MTY_JSONObjSetUInt(json, "micVolume", preferences.micVolume);
-        MTY_JSONObjSetBool(json, "micEnabled", preferences.micEnabled);
+        //MTY_JSONObjSetUInt(json, "micFrequency", preferences.micFrequency);
+        //MTY_JSONObjSetUInt(json, "micVolume", preferences.micVolume);
+        //MTY_JSONObjSetBool(json, "micEnabled", preferences.micEnabled);
         MTY_JSONObjSetUInt(json, "speakersFrequency", preferences.speakersFrequency);
         MTY_JSONObjSetUInt(json, "speakersVolume", preferences.speakersVolume);
         MTY_JSONObjSetBool(json, "speakersEnabled", preferences.speakersEnabled);

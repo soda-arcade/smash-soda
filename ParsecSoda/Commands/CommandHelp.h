@@ -52,7 +52,7 @@ public:
 			+ "\n  " + "---- God Commands ----"
 			+ "\n  " + "!gameid\t\t|\tSet game id."
 			+ "\n  " + "!guests\t\t  |\tSet the amount of room slots."
-			+ "\n  " + "!mic\t\t\t\t|\tSet microphone volume."
+			//+ "\n  " + "!mic\t\t\t\t|\tSet microphone volume."
 			+ "\n  " + "!name\t\t\t|\tSet room name."
 			+ "\n  " + "!private\t\t |\tMake the room private."
 			+ "\n  " + "!public\t\t   |\tMake the room public."

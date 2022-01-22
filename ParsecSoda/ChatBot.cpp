@@ -42,7 +42,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	{
 		if (msgStartsWith(msg, CommandGameId::prefixes()))		return new CommandGameId(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandGuests::prefixes()))		return new CommandGuests(msg, _hostConfig);
-		if (msgStartsWith(msg, CommandMic::prefixes()))			return new CommandMic(msg, _audioIn);
+		//if (msgStartsWith(msg, CommandMic::prefixes()))			return new CommandMic(msg, _audioIn);
 		if (msgStartsWith(msg, CommandName::prefixes()))		return new CommandName(msg, _hostConfig);
 		if (msgIsEqual(msg, CommandPrivate::prefixes()))		return new CommandPrivate(_hostConfig);
 		if (msgIsEqual(msg, CommandPublic::prefixes()))			return new CommandPublic(_hostConfig);

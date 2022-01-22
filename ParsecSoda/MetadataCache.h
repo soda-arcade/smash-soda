@@ -38,11 +38,11 @@ public:
 	class Preferences
 	{
 	public:
-		unsigned int audioInputDevice = 0;
+		//unsigned int audioInputDevice = 0;
 		unsigned int audioOutputDevice = 0;
-		unsigned int micFrequency = 44100;
-		unsigned int micVolume = 80;
-		bool micEnabled = true;
+		//unsigned int micFrequency = 44100;
+		//unsigned int micVolume = 80;
+		//bool micEnabled = true;
 		unsigned int speakersFrequency = 44100;
 		unsigned int speakersVolume = 30;
 		bool speakersEnabled = true;

@@ -17,8 +17,8 @@ ID3D11ShaderResourceView* AppIcons::padOn;
 ID3D11ShaderResourceView* AppIcons::padOff;
 ID3D11ShaderResourceView* AppIcons::plug;
 
-ID3D11ShaderResourceView* AppIcons::micOn;
-ID3D11ShaderResourceView* AppIcons::micOff;
+//ID3D11ShaderResourceView* AppIcons::micOn;
+//ID3D11ShaderResourceView* AppIcons::micOff;
 ID3D11ShaderResourceView* AppIcons::speakersOn;
 ID3D11ShaderResourceView* AppIcons::speakersOff;
 
@@ -82,8 +82,8 @@ Texture AppIcons::_plug;
 Texture AppIcons::_lock;
 Texture AppIcons::_unlock;
 
-Texture AppIcons::_micOn;
-Texture AppIcons::_micOff;
+//Texture AppIcons::_micOn;
+//Texture AppIcons::_micOff;
 Texture AppIcons::_speakersOn;
 Texture AppIcons::_speakersOff;
 
@@ -150,8 +150,8 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _send.loadFromFile(pd3dDevice, "./icons/send.png");
     _back.loadFromFile(pd3dDevice, "./icons/back.png");
 
-    _micOn.loadFromFile(pd3dDevice, "./icons/microphone-on.png");
-    _micOff.loadFromFile(pd3dDevice, "./icons/microphone-off.png");
+    //_micOn.loadFromFile(pd3dDevice, "./icons/microphone-on.png");
+    //_micOff.loadFromFile(pd3dDevice, "./icons/microphone-off.png");
     _speakersOn.loadFromFile(pd3dDevice, "./icons/speakers-on.png");
     _speakersOff.loadFromFile(pd3dDevice, "./icons/speakers-off.png");
 
@@ -215,8 +215,8 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     send = _send.texture;
     back = _back.texture;
     
-    micOn = _micOn.texture;
-    micOff = _micOff.texture;
+    //micOn = _micOn.texture;
+    //micOff = _micOff.texture;
     speakersOn = _speakersOn.texture;
     speakersOff = _speakersOff.texture;
     

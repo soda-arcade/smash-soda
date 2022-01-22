@@ -17,9 +17,9 @@
 #include "ChatBot.h"
 #include "ChatLog.h"
 #include "Stringer.h"
-#include "AudioIn.h"
+//#include "AudioIn.h"
 #include "AudioOut.h"
-#include "AudioMix.h"
+//#include "AudioMix.h"
 #include "GamepadClient.h"
 #include "BanList.h"
 #include "GuestList.h"
@@ -80,7 +80,7 @@ public:
 	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false);
 	void sendHostMessage(const char* message, bool isHidden = false);
 
-	AudioIn audioIn;
+	//AudioIn audioIn;
 	AudioOut audioOut;
 
 private:
@@ -94,7 +94,7 @@ private:
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest);
 
 	// Attributes
-	AudioMix _audioMix;
+	//AudioMix _audioMix;
 	DX11 _dx11;
 	BanList _banList;
 	GuestDataList _guestHistory;

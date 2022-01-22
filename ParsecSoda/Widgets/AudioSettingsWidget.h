@@ -33,9 +33,9 @@ private:
 
 	// Dependency injection
 	Hosting& _hosting;
-	AudioIn& _audioIn;
+	//AudioIn& _audioIn;
 	AudioOut& _audioOut;
 
-	vector<AudioInDevice> _inputs;
+	//vector<AudioInDevice> _inputs;
 	vector<AudioOutDevice> _outputs;
 };

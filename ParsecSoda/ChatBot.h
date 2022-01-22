@@ -25,7 +25,7 @@
 #include "Commands/CommandIpFilter.h"
 #include "Commands/CommandJoin.h"
 #include "Commands/CommandKick.h"
-#include "Commands/CommandMic.h"
+//#include "Commands/CommandMic.h"
 #include "Commands/CommandMirror.h"
 #include "Commands/CommandName.h"
 #include "Commands/CommandLimit.h"
@@ -51,11 +51,13 @@ class ChatBot
 public:
 
 	ChatBot(
-		AudioIn& audioIn, AudioOut& audioOut, BanList& ban, DX11& dx11,
+		AudioOut& audioOut, BanList& ban, DX11& dx11,
+		//AudioIn& audioIn, AudioOut& audioOut, BanList& ban, DX11& dx11,
 		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
 		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, bool& hostingLoopController, Guest& host
 	)
-		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _gamepadClient(gamepadClient),
+		: _audioOut(audioOut), _ban(ban), _dx11(dx11), _gamepadClient(gamepadClient),
+		//: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _gamepadClient(gamepadClient),
 		_guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), _parsecSession(parsecSession),
 		_sfxList(sfxList), _tierList(_tierList), _hostingLoopController(hostingLoopController), _host(host)
 	{}
@@ -79,7 +81,7 @@ private:
 
 	// Dependency Injection
 	ParsecDSO* _parsec;
-	AudioIn& _audioIn;
+	//AudioIn& _audioIn;
 	AudioOut& _audioOut;
 	BanList &_ban;
 	DX11 &_dx11;

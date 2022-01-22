@@ -37,7 +37,7 @@ private:
 
 	// Dependency injection
 	Hosting& _hosting;
-	AudioIn& _audioIn;
+	//AudioIn& _audioIn;
 	AudioOut& _audioOut;
 
 	// Imported Widgets
@@ -51,7 +51,7 @@ private:
 	int32_t _maxGuests;
 	bool _publicGame;
 
-	int _micVolume = 80;
+	//int _micVolume = 80;
 	int _speakersVolume = 30;
 
 

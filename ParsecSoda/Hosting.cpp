@@ -90,14 +90,14 @@ void Hosting::init()
 	audioOut.volume = 0.3f;
 	audioOut.setFrequency((Frequency)MetadataCache::preferences.speakersFrequency);
 
-	vector<AudioInDevice> audioInputDevices = audioIn.listInputDevices();
-	if (preferences.audioInputDevice >= audioInputDevices.size()) {
-		preferences.audioInputDevice = 0;
-	}
-	AudioInDevice device = audioIn.selectInputDevice(preferences.audioInputDevice);
-	audioIn.init(device);
-	audioIn.volume = 0.8f;
-	audioIn.setFrequency((Frequency)MetadataCache::preferences.micFrequency);
+	//vector<AudioInDevice> audioInputDevices = audioIn.listInputDevices();
+	//if (preferences.audioInputDevice >= audioInputDevices.size()) {
+	//	preferences.audioInputDevice = 0;
+	//}
+	//AudioInDevice device = audioIn.selectInputDevice(preferences.audioInputDevice);
+	//audioIn.init(device);
+	//audioIn.volume = 0.8f;
+	//audioIn.setFrequency((Frequency)MetadataCache::preferences.micFrequency);
 
 	preferences.isValid = true;
 	MetadataCache::savePreferences(preferences);
@@ -107,7 +107,8 @@ void Hosting::init()
 	fetchAccountData();
 
 	_chatBot = new ChatBot(
-		audioIn, audioOut, _banList, _dx11,
+		//audioIn, audioOut, _banList, _dx11,
+		audioOut, _banList, _dx11,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
 		_hostConfig, _parsecSession, _sfxList, _tierList,
 		_isRunning, _host
@@ -417,17 +418,18 @@ void Hosting::liveStreamMedia()
 
 		_dx11.captureScreen(_parsec);
 
-		if (audioIn.isEnabled && audioOut.isEnabled)
-		{
-			audioIn.captureAudio();
-			audioOut.captureAudio();
-			if (audioIn.isReady() && audioOut.isReady())
-			{
-				vector<int16_t> mixBuffer = _audioMix.mix(audioIn.popBuffer(), audioOut.popBuffer());
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
-			}
-		}
-		else if (audioOut.isEnabled)
+		//if (audioIn.isEnabled && audioOut.isEnabled)
+		//{
+		//	audioIn.captureAudio();
+		//	audioOut.captureAudio();
+		//	if (audioIn.isReady() && audioOut.isReady())
+		//	{
+		//		vector<int16_t> mixBuffer = _audioMix.mix(audioIn.popBuffer(), audioOut.popBuffer());
+		//		ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
+		//	}
+		//}
+		//else 
+		if (audioOut.isEnabled)
 		{
 			audioOut.captureAudio();
 			if (audioOut.isReady())
@@ -436,15 +438,15 @@ void Hosting::liveStreamMedia()
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
 		}
-		else
-		{
-			audioIn.captureAudio();
-			if (audioIn.isReady())
-			{
-				vector<int16_t> buffer = audioIn.popBuffer();
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, (uint32_t)audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
-			}
-		}
+		//else
+		//{
+		//	audioIn.captureAudio();
+		//	if (audioIn.isReady())
+		//	{
+		//		vector<int16_t> buffer = audioIn.popBuffer();
+		//		ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, (uint32_t)audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+		//	}
+		//}
 
 		sleepTimeMs = _mediaClock.getRemainingTime();
 		if (sleepTimeMs > 0)

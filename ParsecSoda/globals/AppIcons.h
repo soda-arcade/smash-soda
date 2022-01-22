@@ -25,8 +25,8 @@ public:
 	static ID3D11ShaderResourceView* padOff;
 	static ID3D11ShaderResourceView* plug;
 
-	static ID3D11ShaderResourceView* micOn;
-	static ID3D11ShaderResourceView* micOff;
+	//static ID3D11ShaderResourceView* micOn;
+	//static ID3D11ShaderResourceView* micOff;
 	static ID3D11ShaderResourceView* speakersOn;
 	static ID3D11ShaderResourceView* speakersOff;
 
@@ -91,8 +91,8 @@ private:
 	static Texture _lock;
 	static Texture _unlock;
 	
-	static Texture _micOn;
-	static Texture _micOff;
+	//static Texture _micOn;
+	//static Texture _micOff;
 	static Texture _speakersOn;
 	static Texture _speakersOff;
 

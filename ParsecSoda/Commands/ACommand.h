@@ -20,7 +20,7 @@ enum class COMMAND_TYPE
 	JOIN,
 	KICK,
 	LIMIT,
-	MIC,
+	//MIC,
 	MIRROR,
 	NAME,
 	ONE,

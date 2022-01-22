@@ -1,9 +1,13 @@
 ﻿#include "HostSettingsWidget.h"
 
 HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback)
-    : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut),
+    : _hosting(hosting), _audioOut(_hosting.audioOut),
     _thumbnails(_hosting.getSession().getThumbnails()), _onHostRunningStatusCallback(onHostRunningStatusCallback)
 {
+//HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback)
+//    : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut),
+//    _thumbnails(_hosting.getSession().getThumbnails()), _onHostRunningStatusCallback(onHostRunningStatusCallback)
+//{
     ParsecHostConfig cfg = hosting.getHostConfig();
     try
     {
@@ -23,13 +27,13 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     _publicGame = cfg.publicGame;
     _maxGuests = cfg.maxGuests;
     
-    _micVolume = MetadataCache::preferences.micVolume;
-    _audioIn.volume = (float)_micVolume / 100.0f;
+    //_micVolume = MetadataCache::preferences.micVolume;
+    //_audioIn.volume = (float)_micVolume / 100.0f;
     
     _speakersVolume = MetadataCache::preferences.speakersVolume;
     _audioOut.volume = (float)_speakersVolume / 100.0f;
 
-    _audioIn.isEnabled = MetadataCache::preferences.micEnabled;
+    //_audioIn.isEnabled = MetadataCache::preferences.micEnabled;
     _audioOut.isEnabled = MetadataCache::preferences.speakersEnabled;
 
     vector<Thumbnail>::iterator it;
@@ -202,25 +206,27 @@ bool HostSettingsWidget::render(HWND& hwnd)
 
     if (!_hosting.isRunning() && _hosting.isReady())
     {
-        _audioIn.captureAudio();
+        //_audioIn.captureAudio();
         _audioOut.captureAudio();
     }
 
-    static int previousMicVolume, previousSpeakersVolume;
+    static int previousSpeakersVolume;
+    //static int previousMicVolume, previousSpeakersVolume;
     static bool isVolumeChanged = false;
-    previousMicVolume = _micVolume;
+    //previousMicVolume = _micVolume;
     previousSpeakersVolume = _speakersVolume;
 
-    static float micPreview, targetPreview;
-    _micVolume = (int)(100.0f * _audioIn.volume);
-    targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
-    micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
-    if (AudioControlWidget::render("Microphone", &_micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
-    {
-        _audioIn.isEnabled = !_audioIn.isEnabled;
-        savePreferences();
-    }
-    _audioIn.volume = (float)_micVolume / 100.0f;
+    static float targetPreview;
+    //static float micPreview, targetPreview;
+    //_micVolume = (int)(100.0f * _audioIn.volume);
+    //targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
+    //micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
+    //if (AudioControlWidget::render("Microphone", &_micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
+    //{
+    //    _audioIn.isEnabled = !_audioIn.isEnabled;
+    //    savePreferences();
+    //}
+    //_audioIn.volume = (float)_micVolume / 100.0f;
 
     static float speakersPreview;
     _speakersVolume = (int)(100.0f *_audioOut.volume);
@@ -234,7 +240,8 @@ bool HostSettingsWidget::render(HWND& hwnd)
     _audioOut.volume = (float)_speakersVolume / 100.0f;
 
     static Debouncer debouncer(DEBOUNCE_TIME_MS, [&]() { savePreferences(); });
-    if (_micVolume != previousMicVolume || _speakersVolume != previousSpeakersVolume)
+    if (_speakersVolume != previousSpeakersVolume)
+    //if (_micVolume != previousMicVolume || _speakersVolume != previousSpeakersVolume)
     {
         debouncer.start();
     }
@@ -253,8 +260,8 @@ void HostSettingsWidget::savePreferences()
     MetadataCache::preferences.guestCount = _maxGuests;
     MetadataCache::preferences.publicRoom = _publicGame;
     MetadataCache::preferences.secret = _secret;
-    MetadataCache::preferences.micVolume = _micVolume;
-    MetadataCache::preferences.micEnabled = _audioIn.isEnabled;
+    //MetadataCache::preferences.micVolume = _micVolume;
+    //MetadataCache::preferences.micEnabled = _audioIn.isEnabled;
     MetadataCache::preferences.speakersVolume = _speakersVolume;
     MetadataCache::preferences.speakersEnabled = _audioOut.isEnabled;
     MetadataCache::savePreferences();
