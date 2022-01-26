@@ -121,6 +121,7 @@ void GamepadClient::resize(size_t xboxCount, size_t dualshockCount)
 	vector<AGamepad*> newGamepads;
 
 	lock = true;
+	lockStart = true;
 	_isBusy = true;
 
 	reduce([&xi, &di, &xboxCount, &dualshockCount, &newGamepads](AGamepad* pad) {
@@ -170,17 +171,20 @@ void GamepadClient::resize(size_t xboxCount, size_t dualshockCount)
 
 	_isBusy = false;
 	lock = false;
+	lockStart = false;
 }
 
 void GamepadClient::resetAll()
 {
 	_resetAllThread = thread([&]() {
 		lock = true;
+		lockStart = true;
 		release();
 		init();
 		createAllGamepads();
 		connectAllGamepads();
 		lock = false;
+		lockStart = false;
 		_resetAllThread.detach();
 	});
 }
@@ -188,6 +192,14 @@ void GamepadClient::resetAll()
 void GamepadClient::toggleLock()
 {
 	lock = !lock;
+	reduce([&](AGamepad* pad) {
+		pad->clearState();
+	});
+}
+
+void GamepadClient::toggleLockStart()
+{
+	lockStart = !lockStart;
 	reduce([&](AGamepad* pad) {
 		pad->clearState();
 	});
@@ -468,8 +480,15 @@ bool GamepadClient::sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadSt
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadState.id == pad->owner.deviceID))
 			{
-				pad->setStateSafe(toXInput(gamepadState, pad->getState(), prefs));
-				return true;
+				if (pad->isLockedStart() && (gamepadState.buttons & 0x0010))
+				{
+					// pressed start
+				}
+				else
+				{
+					pad->setStateSafe(toXInput(gamepadState, pad->getState(), prefs));
+					return true;
+				}
 			}
 		}
 		return false;
@@ -500,8 +519,15 @@ bool GamepadClient::sendGamepadButtonMessage(ParsecGamepadButtonMessage& gamepad
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadButton.id == pad->owner.deviceID))
 			{
-				pad->setStateSafe(toXInput(gamepadButton, pad->getState(), prefs));
-				return true;
+				if (pad->isLockedStart() && (gamepadButton.button == GAMEPAD_BUTTON_START))
+				{
+					// pressed start
+				}
+				else
+				{
+					pad->setStateSafe(toXInput(gamepadButton, pad->getState(), prefs));
+					return true;
+				}
 			}
 		}
 		return false;
@@ -537,7 +563,6 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 			gamepad->setOwner(guest, deviceID, isKeyboard);
 			return true;
 		}
-
 		return false;
 	});
 }
@@ -650,6 +675,14 @@ void GamepadClient::toggleLockGamepad(int index)
 	if (index >= 0 && index < gamepads.size())
 	{
 		gamepads[index]->toggleLocked();
+	}
+}
+
+void GamepadClient::toggleLockStartGamepad(int index)
+{
+	if (index >= 0 && index < gamepads.size())
+	{
+		gamepads[index]->toggleLockedStart();
 	}
 }
 

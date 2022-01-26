@@ -7,6 +7,7 @@
 #include "IconButton.h"
 #include "TitleTooltipWidget.h"
 #include "ConfirmPopupWidget.h"
+#include "PopupWidgetEdit.h"
 
 class GuestListWidget
 {

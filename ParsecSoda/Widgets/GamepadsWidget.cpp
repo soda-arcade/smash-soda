@@ -62,6 +62,18 @@ bool GamepadsWidget::render()
 
     ImGui::SameLine();
 
+    if (ToggleIconButtonWidget::render(
+        AppIcons::lockStart, AppIcons::unlockStart, _hosting.isGamepadLockStart(),
+        AppColors::negative, AppColors::positive, ImVec2(30, 30)
+    ))
+    {
+        _hosting.toggleGamepadLockStart();
+    }
+    if (_hosting.isGamepadLockStart())   TitleTooltipWidget::render("Unlock guest START input", "Guests START input will be unlocked.");
+    else                            TitleTooltipWidget::render("Lock guest START input", "Guests START input will be locked.");
+
+    ImGui::SameLine();
+
     cursor = ImGui::GetCursorPos();
     ImGui::SetCursorPosX(size.x - 25);
     if (IconButton::render(
@@ -187,7 +199,7 @@ bool GamepadsWidget::render()
 
         ImGui::SameLine();
 
-        if (IconButton::render(AppIcons::back, AppColors::primary))
+        if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
         {
             gi->clearOwner();
         }
@@ -195,7 +207,7 @@ bool GamepadsWidget::render()
 
         ImGui::SameLine();
 
-        if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOff, gi->isConnected()))
+        if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOff, gi->isConnected(), ImVec2(24, 24)))
         {
             if (gi->isConnected()) gi->disconnect();
             else gi->connect();
@@ -209,19 +221,38 @@ bool GamepadsWidget::render()
 
         if (gi->isLocked())
         {
-            if (IconButton::render(AppIcons::lock, AppColors::negative))
+            if (IconButton::render(AppIcons::lock, AppColors::negative, ImVec2(24, 24)))
             {
                 gi->toggleLocked();
             }
-            TitleTooltipWidget::render("Locked gamepad", "Lock this specific gamepad, preventing inputs or picking.");
+            TitleTooltipWidget::render("Locked gamepad", "Unlock this specific gamepad, allowing inputs and picking.");
         }
         else
         {
-            if (IconButton::render(AppIcons::unlock, AppColors::positive))
+            if (IconButton::render(AppIcons::unlock, AppColors::positive, ImVec2(24, 24)))
             {
                 gi->toggleLocked();
             }
-            TitleTooltipWidget::render("Unlocked gamepad", "Unlock this specific gamepad, allowing inputs and picking.");
+            TitleTooltipWidget::render("Unlocked gamepad", "Lock this specific gamepad, preventing inputs or picking.");
+        }
+
+        ImGui::SameLine();
+
+        if (gi->isLockedStart())
+        {
+            if (IconButton::render(AppIcons::lockStart, AppColors::negative, ImVec2(24, 24)))
+            {
+                gi->toggleLockedStart();
+            }
+            TitleTooltipWidget::render("Locked gamepad", "Unlock START.");
+        }
+        else
+        {
+            if (IconButton::render(AppIcons::unlockStart, AppColors::positive, ImVec2(24, 24)))
+            {
+                gi->toggleLockedStart();
+            }
+            TitleTooltipWidget::render("Unlocked gamepad", "Lock START.");
         }
 
         ImGui::SameLine();

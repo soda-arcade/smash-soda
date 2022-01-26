@@ -20,6 +20,8 @@ public:
 
 	static ID3D11ShaderResourceView* lock;
 	static ID3D11ShaderResourceView* unlock;
+	static ID3D11ShaderResourceView* lockStart;
+	static ID3D11ShaderResourceView* unlockStart;
 
 	static ID3D11ShaderResourceView* padOn;
 	static ID3D11ShaderResourceView* padOff;
@@ -51,6 +53,7 @@ public:
 	static ID3D11ShaderResourceView* userOff;
 	static ID3D11ShaderResourceView* block;
 	static ID3D11ShaderResourceView* kick;
+	static ID3D11ShaderResourceView* editReason;
 
 	static ID3D11ShaderResourceView* info;
 	static ID3D11ShaderResourceView* logo;
@@ -90,6 +93,8 @@ private:
 
 	static Texture _lock;
 	static Texture _unlock;
+	static Texture _lockStart;
+	static Texture _unlockStart;
 	
 	static Texture _micOn;
 	static Texture _micOff;
@@ -117,6 +122,7 @@ private:
 	static Texture _userOff;
 	static Texture _block;
 	static Texture _kick;
+	static Texture _editReason;
 
 	static Texture _info;
 	static Texture _logo;

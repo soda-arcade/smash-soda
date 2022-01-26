@@ -143,6 +143,11 @@ bool& Hosting::isGamepadLock()
 	return _gamepadClient.lock;
 }
 
+bool& Hosting::isGamepadLockStart()
+{
+	return _gamepadClient.lockStart;
+}
+
 Guest& Hosting::getHost()
 {
 	return _host;
@@ -233,6 +238,11 @@ const char** Hosting::getGuestNames()
 void Hosting::toggleGamepadLock()
 {
 	_gamepadClient.toggleLock();
+}
+
+void Hosting::toggleGamepadLockStart()
+{
+	_gamepadClient.toggleLockStart();
 }
 
 void Hosting::setGameID(string gameID)
@@ -437,7 +447,7 @@ void Hosting::liveStreamMedia()
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
 		}
-		else
+		else if (audioIn.isEnabled)
 		{
 			audioIn.captureAudio();
 			if (audioIn.isReady())
@@ -500,7 +510,7 @@ void Hosting::pollEvents()
 			ParsecGuest parsecGuest = event.guestStateChange.guest;
 			ParsecGuestState state = parsecGuest.state;
 			ParsecStatus status = event.guestStateChange.status;
-			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id, parsecGuest.metrics[0]);
+			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id);
 			guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 			_guestList.setGuests(guests, guestCount);
 
@@ -530,6 +540,11 @@ void Hosting::pollEvents()
 	_eventThread.detach();
 }
 
+MyMetrics Hosting::getMetrics(uint32_t id)
+{
+	return _guestList.getMetrics(id);
+}
+
 void Hosting::pollLatency()
 {
 	_latencyMutex.lock();
@@ -549,6 +564,11 @@ void Hosting::pollLatency()
 	_latencyThread.detach();
 }
 
+bool Hosting::isLatencyRunning()
+{
+	return _isLatencyThreadRunning;
+}
+
 void Hosting::pollInputs()
 {
 	_inputMutex.lock();
@@ -563,7 +583,15 @@ void Hosting::pollInputs()
 		{
 			if (!_gamepadClient.lock)
 			{
-				_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
+				if (_gamepadClient.lockStart && inputGuestMsg.type == MESSAGE_GAMEPAD_STATE && (inputGuestMsg.gamepadState.buttons & 0x0010)) {
+					// pressed start
+				}
+				else if (_gamepadClient.lockStart && inputGuestMsg.type == MESSAGE_GAMEPAD_BUTTON && (inputGuestMsg.gamepadButton.button == GAMEPAD_BUTTON_START)) {
+					// pressed start
+				}
+				else {
+					_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
+				}
 			}
 		}
 	}
@@ -632,6 +660,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		}
 		else
 		{
+			_guestList.deleteMetrics(guest.id);
 			int droppedPads = 0;
 			CommandFF command(guest, _gamepadClient);
 			command.run();

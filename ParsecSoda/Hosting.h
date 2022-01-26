@@ -47,7 +47,9 @@ public:
 	void release();
 	bool isReady();
 	bool isRunning();
+	bool isLatencyRunning();
 	bool& isGamepadLock();
+	bool& isGamepadLockStart();
 	Guest& getHost();
 	ParsecSession& getSession();
 	void fetchAccountData(bool sync = false);
@@ -57,6 +59,7 @@ public:
 	vector<string>& getMessageLog();
 	vector<string>& getCommandLog();
 	vector<Guest>& getGuestList();
+	MyMetrics getMetrics(uint32_t id);
 	vector<GuestData>& getGuestHistory();
 	BanList& getBanList();
 	vector<AGamepad*>& getGamepads();
@@ -64,6 +67,7 @@ public:
 	MasterOfPuppets& getMasterOfPuppets();
 	const char** getGuestNames();
 	void toggleGamepadLock();
+	void toggleGamepadLockStart();
 	void setGameID(string gameID);
 	void setMaxGuests(uint8_t maxGuests);
 	void setHostConfig(string roomName, string gameId, uint8_t roomSlots, bool isPublicRoom);

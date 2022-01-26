@@ -70,7 +70,7 @@ void GuestListWidget::renderOnlineGuests()
     static size_t popupIndex;
     static string name;
     static uint32_t userID;
-    static ParsecMetrics metrics;
+    static MyMetrics m;
     static ImVec2 cursor;
 
     // Guests
@@ -84,7 +84,7 @@ void GuestListWidget::renderOnlineGuests()
     {
         name = _guests[i].name;
         userID = _guests[i].userID;
-        metrics = _guests[i].metrics;
+        m = _hosting.getMetrics(_guests[i].id);
 
         filterTextStr = _filterText;
         if (!filterTextStr.empty())
@@ -156,32 +156,36 @@ void GuestListWidget::renderOnlineGuests()
 
         cursor = ImGui::GetCursorPos();
         ImGui::BeginGroup();
-        //AppStyle::pushLabel();
-        if (_guests[i].congested)
+        AppFonts::pushInput();
+
+        if (m.congested == 2)
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
         }
+        else if (m.congested == 1)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.75f, 0.0f, 1.00f));
+        }
         else
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.67f, 0.41f, 1.00f));
         }
-        if (metrics.packetsSent > 60)
+        if (m.metrics.packetsSent > 60)
         {
             ImGui::Text("%.0fms  B:%.1f  D:%u/%.1f  E:%.1f  N:%u/%u",
-                metrics.networkLatency,
-                metrics.bitrate,
-                metrics.queuedFrames,
-                metrics.decodeLatency,
-                metrics.encodeLatency,
-                metrics.slowRTs,
-                metrics.fastRTs
+                m.metrics.networkLatency,
+                m.metrics.bitrate,
+                m.metrics.queuedFrames,
+                m.metrics.decodeLatency,
+                m.metrics.encodeLatency,
+                m.metrics.slowRTs,
+                m.metrics.fastRTs
             );
         }
         else {
             ImGui::Text("-");
         }
-        //AppStyle::pop();
-        ImGui::PopStyleColor();
+        AppStyle::pop();
         AppStyle::pushInput();
         ImGui::Text((name +" #"+ to_string(userID)).c_str());
         AppStyle::pop();
@@ -213,11 +217,15 @@ void GuestListWidget::renderOnlineGuests()
 
 void GuestListWidget::renderBannedGuests()
 {
+    static bool showEditPopup = false;
+    static size_t popupEditIndex;
     static bool showUnbanPopup = false;
     static string popupTitle = "";
     static size_t popupIndex;
     static string name;
     static uint32_t userID;
+    static string reason;
+    //static char newReason[128];
     static vector<GuestData>& _bannedGuests = _banList.getGuests();
     static string filterTextStr;
     static bool filterSuccess = false;
@@ -226,6 +234,7 @@ void GuestListWidget::renderBannedGuests()
     {
         name = _bannedGuests[i].name;
         userID = _bannedGuests[i].userID;
+        reason = _bannedGuests[i].reason;
 
         filterTextStr = _filterText;
         if (!filterTextStr.empty())
@@ -268,16 +277,48 @@ void GuestListWidget::renderBannedGuests()
             }
         }
 
+        ImGui::SameLine();
+        IconButton::render(AppIcons::editReason, AppColors::negative, ImVec2(30, 30));
+        if (ImGui::IsItemActive())
+        {
+            showEditPopup = true;
+            popupEditIndex = i;
+            ImGui::OpenPopup(string("Add reason").c_str());
+        }
+        TitleTooltipWidget::render("Add reason", string("Press to add reason").c_str());
+        if (i == popupEditIndex)
+        {
+            if (PopupWidgetEdit::render(string("Add reason").c_str(), showEditPopup, reason))
+            {
+                _bannedGuests[i].reason = reason;
+                 MetadataCache::saveBannedUsers(_bannedGuests);
+            }
+        }
+
+
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
         ImGui::SameLine();
         
         ImGui::BeginGroup();
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("(# %d)\t", userID);
-        AppStyle::pop();
+        //AppStyle::pushLabel();
+        //ImGui::TextWrapped("(# %d)\t", userID);
+        //AppStyle::pop();
+        //AppStyle::pushInput();
+        //ImGui::TextWrapped(name.c_str());
+        //AppStyle::pop();
         AppStyle::pushInput();
-        ImGui::TextWrapped(name.c_str());
+        ImGui::Text("#%d\t%s", userID, name.c_str());
         AppStyle::pop();
+        AppStyle::pushLabel();
+        ImGui::Text(reason.c_str());
+        //if (ImGui::InputText(" ", _sendBuffer, SEND_BUFFER_LEN, ImGuiInputTextFlags_EnterReturnsTrue))
+        //if (ImGui::InputText("", newReason, IM_ARRAYSIZE(newReason), ImGuiInputTextFlags_EnterReturnsTrue))
+        //if (ImGui::InputText(" ", newReason, IM_ARRAYSIZE(newReason), ImGuiInputTextFlags_EnterReturnsTrue))
+        //{
+        //    _hosting.sendHostMessage(newReason);
+        //}
+        AppStyle::pop();
+        //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();
         ImGui::PopStyleVar();
