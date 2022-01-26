@@ -163,6 +163,7 @@
     <ClCompile Include="Commands\CommandBonk.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
+    <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
     <ClCompile Include="XBoxGamepad.cpp" />
     <ClCompile Include="MasterOfPuppets.cpp" />
     <ClCompile Include="SDLGamepad.cpp" />
@@ -247,6 +248,7 @@
   <ItemGroup>
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
+    <ClInclude Include="Widgets\PopupWidgetEdit.h" />
     <ClInclude Include="XBoxGamepad.h" />
     <ClInclude Include="MasterOfPuppets.h" />
     <ClInclude Include="SDLGamepad.h" />

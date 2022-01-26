@@ -61,6 +61,7 @@ public:
 	vector<string>& getMessageLog();
 	vector<string>& getCommandLog();
 	vector<Guest>& getGuestList();
+	MyMetrics getMetrics(uint32_t id);
 	vector<GuestData>& getGuestHistory();
 	BanList& getBanList();
 	vector<AGamepad*>& getGamepads();

@@ -482,14 +482,15 @@ bool GamepadClient::sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadSt
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadState.id == pad->owner.deviceID))
 			{
-				if (pad->isLockedStart() && (gamepadState.buttons & 0x0010)) {
+				if (pad->isLockedStart() && (gamepadState.buttons & 0x0010))
+				{
 					// pressed start
 				}
 				else
 				{
 					pad->setStateSafe(toXInput(gamepadState, pad->getState(), prefs));
+					return true;
 				}
-				return true;
 			}
 		}
 		return false;
@@ -520,9 +521,15 @@ bool GamepadClient::sendGamepadButtonMessage(ParsecGamepadButtonMessage& gamepad
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadButton.id == pad->owner.deviceID))
 			{
-				g_hosting.sendHostMessage(("2 - "+ to_string(gamepadButton.button)).c_str());
-				pad->setStateSafe(toXInput(gamepadButton, pad->getState(), prefs));
-				return true;
+				if (pad->isLockedStart() && (gamepadButton.button == GAMEPAD_BUTTON_START))
+				{
+					// pressed start
+				}
+				else
+				{
+					pad->setStateSafe(toXInput(gamepadButton, pad->getState(), prefs));
+					return true;
+				}
 			}
 		}
 		return false;

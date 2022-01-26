@@ -476,7 +476,7 @@ void Hosting::liveStreamMedia()
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
 		}
-		else
+		else if (audioIn.isEnabled)
 		{
 			audioIn.captureAudio();
 			if (audioIn.isReady())
@@ -554,7 +554,7 @@ void Hosting::pollEvents()
 			ParsecGuest parsecGuest = event.guestStateChange.guest;
 			ParsecGuestState state = parsecGuest.state;
 			ParsecStatus status = event.guestStateChange.status;
-			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id, parsecGuest.metrics[0]);
+			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id);
 			guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 			_guestList.setGuests(guests, guestCount);
 
@@ -582,6 +582,11 @@ void Hosting::pollEvents()
 	_isEventThreadRunning = false;
 	_eventMutex.unlock();
 	_eventThread.detach();
+}
+
+MyMetrics Hosting::getMetrics(uint32_t id)
+{
+	return _guestList.getMetrics(id);
 }
 
 void Hosting::pollLatency()
@@ -790,6 +795,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		}
 		else
 		{
+			_guestList.deleteMetrics(guest.id);
 			int droppedPads = 0;
 			CommandFF command(guest, _gamepadClient);
 			command.run();

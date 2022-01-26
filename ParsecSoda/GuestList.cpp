@@ -13,9 +13,7 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 			(
 				guests[i].name,
 				guests[i].userID,
-				guests[i].id,
-				guests[i].metrics[0],
-				0
+				guests[i].id
 			)
 		);
 
@@ -31,49 +29,47 @@ vector<Guest>& GuestList::getGuests()
     return _guests;
 }
 
+MyMetrics GuestList::getMetrics(uint32_t id)
+{
+	auto it = _metrics.find(id);
+	if (it != _metrics.end()) {
+		return it->second;
+	}
+	MyMetrics defaultValues;
+	return defaultValues;
+}
+
+void GuestList::deleteMetrics(uint32_t id)
+{
+	_metrics.erase(id);
+}
+
 void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
 {
-	for (size_t mi = 0; mi < guestCount; mi++)
+	for (size_t i = 0; i < guestCount; i++)
 	{
-		for (size_t gi = 0; gi < _guests.size(); ++gi)
+		auto it = _metrics.find(guests[i].id);
+		if (it != _metrics.end())
 		{
-			if (guests[mi].id == _guests[gi].id)
-			{
-				if (guests[mi].metrics[0].slowRTs > _guests[gi].metrics.slowRTs)
-				{
-					_guests[gi].congested = 2;
-				}
-				else if (guests[mi].metrics[0].fastRTs > _guests[gi].metrics.fastRTs)
-				{
-					_guests[gi].congested = 1;
-				}
-				else
-				{
-					_guests[gi].congested = 0;
-				}
-				_guests[gi].metrics = guests[mi].metrics[0];
-			}
+			if (guests[i].metrics[0].slowRTs > it->second.metrics.slowRTs)
+				it->second.congested = 2;
+			else if (guests[i].metrics[0].fastRTs > it->second.metrics.fastRTs)
+				it->second.congested = 1;
+			else
+				it->second.congested = 0;
+			it->second.metrics.bitrate = guests[i].metrics[0].bitrate;
+			it->second.metrics.decodeLatency = guests[i].metrics[0].decodeLatency;
+			it->second.metrics.encodeLatency = guests[i].metrics[0].encodeLatency;
+			it->second.metrics.fastRTs = guests[i].metrics[0].fastRTs;
+			it->second.metrics.networkLatency = guests[i].metrics[0].networkLatency;
+			it->second.metrics.packetsSent = guests[i].metrics[0].packetsSent;
+			it->second.metrics.queuedFrames = guests[i].metrics[0].queuedFrames;
+			it->second.metrics.slowRTs = guests[i].metrics[0].slowRTs;
 		}
-		//vector<Guest>::iterator i;
-		//for (i = _guests.begin(); i != _guests.end(); ++i)
-		//{
-		//	if ((*i).id == guests[mi].id)
-		//	{
-		//		if (guests[mi].metrics[0].slowRTs > (*i).metrics.slowRTs)
-		//		{
-		//			(*i).congested = 2;
-		//		}
-		//		else if (guests[mi].metrics[0].fastRTs > (*i).metrics.fastRTs)
-		//		{
-		//			(*i).congested = 1;
-		//		}
-		//		else
-		//		{
-		//			(*i).congested = 0;
-		//		}
-		//		(*i).metrics = guests[mi].metrics[0];
-		//	}
-		//}
+		else
+		{
+			_metrics.insert(pair<uint32_t, MyMetrics>(guests[i].id, { guests[i].metrics[0] } ));
+		}
 	}
 }
 
