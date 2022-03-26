@@ -9,6 +9,7 @@
 #include "IconButton.h"
 #include "ToggleIconButtonWidget.h"
 #include "TitleTooltipWidget.h"
+#include "../MetadataCache.h"
 
 class NavBar
 {
@@ -26,6 +27,7 @@ public:
         bool& showAudio,
         bool& showVideo,
         bool& showInfo,
+        bool& showSettings,
         bool& showWebSocket
     );
 

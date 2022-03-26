@@ -114,8 +114,6 @@ void Hosting::init()
 		_isRunning, _host
 	);
 
-	//_webSocket = new WebSocket;
-
 	CommandBonk::init();
 }
 
@@ -211,6 +209,11 @@ vector<Guest>& Hosting::getGuestList()
 vector<GuestData>& Hosting::getGuestHistory()
 {
 	return _guestHistory.getGuests();
+}
+
+MyMetrics Hosting::getMetrics(uint32_t id)
+{
+	return _guestList.getMetrics(id);
 }
 
 BanList& Hosting::getBanList()
@@ -322,7 +325,6 @@ void Hosting::startHosting()
 			if (_parsec != nullptr)
 			{
 				_mediaThread = thread ( [this]() {liveStreamMedia(); } );
-				//_videoThread = thread([this]() {liveStreamVideo(); });
 				_inputThread = thread ([this]() {pollInputs(); });
 				_eventThread = thread ([this]() {pollEvents(); });
 				_latencyThread = thread([this]() {pollLatency(); });
@@ -498,21 +500,6 @@ void Hosting::liveStreamMedia()
 	_mediaThread.detach();
 }
 
-void Hosting::liveStreamVideo()
-{
-	_videoMutex.lock();
-	_isVideoThreadRunning = true;
-
-	while (_isRunning)
-	{
-		_dx11.captureScreen(_parsec);
-	}
-
-	_isVideoThreadRunning = false;
-	_videoMutex.unlock();
-	_videoThread.detach();
-}
-
 void Hosting::mainLoopControl()
 {
 	do
@@ -553,7 +540,6 @@ void Hosting::pollEvents()
 		if (ParsecHostPollEvents(_parsec, 30, &event)) {
 			ParsecGuest parsecGuest = event.guestStateChange.guest;
 			ParsecGuestState state = parsecGuest.state;
-			ParsecStatus status = event.guestStateChange.status;
 			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id);
 			guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 			_guestList.setGuests(guests, guestCount);
@@ -561,7 +547,7 @@ void Hosting::pollEvents()
 			switch (event.type)
 			{
 			case HOST_EVENT_GUEST_STATE_CHANGE:
-				onGuestStateChange(state, guest, status);
+				onGuestStateChange(state, guest, event.guestStateChange.status);
 				break;
 
 			case HOST_EVENT_USER_DATA:
@@ -582,11 +568,6 @@ void Hosting::pollEvents()
 	_isEventThreadRunning = false;
 	_eventMutex.unlock();
 	_eventThread.detach();
-}
-
-MyMetrics Hosting::getMetrics(uint32_t id)
-{
-	return _guestList.getMetrics(id);
 }
 
 void Hosting::pollLatency()
@@ -610,6 +591,7 @@ void Hosting::pollLatency()
 				MTY_JSONObjSetUInt(jmetric, "id", guests[mi].id);
 				MTY_JSONObjSetUInt(jmetric, "userid", guests[mi].userID);
 				MTY_JSONObjSetString(jmetric, "username", guests[mi].name);
+				MTY_JSONObjSetBool(jmetric, "banned", _banList.isBanned(guests[mi].userID));
 				MTY_JSONObjSetFloat(jmetric, "networkLatency", guests[mi].metrics[0].networkLatency);
 				MTY_JSONObjSetUInt(jmetric, "fastRTs", guests[mi].metrics[0].fastRTs);
 				MTY_JSONObjSetUInt(jmetric, "slowRTs", guests[mi].metrics[0].slowRTs);
@@ -629,7 +611,6 @@ void Hosting::pollLatency()
 				MTY_JSONObjSetUInt(jmetric, "index", gi);
 				if (_gamepadClient.gamepads[gi]->isOwned())
 				{
-					//MTY_JSONObjSetUInt(jmetric, "windowsxinputindex", _gamepadClient.gamepads[gi]->getIndex());
 					MTY_JSONObjSetUInt(jmetric, "id", _gamepadClient.gamepads[gi]->owner.guest.id);
 					MTY_JSONObjSetUInt(jmetric, "userid", _gamepadClient.gamepads[gi]->owner.guest.userID);
 					MTY_JSONObjSetString(jmetric, "username", _gamepadClient.gamepads[gi]->owner.guest.name.c_str());
@@ -687,11 +668,11 @@ void Hosting::pollInputs()
 	_inputThread.detach();
 }
 
-void Hosting::webSocketStart(string uri)
+void Hosting::webSocketStart(string uri, string password)
 {
 	if (!_isWebSocketThreadRunning)
 	{
-		_webSocketThread = thread([this,uri]() {webSocketRun(uri); });
+		_webSocketThread = thread([this,uri,password]() {webSocketRun(uri,password); });
 	}
 }
 
@@ -708,20 +689,22 @@ WebSocket& Hosting::getWebSocket()
 	return _webSocket;
 }
 
-void Hosting::webSocketRun(string uri)
+void Hosting::webSocketRun(string uri, string password)
 {
 	_webSocketMutex.lock();
 	_isWebSocketThreadRunning = true;
 
-	//_webSocket.start("ws://localhost:9002");
-	_webSocket.start(uri);
-	//_webSocketThread.join();
+	_webSocket.start(uri, password);
 
 	_isWebSocketThreadRunning = false;
 	_webSocketMutex.unlock();
 	_webSocketThread.detach();
 }
 
+bool Hosting::webSocketRunning()
+{
+	return _isWebSocketThreadRunning;
+}
 
 bool Hosting::parsecArcadeStart()
 {
@@ -763,6 +746,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
 		MTY_JSONObjSetUInt(jmsg, "state", state);
 		MTY_JSONObjSetUInt(jmsg, "status", status);
+		MTY_JSONObjSetBool(jmsg, "banned", _banList.isBanned(guest.userID));
 		char* finmsg = MTY_JSONSerialize(jmsg);
 		_webSocket.handle_message(finmsg);
 	}

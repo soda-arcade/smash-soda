@@ -12,8 +12,6 @@ ID3D11ShaderResourceView* AppIcons::back;
 
 ID3D11ShaderResourceView* AppIcons::lock;
 ID3D11ShaderResourceView* AppIcons::unlock;
-ID3D11ShaderResourceView* AppIcons::lockStart;
-ID3D11ShaderResourceView* AppIcons::unlockStart;
 
 ID3D11ShaderResourceView* AppIcons::padOn;
 ID3D11ShaderResourceView* AppIcons::padOff;
@@ -25,7 +23,6 @@ ID3D11ShaderResourceView* AppIcons::speakersOn;
 ID3D11ShaderResourceView* AppIcons::speakersOff;
 
 ID3D11ShaderResourceView* AppIcons::video;
-ID3D11ShaderResourceView* AppIcons::websocket;
 
 ID3D11ShaderResourceView* AppIcons::refresh;
 ID3D11ShaderResourceView* AppIcons::sort;
@@ -46,7 +43,6 @@ ID3D11ShaderResourceView* AppIcons::userOn;
 ID3D11ShaderResourceView* AppIcons::userOff;
 ID3D11ShaderResourceView* AppIcons::block;
 ID3D11ShaderResourceView* AppIcons::kick;
-ID3D11ShaderResourceView* AppIcons::editReason;
 
 ID3D11ShaderResourceView* AppIcons::info;
 ID3D11ShaderResourceView* AppIcons::logo;
@@ -70,6 +66,12 @@ ID3D11ShaderResourceView* AppIcons::btc;
 ID3D11ShaderResourceView* AppIcons::ltc;
 ID3D11ShaderResourceView* AppIcons::eth;
 
+ID3D11ShaderResourceView* AppIcons::lockStart;
+ID3D11ShaderResourceView* AppIcons::unlockStart;
+ID3D11ShaderResourceView* AppIcons::settings;
+ID3D11ShaderResourceView* AppIcons::websocket;
+ID3D11ShaderResourceView* AppIcons::editReason;
+
 Texture AppIcons::_play;
 Texture AppIcons::_stop;
 
@@ -85,8 +87,6 @@ Texture AppIcons::_plug;
 
 Texture AppIcons::_lock;
 Texture AppIcons::_unlock;
-Texture AppIcons::_lockStart;
-Texture AppIcons::_unlockStart;
 
 Texture AppIcons::_micOn;
 Texture AppIcons::_micOff;
@@ -94,7 +94,6 @@ Texture AppIcons::_speakersOn;
 Texture AppIcons::_speakersOff;
 
 Texture AppIcons::_video;
-Texture AppIcons::_websocket;
 
 Texture AppIcons::_refresh;
 Texture AppIcons::_sort;
@@ -115,7 +114,6 @@ Texture AppIcons::_userOn;
 Texture AppIcons::_userOff;
 Texture AppIcons::_block;
 Texture AppIcons::_kick;
-Texture AppIcons::_editReason;
 
 Texture AppIcons::_info;
 Texture AppIcons::_logo;
@@ -139,6 +137,11 @@ Texture AppIcons::_btc;
 Texture AppIcons::_ltc;
 Texture AppIcons::_eth;
 
+Texture AppIcons::_lockStart;
+Texture AppIcons::_unlockStart;
+Texture AppIcons::_settings;
+Texture AppIcons::_websocket;
+Texture AppIcons::_editReason;
 
 void AppIcons::init(ID3D11Device* pd3dDevice)
 {
@@ -150,8 +153,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
 
     _lock.loadFromFile(pd3dDevice, "./icons/lock.png");
     _unlock.loadFromFile(pd3dDevice, "./icons/unlock.png");
-    _lockStart.loadFromFile(pd3dDevice, "./icons/lock-start.png");
-    _unlockStart.loadFromFile(pd3dDevice, "./icons/unlock-start.png");
 
     _padOn.loadFromFile(pd3dDevice, "./icons/pad-on.png");
     _padOff.loadFromFile(pd3dDevice, "./icons/pad-off.png");
@@ -166,7 +167,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _speakersOff.loadFromFile(pd3dDevice, "./icons/speakers-off.png");
 
     _video.loadFromFile(pd3dDevice, "./icons/video.png");
-    _websocket.loadFromFile(pd3dDevice, "./icons/websocket.png");
 
     _refresh.loadFromFile(pd3dDevice, "./icons/refresh.png");
     _sort.loadFromFile(pd3dDevice, "./icons/sort.png");
@@ -187,7 +187,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _userOff.loadFromFile(pd3dDevice, "./icons/user-off.png");
     _block.loadFromFile(pd3dDevice, "./icons/block.png");
     _kick.loadFromFile(pd3dDevice, "./icons/kick.png");
-    _editReason.loadFromFile(pd3dDevice, "./icons/editreason.png");
 
     _info.loadFromFile(pd3dDevice, "./icons/info.png");
     _logo.loadFromFile(pd3dDevice, "./icons/logo.png");
@@ -211,6 +210,12 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _ltc.loadFromFile(pd3dDevice, "./icons/ltc.png");
     _eth.loadFromFile(pd3dDevice, "./icons/eth.png");
 
+    _lockStart.loadFromFile(pd3dDevice, "./icons/lock-start.png");
+    _unlockStart.loadFromFile(pd3dDevice, "./icons/unlock-start.png");
+    _settings.loadFromFile(pd3dDevice, "./icons/settings.png");
+    _websocket.loadFromFile(pd3dDevice, "./icons/websocket.png");
+    _editReason.loadFromFile(pd3dDevice, "./icons/editreason.png");
+
     play = _play.texture;
     stop = _stop.texture;
     
@@ -219,8 +224,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     
     lock = _lock.texture;
     unlock = _unlock.texture;
-    lockStart = _lockStart.texture;
-    unlockStart = _unlockStart.texture;
 
     padOn = _padOn.texture;
     padOff = _padOff.texture;
@@ -235,7 +238,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     speakersOff = _speakersOff.texture;
     
     video = _video.texture;
-    websocket = _websocket.texture;
 
     refresh = _refresh.texture;
     sort = _sort.texture;
@@ -253,7 +255,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     logoff = _logoff.texture;
     block = _block.texture;
     kick = _kick.texture;
-    editReason = _editReason.texture;
 
     userOn = _userOn.texture;
     userOff = _userOff.texture;
@@ -279,4 +280,10 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     btc = _btc.texture;
     ltc = _ltc.texture;
     eth = _eth.texture;
+    
+    lockStart = _lockStart.texture;
+    unlockStart = _unlockStart.texture;
+    settings = _settings.texture;
+    websocket = _websocket.texture;
+    editReason = _editReason.texture;
 }

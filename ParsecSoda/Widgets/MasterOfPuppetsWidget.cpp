@@ -15,7 +15,7 @@ bool MasterOfPuppetsWidget::render()
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(820, 300), ImVec2(1300, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 100), ImVec2(1300, 900));
     ImGui::Begin("Master of Puppets##Master of Puppets", 0, isWindowLocked ? ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize : 0);
     AppStyle::pushInput();
 
@@ -27,7 +27,7 @@ bool MasterOfPuppetsWidget::render()
         
         fill = 1.0f - (float)stopwatch.getRemainingTime() / stopwatch.getDuration();
         
-        if (IconButton::render(AppIcons::sdl, AppColors::primary))
+        if (IconButton::render(AppIcons::sdl, AppColors::primary, ImVec2(30, 30)))
         {
             _masterOfPuppets.isSDLEngine = !_masterOfPuppets.isSDLEngine;
         }
@@ -39,11 +39,11 @@ bool MasterOfPuppetsWidget::render()
         ImGui::SameLine();
 
         cursor = ImGui::GetCursorPos();
-        ProgressCircularWidget::render(20, 10, fill);
+        ProgressCircularWidget::render(15, 8, fill);
         
         ImGui::SetCursorPos(cursor);
 
-        if (ImGui::Button("### SDL Joysticks Refresh", ImVec2(40, 40)))
+        if (ImGui::Button("### SDL Joysticks Refresh", ImVec2(35, 35)))
         {
             static Debouncer debouncer = Debouncer(500, [&]() {
                 _masterOfPuppets.fetchSDLGamepads();
@@ -57,7 +57,7 @@ bool MasterOfPuppetsWidget::render()
     }
     else
     {
-        if (IconButton::render(AppIcons::windows, AppColors::primary))
+        if (IconButton::render(AppIcons::windows, AppColors::primary, ImVec2(30, 30)))
         {
             _masterOfPuppets.isSDLEngine = !_masterOfPuppets.isSDLEngine;
             _masterOfPuppets.fetchSDLGamepads();
@@ -65,27 +65,27 @@ bool MasterOfPuppetsWidget::render()
         TitleTooltipWidget::render("Master Gamepad Engine", _wgiTooltipString.c_str());
     }
 
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(5, 0));
+    //ImGui::SameLine();
+    //ImGui::Dummy(ImVec2(5, 0));
     ImGui::SameLine();
     static bool showVPad = false;
-    if (IconButton::render(AppIcons::vpad, showVPad ? AppColors::positive : AppColors::negative))
+    if (IconButton::render(AppIcons::vpad, showVPad ? AppColors::positive : AppColors::negative, ImVec2(30, 30)))
     {
         showVPad = !showVPad;
-        isWindowLocked = showVPad;
+        //isWindowLocked = showVPad;
     }
     TitleTooltipWidget::render("Virtual Master Gamepad", "Click to toggle Master VPad.");
 
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
-    if (IconButton::render(AppIcons::move, isWindowLocked ? AppColors::negative : AppColors::positive))
-    {
-        isWindowLocked = !isWindowLocked;
-    }
-    if (isWindowLocked) TitleTooltipWidget::render("Window Locked", "This window cannot move or resize.");
-    else TitleTooltipWidget::render("Window Unlocked", "This window can move and resize.");
+    //ImGui::SameLine();
+    //ImGui::SetCursorPosX(ImGui::GetWindowContentRegionWidth() - 20);
+    //if (IconButton::render(AppIcons::move, isWindowLocked ? AppColors::negative : AppColors::positive, ImVec2(30, 30)))
+    //{
+    //    isWindowLocked = !isWindowLocked;
+    //}
+    //if (isWindowLocked) TitleTooltipWidget::render("Window Locked", "This window cannot move or resize.");
+    //else TitleTooltipWidget::render("Window Unlocked", "This window can move and resize.");
 
-    ImGui::Dummy(ImVec2(0, 5));
+    //ImGui::Dummy(ImVec2(0, 5));
     ImGui::Separator();
     ImGui::Dummy(ImVec2(0, 5));
 
@@ -94,7 +94,7 @@ bool MasterOfPuppetsWidget::render()
     _masterOfPuppets.setVirtualMaster(showVPad);
     if (showVPad)
     {
-        vpadState = vpad.render();
+        vpadState = vpad.render(40);
 
         ImGui::Dummy(ImVec2(0, 5));
         ImGui::Separator();
@@ -108,11 +108,11 @@ bool MasterOfPuppetsWidget::render()
     renderMaster();
     ImGui::SameLine();
 
-    if (_masterOfPuppets.isSDLEngine)
-    {
+    //if (_masterOfPuppets.isSDLEngine)
+    //{
         ImGui::Dummy(ImVec2(50, 0));
         ImGui::SameLine();
-    }
+    //}
 
     renderPuppets();
     ImGui::EndGroup();
@@ -150,11 +150,11 @@ void MasterOfPuppetsWidget::renderMasterSDL()
     ImGui::Text("Master");
     AppFonts::pop();
 
-    ImGui::Dummy(ImVec2(380, 0));
+    ImGui::Dummy(ImVec2(200, 0));
 
     for (int i = 0; i < sdlGamepads.size(); ++i)
     {
-        static float shift1 = 55.0f, shift2 = 55.0f, shift3 = 5.0f;
+        static float shift1 = 25.0f, shift2 = 30.0f, shift3 = 5.0f;
         cursor = ImGui::GetCursorPos();
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
@@ -172,15 +172,15 @@ void MasterOfPuppetsWidget::renderMasterSDL()
         switch (sdlGamepads[i].type)
         {
         case SDLGamepad::Type::XBox:
-            isMappingBtnPressed = IconButton::render(AppIcons::xinput, AppColors::primary);
+            isMappingBtnPressed = IconButton::render(AppIcons::xinput, AppColors::primary, ImVec2(20, 20));
             TitleTooltipWidget::render("Button Mapping", _sdlXInputMapTooltip.c_str());
             break;
         case SDLGamepad::Type::DS:
-            isMappingBtnPressed = IconButton::render(AppIcons::dinput, AppColors::primary);
+            isMappingBtnPressed = IconButton::render(AppIcons::dinput, AppColors::primary, ImVec2(20, 20));
             TitleTooltipWidget::render("Button Mapping", _sdlDualshockMapTooltip.c_str());
             break;
         case SDLGamepad::Type::DS4:
-            isMappingBtnPressed = IconButton::render(AppIcons::ds4, AppColors::primary);
+            isMappingBtnPressed = IconButton::render(AppIcons::ds4, AppColors::primary, ImVec2(20, 20));
             TitleTooltipWidget::render("Button Mapping", _sdlDS4MapTooltip.c_str());
             break;
         default:
@@ -201,7 +201,7 @@ void MasterOfPuppetsWidget::renderMasterSDL()
             (
                 string() + "### Master Gamepad " + to_string(i)
             ).c_str(),
-            _masterOfPuppets.getMasterIndex() == i, 0, ImVec2(275, 40))
+            _masterOfPuppets.getMasterIndex() == i, 0, ImVec2(155, 20))
         )
         {
             setMaster(i);
@@ -217,7 +217,7 @@ void MasterOfPuppetsWidget::renderMasterSDL()
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
 
         XINPUT_GAMEPAD gg = sdlGamepads[i].getGamepadState().state.Gamepad;
-        AnimatedGamepadWidget::render(sdlGamepads[i].getGamepadState().state.Gamepad);
+        AnimatedGamepadWidget::render(sdlGamepads[i].getGamepadState().state.Gamepad, 20);
         ImGui::PopStyleVar();
 
         ImGui::PopID();
@@ -239,11 +239,11 @@ void MasterOfPuppetsWidget::renderMasterXInput()
     ImGui::Text("Master");
     AppFonts::pop();
 
-    ImGui::Dummy(ImVec2(380, 0));
+    ImGui::Dummy(ImVec2(200, 0));
 
     for (int i = 0; i < xinputGamepads.size(); ++i)
     {
-        static float shift1 = 55.0f, shift2 = 55.0f, shift3 = 5.0f;
+        static float shift1 = 25.0f, shift2 = 30.0f, shift3 = 5.0f;
         cursor = ImGui::GetCursorPos();
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
@@ -254,13 +254,13 @@ void MasterOfPuppetsWidget::renderMasterXInput()
 
         ImGui::PushID(i);
         ImGui::SetCursorPos(cursor);
-        ImGui::SetCursorPosX(shift1);
+        ImGui::SetCursorPosX(shift1 + shift2);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
         if (ImGui::Selectable(
             (
                 string() + "### Master Gamepad " + to_string(i)
                 ).c_str(),
-            _masterOfPuppets.getMasterIndex() == i, 0, ImVec2(275, 40))
+            _masterOfPuppets.getMasterIndex() == i, 0, ImVec2(155, 20))
             )
         {
             setMaster(i);
@@ -271,10 +271,10 @@ void MasterOfPuppetsWidget::renderMasterXInput()
         );
 
         ImGui::SetCursorPos(cursor);
-        ImGui::SetCursorPosX(shift1 + shift3);
+        ImGui::SetCursorPosX(shift1 + shift2 + shift3);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
 
-        AnimatedGamepadWidget::render(xinputGamepads[i].state.Gamepad);
+        AnimatedGamepadWidget::render(xinputGamepads[i].state.Gamepad, 20);
         ImGui::PopStyleVar();
 
         ImGui::PopID();
@@ -325,7 +325,7 @@ void MasterOfPuppetsWidget::renderPuppets()
 
     for (int i = 0; i < gamepads.size(); ++i)
     {
-        static float shift1 = 30.0f, shift2 = 20.0f, shift3 = 5.0f;
+        static float shift1 = 10.0f, shift2 = 10.0f, shift3 = 5.0f;
         cursor = ImGui::GetCursorPos();
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
@@ -344,7 +344,7 @@ void MasterOfPuppetsWidget::renderPuppets()
             (
                 string() + "### Puppet Gamepad " + to_string(i)
                 ).c_str(),
-            gamepads[i]->isPuppet, 0, ImVec2(275, 40))
+            gamepads[i]->isPuppet, 0, ImVec2(155, 20))
             )
         {
             gamepads[i]->isPuppet = !gamepads[i]->isPuppet;
@@ -359,7 +359,7 @@ void MasterOfPuppetsWidget::renderPuppets()
         ImGui::SetCursorPosX(cursor.x + shift1 + shift2 + shift3);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
 
-        AnimatedGamepadWidget::render(gamepads[i]->getState().Gamepad);
+        AnimatedGamepadWidget::render(gamepads[i]->getState().Gamepad, 20);
         ImGui::PopStyleVar();
 
         ImGui::PopID();

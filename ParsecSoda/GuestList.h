@@ -22,13 +22,13 @@ class GuestList
 public:
 	void setGuests(ParsecGuest* guests, int guestCount);
 	vector<Guest> &getGuests();
-	MyMetrics getMetrics(uint32_t id);
-	void deleteMetrics(uint32_t id);
-	void updateMetrics(ParsecGuest* guests, int guestCount);
 	void clear();
 	const bool find(uint32_t targetGuestID, Guest *result);
 	const bool find(const char* targetName, Guest* result);
 	const bool find(string targetName, Guest* result);
+	MyMetrics getMetrics(uint32_t id);
+	void deleteMetrics(uint32_t id);
+	void updateMetrics(ParsecGuest* guests, int guestCount);
 
 	const char* guestNames[GUESTLIST_MAX_GUESTS];
 private:

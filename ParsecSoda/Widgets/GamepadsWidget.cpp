@@ -17,7 +17,7 @@ bool GamepadsWidget::render()
     static ImVec2 dummySize = ImVec2(0.0f, 5.0f);
 
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 280), ImVec2(800, 1100));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 280), ImVec2(800, 1100));
     ImGui::Begin("Virtual Gamepads", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
     AppStyle::pushInput();
     
@@ -71,23 +71,25 @@ bool GamepadsWidget::render()
     {
         _hosting.toggleGamepadLockStart();
     }
-    if (_hosting.isGamepadLockStart())   TitleTooltipWidget::render("Unlock guest START input", "Guests START input will be unlocked.");
-    else                            TitleTooltipWidget::render("Lock guest START input", "Guests START input will be locked.");
+    if (_hosting.isGamepadLockStart())
+        TitleTooltipWidget::render("Unlock START input", "Guests will be able to push START");
+    else
+        TitleTooltipWidget::render("Lock START input", "Guests will not be able to push START");
 
-    ImGui::SameLine();
+    //ImGui::SameLine();
 
-    cursor = ImGui::GetCursorPos();
-    ImGui::SetCursorPosX(size.x - 25);
-    if (IconButton::render(
-        AppIcons::move,
-        isWindowLocked ? AppColors::negative : AppColors::positive,
-        ImVec2(30, 30)
-    ))
-    {
-        isWindowLocked = !isWindowLocked;
-    }
-    if (isWindowLocked) TitleTooltipWidget::render("Window Locked", "This window cannot move or resize.");
-    else TitleTooltipWidget::render("Window Unlocked", "This window can move and resize.");
+    //cursor = ImGui::GetCursorPos();
+    //ImGui::SetCursorPosX(size.x - 25);
+    //if (IconButton::render(
+    //    AppIcons::move,
+    //    isWindowLocked ? AppColors::negative : AppColors::positive,
+    //    ImVec2(30, 30)
+    //))
+    //{
+    //    isWindowLocked = !isWindowLocked;
+    //}
+    //if (isWindowLocked) TitleTooltipWidget::render("Window Locked", "This window cannot move or resize.");
+    //else TitleTooltipWidget::render("Window Unlocked", "This window can move and resize.");
 
     ImGui::Dummy(ImVec2(0, 5));
     ImGui::Separator();
@@ -99,7 +101,7 @@ bool GamepadsWidget::render()
         ds4Count = (int) MetadataCache::preferences.ds4PuppetCount,
         lastDs4Count = (int) MetadataCache::preferences.ds4PuppetCount;
 
-    ImGui::Image(AppIcons::xinput, ImVec2(45, 45), ImVec2(0, 0), ImVec2(1, 1), AppColors::backgroundIcon);
+    ImGui::Image(AppIcons::xinput, ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), AppColors::backgroundIcon);
     ImGui::SameLine();
     if (IntRangeWidget::render("xboxCounter", xboxCount, 0, 100))
     {
@@ -110,7 +112,7 @@ bool GamepadsWidget::render()
     ImGui::Dummy(ImVec2(20, 0));
     ImGui::SameLine();
     
-    ImGui::Image(AppIcons::dinput, ImVec2(45, 45), ImVec2(0, 0), ImVec2(1, 1), AppColors::backgroundIcon);
+    ImGui::Image(AppIcons::dinput, ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), AppColors::backgroundIcon);
     ImGui::SameLine();
     if (IntRangeWidget::render("ds4Counter", ds4Count, 0, 100))
     {
@@ -137,7 +139,7 @@ bool GamepadsWidget::render()
         padIndex = xboxIndex + 1;
         static bool isIndexSuccess = false;
         isIndexSuccess = gi->isConnected() && padIndex > 0 && padIndex <= 4;
-        WebSocket& _ws = g_hosting.getWebSocket();
+        WebSocket& ws = g_hosting.getWebSocket();
 
         ImGui::BeginGroup();
         {
@@ -204,7 +206,7 @@ bool GamepadsWidget::render()
 
         if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
         {
-            if (gi->isOwned() && _ws.connected())
+            if (gi->isOwned() && ws.connected())
             {
                 MTY_JSON* jmsg = MTY_JSONObjCreate();
                 MTY_JSONObjSetString(jmsg, "type", "gamepadstrip");
@@ -213,7 +215,7 @@ bool GamepadsWidget::render()
                 MTY_JSONObjSetString(jmsg, "username", gi->owner.guest.name.c_str());
                 MTY_JSONObjSetUInt(jmsg, "index", i);
                 char* finmsg = MTY_JSONSerialize(jmsg);
-                _ws.handle_message(finmsg);
+                ws.handle_message(finmsg);
             }
             gi->clearOwner();
         }
@@ -258,7 +260,7 @@ bool GamepadsWidget::render()
             {
                 gi->toggleLockedStart();
             }
-            TitleTooltipWidget::render("Locked gamepad", "Unlock START.");
+            TitleTooltipWidget::render("Locked START", "Unlock this specific gamepad, allowing START inputs");
         }
         else
         {
@@ -266,7 +268,7 @@ bool GamepadsWidget::render()
             {
                 gi->toggleLockedStart();
             }
-            TitleTooltipWidget::render("Unlocked gamepad", "Lock START.");
+            TitleTooltipWidget::render("Unlocked START", "Lock this specific gamepad, preventing START input");
         }
 
         ImGui::SameLine();
@@ -345,7 +347,7 @@ bool GamepadsWidget::render()
                     if (guestIndex >= 0 && guestIndex < _hosting.getGuestList().size())
                     {
                         MTY_JSON* jmsg = MTY_JSONObjCreate();
-                        bool wsConnected = _ws.connected();
+                        bool wsConnected = ws.connected();
                         if (wsConnected)
                         {
                             MTY_JSONObjSetString(jmsg, "type", "gamepadassign");
@@ -361,7 +363,7 @@ bool GamepadsWidget::render()
                             MTY_JSONObjSetUInt(jmsg, "touserid", gi->owner.guest.userID);
                             MTY_JSONObjSetString(jmsg, "tousername", gi->owner.guest.name.c_str());
                             char* finmsg = MTY_JSONSerialize(jmsg);
-                            _ws.handle_message(finmsg);
+                            ws.handle_message(finmsg);
                         }
                     }
                 }
@@ -380,7 +382,7 @@ bool GamepadsWidget::render()
                         _gamepads[sourceIndex]->owner.copy(backupOwner);
                         _gamepads[i]->clearState();
                         _gamepads[sourceIndex]->clearState();
-                        if (_ws.connected())
+                        if (ws.connected())
                         {
                             MTY_JSON* jmsg = MTY_JSONObjCreate();
                             MTY_JSONObjSetString(jmsg, "type", "gamepadmove");
@@ -393,7 +395,7 @@ bool GamepadsWidget::render()
                             MTY_JSONObjSetUInt(jmsg, "fromindex", sourceIndex);
                             MTY_JSONObjSetUInt(jmsg, "toindex", i);
                             char* finmsg = MTY_JSONSerialize(jmsg);
-                            _ws.handle_message(finmsg);
+                            ws.handle_message(finmsg);
                         }
                     }
                 }
@@ -441,7 +443,7 @@ bool GamepadsWidget::render()
         ImGui::Dummy(ImVec2(0, 2));
 
         ImGui::BeginGroup();
-        ImGui::Dummy(ImVec2(96, 0));
+        ImGui::Dummy(ImVec2(48, 0));
         
         ImGui::SameLine();
 

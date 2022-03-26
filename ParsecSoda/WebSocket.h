@@ -16,7 +16,7 @@ using websocketpp::lib::bind;
 class connection_metadata {
 public:
     typedef websocketpp::lib::shared_ptr<connection_metadata> ptr;
-    connection_metadata(int id, websocketpp::connection_hdl hdl, std::string uri);
+    connection_metadata(int id, websocketpp::connection_hdl hdl, std::string uri, std::string password);
     void on_open(client* c, websocketpp::connection_hdl hdl);
     void on_fail(client* c, websocketpp::connection_hdl hdl);
     void on_close(client* c, websocketpp::connection_hdl hdl);
@@ -34,13 +34,14 @@ private:
     std::string m_server;
     std::string m_error_reason;
     std::vector<std::string> m_messages;
+    std::string m_password;
 };
 
 class websocket_endpoint {
 public:
     websocket_endpoint();
     ~websocket_endpoint();
-    int connect(std::string const& uri);
+    int connect(std::string const& uri, std::string const& password);
     void close(int id, websocketpp::close::status::value code, std::string reason);
     void send(int id, std::string message);
     connection_metadata::ptr get_metadata(int id) const;
@@ -56,10 +57,11 @@ class WebSocket {
 public:
     WebSocket();
     bool connected();
-    void start(string uri);
+    std::string status();
+    void start(string uri, string password);
     void close();
     void handle_message(string msg);
-    void sendMetrics(vector<ParsecMetrics> metrics);
+    //void sendMetrics(vector<ParsecMetrics> metrics);
     int con_id{ -1 };
     websocket_endpoint endpoint;
 

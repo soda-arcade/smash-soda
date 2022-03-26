@@ -20,8 +20,6 @@ public:
 
 	static ID3D11ShaderResourceView* lock;
 	static ID3D11ShaderResourceView* unlock;
-	static ID3D11ShaderResourceView* lockStart;
-	static ID3D11ShaderResourceView* unlockStart;
 
 	static ID3D11ShaderResourceView* padOn;
 	static ID3D11ShaderResourceView* padOff;
@@ -33,7 +31,6 @@ public:
 	static ID3D11ShaderResourceView* speakersOff;
 
 	static ID3D11ShaderResourceView* video;
-	static ID3D11ShaderResourceView* websocket;
 
 	static ID3D11ShaderResourceView* refresh;
 	static ID3D11ShaderResourceView* sort;
@@ -54,7 +51,6 @@ public:
 	static ID3D11ShaderResourceView* userOff;
 	static ID3D11ShaderResourceView* block;
 	static ID3D11ShaderResourceView* kick;
-	static ID3D11ShaderResourceView* editReason;
 
 	static ID3D11ShaderResourceView* info;
 	static ID3D11ShaderResourceView* logo;
@@ -77,6 +73,12 @@ public:
 	static ID3D11ShaderResourceView* btc;
 	static ID3D11ShaderResourceView* ltc;
 	static ID3D11ShaderResourceView* eth;
+	
+	static ID3D11ShaderResourceView* lockStart;
+	static ID3D11ShaderResourceView* unlockStart;
+	static ID3D11ShaderResourceView* settings;
+	static ID3D11ShaderResourceView* websocket;
+	static ID3D11ShaderResourceView* editReason;
 
 private:
 	static Texture _play;
@@ -94,15 +96,12 @@ private:
 
 	static Texture _lock;
 	static Texture _unlock;
-	static Texture _lockStart;
-	static Texture _unlockStart;
 	
 	static Texture _micOn;
 	static Texture _micOff;
 	static Texture _speakersOn;
 	static Texture _speakersOff;
 
-	static Texture _websocket;
 	static Texture _video;
 	
 	static Texture _refresh;
@@ -124,7 +123,6 @@ private:
 	static Texture _userOff;
 	static Texture _block;
 	static Texture _kick;
-	static Texture _editReason;
 
 	static Texture _info;
 	static Texture _logo;
@@ -147,5 +145,11 @@ private:
 	static Texture _btc;
 	static Texture _ltc;
 	static Texture _eth;
+	
+	static Texture _lockStart;
+	static Texture _unlockStart;
+	static Texture _settings;
+	static Texture _websocket;
+	static Texture _editReason;
 };
 

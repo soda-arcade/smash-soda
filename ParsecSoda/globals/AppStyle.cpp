@@ -18,6 +18,12 @@ void AppStyle::pushInput()
 	AppColors::pushInput();
 }
 
+void AppStyle::pushInputArrow()
+{
+	AppFonts::pushInputArrow();
+	AppColors::pushInput();
+}
+
 void AppStyle::pushPositive()
 {
 	AppFonts::pushInput();

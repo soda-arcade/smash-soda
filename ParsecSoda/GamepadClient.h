@@ -1,6 +1,7 @@
 #pragma once
 
 #define _WINSOCKAPI_
+
 #include "XBoxGamepad.h"
 #include "DualshockGamepad.h"
 #include <Windows.h>

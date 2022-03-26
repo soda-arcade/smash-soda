@@ -20,7 +20,7 @@ ImVec4 AppColors::disabled;
 
 void AppColors::init()
 {
-	title = ImVec4(0.05f, 0.03f, 0.07f, 1.0f);
+	title = ImVec4(0.00f, 0.00f, 0.00f, 1.0f);
 	label = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 	input = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
 	positive = ImVec4(0.00f, 0.67f, 0.41f, 1.00f);
@@ -34,7 +34,7 @@ void AppColors::init()
 	primary = ImVec4(0.00f, 0.47f, 0.80f, 1.00f);
 	secondary = ImVec4(0.02f, 0.29f, 0.53f, 1.00f);
 
-	backgroundIcon = ImVec4(0.08f, 0.07f, 0.07f, 1.00f);
+	backgroundIcon = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
 
 	disabled = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 }

@@ -3,6 +3,7 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #define _WINSOCKAPI_
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
@@ -34,6 +35,7 @@
 #include "Widgets/VersionWidget.h"
 #include "Widgets/ThumbnailsWidget.h"
 #include "Widgets/MasterOfPuppetsWidget.h"
+#include "Widgets/SettingsWidget.h"
 #include "Widgets/WebSocketWidget.h"
 
 using namespace std;
@@ -132,15 +134,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     VideoWidget videoWidget(g_hosting);
     HostInfoWidget hostInfoWidget(g_hosting);
     MasterOfPuppetsWidget masterOfPuppets(g_hosting);
+    SettingsWidget settingsWidget(g_hosting);
     WebSocketWidget webSocketWidget(g_hosting);
-
-    //ITaskbarList3* m_pTaskBarlist;
-    //CoCreateInstance(
-    //    CLSID_TaskbarList, NULL, CLSCTX_ALL,
-    //    IID_ITaskbarList3, (void**)&m_pTaskBarlist);
-
-    //m_pTaskBarlist->SetProgressState(hwnd, TBPF_ERROR);
-    //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
 
     ChatWidget chatWindow(g_hosting);
     //FLASHWINFO fi;
@@ -154,8 +149,15 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     //ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
     //    FlashWindowEx(&fi);
     //});
+    
+    //ITaskbarList3* m_pTaskBarlist;
+    //CoCreateInstance(
+    //    CLSID_TaskbarList, NULL, CLSCTX_ALL,
+    //    IID_ITaskbarList3, (void**)&m_pTaskBarlist);
+    //m_pTaskBarlist->SetProgressState(hwnd, TBPF_ERROR);
+    //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
 
-    ImVec4 clear_color = ImVec4(0.01f, 0.01f, 0.01f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     ImGui::loadStyle();
 
     bool showHostSettings = true;
@@ -163,14 +165,15 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showLog = true;
     bool showGuests = true;
     bool showGamepads = true;
-    bool showMasterOfPuppets = false;
-    bool showAudio = false;
-    bool showVideo = true;
+    bool showMasterOfPuppets = MetadataCache::preferences.showMasterOfPuppets;
+    bool showAudio = MetadataCache::preferences.showAudio;
+    bool showVideo = MetadataCache::preferences.showVideo;
     bool showStyles = true;
     bool showInfo = false;
     bool showLogin = true;
-    bool showThumbs = false;
-    bool showWebSocket = true;
+    bool showThumbs = MetadataCache::preferences.showThumbs;
+    bool showSettings = false;
+    bool showWebSocket = MetadataCache::preferences.showWebSocket;
 
     ParsecSession& g_session = g_hosting.getSession();
     vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
@@ -235,11 +238,12 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showVideo)              videoWidget.render();
             if (showInfo)               InfoWidget::render();
             if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
+            if (showSettings)           settingsWidget.render();
             if (showWebSocket)          webSocketWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showWebSocket
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket
             );
             hostInfoWidget.render();
         }
@@ -257,20 +261,16 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-
+        //g_pSwapChain->Present(1, 0); // Present with vsync
+        //g_pSwapChain->Present(0, 0); // Present without vsync
         static UINT presentFlags = 0;
-
         if (g_pSwapChain->Present(1, presentFlags) == DXGI_STATUS_OCCLUDED) {
             presentFlags = DXGI_PRESENT_TEST;
-            Sleep(20);
+            Sleep(4);
         }
         else {
             presentFlags = 0;
         }
-
-
-        //g_pSwapChain->Present(1, 0); // Present with vsync
-        //g_pSwapChain->Present(0, 0); // Present without vsync
     }
 
     // Cleanup

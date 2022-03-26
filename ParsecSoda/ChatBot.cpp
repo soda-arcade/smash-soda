@@ -18,10 +18,13 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
 	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
 
-#if !BASIC_VERSION
-	if (msgStartsWith(msg, CommandSFX::prefixes()))		return new CommandSFX(msg, _sfxList);
-	if (msgStartsWith(msg, CommandBonk::prefixes()))	return new CommandBonk(msg, sender, _guests, _host);
-#endif
+//#if !BASIC_VERSION
+	if (!MetadataCache::preferences.basicVersion)
+	{
+		if (msgStartsWith(msg, CommandSFX::prefixes()))		return new CommandSFX(msg, _sfxList);
+		if (msgStartsWith(msg, CommandBonk::prefixes()))	return new CommandBonk(msg, sender, _guests, _host);
+	}
+//#endif
 	
 
 	Tier tier = _tierList.getTier(sender.userID);

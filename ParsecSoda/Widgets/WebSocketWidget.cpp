@@ -3,53 +3,66 @@
 WebSocketWidget::WebSocketWidget(Hosting& hosting)
     : _hosting(hosting)
 {
+    try
+    {
+        strcpy_s(_ws_uri, MetadataCache::preferences.websocketURI.c_str());
+        strcpy_s(_ws_password, MetadataCache::preferences.websocketPassword.c_str());
+    }
+    catch (const std::exception&)
+    {
+        try
+        {
+            strcpy_s(_ws_uri, "");
+            strcpy_s(_ws_password, "");
+        }
+        catch (const std::exception&) {}
+    }
 }
 
 bool WebSocketWidget::render()
 {
-    
-    WebSocket& _ws = _hosting.getWebSocket();
+    WebSocket& ws = _hosting.getWebSocket();
 
-    // static float indentSize = 0;
-    // static ImVec2 dummySize = ImVec2(0.0f, 15.0f);
-    // static ImVec2 cursor;
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(100, 50), ImVec2(500, 600));
     ImGui::Begin("WebSocket");
     AppStyle::pushLabel();
 
-    // static ImVec2 size;
-    // size = ImGui::GetContentRegionAvail();
-    // ImGui::SetNextItemWidth(size.x);
+    static ImVec2 size;
+    size = ImGui::GetContentRegionAvail();
 
-    //ImGui::InputText(" ", _ws_uri, 50, ImGuiInputTextFlags_EnterReturnsTrue);
-    ImGui::InputText(" ", _ws_uri, 50);
+    AppStyle::pushInput();
+    ImGui::SetNextItemWidth(size.x);
+    ImGui::InputText("##uri", _ws_uri, 50);
+    ImGui::SetNextItemWidth(size.x);
+    ImGui::InputText("##password", _ws_password, 32, ImGuiInputTextFlags_Password);
+    AppStyle::pop();
 
-    if (_ws.connected())
+    AppFonts::pushInput();
+    string ws_status = ws.status();
+    ImGui::Text( ws_status.c_str() );
+    AppFonts::pop();
+
+    if (ws_status == "Open")
     {
-        //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
         AppStyle::pushNegative();
         if (ImGui::Button("Disconnect"))
         {
             _hosting.webSocketStop();
         }
+        AppStyle::pop();
     }
-    else
+    else if (ws_status == "Failed" || ws_status == "Closed")
     {
-        //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
         AppStyle::pushPositive();
         if (ImGui::Button("Connect"))
         {
-            string conUri(_ws_uri);
-            _hosting.webSocketStart(conUri);
+            MetadataCache::preferences.websocketURI = _ws_uri;
+            MetadataCache::preferences.websocketPassword = _ws_password;
+            _hosting.webSocketStart(MetadataCache::preferences.websocketURI, MetadataCache::preferences.websocketPassword);
         }
+        AppStyle::pop();
     }
-    //ImGui::Checkbox("Enable WebSockets", &_websocketsEnabled);
-
-    AppStyle::pop();
-    //ImGui::PopStyleColor();
-    //ImGui::Text("Adapters");
-
 
     AppStyle::pop();
     ImGui::End();

@@ -116,6 +116,8 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
         {
             MTY_JSON *json = MTY_JSONReadFile(filepath.c_str());
             char roomName[256] = "", gameID[72] = "", secret[32] = "";
+            char websocketURI[50] = "";
+            char websocketPassword[32] = "";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -207,6 +209,22 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
                 preferences.ds4PuppetCount = 0;
             }
             
+            if (!MTY_JSONObjGetBool(json, "basicVersion", &preferences.basicVersion)) {
+                preferences.basicVersion = false;
+            }
+
+            if (MTY_JSONObjGetString(json, "websocketURI", websocketURI, 50)) preferences.websocketURI = websocketURI;
+            else preferences.websocketURI = "ws://127.0.0.1:9002";
+
+            if (MTY_JSONObjGetString(json, "websocketPassword", websocketPassword, 32)) preferences.websocketPassword = websocketPassword;
+            else preferences.websocketPassword = "";
+
+            if (!MTY_JSONObjGetBool(json, "showMasterOfPuppets", &preferences.showMasterOfPuppets)) preferences.showMasterOfPuppets = false;
+            if (!MTY_JSONObjGetBool(json, "showAudio", &preferences.showAudio)) preferences.showAudio = false;
+            if (!MTY_JSONObjGetBool(json, "showVideo", &preferences.showVideo)) preferences.showVideo = false;
+            if (!MTY_JSONObjGetBool(json, "showThumbs", &preferences.showThumbs)) preferences.showThumbs = false;
+            if (!MTY_JSONObjGetBool(json, "showWebSocket", &preferences.showWebSocket)) preferences.showWebSocket = false;
+
             preferences.isValid = true;
 
             MTY_JSONDestroy(&json);
@@ -254,6 +272,14 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetUInt(json, "adapter", preferences.adapter);
         MTY_JSONObjSetUInt(json, "xboxPuppetCount", preferences.xboxPuppetCount);
         MTY_JSONObjSetUInt(json, "ds4PuppetCount", preferences.ds4PuppetCount);
+        MTY_JSONObjSetBool(json, "basicVersion", preferences.basicVersion);
+        MTY_JSONObjSetString(json, "websocketURI", preferences.websocketURI.c_str());
+        MTY_JSONObjSetString(json, "websocketPassword", preferences.websocketPassword.c_str());
+        MTY_JSONObjSetBool(json, "showMasterOfPuppets", preferences.showMasterOfPuppets);
+        MTY_JSONObjSetBool(json, "showAudio", preferences.showAudio);
+        MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
+        MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
+        MTY_JSONObjSetBool(json, "showWebSocket", preferences.showWebSocket);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);

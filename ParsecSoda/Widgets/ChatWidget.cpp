@@ -1,9 +1,7 @@
 #include "ChatWidget.h"
 
-//ChatWidget::ChatWidget(Hosting& hosting, function<void(void)> onMessageCallback)
-//    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0), _onMessageCallback(onMessageCallback)
-ChatWidget::ChatWidget(Hosting& hosting)
-    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0)
+ChatWidget::ChatWidget(Hosting& hosting) // , function<void(void)> onMessageCallback
+    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0) // , _onMessageCallback(onMessageCallback)
 {
     setSendBuffer("\0");
 }
@@ -18,7 +16,7 @@ bool ChatWidget::render()
     stopwatch.start();
 
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 400), ImVec2(800, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 350), ImVec2(800, 900));
     ImGui::Begin("Chat", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
     AppStyle::pushInput();
 
@@ -29,8 +27,8 @@ bool ChatWidget::render()
 
     if (_chatLog.size() > CHATLOG_MESSAGE_LENGTH)
     {
-        vector<string>::iterator itd = _chatLog.begin();
-        _chatLog.erase(itd, itd + CHATLOG_MESSAGE_LENGTH/2);
+        vector<string>::iterator it = _chatLog.begin();
+        _chatLog.erase(it, it + CHATLOG_MESSAGE_LENGTH/2);
     }
 
     renderTopBar(isWindowLocked, isClearChat);
@@ -72,8 +70,9 @@ bool ChatWidget::render()
 
     //ImGui::BeginChild("Message Preview", ImVec2(size.x, 60));
     //ImGui::Separator();
-    //ImGui::TextWrapped(_sendBuffer);
+    //ImGui::TextWrapped(_previewBuffer);
     //ImGui::EndChild();
+
     ImGui::Dummy(ImVec2(0, 1.0f));
 
     ImGui::SetNextItemWidth(size.x);
@@ -120,7 +119,7 @@ bool ChatWidget::render()
     //ImGui::SetCursorPos(cursor);
 
     //ImGui::Indent(size.x - 50);
-    //
+
     //if (ToggleIconButtonWidget::render(
     //    AppIcons::send, AppIcons::send, isDirty(),
     //    AppColors::primary, AppColors::alpha(AppColors::primary, 0.25f)
@@ -159,9 +158,9 @@ bool ChatWidget::renderTopBar(bool& isWindowLocked, bool& isClearChat)
     {
         if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30)))
         {
+            //isDeletingChat = true;
             isClearChat = true;
             result = true;
-            //isDeletingChat = true;
         }
         TitleTooltipWidget::render("Clear Chat", "Deletes all chat messages.");
     }
@@ -192,19 +191,19 @@ bool ChatWidget::renderTopBar(bool& isWindowLocked, bool& isClearChat)
         ImGui::EndGroup();
     }
 
-    ImGui::SameLine();
-    cursor = ImGui::GetCursorPos();
-    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 40);
-    if (IconButton::render(
-        AppIcons::move,
-        isWindowLocked ? AppColors::negative : AppColors::positive,
-        ImVec2(30, 30)
-    ))
-    {
-        isWindowLocked = !isWindowLocked;
-    }
-    if (isWindowLocked) TitleTooltipWidget::render("Window Locked", "This window cannot move or resize.");
-    else TitleTooltipWidget::render("Window Unlocked", "This window can move and resize.");
+    //ImGui::SameLine();
+    //cursor = ImGui::GetCursorPos();
+    //ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 40);
+    //if (IconButton::render(
+    //    AppIcons::move,
+    //    isWindowLocked ? AppColors::negative : AppColors::positive,
+    //    ImVec2(30, 30)
+    //))
+    //{
+    //    isWindowLocked = !isWindowLocked;
+    //}
+    //if (isWindowLocked) TitleTooltipWidget::render("Window Locked", "This window cannot move or resize.");
+    //else TitleTooltipWidget::render("Window Unlocked", "This window can move and resize.");
 
     return result;
 }

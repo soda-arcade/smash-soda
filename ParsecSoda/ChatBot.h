@@ -42,6 +42,7 @@
 #include "Commands/CommandUnban.h"
 #include "Commands/CommandVideoFix.h"
 #include "CompilerDirectives.h"
+#include "MetadataCache.h"
 
 #define BOT_GUESTID 0
 

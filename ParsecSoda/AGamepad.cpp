@@ -119,24 +119,24 @@ const bool AGamepad::isLocked() const
 	return _isLocked;
 }
 
-const bool AGamepad::isLockedStart() const
-{
-	return _isLockedStart;
-}
-
 void AGamepad::setLocked(const bool value)
 {
 	_isLocked = value;
 }
 
-void AGamepad::setLockedStart(const bool value)
-{
-	_isLockedStart = value;
-}
-
 void AGamepad::toggleLocked()
 {
 	setLocked(!_isLocked);
+}
+
+const bool AGamepad::isLockedStart() const
+{
+	return _isLockedStart;
+}
+
+void AGamepad::setLockedStart(const bool value)
+{
+	_isLockedStart = value;
 }
 
 void AGamepad::toggleLockedStart()

@@ -27,7 +27,7 @@ public:
 	 * @param id Internal id for specific methods.
 	 */
 	Guest(string name, uint32_t userID, uint32_t id, Status status = Status::OK);
-
+	
 	/**
 	 * Compatibility constructor.
 	 * @param guest ParsecGuest object.

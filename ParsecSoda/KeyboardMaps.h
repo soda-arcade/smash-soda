@@ -44,8 +44,8 @@ public:
 	uint16_t Start = KEY_ENTER;
 
 	// Stick Buttons
-	uint16_t LThumb = KEY_E;
-	uint16_t RThumb = KEY_U;
+	uint16_t LThumb = KEY_E; // C
+	uint16_t RThumb = KEY_U; // M
 };
 
 //enum class KEY_TO_GAMEPAD {

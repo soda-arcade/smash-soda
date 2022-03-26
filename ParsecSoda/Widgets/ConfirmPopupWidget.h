@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "../imgui/imgui.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
@@ -8,6 +9,6 @@
 class ConfirmPopupWidget
 {
 public:
-	static bool render(const char* title, bool& showPopup);
+	static bool render(const char* title, bool& showPopup, std::string textString = "");
 };
 

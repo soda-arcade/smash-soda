@@ -376,9 +376,6 @@ bool DX11::captureScreen(ParsecDSO *ps)
 	DXGI_OUTDUPL_FRAME_INFO lFrameInfo;
 	ID3D11Texture2D* currTexture = NULL;
 	
-	// "For performance reasons, we recommend that you release the frame just before you call the IDXGIOutputDuplication::AcquireNextFrame"
-	// Just testing if it changes anything
-	//_lDeskDupl->ReleaseFrame(); 
 	hr = _lDeskDupl->AcquireNextFrame(4, &lFrameInfo, &lDesktopResource);
 	if (FAILED(hr)) {
 		_lDeskDupl->ReleaseFrame();

@@ -62,6 +62,14 @@ public:
 		unsigned int bandwidth = 20;
 		unsigned int xboxPuppetCount = 4;
 		unsigned int ds4PuppetCount = 0;
+		bool basicVersion = false;
+		string websocketURI = "";
+		string websocketPassword = "";
+		bool showMasterOfPuppets;
+		bool showAudio;
+		bool showVideo;
+		bool showThumbs;
+		bool showWebSocket;
 	};
 
 	static SessionCache loadSessionCache();

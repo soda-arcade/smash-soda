@@ -26,6 +26,7 @@ private:
 	
 	// Attributes
 	char _filterText[256] = "";
+	bool _filterNoReason = false;
 	string _logBuffer;
 	vector<Guest>& _guests;
 	vector<GuestData>& _guestHistory;

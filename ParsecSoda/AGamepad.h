@@ -1,6 +1,7 @@
 #pragma once
 
 #define _WINSOCKAPI_
+
 #include <Windows.h>
 #include <Xinput.h>
 #include "ViGEm/Client.h"
@@ -69,10 +70,10 @@ public:
 	const bool isOwned();
 	bool isConnected() const;
 	const bool isLocked() const;
-	const bool isLockedStart() const;
 	void setLocked(const bool value);
-	void setLockedStart(const bool value);
 	void toggleLocked();
+	const bool isLockedStart() const;
+	void setLockedStart(const bool value);
 	void toggleLockedStart();
 
 	// Child specific implementations

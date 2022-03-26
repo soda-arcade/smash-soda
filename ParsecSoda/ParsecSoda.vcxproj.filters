@@ -267,6 +267,9 @@
     <ClCompile Include="Widgets\PopupWidgetEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Widgets\SettingsWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioIn.h">
@@ -651,6 +654,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\PopupWidgetEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\SettingsWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

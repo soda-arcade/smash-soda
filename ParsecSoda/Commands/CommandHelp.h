@@ -18,21 +18,25 @@ public:
 
 	bool run() override
 	{
-		const string pleb_commands = string()
-			+ "\n  " + "---- Normal Commands ----"
-#if !BASIC_VERSION
-			+ "\n  " + "!bonk\t\t\t\t |\tBonk another user."
-#endif
-			+ "\n  " + "!help\t\t\t\t  |\tShow command list."
-			+ "\n  " + "!ff\t\t\t\t\t\t |\tDrop your gamepads."
-			+ "\n  " + "!mirror\t\t\t   |\tToggle mirroring of L-Stick into DPad."
-			+ "\n  " + "!one\t\t\t\t    |\tMaps all of your devices to the same gamepad."
-			+ "\n  " + "!pads\t\t\t\t  |\tShow who's holding each gamepad."
-#if !BASIC_VERSION
-			+ "\n  " + "!sfx\t\t\t\t\t  |\tPlay sound effect."
-#endif
-			+ "\n  " + "!swap\t\t\t\t |\tReplace your gamepad with another one."
-			;
+		string pleb_commands = "\n  ---- Normal Commands ----";
+//#if !BASIC_VERSION
+		if (!MetadataCache::preferences.basicVersion)
+		{
+			pleb_commands += "\n  !bonk\t\t\t\t |\tBonk another user.";
+		}
+//#endif
+		pleb_commands += "\n  !help\t\t\t\t  |\tShow command list.";
+		pleb_commands += "\n  !ff\t\t\t\t\t\t |\tDrop your gamepads.";
+		pleb_commands += "\n  !mirror\t\t\t   |\tToggle mirroring of L-Stick into DPad.";
+		pleb_commands += "\n  !one\t\t\t\t    |\tMaps all of your devices to the same gamepad.";
+		pleb_commands += "\n  !pads\t\t\t\t  |\tShow who's holding each gamepad.";
+//#if !BASIC_VERSION
+		if (!MetadataCache::preferences.basicVersion)
+		{
+			pleb_commands += "\n  !sfx\t\t\t\t\t  |\tPlay sound effect.";
+		}
+//#endif
+		pleb_commands += "\n  !swap\t\t\t\t |\tReplace your gamepad with another one.";
 
 		const string admin_commands = string()
 			+ pleb_commands

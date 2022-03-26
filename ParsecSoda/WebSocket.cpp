@@ -3,62 +3,51 @@
 
 extern Hosting g_hosting;
 
-connection_metadata::connection_metadata(int id, websocketpp::connection_hdl hdl, std::string uri)
-        : m_id(id)
-        , m_hdl(hdl)
-        , m_status("Connecting")
-        , m_uri(uri)
-        , m_server("N/A")
+connection_metadata::connection_metadata(int id, websocketpp::connection_hdl hdl, std::string uri, std::string password)
+    : m_id(id), m_hdl(hdl), m_status("Connecting"), m_uri(uri), m_server("N/A"), m_password(password)
     {}
 
 void connection_metadata::on_open(client* c, websocketpp::connection_hdl hdl) {
     m_status = "Open";
-
-    //client::connection_ptr con = c->get_con_from_hdl(hdl);
-    //m_server = con->get_response_header("Server");
-    //Guest host = g_hosting.getHost();
-    //con->send("name:"+ host.name);
+    // Identify
+    Guest host = g_hosting.getHost();
+    MTY_JSON* jmsg = MTY_JSONObjCreate();
+    MTY_JSONObjSetString(jmsg, "type", "identify");
+    MTY_JSONObjSetUInt(jmsg, "id", host.id);
+    MTY_JSONObjSetUInt(jmsg, "userid", host.userID);
+    MTY_JSONObjSetString(jmsg, "username", host.name.c_str());
+    MTY_JSONObjSetString(jmsg, "password", m_password.c_str() );
+    char* finmsg = MTY_JSONSerialize(jmsg);
+    c->send(hdl, finmsg, websocketpp::frame::opcode::text);
 }
 
 void connection_metadata::on_fail(client* c, websocketpp::connection_hdl hdl) {
     m_status = "Failed";
-    //client::connection_ptr con = c->get_con_from_hdl(hdl);
-    //m_server = con->get_response_header("Server");
-    //m_error_reason = con->get_ec().message();
 }
 
 void connection_metadata::on_close(client* c, websocketpp::connection_hdl hdl) {
     m_status = "Closed";
-    //client::connection_ptr con = c->get_con_from_hdl(hdl);
-    //std::stringstream s;
-    //s << "close code: " << con->get_remote_close_code() << " ("
-    //    << websocketpp::close::status::get_string(con->get_remote_close_code())
-    //    << "), close reason: " << con->get_remote_close_reason();
-    //m_error_reason = s.str();
 }
 
 void connection_metadata::on_message(websocketpp::connection_hdl, client::message_ptr msg) {
     if (msg->get_opcode() == websocketpp::frame::opcode::text) {
-        //m_messages.push_back("<< " + msg->get_payload());
         //g_hosting.sendHostMessage(msg->get_payload().c_str());
         MTY_JSON *jmsg = MTY_JSONParse(msg->get_payload().c_str());
         if (jmsg)
         {
-            //{"type":"chat", "id" : 0, "userid" : 7466020, "username" : "v6 [Europe]", "content" : "123"}
             uint32_t id;
             uint32_t userid;
             char msg[1023];
             char name[GUEST_NAME_LEN];
             char type;
             MTY_JSONObjGetString(jmsg, "type", &type, 32);
-            //if (&type == "chat")
-            //{
+            //if (&type == "chat") {
                 MTY_JSONObjGetUInt(jmsg, "id", &id);
                 MTY_JSONObjGetUInt(jmsg, "userid", &userid);
                 MTY_JSONObjGetString(jmsg, "username", name, GUEST_NAME_LEN);
                 MTY_JSONObjGetString(jmsg, "content", msg, 1023);
                 Guest guest;
-                guest.id = 0; // don't process this as a locally connected player
+                guest.id = 0;
                 guest.userID = userid;
                 guest.name = string(name);
                 guest.status = Guest::Status::OK;
@@ -90,133 +79,57 @@ std::string connection_metadata::get_status() const {
     return m_status;
 }
 
-void connection_metadata::record_sent_message(std::string message) {
-    //m_messages.push_back(">> " + message);
-}
 
-
-std::ostream& operator<< (std::ostream& out, connection_metadata const& data) {
-    out << "> URI: " << data.m_uri << "\n"
-        << "> Status: " << data.m_status << "\n"
-        << "> Remote Server: " << (data.m_server.empty() ? "None Specified" : data.m_server) << "\n"
-        << "> Error/close reason: " << (data.m_error_reason.empty() ? "N/A" : data.m_error_reason) << "\n";
-    out << "> Messages Processed: (" << data.m_messages.size() << ") \n";
-
-    std::vector<std::string>::const_iterator it;
-    for (it = data.m_messages.begin(); it != data.m_messages.end(); ++it) {
-        out << *it << "\n";
-    }
-
-    return out;
-}
 
 websocket_endpoint::websocket_endpoint() : m_next_id(0) {
-        m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
-        m_endpoint.clear_error_channels(websocketpp::log::elevel::all);
-
-        m_endpoint.init_asio();
-        m_endpoint.start_perpetual();
-
-        m_thread = websocketpp::lib::make_shared<websocketpp::lib::thread>(&client::run, &m_endpoint);
-    }
+    m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
+    m_endpoint.clear_error_channels(websocketpp::log::elevel::all);
+    m_endpoint.init_asio();
+    m_endpoint.start_perpetual();
+    m_thread = websocketpp::lib::make_shared<websocketpp::lib::thread>(&client::run, &m_endpoint);
+}
 
 websocket_endpoint::~websocket_endpoint() {
-        m_endpoint.stop_perpetual();
-
-        for (con_list::const_iterator it = m_connection_list.begin(); it != m_connection_list.end(); ++it) {
-            if (it->second->get_status() != "Open") {
-                // Only close open connections
-                continue;
-            }
-
-            //std::cout << "> Closing connection " << it->second->get_id() << std::endl;
-
-            websocketpp::lib::error_code ec;
-            m_endpoint.close(it->second->get_hdl(), websocketpp::close::status::going_away, "", ec);
-            if (ec) {
-                //std::cout << "> Error closing connection " << it->second->get_id() << ": " << ec.message() << std::endl;
-            }
+    m_endpoint.stop_perpetual();
+    for (con_list::const_iterator it = m_connection_list.begin(); it != m_connection_list.end(); ++it) {
+        if (it->second->get_status() != "Open") {
+            // Only close open connections
+            continue;
         }
-
-        m_thread->join();
+        m_endpoint.close(it->second->get_hdl(), websocketpp::close::status::going_away, "");
     }
+    m_thread->join();
+}
 
-int websocket_endpoint::connect(std::string const& uri) {
+int websocket_endpoint::connect(std::string const& uri, std::string const& password) {
     websocketpp::lib::error_code ec;
-
     client::connection_ptr con = m_endpoint.get_connection(uri, ec);
     con->add_subprotocol("soda");
-
-    if (ec) {
-        //std::cout << "> Connect initialization error: " << ec.message() << std::endl;
-        return -1;
-    }
-
+    if (ec) return -1;
     int new_id = m_next_id++;
-    connection_metadata::ptr metadata_ptr = websocketpp::lib::make_shared<connection_metadata>(new_id, con->get_handle(), uri);
+    connection_metadata::ptr metadata_ptr = websocketpp::lib::make_shared<connection_metadata>(new_id, con->get_handle(), uri, password);
     m_connection_list[new_id] = metadata_ptr;
-
-    con->set_open_handler(websocketpp::lib::bind(
-        &connection_metadata::on_open,
-        metadata_ptr,
-        &m_endpoint,
-        websocketpp::lib::placeholders::_1
-    ));
-    con->set_fail_handler(websocketpp::lib::bind(
-        &connection_metadata::on_fail,
-        metadata_ptr,
-        &m_endpoint,
-        websocketpp::lib::placeholders::_1
-    ));
-    con->set_close_handler(websocketpp::lib::bind(
-        &connection_metadata::on_close,
-        metadata_ptr,
-        &m_endpoint,
-        websocketpp::lib::placeholders::_1
-    ));
-    con->set_message_handler(websocketpp::lib::bind(
-        &connection_metadata::on_message,
-        metadata_ptr,
-        websocketpp::lib::placeholders::_1,
-        websocketpp::lib::placeholders::_2
-    ));
-
+    con->set_open_handler(websocketpp::lib::bind(&connection_metadata::on_open, metadata_ptr, &m_endpoint, websocketpp::lib::placeholders::_1));
+    con->set_fail_handler(websocketpp::lib::bind(&connection_metadata::on_fail, metadata_ptr, &m_endpoint, websocketpp::lib::placeholders::_1));
+    con->set_close_handler(websocketpp::lib::bind(&connection_metadata::on_close, metadata_ptr, &m_endpoint, websocketpp::lib::placeholders::_1));
+    con->set_message_handler(websocketpp::lib::bind(&connection_metadata::on_message, metadata_ptr, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
     m_endpoint.connect(con);
-
     return new_id;
 }
 
 void websocket_endpoint::close(int id, websocketpp::close::status::value code, std::string reason) {
     websocketpp::lib::error_code ec;
-
     con_list::iterator metadata_it = m_connection_list.find(id);
-    if (metadata_it == m_connection_list.end()) {
-        //std::cout << "> No connection found with id " << id << std::endl;
-        return;
-    }
-
-    m_endpoint.close(metadata_it->second->get_hdl(), code, reason, ec);
-    if (ec) {
-        //std::cout << "> Error initiating close: " << ec.message() << std::endl;
-    }
+    if (metadata_it == m_connection_list.end()) return;
+    m_endpoint.close(metadata_it->second->get_hdl(), code, reason);
 }
 
 void websocket_endpoint::send(int id, std::string message) {
     websocketpp::lib::error_code ec;
-
     con_list::iterator metadata_it = m_connection_list.find(id);
-    if (metadata_it == m_connection_list.end()) {
-        //std::cout << "> No connection found with id " << id << std::endl;
-        return;
-    }
-
+    if (metadata_it == m_connection_list.end()) return;
     m_endpoint.send(metadata_it->second->get_hdl(), message, websocketpp::frame::opcode::text, ec);
-    if (ec) {
-        //std::cout << "> Error sending message: " << ec.message() << std::endl;
-        return;
-    }
-
-    //metadata_it->second->record_sent_message(message);
+    if (ec) return;
 }
 
 connection_metadata::ptr websocket_endpoint::get_metadata(int id) const {
@@ -249,9 +162,18 @@ bool WebSocket::connected()
     return false;
 }
 
-void WebSocket::start(string uri)
+std::string WebSocket::status() {
+    if (con_id != -1)
+    {
+        connection_metadata::ptr metadata = endpoint.get_metadata(con_id);
+        return metadata->get_status();
+    }
+    return "Closed";
+}
+
+void WebSocket::start(string uri, string password)
 {
-    con_id = endpoint.connect(uri);
+    con_id = endpoint.connect(uri, password);
 }
 
 void WebSocket::close()

@@ -61,8 +61,8 @@ public:
 	vector<string>& getMessageLog();
 	vector<string>& getCommandLog();
 	vector<Guest>& getGuestList();
-	MyMetrics getMetrics(uint32_t id);
 	vector<GuestData>& getGuestHistory();
+	MyMetrics getMetrics(uint32_t id);
 	BanList& getBanList();
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
@@ -83,9 +83,10 @@ public:
 	void stripGamepad(int index);
 	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
 	WebSocket& getWebSocket();
-	void webSocketStart(string uri);
-	void webSocketRun(string uri);
+	void webSocketStart(string uri, string password);
+	void webSocketRun(string uri, string password);
 	void webSocketStop();
+	bool webSocketRunning();
 
 	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false, bool outside = false);
 	void sendHostMessage(const char* message, bool isHidden = false);
@@ -97,7 +98,6 @@ public:
 private:
 	void initAllModules();
 	void liveStreamMedia();
-	void liveStreamVideo();
 	void mainLoopControl();
 	void pollEvents();
 	void pollInputs();
@@ -128,7 +128,6 @@ private:
 
 	bool _isRunning = false;
 	bool _isMediaThreadRunning = false;
-	bool _isVideoThreadRunning = false;
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
 	bool _isLatencyThreadRunning = false;
@@ -138,7 +137,6 @@ private:
 
 	thread _mainLoopControlThread;
 	thread _mediaThread;
-	thread _videoThread;
 	thread _inputThread;
 	thread _eventThread;
 	thread _latencyThread;
@@ -147,7 +145,6 @@ private:
 	thread _connectGamepadsThread;
 
 	mutex _mediaMutex;
-	mutex _videoMutex;
 	mutex _inputMutex;
 	mutex _eventMutex;
 	mutex _latencyMutex;

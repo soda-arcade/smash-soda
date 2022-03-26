@@ -3,6 +3,7 @@
 #include "../imgui/imgui.h"
 #include "../Hosting.h"
 #include "../MetadataCache.h"
+#include "../Debouncer.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppFonts.h"
 #include "../globals/AppColors.h"
@@ -10,15 +11,16 @@
 #include "TitleTooltipWidget.h"
 #include "TooltipWidget.h"
 #include "IntRangeWidget.h"
-#include "../MetadataCache.h"
 
-class WebSocketWidget
+class SettingsWidget
 {
 public:
-	WebSocketWidget(Hosting& hosting);
+	SettingsWidget(Hosting& hosting);
 	bool render();
+
 private:
+	// Dependency injection
 	Hosting& _hosting;
-	char _ws_uri[50]{ "" };
-	char _ws_password[32]{ "" };
+
+	bool _basicVersion = false;
 };

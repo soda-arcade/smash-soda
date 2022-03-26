@@ -559,14 +559,14 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 		return false;
 	}
 	
-	int i{ 0 };
+	int i = 0;
 	return reduceUntilFirst([&](AGamepad* gamepad) {
 		if (!(isPuppetMaster && gamepad->isPuppet) && (!gamepad->isLocked() && gamepad->isAttached() && !gamepad->owner.guest.isValid()))
 		{
 			gamepad->setOwner(guest, deviceID, isKeyboard);
 
-			WebSocket &_ws = g_hosting.getWebSocket();
-			if (_ws.connected())
+			WebSocket &ws = g_hosting.getWebSocket();
+			if (ws.connected())
 			{
 				MTY_JSON* jmsg = MTY_JSONObjCreate();
 				MTY_JSONObjSetString(jmsg, "type", "gamepadconnect");
@@ -575,7 +575,7 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 				MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
 				MTY_JSONObjSetUInt(jmsg, "index", i);
 				char* finmsg = MTY_JSONSerialize(jmsg);
-				_ws.handle_message(finmsg);
+				ws.handle_message(finmsg);
 			}
 			return true;
 		}
