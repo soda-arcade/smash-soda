@@ -21,6 +21,10 @@ public:
 private:
 	// Dependency injection
 	Hosting& _hosting;
+	uint32_t DEBOUNCER_TIME_MS = 2000;
 
 	bool _basicVersion = false;
+	bool _disableMicrophone = false;
+	bool _latencyLimitEnabled = false;
+	unsigned int _latencyLimitValue = 0;
 };

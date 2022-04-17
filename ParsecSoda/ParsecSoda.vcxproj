@@ -163,6 +163,7 @@
     <ClCompile Include="Commands\CommandBonk.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
+    <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
     <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
     <ClCompile Include="Widgets\SettingsWidget.cpp" />
     <ClCompile Include="XBoxGamepad.cpp" />
@@ -247,8 +248,10 @@
     <ClCompile Include="Widgets\NavBar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ButtonLock.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
+    <ClInclude Include="Widgets\ButtonLockWidget.h" />
     <ClInclude Include="Widgets\PopupWidgetEdit.h" />
     <ClInclude Include="Widgets\SettingsWidget.h" />
     <ClInclude Include="XBoxGamepad.h" />

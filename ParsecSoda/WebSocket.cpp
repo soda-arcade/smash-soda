@@ -19,6 +19,8 @@ void connection_metadata::on_open(client* c, websocketpp::connection_hdl hdl) {
     MTY_JSONObjSetString(jmsg, "password", m_password.c_str() );
     char* finmsg = MTY_JSONSerialize(jmsg);
     c->send(hdl, finmsg, websocketpp::frame::opcode::text);
+    MTY_JSONDestroy(&jmsg);
+    MTY_Free(finmsg);
 }
 
 void connection_metadata::on_fail(client* c, websocketpp::connection_hdl hdl) {
@@ -39,20 +41,22 @@ void connection_metadata::on_message(websocketpp::connection_hdl, client::messag
             uint32_t userid;
             char msg[1023];
             char name[GUEST_NAME_LEN];
-            char type;
-            MTY_JSONObjGetString(jmsg, "type", &type, 32);
-            //if (&type == "chat") {
-                MTY_JSONObjGetUInt(jmsg, "id", &id);
-                MTY_JSONObjGetUInt(jmsg, "userid", &userid);
-                MTY_JSONObjGetString(jmsg, "username", name, GUEST_NAME_LEN);
-                MTY_JSONObjGetString(jmsg, "content", msg, 1023);
-                Guest guest;
-                guest.id = 0;
-                guest.userID = userid;
-                guest.name = string(name);
-                guest.status = Guest::Status::OK;
-                g_hosting.handleMessage(msg, guest, false, false, true);
-            //}
+            char type[32];
+            if (MTY_JSONObjGetString(jmsg, "type", type, 32))
+            {
+                if (strcmp(type, "chat") == 0) {
+                    MTY_JSONObjGetUInt(jmsg, "id", &id);
+                    MTY_JSONObjGetUInt(jmsg, "userid", &userid);
+                    MTY_JSONObjGetString(jmsg, "username", name, GUEST_NAME_LEN);
+                    MTY_JSONObjGetString(jmsg, "content", msg, 1023);
+                    Guest guest;
+                    guest.id = 0;
+                    guest.userID = userid;
+                    guest.name = string(name);
+                    guest.status = Guest::Status::OK;
+                    g_hosting.handleMessage(msg, guest, false, false, true);
+                }
+            }
         }
 
         //if (!jmsg) {

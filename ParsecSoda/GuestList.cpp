@@ -146,6 +146,8 @@ void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
 			it->second.metrics.packetsSent = guests[i].metrics[0].packetsSent;
 			it->second.metrics.queuedFrames = guests[i].metrics[0].queuedFrames;
 			it->second.metrics.slowRTs = guests[i].metrics[0].slowRTs;
+			++it->second.averageNetworkLatencySize;
+			it->second.averageNetworkLatency = it->second.averageNetworkLatency + (guests[i].metrics[0].networkLatency - it->second.averageNetworkLatency) / it->second.averageNetworkLatencySize;
 		}
 		else
 		{

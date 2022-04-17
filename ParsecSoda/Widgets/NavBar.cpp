@@ -14,11 +14,12 @@ void NavBar::render(
 	bool& showVideo,
 	bool& showInfo,
 	bool& showSettings,
-	bool& showWebSocket
+	bool& showWebSocket,
+	bool& showButtonLock
 )
 {
 	static ImVec2 iconSize = ImVec2(24, 24);
-	static ImVec2 windowSize = ImVec2(32+4, 13*30+4);
+	static ImVec2 windowSize = ImVec2(32+4, 14*30+4);
 	static ImVec2 zero = ImVec2(0, 0);
 	static ImVec2 padding = ImVec2(8, 8);
 	
@@ -88,6 +89,10 @@ void NavBar::render(
 		MetadataCache::preferences.showWebSocket = showWebSocket;
 	}
 	renderNavtooltip("WebSocket", showWebSocket);
+
+	if (ToggleIconButtonWidget::render(AppIcons::buttonLock, AppIcons::buttonLock, showButtonLock, iconSize)) showButtonLock = !showButtonLock;
+	renderNavtooltip("Button Lock", showButtonLock);
+
 
 	if (IconButton::render(AppIcons::logoff, AppColors::primary, iconSize))
 	{

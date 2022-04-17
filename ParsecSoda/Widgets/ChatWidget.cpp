@@ -101,9 +101,8 @@ bool ChatWidget::render()
 
     if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
         ImGui::SetKeyboardFocusHere(-1);
-    // Activate chat when not foreground window and not selected any other box
-    if (!ImGui::IsAnyItemActive() && GetForegroundWindow() != _hosting.mainWindow) {
-        //_chatLog.push_back("activated");
+    // Activate chat when not foreground window
+    if (GetForegroundWindow() != _hosting.mainWindow && !ImGui::IsItemActive()) {
         ImGui::SetKeyboardFocusHere(-1);
     }
 

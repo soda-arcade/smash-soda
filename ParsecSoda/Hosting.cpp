@@ -46,6 +46,10 @@ Hosting::Hosting()
 	SDL_Init(SDL_INIT_JOYSTICK);
 	_masterOfPuppets.init(_gamepadClient);
 	_masterOfPuppets.start();
+
+	_latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
+	_latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
+	_disableMicrophone = MetadataCache::preferences.disableMicrophone;
 }
 
 void Hosting::applyHostConfig()
@@ -144,9 +148,9 @@ bool& Hosting::isGamepadLock()
 	return _gamepadClient.lock;
 }
 
-bool& Hosting::isGamepadLockStart()
+bool& Hosting::isGamepadLockButtons()
 {
-	return _gamepadClient.lockStart;
+	return _gamepadClient.lockButtons;
 }
 
 Guest& Hosting::getHost()
@@ -246,9 +250,9 @@ void Hosting::toggleGamepadLock()
 	_gamepadClient.toggleLock();
 }
 
-void Hosting::toggleGamepadLockStart()
+void Hosting::toggleGamepadLockButtons()
 {
-	_gamepadClient.toggleLockStart();
+	_gamepadClient.toggleLockButtons();
 }
 
 void Hosting::setGameID(string gameID)
@@ -328,6 +332,7 @@ void Hosting::startHosting()
 				_inputThread = thread ([this]() {pollInputs(); });
 				_eventThread = thread ([this]() {pollEvents(); });
 				_latencyThread = thread([this]() {pollLatency(); });
+				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
 			}
 		}
@@ -342,6 +347,10 @@ void Hosting::stopHosting()
 {
 	_isRunning = false;
 	_guestList.clear();
+	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++)
+	{
+		_gamepadClient.gamepads[i]->clearOwner();
+	}
 }
 
 void Hosting::stripGamepad(int index)
@@ -381,6 +390,9 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 			MTY_JSONObjSetString(jmsg, "content", message);
 			char* finmsg = MTY_JSONSerialize(jmsg);
 			_webSocket.handle_message(finmsg);
+			MTY_JSONDestroy(&jmsg);
+			MTY_Free(finmsg);
+
 		}
 
 		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier);
@@ -411,6 +423,8 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 			MTY_JSONObjSetString(jmsg, "content", command->replyMessage().c_str());
 			char* finmsg = MTY_JSONSerialize(jmsg);
 			_webSocket.handle_message(finmsg);
+			MTY_JSONDestroy(&jmsg);
+			MTY_Free(finmsg);
 		}
 
 		broadcastChatMessage(command->replyMessage());
@@ -459,7 +473,7 @@ void Hosting::liveStreamMedia()
 
 		_dx11.captureScreen(_parsec);
 
-		if (audioIn.isEnabled && audioOut.isEnabled)
+		if (!_disableMicrophone && audioIn.isEnabled && audioOut.isEnabled)
 		{
 			audioIn.captureAudio();
 			audioOut.captureAudio();
@@ -478,7 +492,7 @@ void Hosting::liveStreamMedia()
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
 		}
-		else if (audioIn.isEnabled)
+		else if (!_disableMicrophone && audioIn.isEnabled)
 		{
 			audioIn.captureAudio();
 			if (audioIn.isReady())
@@ -580,6 +594,26 @@ void Hosting::pollLatency()
 	{
 		Sleep(2000);
 		guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
+		if (guestCount > 0) {
+			_guestList.updateMetrics(guests, guestCount);
+
+			// Test
+			//if (_latencyLimitEnabled)
+			//{
+			//	for (size_t mi = 0; mi < guestCount; mi++)
+			//	{
+			//		MyMetrics m = _guestList.getMetrics(guests[mi].id);
+			//		if (m.metrics.networkLatency > 0.1f && m.averageNetworkLatencySize <= 3)
+			//		{
+			//			_chatLog.logCommand(string("!") + guests[mi].name + " P:" + to_string(m.metrics.packetsSent) + " L:" + to_string(m.metrics.networkLatency));
+			//		}
+			//		//if (m.averageNetworkLatencySize > 5 && m.averageNetworkLatency > _latencyLimitValue) {
+			//		//	ParsecHostKickGuest(_parsec, guests[mi].id);
+			//		//	_chatLog.logCommand(string("!>") + to_string(_latencyLimitValue) + " \t\t " + guests[mi].name + " #" + to_string(guests[mi].userID));
+			//		//}
+			//	}
+			//}
+		}
 		if (_webSocket.connected())
 		{
 			// submit guests/metrics
@@ -601,6 +635,8 @@ void Hosting::pollLatency()
 			MTY_JSONObjSetItem(jmsg, "content", jdata);
 			char* finmsg = MTY_JSONSerialize(jmsg);
 			_webSocket.handle_message(finmsg);
+			MTY_JSONDestroy(&jmsg);
+			MTY_Free(finmsg);
 
 			// submit all gamepads
 			MTY_JSON* jmsg2 = MTY_JSONObjCreate();
@@ -621,9 +657,8 @@ void Hosting::pollLatency()
 			MTY_JSONObjSetItem(jmsg2, "content", jdata2);
 			char* finmsg2 = MTY_JSONSerialize(jmsg2);
 			_webSocket.handle_message(finmsg2);
-		}
-		if (guestCount > 0) {
-			_guestList.updateMetrics(guests, guestCount);
+			MTY_JSONDestroy(&jmsg2);
+			MTY_Free(finmsg2);
 		}
 	}
 	_isLatencyThreadRunning = false;
@@ -634,6 +669,50 @@ void Hosting::pollLatency()
 bool Hosting::isLatencyRunning()
 {
 	return _isLatencyThreadRunning;
+}
+
+void Hosting::pollGamepad()
+{
+	_gamepadMutex.lock();
+	_isGamepadThreadRunning = true;
+	while (_isRunning)
+	{
+		Sleep(33);
+		if (_gamepadClient.gamepads.size() > 0 && _webSocket.connected())
+		{
+			MTY_JSON* jmsg3 = MTY_JSONObjCreate();
+			MTY_JSON* jdata3 = MTY_JSONArrayCreate();
+			for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++)
+			{
+				if (!_gamepadClient.gamepads[i]->isConnected()) continue;
+				XINPUT_STATE test = _gamepadClient.gamepads[i]->getState();
+				MTY_JSON* jmetric = MTY_JSONObjCreate();
+				MTY_JSONObjSetUInt(jmetric, "i", i);
+				MTY_JSONObjSetInt(jmetric, "lt", test.Gamepad.bLeftTrigger);
+				MTY_JSONObjSetInt(jmetric, "rt", test.Gamepad.bRightTrigger);
+				MTY_JSONObjSetInt(jmetric, "lx", test.Gamepad.sThumbLX);
+				MTY_JSONObjSetInt(jmetric, "ly", test.Gamepad.sThumbLY);
+				MTY_JSONObjSetInt(jmetric, "rx", test.Gamepad.sThumbRX);
+				MTY_JSONObjSetInt(jmetric, "ry", test.Gamepad.sThumbRY);
+				MTY_JSONObjSetInt(jmetric, "b", test.Gamepad.wButtons);
+				MTY_JSONArrayAppendItem(jdata3, jmetric);
+			}
+			MTY_JSONObjSetString(jmsg3, "type", "gamepadstate");
+			MTY_JSONObjSetItem(jmsg3, "content", jdata3);
+			char* finmsg3 = MTY_JSONSerialize(jmsg3);
+			_webSocket.handle_message(finmsg3);
+			MTY_JSONDestroy(&jmsg3);
+			MTY_Free(finmsg3);
+		}
+	}
+	_isGamepadThreadRunning = false;
+	_gamepadMutex.unlock();
+	_gamepadThread.detach();
+}
+
+bool Hosting::isGamepadRunning()
+{
+	return _isGamepadThreadRunning;
 }
 
 void Hosting::pollInputs()
@@ -650,15 +729,7 @@ void Hosting::pollInputs()
 		{
 			if (!_gamepadClient.lock)
 			{
-				if (_gamepadClient.lockStart && inputGuestMsg.type == MESSAGE_GAMEPAD_STATE && (inputGuestMsg.gamepadState.buttons & 0x0010)) {
-					// pressed start
-				}
-				else if (_gamepadClient.lockStart && inputGuestMsg.type == MESSAGE_GAMEPAD_BUTTON && (inputGuestMsg.gamepadButton.button == GAMEPAD_BUTTON_START)) {
-					// pressed start
-				}
-				else {
 					_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
-				}
 			}
 		}
 	}
@@ -706,6 +777,18 @@ bool Hosting::webSocketRunning()
 	return _isWebSocketThreadRunning;
 }
 
+void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
+{
+	_lockedGamepad = lockedGamepad;
+	MetadataCache::preferences.lockedGamepadLeftTrigger = _lockedGamepad.bLeftTrigger;
+	MetadataCache::preferences.lockedGamepadRightTrigger = _lockedGamepad.bRightTrigger;
+	MetadataCache::preferences.lockedGamepadLX = _lockedGamepad.sThumbLX;
+	MetadataCache::preferences.lockedGamepadLY = _lockedGamepad.sThumbLY;
+	MetadataCache::preferences.lockedGamepadRX = _lockedGamepad.sThumbRX;
+	MetadataCache::preferences.lockedGamepadRY = _lockedGamepad.sThumbRY;
+	MetadataCache::preferences.lockedGamepadButtons = _lockedGamepad.wButtons;
+}
+
 bool Hosting::parsecArcadeStart()
 {
 	if (isReady()) {
@@ -749,6 +832,8 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		MTY_JSONObjSetBool(jmsg, "banned", _banList.isBanned(guest.userID));
 		char* finmsg = MTY_JSONSerialize(jmsg);
 		_webSocket.handle_message(finmsg);
+		MTY_JSONDestroy(&jmsg);
+		MTY_Free(finmsg);
 	}
 
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && _banList.isBanned(guest.userID))
@@ -770,8 +855,10 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		guestMsg = string(guest.name);
 
 		logMessage = _chatBot->formatGuestConnection(guest, state);
-		broadcastChatMessage(logMessage);
-		_chatLog.logCommand(logMessage);
+		if (!_banList.isBanned(guest.userID)) {
+			broadcastChatMessage(logMessage);
+			_chatLog.logCommand(logMessage);
+		}
 
 		if (state == GUEST_CONNECTED)
 		{

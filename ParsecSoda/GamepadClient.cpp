@@ -123,7 +123,7 @@ void GamepadClient::resize(size_t xboxCount, size_t dualshockCount)
 	vector<AGamepad*> newGamepads;
 
 	lock = true;
-	lockStart = true;
+	lockButtons = true;
 	_isBusy = true;
 
 	reduce([&xi, &di, &xboxCount, &dualshockCount, &newGamepads](AGamepad* pad) {
@@ -173,20 +173,20 @@ void GamepadClient::resize(size_t xboxCount, size_t dualshockCount)
 
 	_isBusy = false;
 	lock = false;
-	lockStart = false;
+	lockButtons = false;
 }
 
 void GamepadClient::resetAll()
 {
 	_resetAllThread = thread([&]() {
 		lock = true;
-		lockStart = true;
+		lockButtons = true;
 		release();
 		init();
 		createAllGamepads();
 		connectAllGamepads();
 		lock = false;
-		lockStart = false;
+		lockButtons = false;
 		_resetAllThread.detach();
 	});
 }
@@ -199,9 +199,9 @@ void GamepadClient::toggleLock()
 	});
 }
 
-void GamepadClient::toggleLockStart()
+void GamepadClient::toggleLockButtons()
 {
-	lockStart = !lockStart;
+	lockButtons = !lockButtons;
 	reduce([&](AGamepad* pad) {
 		pad->clearState();
 	});
@@ -482,15 +482,25 @@ bool GamepadClient::sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadSt
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadState.id == pad->owner.deviceID))
 			{
-				if (pad->isLockedStart() && (gamepadState.buttons & 0x0010))
+				if (pad->isLockedStart() || lockButtons)
 				{
-					// pressed start
+					if (gamepadState.buttons & g_hosting._lockedGamepad.wButtons)
+						gamepadState.buttons &= ~g_hosting._lockedGamepad.wButtons;
+					if (g_hosting._lockedGamepad.bLeftTrigger && gamepadState.leftTrigger != 0)
+						gamepadState.leftTrigger = 0;
+					if (g_hosting._lockedGamepad.bRightTrigger && gamepadState.rightTrigger != 0)
+						gamepadState.rightTrigger = 0;
+					if (g_hosting._lockedGamepad.sThumbLX && gamepadState.thumbLX != 0)
+						gamepadState.thumbLX = 0;
+					if (g_hosting._lockedGamepad.sThumbLY && gamepadState.thumbLY != 0)
+						gamepadState.thumbLY = 0;
+					if (g_hosting._lockedGamepad.sThumbRX && gamepadState.thumbRX != 0)
+						gamepadState.thumbRX = 0;
+					if (g_hosting._lockedGamepad.sThumbRY && gamepadState.thumbRY != 0)
+						gamepadState.thumbRY = 0;
 				}
-				else
-				{
-					pad->setStateSafe(toXInput(gamepadState, pad->getState(), prefs));
-					return true;
-				}
+				pad->setStateSafe(toXInput(gamepadState, pad->getState(), prefs));
+				return true;
 			}
 		}
 		return false;
@@ -505,7 +515,22 @@ bool GamepadClient::sendGamepadAxisMessage(ParsecGamepadAxisMessage& gamepadAxis
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadAxis.id == pad->owner.deviceID))
 			{
-				pad->setStateSafe(toXInput(gamepadAxis, pad->getState(), prefs));
+				XINPUT_STATE xstate = toXInput(gamepadAxis, pad->getState(), prefs);
+				if (pad->isLockedStart() || lockButtons) {
+					if (g_hosting._lockedGamepad.sThumbLX && gamepadAxis.axis == GAMEPAD_AXIS_LX)
+						xstate.Gamepad.sThumbLX = 0;
+					else if (g_hosting._lockedGamepad.sThumbLY && gamepadAxis.axis == GAMEPAD_AXIS_LY)
+						xstate.Gamepad.sThumbLY = 0;
+					else if (g_hosting._lockedGamepad.sThumbRX && gamepadAxis.axis == GAMEPAD_AXIS_RX)
+						xstate.Gamepad.sThumbRX = 0;
+					else if (g_hosting._lockedGamepad.sThumbRY && gamepadAxis.axis == GAMEPAD_AXIS_RY)
+						xstate.Gamepad.sThumbRY = 0;
+					else if (g_hosting._lockedGamepad.bLeftTrigger && gamepadAxis.axis == GAMEPAD_AXIS_TRIGGERL)
+						xstate.Gamepad.bLeftTrigger = 0;
+					else if (g_hosting._lockedGamepad.bRightTrigger && gamepadAxis.axis == GAMEPAD_AXIS_TRIGGERR)
+						xstate.Gamepad.bRightTrigger = 0;
+				}
+				pad->setStateSafe(xstate);
 				return true;
 			}
 		}
@@ -521,15 +546,13 @@ bool GamepadClient::sendGamepadButtonMessage(ParsecGamepadButtonMessage& gamepad
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadButton.id == pad->owner.deviceID))
 			{
-				if (pad->isLockedStart() && (gamepadButton.button == GAMEPAD_BUTTON_START))
-				{
-					// pressed start
+				XINPUT_STATE xstate = toXInput(gamepadButton, pad->getState(), prefs);
+				if (pad->isLockedStart() || lockButtons) {
+					if (xstate.Gamepad.wButtons & g_hosting._lockedGamepad.wButtons)
+						xstate.Gamepad.wButtons &= ~g_hosting._lockedGamepad.wButtons;
 				}
-				else
-				{
-					pad->setStateSafe(toXInput(gamepadButton, pad->getState(), prefs));
-					return true;
-				}
+				pad->setStateSafe(xstate);
+				return true;
 			}
 		}
 		return false;
@@ -544,7 +567,24 @@ bool GamepadClient::sendKeyboardMessage(ParsecKeyboardMessage& keyboard, Guest& 
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || pad->owner.isKeyboard))
 			{
-				pad->setStateSafe(toXInput(keyboard, pad->getKeyboard(), pad->getState(), prefs));
+				XINPUT_STATE xstate = toXInput(keyboard, pad->getKeyboard(), pad->getState(), prefs);
+				if (pad->isLockedStart() || lockButtons) {
+					if (xstate.Gamepad.wButtons & g_hosting._lockedGamepad.wButtons)
+						xstate.Gamepad.wButtons &= ~g_hosting._lockedGamepad.wButtons;
+					if (g_hosting._lockedGamepad.bLeftTrigger && xstate.Gamepad.bLeftTrigger != 0)
+						xstate.Gamepad.bLeftTrigger = 0;
+					if (g_hosting._lockedGamepad.bRightTrigger && xstate.Gamepad.bRightTrigger != 0)
+						xstate.Gamepad.bRightTrigger = 0;
+					if (g_hosting._lockedGamepad.sThumbLX && xstate.Gamepad.sThumbLX != 0)
+						xstate.Gamepad.sThumbLX = 0;
+					if (g_hosting._lockedGamepad.sThumbLY && xstate.Gamepad.sThumbLY != 0)
+						xstate.Gamepad.sThumbLY = 0;
+					if (g_hosting._lockedGamepad.sThumbRX && xstate.Gamepad.sThumbRX != 0)
+						xstate.Gamepad.sThumbRX = 0;
+					if (g_hosting._lockedGamepad.sThumbRY && xstate.Gamepad.sThumbRY != 0)
+						xstate.Gamepad.sThumbRY = 0;
+				}
+				pad->setStateSafe(xstate);
 				return true;
 			}
 		}
@@ -576,6 +616,8 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 				MTY_JSONObjSetUInt(jmsg, "index", i);
 				char* finmsg = MTY_JSONSerialize(jmsg);
 				ws.handle_message(finmsg);
+				MTY_JSONDestroy(&jmsg);
+				MTY_Free(finmsg);
 			}
 			return true;
 		}
@@ -695,7 +737,7 @@ void GamepadClient::toggleLockGamepad(int index)
 	}
 }
 
-void GamepadClient::toggleLockStartGamepad(int index)
+void GamepadClient::toggleLockButtonsGamepad(int index)
 {
 	if (index >= 0 && index < gamepads.size())
 	{

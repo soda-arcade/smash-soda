@@ -15,6 +15,8 @@ typedef struct MyMetrics
 {
 	ParsecMetrics metrics{ 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0 };
 	int congested{ 0 };
+	float averageNetworkLatency{ 0 };
+	uint32_t averageNetworkLatencySize{ 0 };
 } MyMetrics;
 
 class GuestList

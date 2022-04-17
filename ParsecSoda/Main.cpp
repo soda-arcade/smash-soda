@@ -37,6 +37,7 @@
 #include "Widgets/MasterOfPuppetsWidget.h"
 #include "Widgets/SettingsWidget.h"
 #include "Widgets/WebSocketWidget.h"
+#include "Widgets/ButtonLockWidget.h"
 
 using namespace std;
 
@@ -136,6 +137,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     MasterOfPuppetsWidget masterOfPuppets(g_hosting);
     SettingsWidget settingsWidget(g_hosting);
     WebSocketWidget webSocketWidget(g_hosting);
+    ButtonLockWidget buttonLockWidget(g_hosting);
 
     ChatWidget chatWindow(g_hosting);
     //FLASHWINFO fi;
@@ -174,6 +176,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showThumbs = MetadataCache::preferences.showThumbs;
     bool showSettings = false;
     bool showWebSocket = MetadataCache::preferences.showWebSocket;
+    bool showButtonLock = false;
 
     ParsecSession& g_session = g_hosting.getSession();
     vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
@@ -240,10 +243,11 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
             if (showSettings)           settingsWidget.render();
             if (showWebSocket)          webSocketWidget.render();
+            if (showButtonLock)         buttonLockWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket, showButtonLock
             );
             hostInfoWidget.render();
         }

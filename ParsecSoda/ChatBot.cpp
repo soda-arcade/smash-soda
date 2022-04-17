@@ -19,7 +19,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
 
 //#if !BASIC_VERSION
-	if (!MetadataCache::preferences.basicVersion)
+	if (!_basicVersion)
 	{
 		if (msgStartsWith(msg, CommandSFX::prefixes()))		return new CommandSFX(msg, _sfxList);
 		if (msgStartsWith(msg, CommandBonk::prefixes()))	return new CommandBonk(msg, sender, _guests, _host);
@@ -145,4 +145,9 @@ bool ChatBot::msgIsEqual(const char* msg, vector<const char*> patterns)
 void ChatBot::setLastUserId(uint32_t lastId)
 {
 	this->_lastUserId = lastId;
+}
+
+void ChatBot::updateSettings()
+{
+	_basicVersion = MetadataCache::preferences.basicVersion;
 }

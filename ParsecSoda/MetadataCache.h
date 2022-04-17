@@ -63,13 +63,23 @@ public:
 		unsigned int xboxPuppetCount = 4;
 		unsigned int ds4PuppetCount = 0;
 		bool basicVersion = false;
+		bool disableMicrophone = false;
 		string websocketURI = "";
 		string websocketPassword = "";
-		bool showMasterOfPuppets;
-		bool showAudio;
-		bool showVideo;
-		bool showThumbs;
-		bool showWebSocket;
+		bool showMasterOfPuppets = false;
+		bool showAudio = false;
+		bool showVideo = false;
+		bool showThumbs = false;
+		bool showWebSocket = false;
+		bool latencyLimitEnabled = false;
+		unsigned int latencyLimitValue = 0;
+		bool lockedGamepadLeftTrigger = false;
+		bool lockedGamepadRightTrigger = false;
+		bool lockedGamepadLX = false;
+		bool lockedGamepadLY = false;
+		bool lockedGamepadRX = false;
+		bool lockedGamepadRY = false;
+		unsigned int lockedGamepadButtons = 0;
 	};
 
 	static SessionCache loadSessionCache();

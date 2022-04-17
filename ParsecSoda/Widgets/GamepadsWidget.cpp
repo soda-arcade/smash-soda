@@ -65,16 +65,16 @@ bool GamepadsWidget::render()
     ImGui::SameLine();
 
     if (ToggleIconButtonWidget::render(
-        AppIcons::lockStart, AppIcons::unlockStart, _hosting.isGamepadLockStart(),
+        AppIcons::buttonLock, AppIcons::buttonLock, _hosting.isGamepadLockButtons(),
         AppColors::negative, AppColors::positive, ImVec2(30, 30)
     ))
     {
-        _hosting.toggleGamepadLockStart();
+        _hosting.toggleGamepadLockButtons();
     }
-    if (_hosting.isGamepadLockStart())
-        TitleTooltipWidget::render("Unlock START input", "Guests will be able to push START");
+    if (_hosting.isGamepadLockButtons())
+        TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
     else
-        TitleTooltipWidget::render("Lock START input", "Guests will not be able to push START");
+        TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
 
     //ImGui::SameLine();
 
@@ -119,7 +119,7 @@ bool GamepadsWidget::render()
         TitleTooltipWidget::render("Dualshock Puppet Counter", "Set the amount of DS4 controllers.\n\n* Warning: disconnect all gamepads before changing this.");
     }
 
-    ImGui::Dummy(ImVec2(0, 20));
+    ImGui::Dummy(ImVec2(0, 15));
 
     for (size_t i = 0; i < _gamepads.size(); ++i)
     {
@@ -216,6 +216,8 @@ bool GamepadsWidget::render()
                 MTY_JSONObjSetUInt(jmsg, "index", i);
                 char* finmsg = MTY_JSONSerialize(jmsg);
                 ws.handle_message(finmsg);
+                MTY_JSONDestroy(&jmsg);
+                MTY_Free(finmsg);
             }
             gi->clearOwner();
         }
@@ -256,33 +258,33 @@ bool GamepadsWidget::render()
 
         if (gi->isLockedStart())
         {
-            if (IconButton::render(AppIcons::lockStart, AppColors::negative, ImVec2(24, 24)))
+            if (IconButton::render(AppIcons::buttonLock, AppColors::negative, ImVec2(24, 24)))
             {
                 gi->toggleLockedStart();
             }
-            TitleTooltipWidget::render("Locked START", "Unlock this specific gamepad, allowing START inputs");
+            TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
         }
         else
         {
-            if (IconButton::render(AppIcons::unlockStart, AppColors::positive, ImVec2(24, 24)))
+            if (IconButton::render(AppIcons::buttonLock, AppColors::positive, ImVec2(24, 24)))
             {
                 gi->toggleLockedStart();
             }
-            TitleTooltipWidget::render("Unlocked START", "Lock this specific gamepad, preventing START input");
+            TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
         }
 
         ImGui::SameLine();
         
         static float gamepadLabelWidth;
-        gamepadLabelWidth = size.x - 230.0f;
+        gamepadLabelWidth = size.x - 210.0f;
         
         ImGui::BeginChild(
             (string("##name ") + to_string(i)).c_str(),
-            ImVec2(gamepadLabelWidth, 50.0f)
+            ImVec2(gamepadLabelWidth, 35.0f)
         );
         cursor = ImGui::GetCursorPos();
 
-        ImGui::Dummy(ImVec2(0,8));
+        //ImGui::Dummy(ImVec2(0,8));
 
 
         static string name, id;
@@ -302,7 +304,8 @@ bool GamepadsWidget::render()
         }
 
         AppStyle::pushLabel();
-        ImGui::TextWrapped(id.c_str());
+        //ImGui::TextWrapped(id.c_str());
+        ImGui::Text(id.c_str());
         AppStyle::pop();
 
         AppFonts::pushInput();
@@ -318,7 +321,8 @@ bool GamepadsWidget::render()
         ImGui::SetCursorPos(cursor);
         ImGui::Button(
             (string("##gamepad button") + to_string(i + 1)).c_str(),
-            ImVec2(gamepadLabelWidth, 50.0f)
+            //ImVec2(gamepadLabelWidth, 50.0f)
+            ImVec2(gamepadLabelWidth, 35.0f)
         );
 
         if (ImGui::BeginDragDropSource())
@@ -364,6 +368,8 @@ bool GamepadsWidget::render()
                             MTY_JSONObjSetString(jmsg, "tousername", gi->owner.guest.name.c_str());
                             char* finmsg = MTY_JSONSerialize(jmsg);
                             ws.handle_message(finmsg);
+                            MTY_JSONDestroy(&jmsg);
+                            MTY_Free(finmsg);
                         }
                     }
                 }
@@ -396,6 +402,8 @@ bool GamepadsWidget::render()
                             MTY_JSONObjSetUInt(jmsg, "toindex", i);
                             char* finmsg = MTY_JSONSerialize(jmsg);
                             ws.handle_message(finmsg);
+                            MTY_JSONDestroy(&jmsg);
+                            MTY_Free(finmsg);
                         }
                     }
                 }
@@ -413,14 +421,14 @@ bool GamepadsWidget::render()
         ImGui::BeginGroup();
         if (_hosting.getGamepadClient().isPuppetMaster && gi->isPuppet)
         {
-            ImGui::Dummy(ImVec2(0, 8));
+            //ImGui::Dummy(ImVec2(0, 8));
             ImGui::Image(AppIcons::puppet, ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), AppColors::primary);
             TitleTooltipWidget::render("Puppet", "This gamepad is under control of Master of Puppets.");
         }
         else
         {
             static int deviceIndices[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-            ImGui::Dummy(ImVec2(0.0f, 12.0f));
+            //ImGui::Dummy(ImVec2(0.0f, 12.0f));
             ImGui::SetNextItemWidth(40);
             deviceIndices[i] = gi->owner.deviceID;
 
@@ -440,7 +448,9 @@ bool GamepadsWidget::render()
         ImGui::EndGroup();
         ImGui::EndChild();
 
-        ImGui::Dummy(ImVec2(0, 2));
+        //ImGui::Dummy(ImVec2(0, 2));
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 10);
 
         ImGui::BeginGroup();
         ImGui::Dummy(ImVec2(48, 0));
@@ -451,7 +461,7 @@ bool GamepadsWidget::render()
 
         ImGui::EndGroup();
 
-        ImGui::Dummy(ImVec2(0, 5));
+        ImGui::Dummy(ImVec2(0, 10));
     }
 
     ImGui::PopStyleVar();

@@ -66,11 +66,10 @@ ID3D11ShaderResourceView* AppIcons::btc;
 ID3D11ShaderResourceView* AppIcons::ltc;
 ID3D11ShaderResourceView* AppIcons::eth;
 
-ID3D11ShaderResourceView* AppIcons::lockStart;
-ID3D11ShaderResourceView* AppIcons::unlockStart;
 ID3D11ShaderResourceView* AppIcons::settings;
 ID3D11ShaderResourceView* AppIcons::websocket;
 ID3D11ShaderResourceView* AppIcons::editReason;
+ID3D11ShaderResourceView* AppIcons::buttonLock;
 
 Texture AppIcons::_play;
 Texture AppIcons::_stop;
@@ -137,11 +136,10 @@ Texture AppIcons::_btc;
 Texture AppIcons::_ltc;
 Texture AppIcons::_eth;
 
-Texture AppIcons::_lockStart;
-Texture AppIcons::_unlockStart;
 Texture AppIcons::_settings;
 Texture AppIcons::_websocket;
 Texture AppIcons::_editReason;
+Texture AppIcons::_buttonLock;
 
 void AppIcons::init(ID3D11Device* pd3dDevice)
 {
@@ -210,11 +208,10 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _ltc.loadFromFile(pd3dDevice, "./icons/ltc.png");
     _eth.loadFromFile(pd3dDevice, "./icons/eth.png");
 
-    _lockStart.loadFromFile(pd3dDevice, "./icons/lock-start.png");
-    _unlockStart.loadFromFile(pd3dDevice, "./icons/unlock-start.png");
     _settings.loadFromFile(pd3dDevice, "./icons/settings.png");
     _websocket.loadFromFile(pd3dDevice, "./icons/websocket.png");
     _editReason.loadFromFile(pd3dDevice, "./icons/editreason.png");
+    _buttonLock.loadFromFile(pd3dDevice, "./icons/buttonlock.png");
 
     play = _play.texture;
     stop = _stop.texture;
@@ -281,9 +278,8 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     ltc = _ltc.texture;
     eth = _eth.texture;
     
-    lockStart = _lockStart.texture;
-    unlockStart = _unlockStart.texture;
     settings = _settings.texture;
     websocket = _websocket.texture;
     editReason = _editReason.texture;
+    buttonLock = _buttonLock.texture;
 }

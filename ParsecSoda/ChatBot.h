@@ -59,7 +59,9 @@ public:
 		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _gamepadClient(gamepadClient),
 		_guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), _parsecSession(parsecSession),
 		_sfxList(sfxList), _tierList(_tierList), _hostingLoopController(hostingLoopController), _host(host)
-	{}
+	{
+		_basicVersion = MetadataCache::preferences.basicVersion;
+	}
 
 	ACommand * identifyUserDataMessage(const char* msg, Guest& sender, bool isHost = false);
 
@@ -70,6 +72,7 @@ public:
 	const std::string formatBannedGuestMessage(Guest guest);
 	const std::string formatFailedConnection(Guest guest, ParsecStatus status);
 	CommandBotMessage sendBotMessage(const char * msg);
+	void updateSettings();
 
 private:
 	static bool msgStartsWith(const char* msg, const char* pattern);
@@ -94,4 +97,5 @@ private:
 	TierList& _tierList;
 	bool &_hostingLoopController;
 	Guest& _host;
+	bool _basicVersion = false;
 };

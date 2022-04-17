@@ -209,9 +209,8 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
                 preferences.ds4PuppetCount = 0;
             }
             
-            if (!MTY_JSONObjGetBool(json, "basicVersion", &preferences.basicVersion)) {
-                preferences.basicVersion = false;
-            }
+            if (!MTY_JSONObjGetBool(json, "basicVersion", &preferences.basicVersion)) preferences.basicVersion = false;
+            if (!MTY_JSONObjGetBool(json, "disableMicrophone", &preferences.disableMicrophone)) preferences.disableMicrophone = false;
 
             if (MTY_JSONObjGetString(json, "websocketURI", websocketURI, 50)) preferences.websocketURI = websocketURI;
             else preferences.websocketURI = "ws://127.0.0.1:9002";
@@ -224,6 +223,15 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetBool(json, "showVideo", &preferences.showVideo)) preferences.showVideo = false;
             if (!MTY_JSONObjGetBool(json, "showThumbs", &preferences.showThumbs)) preferences.showThumbs = false;
             if (!MTY_JSONObjGetBool(json, "showWebSocket", &preferences.showWebSocket)) preferences.showWebSocket = false;
+            if (!MTY_JSONObjGetBool(json, "latencyLimitEnabled", &preferences.latencyLimitEnabled)) preferences.latencyLimitEnabled = false;
+            if (!MTY_JSONObjGetUInt(json, "latencyLimitValue", &preferences.latencyLimitValue)) preferences.latencyLimitValue = 200;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadLeftTrigger", &preferences.lockedGamepadLeftTrigger)) preferences.lockedGamepadLeftTrigger = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadRightTrigger", &preferences.lockedGamepadRightTrigger)) preferences.lockedGamepadRightTrigger = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadLX", &preferences.lockedGamepadLX)) preferences.lockedGamepadLX = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadLY", &preferences.lockedGamepadLY)) preferences.lockedGamepadLY = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadRX", &preferences.lockedGamepadRX)) preferences.lockedGamepadRX = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadRY", &preferences.lockedGamepadRY)) preferences.lockedGamepadRY = false;
+            if (!MTY_JSONObjGetUInt(json, "lockedGamepadButtons", &preferences.lockedGamepadButtons)) preferences.lockedGamepadButtons = 0;
 
             preferences.isValid = true;
 
@@ -273,6 +281,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetUInt(json, "xboxPuppetCount", preferences.xboxPuppetCount);
         MTY_JSONObjSetUInt(json, "ds4PuppetCount", preferences.ds4PuppetCount);
         MTY_JSONObjSetBool(json, "basicVersion", preferences.basicVersion);
+        MTY_JSONObjSetBool(json, "disableMicrophone", preferences.disableMicrophone);
         MTY_JSONObjSetString(json, "websocketURI", preferences.websocketURI.c_str());
         MTY_JSONObjSetString(json, "websocketPassword", preferences.websocketPassword.c_str());
         MTY_JSONObjSetBool(json, "showMasterOfPuppets", preferences.showMasterOfPuppets);
@@ -280,6 +289,15 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
         MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
         MTY_JSONObjSetBool(json, "showWebSocket", preferences.showWebSocket);
+        MTY_JSONObjSetBool(json, "latencyLimitEnabled", preferences.latencyLimitEnabled);
+        MTY_JSONObjSetUInt(json, "latencyLimitValue", preferences.latencyLimitValue);
+        MTY_JSONObjSetBool(json, "lockedGamepadLeftTrigger", preferences.lockedGamepadLeftTrigger);
+        MTY_JSONObjSetBool(json, "lockedGamepadRightTrigger", preferences.lockedGamepadRightTrigger);
+        MTY_JSONObjSetBool(json, "lockedGamepadLX", preferences.lockedGamepadLX);
+        MTY_JSONObjSetBool(json, "lockedGamepadLY", preferences.lockedGamepadLY);
+        MTY_JSONObjSetBool(json, "lockedGamepadRX", preferences.lockedGamepadRX);
+        MTY_JSONObjSetBool(json, "lockedGamepadRY", preferences.lockedGamepadRY);
+        MTY_JSONObjSetUInt(json, "lockedGamepadButtons", preferences.lockedGamepadButtons);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
@@ -545,17 +563,22 @@ bool MetadataCache::saveThumbnails(vector<Thumbnail> thumbnails)
     return result;
 }
 
+std::string GetCurrentDirectory()
+{
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+    return std::string(buffer).substr(0, pos);
+}
+
 string MetadataCache::getUserDir()
 {
-    TCHAR tAppdata[1024];
-    if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata)))
+    string dir = GetCurrentDirectory();
+    string appDir = "\\ParsecSodaV\\";
+    if (MTY_FileExists( (dir+"\\portable.txt").c_str()  ))
     {
-        wstring wAppdata(tAppdata);
-        string appdata(wAppdata.begin(), wAppdata.end());
-        string dirPath = appdata + "\\ParsecSoda\\";
-        
+        string dirPath = dir+appDir;
         bool isDirOk = false;
-
         if (!MTY_FileExists(dirPath.c_str()))
         {
             if (MTY_Mkdir(dirPath.c_str()))
@@ -567,10 +590,38 @@ string MetadataCache::getUserDir()
         {
             isDirOk = true;
         }
-
         if (isDirOk)
         {
             return dirPath;
+        }
+    }
+    else
+    {
+        TCHAR tAppdata[1024];
+        if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata)))
+        {
+            wstring wAppdata(tAppdata);
+            string appdata(wAppdata.begin(), wAppdata.end());
+            string dirPath = appdata + appDir;
+
+            bool isDirOk = false;
+
+            if (!MTY_FileExists(dirPath.c_str()))
+            {
+                if (MTY_Mkdir(dirPath.c_str()))
+                {
+                    isDirOk = true;
+                }
+            }
+            else
+            {
+                isDirOk = true;
+            }
+
+            if (isDirOk)
+            {
+                return dirPath;
+            }
         }
     }
 

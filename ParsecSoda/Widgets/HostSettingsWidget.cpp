@@ -234,25 +234,32 @@ bool HostSettingsWidget::render(HWND& hwnd)
 
     if (!_hosting.isRunning() && _hosting.isReady())
     {
-        _audioIn.captureAudio();
+        if (!_hosting._disableMicrophone) _audioIn.captureAudio();
         _audioOut.captureAudio();
     }
 
     static int previousMicVolume, previousSpeakersVolume;
     static bool isVolumeChanged = false;
-    previousMicVolume = _micVolume;
-    previousSpeakersVolume = _speakersVolume;
+    static float targetPreview;
 
-    static float micPreview, targetPreview;
-    _micVolume = (int)(100.0f * _audioIn.volume);
-    targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
-    micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
-    if (AudioControlWidget::render("Microphone", &_micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
+    if (!_hosting._disableMicrophone)
     {
-        _audioIn.isEnabled = !_audioIn.isEnabled;
-        savePreferences();
+
+        previousMicVolume = _micVolume;
+        previousSpeakersVolume = _speakersVolume;
+
+        static float micPreview;
+        _micVolume = (int)(100.0f * _audioIn.volume);
+        targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
+        micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
+        if (AudioControlWidget::render("Microphone", &_micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
+        {
+            _audioIn.isEnabled = !_audioIn.isEnabled;
+            savePreferences();
+        }
+        _audioIn.volume = (float)_micVolume / 100.0f;
+
     }
-    _audioIn.volume = (float)_micVolume / 100.0f;
 
     static float speakersPreview;
     _speakersVolume = (int)(100.0f *_audioOut.volume);

@@ -15,14 +15,11 @@ bool GuestListWidget::render()
 
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    //static vector<Guest>::iterator it;
-    //it = _guests.begin();
     ImGui::BeginChild("Guest List", ImVec2(size.x, size.y));
 
     //AppStyle::pushLabel();
     //ImGui::Text("Filter Guests");
     //AppStyle::pop();
-    //ImGui::SetNextItemWidth(size.x);
     ImGui::SetNextItemWidth(size.x-42);
     ImGui::InputText("### Guest List Filter", _filterText, 256);
     TitleTooltipWidget::render("Filter Guests", "Type user Name or ID to filter.");
@@ -113,7 +110,6 @@ void GuestListWidget::renderOnlineGuests()
         {
             showKickPopup = true;
             kickPopupTitle = string("Kick##Popup");
-            //kickPopupTitle = string("Kick ") + name + "?" + "##Online Kick " + to_string(userID);
             popupIndex = i;
             ImGui::OpenPopup(kickPopupTitle.c_str());
         }
@@ -129,7 +125,6 @@ void GuestListWidget::renderOnlineGuests()
         {
             showBanPopup = true;
             banPopupTitle = string("Ban##Popup");
-            //banPopupTitle = string("Ban ") + name + "?" + "##Online Ban " + to_string(userID);
             popupIndex = i;
             ImGui::OpenPopup(banPopupTitle.c_str());
         }
@@ -167,9 +162,14 @@ void GuestListWidget::renderOnlineGuests()
 
         cursor = ImGui::GetCursorPos();
         ImGui::BeginGroup();
+
         AppStyle::pushInput();
-        ImGui::Text((name + " #" + to_string(userID)).c_str());
+        ImGui::Text("#%d", userID);
+        ImGui::SameLine();
+        ImGui::Indent(85);
+        ImGui::Text("%s", name.c_str());
         AppStyle::pop();
+        ImGui::Unindent(85);
         AppFonts::pushInput();
         if (m.congested == 2)
         {
@@ -183,7 +183,11 @@ void GuestListWidget::renderOnlineGuests()
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.67f, 0.41f, 1.00f));
         }
-        if (m.metrics.packetsSent > 60)
+        if (m.metrics.packetsSent < 1)
+        {
+            ImGui::Text("-");
+        }
+        else
         {
             ImGui::Text("%.0fms  B:%.1f  D:%u/%.1f  E:%.1f  N:%u/%u",
                 m.metrics.networkLatency,
@@ -194,9 +198,6 @@ void GuestListWidget::renderOnlineGuests()
                 m.metrics.slowRTs,
                 m.metrics.fastRTs
             );
-        }
-        else {
-            ImGui::Text("-");
         }
         AppStyle::pop();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
@@ -227,6 +228,8 @@ void GuestListWidget::renderOnlineGuests()
 
 void GuestListWidget::renderBannedGuests()
 {
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+
     static bool showEditPopup = false;
     static size_t popupEditIndex;
     static string reason;
@@ -266,10 +269,9 @@ void GuestListWidget::renderBannedGuests()
 
         if (_filterNoReason && reason.size() > 0) continue;
 
-        IconButton::render(AppIcons::userOff, AppColors::negative, ImVec2(30, 30));
+        IconButton::render(AppIcons::userOff, AppColors::primary, ImVec2(30, 30));
         if (ImGui::IsItemActive())
         {
-            //popupTitle = string("Unban ") + name + "?" + "##Blocked Unban " + to_string(userID);
             popupTitle = string("Unban##Popup");
             showUnbanPopup = true;
             popupIndex = i;
@@ -295,7 +297,7 @@ void GuestListWidget::renderBannedGuests()
         }
 
         ImGui::SameLine();
-        IconButton::render(AppIcons::editReason, AppColors::negative, ImVec2(30, 30));
+        IconButton::render(AppIcons::editReason, AppColors::primary, ImVec2(30, 30));
         if (ImGui::IsItemActive())
         {
             showEditPopup = true;
@@ -312,26 +314,24 @@ void GuestListWidget::renderBannedGuests()
             }
         }
 
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
         ImGui::SameLine();
         
         ImGui::BeginGroup();
         AppStyle::pushInput();
         ImGui::Text("#%d", userID);
         ImGui::SameLine();
-        ImGui::Indent(90);
+        ImGui::Indent(85);
         ImGui::Text("%s", name.c_str());
         AppStyle::pop();
-        ImGui::Unindent(90);
+        ImGui::Unindent(85);
         AppFonts::pushInput();
-        AppColors::pushNegative();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.50f, 0.60f, 1.00f));
         ImGui::Text(reason.c_str());
         AppStyle::pop();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();
-        ImGui::PopStyleVar();
     }
+    ImGui::PopStyleVar();
 }
 
 
@@ -369,7 +369,6 @@ void GuestListWidget::renderHistoryGuests()
         if(ImGui::IsItemActive())
         {
             showBanPopup = true;
-            //popupTitle = string("Ban ") + name + "?" + "##History Ban " + to_string(userID);
             popupTitle = string("Ban##Popup");
             popupIndex = i;
             ImGui::OpenPopup(popupTitle.c_str());
