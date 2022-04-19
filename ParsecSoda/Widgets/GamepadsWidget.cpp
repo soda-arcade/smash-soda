@@ -256,11 +256,11 @@ bool GamepadsWidget::render()
 
         ImGui::SameLine();
 
-        if (gi->isLockedStart())
+        if (gi->isLockedButtons())
         {
             if (IconButton::render(AppIcons::buttonLock, AppColors::negative, ImVec2(24, 24)))
             {
-                gi->toggleLockedStart();
+                gi->toggleLockedButtons();
             }
             TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
         }
@@ -268,7 +268,7 @@ bool GamepadsWidget::render()
         {
             if (IconButton::render(AppIcons::buttonLock, AppColors::positive, ImVec2(24, 24)))
             {
-                gi->toggleLockedStart();
+                gi->toggleLockedButtons();
             }
             TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
         }

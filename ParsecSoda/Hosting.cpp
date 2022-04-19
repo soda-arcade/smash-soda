@@ -50,6 +50,13 @@ Hosting::Hosting()
 	_latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
 	_latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
 	_disableMicrophone = MetadataCache::preferences.disableMicrophone;
+	_lockedGamepad.bLeftTrigger = MetadataCache::preferences.lockedGamepadLeftTrigger;
+	_lockedGamepad.bRightTrigger = MetadataCache::preferences.lockedGamepadRightTrigger;
+	_lockedGamepad.sThumbLX = MetadataCache::preferences.lockedGamepadLX;
+	_lockedGamepad.sThumbLY = MetadataCache::preferences.lockedGamepadLY;
+	_lockedGamepad.sThumbRX = MetadataCache::preferences.lockedGamepadRX;
+	_lockedGamepad.sThumbRY = MetadataCache::preferences.lockedGamepadRY;
+	_lockedGamepad.wButtons = MetadataCache::preferences.lockedGamepadButtons;
 }
 
 void Hosting::applyHostConfig()

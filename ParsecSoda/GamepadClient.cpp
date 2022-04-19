@@ -482,7 +482,7 @@ bool GamepadClient::sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadSt
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadState.id == pad->owner.deviceID))
 			{
-				if (pad->isLockedStart() || lockButtons)
+				if (pad->isLockedButtons() || lockButtons)
 				{
 					if (gamepadState.buttons & g_hosting._lockedGamepad.wButtons)
 						gamepadState.buttons &= ~g_hosting._lockedGamepad.wButtons;
@@ -516,7 +516,7 @@ bool GamepadClient::sendGamepadAxisMessage(ParsecGamepadAxisMessage& gamepadAxis
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadAxis.id == pad->owner.deviceID))
 			{
 				XINPUT_STATE xstate = toXInput(gamepadAxis, pad->getState(), prefs);
-				if (pad->isLockedStart() || lockButtons) {
+				if (pad->isLockedButtons() || lockButtons) {
 					if (g_hosting._lockedGamepad.sThumbLX && gamepadAxis.axis == GAMEPAD_AXIS_LX)
 						xstate.Gamepad.sThumbLX = 0;
 					else if (g_hosting._lockedGamepad.sThumbLY && gamepadAxis.axis == GAMEPAD_AXIS_LY)
@@ -547,7 +547,7 @@ bool GamepadClient::sendGamepadButtonMessage(ParsecGamepadButtonMessage& gamepad
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadButton.id == pad->owner.deviceID))
 			{
 				XINPUT_STATE xstate = toXInput(gamepadButton, pad->getState(), prefs);
-				if (pad->isLockedStart() || lockButtons) {
+				if (pad->isLockedButtons() || lockButtons) {
 					if (xstate.Gamepad.wButtons & g_hosting._lockedGamepad.wButtons)
 						xstate.Gamepad.wButtons &= ~g_hosting._lockedGamepad.wButtons;
 				}
@@ -568,7 +568,7 @@ bool GamepadClient::sendKeyboardMessage(ParsecKeyboardMessage& keyboard, Guest& 
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || pad->owner.isKeyboard))
 			{
 				XINPUT_STATE xstate = toXInput(keyboard, pad->getKeyboard(), pad->getState(), prefs);
-				if (pad->isLockedStart() || lockButtons) {
+				if (pad->isLockedButtons() || lockButtons) {
 					if (xstate.Gamepad.wButtons & g_hosting._lockedGamepad.wButtons)
 						xstate.Gamepad.wButtons &= ~g_hosting._lockedGamepad.wButtons;
 					if (g_hosting._lockedGamepad.bLeftTrigger && xstate.Gamepad.bLeftTrigger != 0)
@@ -741,7 +741,7 @@ void GamepadClient::toggleLockButtonsGamepad(int index)
 {
 	if (index >= 0 && index < gamepads.size())
 	{
-		gamepads[index]->toggleLockedStart();
+		gamepads[index]->toggleLockedButtons();
 	}
 }
 
