@@ -103,7 +103,7 @@ bool GamepadsWidget::render()
 
     ImGui::Image(AppIcons::xinput, ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), AppColors::backgroundIcon);
     ImGui::SameLine();
-    if (IntRangeWidget::render("xboxCounter", xboxCount, 0, 100))
+    if (IntRangeWidget::render("xboxCounter", xboxCount, 0, 32))
     {
         TitleTooltipWidget::render("XBox Puppet Counter", "Set the amount of XBox controllers.\n\n* Warning: disconnect all gamepads before changing this.");
     }
@@ -114,7 +114,7 @@ bool GamepadsWidget::render()
     
     ImGui::Image(AppIcons::dinput, ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), AppColors::backgroundIcon);
     ImGui::SameLine();
-    if (IntRangeWidget::render("ds4Counter", ds4Count, 0, 100))
+    if (IntRangeWidget::render("ds4Counter", ds4Count, 0, 32))
     {
         TitleTooltipWidget::render("Dualshock Puppet Counter", "Set the amount of DS4 controllers.\n\n* Warning: disconnect all gamepads before changing this.");
     }
@@ -484,6 +484,8 @@ bool GamepadsWidget::render()
 
     if (lastXboxCount != xboxCount || lastDs4Count != ds4Count)
     {
+        if (xboxCount > 32) xboxCount = 32;
+        if (ds4Count > 32) ds4Count = 32;
         lastXboxCount = xboxCount;
         lastDs4Count = ds4Count;
         MetadataCache::preferences.xboxPuppetCount = xboxCount;

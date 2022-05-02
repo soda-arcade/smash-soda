@@ -73,8 +73,10 @@ bool ButtonLockWidget::render()
     ImGui::SetCursorPos(ImVec2(310, 80));
     makeButton("RB", wideButton, GAMEPAD_STATE_RIGHT_SHOULDER);
 
+    ImGui::SetCursorPos(ImVec2(135, 50));
+    makeButton("Xbox Button", ultrawideButton, GAMEPAD_STATE_GUIDE);
     ImGui::SetCursorPos(ImVec2(135, 80));
-    makeButton("Select", wideButton, GAMEPAD_STATE_BACK);
+    makeButton("Back", wideButton, GAMEPAD_STATE_BACK);
     ImGui::SetCursorPos(ImVec2(200, 80));
     makeButton("Start", wideButton, GAMEPAD_STATE_START);
 
