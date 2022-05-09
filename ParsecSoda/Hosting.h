@@ -105,6 +105,7 @@ public:
 
 private:
 	void initAllModules();
+	void submitSilence();
 	void liveStreamMedia();
 	void mainLoopControl();
 	void pollEvents();

@@ -465,6 +465,11 @@ void Hosting::initAllModules()
 	parsecArcadeStart();
 }
 
+void Hosting::submitSilence()
+{
+	ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), nullptr, 0);
+}
+
 void Hosting::liveStreamMedia()
 {
 	_mediaMutex.lock();
@@ -489,6 +494,7 @@ void Hosting::liveStreamMedia()
 				vector<int16_t> mixBuffer = _audioMix.mix(audioIn.popBuffer(), audioOut.popBuffer());
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
 			}
+			else submitSilence();
 		}
 		else if (audioOut.isEnabled)
 		{
@@ -498,6 +504,7 @@ void Hosting::liveStreamMedia()
 				vector<int16_t> buffer = audioOut.popBuffer();
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
+			else submitSilence();
 		}
 		else if (!_disableMicrophone && audioIn.isEnabled)
 		{
@@ -507,7 +514,9 @@ void Hosting::liveStreamMedia()
 				vector<int16_t> buffer = audioIn.popBuffer();
 				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, (uint32_t)audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
+			else submitSilence();
 		}
+		else submitSilence();
 
 		sleepTimeMs = _mediaClock.getRemainingTime();
 		if (sleepTimeMs > 0)
