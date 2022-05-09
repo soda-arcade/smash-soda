@@ -28,9 +28,14 @@ bool GamepadsWidget::render()
 
     static float indentDistance;
 
+    static bool resetting = false;
     if (IconButton::render(AppIcons::refresh, AppColors::primary, ImVec2(30, 30)))
     {
-        _hosting.getGamepadClient().resetAll();
+        if (!resetting)
+        {
+            resetting = true;
+            _hosting.getGamepadClient().resetAll(resetting);
+        }
     }
     TitleTooltipWidget::render("Reset gamepad engine", "If all else fails, try this button.\nPress in dire situations.");
     

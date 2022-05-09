@@ -61,7 +61,7 @@ public:
 	void disconnectAllGamepads();
 	void sortGamepads();
 	void resize(size_t xboxCount, size_t dualshockCount);
-	void resetAll();
+	void resetAll(bool& resetting);
 	void toggleLock();
 	void toggleLockButtons();
 	void toggleLockGamepad(int index);

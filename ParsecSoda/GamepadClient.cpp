@@ -176,7 +176,7 @@ void GamepadClient::resize(size_t xboxCount, size_t dualshockCount)
 	lockButtons = false;
 }
 
-void GamepadClient::resetAll()
+void GamepadClient::resetAll(bool& resetting)
 {
 	_resetAllThread = thread([&]() {
 		lock = true;
@@ -188,6 +188,7 @@ void GamepadClient::resetAll()
 		lock = false;
 		lockButtons = false;
 		_resetAllThread.detach();
+		resetting = false;
 	});
 }
 
