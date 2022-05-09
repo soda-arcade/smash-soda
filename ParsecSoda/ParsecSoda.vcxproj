@@ -120,6 +120,13 @@
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\32;$(SolutionDir)Dependencies\vigem\bin\release32;$(SolutionDir)Dependencies\sdl\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec32.lib;libucrt.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)ParsecSoda\fonts\" "$(TargetDir)fonts\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\icons\" "$(TargetDir)icons\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\sfx\" "$(TargetDir)sfx\" /E
+copy /Y "$(SolutionDir)Dependencies\parsecsdk\windows\parsec32.dll" "$(TargetDir)parsec32.dll"
+copy /Y "$(SolutionDir)Dependencies\sdl\lib\x86\SDL2.dll" "$(TargetDir)SDL2.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -158,6 +165,13 @@
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\lib\release\x64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec.lib;libucrt.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)ParsecSoda\fonts\" "$(TargetDir)fonts\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\icons\" "$(TargetDir)icons\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\sfx\" "$(TargetDir)sfx\" /E
+copy /Y "$(SolutionDir)Dependencies\parsecsdk\windows\parsec.dll" "$(TargetDir)parsec.dll"
+copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Commands\CommandBonk.cpp" />
