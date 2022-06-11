@@ -50,6 +50,7 @@ Hosting::Hosting()
 	_latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
 	_latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
 	_disableMicrophone = MetadataCache::preferences.disableMicrophone;
+	_disableGuideButton = MetadataCache::preferences.disableGuideButton;
 	_lockedGamepad.bLeftTrigger = MetadataCache::preferences.lockedGamepadLeftTrigger;
 	_lockedGamepad.bRightTrigger = MetadataCache::preferences.lockedGamepadRightTrigger;
 	_lockedGamepad.sThumbLX = MetadataCache::preferences.lockedGamepadLX;
@@ -855,9 +856,9 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && _banList.isBanned(guest.userID))
 	{
 		ParsecHostKickGuest(_parsec, guest.id);
-		logMessage = _chatBot->formatBannedGuestMessage(guest);
-		broadcastChatMessage(logMessage);
-		_chatLog.logCommand(logMessage);
+		//logMessage = _chatBot->formatBannedGuestMessage(guest);
+		//broadcastChatMessage(logMessage);
+		//_chatLog.logCommand(logMessage);
 	}
 	else if (state == GUEST_FAILED)
 	{
@@ -870,8 +871,14 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		guestMsg.clear();
 		guestMsg = string(guest.name);
 
-		logMessage = _chatBot->formatGuestConnection(guest, state);
-		if (!_banList.isBanned(guest.userID)) {
+		if (_banList.isBanned(guest.userID)) {
+			logMessage = _chatBot->formatBannedGuestMessage(guest);
+			broadcastChatMessage(logMessage);
+			_chatLog.logCommand(logMessage);
+		}
+		else
+		{
+			logMessage = _chatBot->formatGuestConnection(guest, state);
 			broadcastChatMessage(logMessage);
 			_chatLog.logCommand(logMessage);
 		}

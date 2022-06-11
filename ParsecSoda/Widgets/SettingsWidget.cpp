@@ -5,6 +5,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
 {
     _basicVersion = MetadataCache::preferences.basicVersion;
     _disableMicrophone = MetadataCache::preferences.disableMicrophone;
+    _disableGuideButton = MetadataCache::preferences.disableGuideButton;
     _latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
     _latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
 }
@@ -31,6 +32,15 @@ bool SettingsWidget::render()
         MetadataCache::preferences.disableMicrophone = _disableMicrophone;
         MetadataCache::savePreferences();
         _hosting._disableMicrophone = _disableMicrophone;
+    }
+    AppStyle::pop();
+
+    AppStyle::pushInput();
+    if (ImGui::Checkbox("Disable Guide Button", &_disableGuideButton))
+    {
+        MetadataCache::preferences.disableGuideButton = _disableGuideButton;
+        MetadataCache::savePreferences();
+        _hosting._disableGuideButton = _disableGuideButton;
     }
     AppStyle::pop();
 

@@ -64,6 +64,7 @@ public:
 		unsigned int ds4PuppetCount = 0;
 		bool basicVersion = false;
 		bool disableMicrophone = false;
+		bool disableGuideButton = false;
 		string websocketURI = "";
 		string websocketPassword = "";
 		bool showMasterOfPuppets = false;

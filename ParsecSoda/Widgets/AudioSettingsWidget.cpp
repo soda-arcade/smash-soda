@@ -14,7 +14,7 @@ bool AudioSettingsWidget::render()
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 550), ImVec2(600, 700));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 450), ImVec2(600, 700));
     ImGui::Begin("Audio");
     AppStyle::pushLabel();
 

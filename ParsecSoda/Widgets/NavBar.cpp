@@ -44,6 +44,9 @@ void NavBar::render(
 	if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOn, showGamepads, iconSize)) showGamepads = !showGamepads;
 	renderNavtooltip("Gamepads", showGamepads);
 
+	if (ToggleIconButtonWidget::render(AppIcons::buttonLock, AppIcons::buttonLock, showButtonLock, iconSize)) showButtonLock = !showButtonLock;
+	renderNavtooltip("Button Lock", showButtonLock);
+
 	if (ToggleIconButtonWidget::render(AppIcons::puppet, AppIcons::puppet, showMasterOfPuppets, iconSize))
 	{
 		showMasterOfPuppets = !showMasterOfPuppets;
@@ -78,20 +81,17 @@ void NavBar::render(
 	}
 	renderNavtooltip("Video", showVideo);
 
-	if (ToggleIconButtonWidget::render(AppIcons::info, AppIcons::info, showInfo, iconSize)) showInfo = !showInfo;
-	renderNavtooltip("About", showInfo);
-
-	if (ToggleIconButtonWidget::render(AppIcons::settings, AppIcons::settings, showSettings, iconSize)) showSettings = !showSettings;
-	renderNavtooltip("Settings", showSettings);
-
 	if (ToggleIconButtonWidget::render(AppIcons::websocket, AppIcons::websocket, showWebSocket, iconSize)) {
 		showWebSocket = !showWebSocket;
 		MetadataCache::preferences.showWebSocket = showWebSocket;
 	}
 	renderNavtooltip("WebSocket", showWebSocket);
 
-	if (ToggleIconButtonWidget::render(AppIcons::buttonLock, AppIcons::buttonLock, showButtonLock, iconSize)) showButtonLock = !showButtonLock;
-	renderNavtooltip("Button Lock", showButtonLock);
+	if (ToggleIconButtonWidget::render(AppIcons::settings, AppIcons::settings, showSettings, iconSize)) showSettings = !showSettings;
+	renderNavtooltip("Settings", showSettings);
+
+	if (ToggleIconButtonWidget::render(AppIcons::info, AppIcons::info, showInfo, iconSize)) showInfo = !showInfo;
+	renderNavtooltip("About", showInfo);
 
 
 	if (IconButton::render(AppIcons::logoff, AppColors::primary, iconSize))

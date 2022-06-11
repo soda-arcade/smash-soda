@@ -16,7 +16,7 @@ bool ChatWidget::render()
     stopwatch.start();
 
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 350), ImVec2(800, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
     ImGui::Begin("Chat", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
     AppStyle::pushInput();
 

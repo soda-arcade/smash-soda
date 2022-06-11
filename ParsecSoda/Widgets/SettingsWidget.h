@@ -25,6 +25,7 @@ private:
 
 	bool _basicVersion = false;
 	bool _disableMicrophone = false;
+	bool _disableGuideButton = false;
 	bool _latencyLimitEnabled = false;
 	unsigned int _latencyLimitValue = 0;
 };

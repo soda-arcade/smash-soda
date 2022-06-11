@@ -141,10 +141,10 @@ void AnimatedGamepadWidget::renderTrigger(XINPUT_GAMEPAD gamepad, bool isRightTr
 	else
 		color = (gamepad.wButtons & XUSB_GAMEPAD_LEFT_SHOULDER) != 0 ? activeColor : ANIMGAMEPAD_COL_BG;
 
-	float shoulderRadius = dotRadius * 0.6;
-	renderSquare(drawList, center, 2.0f * shoulderRadius, color);
-	drawList->AddCircleFilled(ImVec2(center.x + shoulderRadius, center.y), shoulderRadius, color);
-	drawList->AddCircleFilled(ImVec2(center.x - shoulderRadius, center.y), shoulderRadius, color);
+	float shoulderRadius = dotRadius * 0.7;
+	renderSquare(drawList, ImVec2(center.x, center.y-dotRadius/2), 2.0f * shoulderRadius, color);
+	drawList->AddCircleFilled(ImVec2(center.x + shoulderRadius, center.y-dotRadius/2), shoulderRadius, color);
+	drawList->AddCircleFilled(ImVec2(center.x - shoulderRadius, center.y-dotRadius/2), shoulderRadius, color);
 
 
 	ImVec2 pMiddle = ImVec2(center.x, center.y + height * 0.5f * (1.0f - dotRatio));
@@ -152,19 +152,23 @@ void AnimatedGamepadWidget::renderTrigger(XINPUT_GAMEPAD gamepad, bool isRightTr
 
 	if (isRightTrigger)
 	{
-		pMiddle0 = sum(pMiddle, mul(ImVec2(-1.0f, -1.0f), shoulderRadius));
-		pMiddle1 = sum(pMiddle, mul(ImVec2(-1.0f, +1.0f), shoulderRadius));
-		pMiddle2 = ImVec2(pMiddle.x + shoulderRadius, pMiddle.y);
+		pMiddle0 = sum(pMiddle, mul(ImVec2(-2.0f, -1.7f), shoulderRadius));
+		pMiddle1 = sum(pMiddle, mul(ImVec2(-2.0f, +1.7f), shoulderRadius));
+		pMiddle2 = ImVec2(pMiddle.x + shoulderRadius*2, pMiddle.y);
 		color = (gamepad.wButtons & XUSB_GAMEPAD_START) != 0 ? activeColor : ANIMGAMEPAD_COL_BG;
-		drawList->AddTriangleFilled(pMiddle0, pMiddle1, pMiddle2, color);
+		drawList->AddTriangleFilled(pMiddle0, pMiddle2, pMiddle1, color);
 	}
 	else
 	{
-		pMiddle0 = sum(pMiddle, mul(ImVec2(1.0f, -1.0f), shoulderRadius));
-		pMiddle1 = sum(pMiddle, mul(ImVec2(1.0f, +1.0f), shoulderRadius));
-		pMiddle2 = ImVec2(pMiddle.x - shoulderRadius, pMiddle.y);
+		pMiddle0 = sum(pMiddle, mul(ImVec2(2.0f, -1.7f), shoulderRadius));
+		pMiddle1 = sum(pMiddle, mul(ImVec2(2.0f, +1.7f), shoulderRadius));
+		pMiddle2 = ImVec2(pMiddle.x - shoulderRadius*2, pMiddle.y);
 		color = (gamepad.wButtons & XUSB_GAMEPAD_BACK) != 0 ? activeColor : ANIMGAMEPAD_COL_BG;
 		drawList->AddTriangleFilled(pMiddle0, pMiddle1, pMiddle2, color);
+
+		ImU32 guideColor = ANIMGAMEPAD_COL_BG;
+		guideColor = (gamepad.wButtons & XUSB_GAMEPAD_GUIDE) != 0 ? activeColor : ANIMGAMEPAD_COL_BG;
+		drawList->AddCircleFilled(ImVec2(pMiddle1.x + 2.5f + (pMiddle1.y - pMiddle0.y) / 1.5, pMiddle2.y), (pMiddle1.y - pMiddle0.y) / 2, guideColor);
 	}
 
 	ImGui::SetCursorPos(cursor);

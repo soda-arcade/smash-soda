@@ -17,7 +17,7 @@ bool GamepadsWidget::render()
     static ImVec2 dummySize = ImVec2(0.0f, 5.0f);
 
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 280), ImVec2(800, 1100));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 150), ImVec2(800, 1100));
     ImGui::Begin("Virtual Gamepads", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
     AppStyle::pushInput();
     
@@ -462,7 +462,7 @@ bool GamepadsWidget::render()
         
         ImGui::SameLine();
 
-        AnimatedGamepadWidget::render(gi->getState().Gamepad);
+        AnimatedGamepadWidget::render(gi->getState().Gamepad, 30);
 
         ImGui::EndGroup();
 

@@ -15,7 +15,7 @@ bool MasterOfPuppetsWidget::render()
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 100), ImVec2(1300, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(450, 100), ImVec2(1300, 900));
     ImGui::Begin("Master of Puppets##Master of Puppets", 0, isWindowLocked ? ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize : 0);
     AppStyle::pushInput();
 

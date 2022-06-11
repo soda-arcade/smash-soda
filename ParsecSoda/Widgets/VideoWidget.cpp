@@ -15,7 +15,7 @@ bool VideoWidget::render()
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(250, 150), ImVec2(500, 600));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(500, 600));
     ImGui::Begin("Video");
 
 

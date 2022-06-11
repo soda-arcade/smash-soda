@@ -483,6 +483,8 @@ bool GamepadClient::sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadSt
 			slots++;
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadState.id == pad->owner.deviceID))
 			{
+				if (g_hosting._disableGuideButton && (gamepadState.buttons & GAMEPAD_STATE_GUIDE))
+					gamepadState.buttons &= ~GAMEPAD_STATE_GUIDE;
 				if (pad->isLockedButtons() || lockButtons)
 				{
 					if (gamepadState.buttons & g_hosting._lockedGamepad.wButtons)
@@ -548,6 +550,8 @@ bool GamepadClient::sendGamepadButtonMessage(ParsecGamepadButtonMessage& gamepad
 			if (!(isPuppetMaster && pad->isPuppet) && !pad->isLocked() && (prefs.ignoreDeviceID || gamepadButton.id == pad->owner.deviceID))
 			{
 				XINPUT_STATE xstate = toXInput(gamepadButton, pad->getState(), prefs);
+				if (g_hosting._disableGuideButton && (xstate.Gamepad.wButtons & GAMEPAD_STATE_GUIDE))
+					xstate.Gamepad.wButtons &= ~GAMEPAD_STATE_GUIDE;
 				if (pad->isLockedButtons() || lockButtons) {
 					if (xstate.Gamepad.wButtons & g_hosting._lockedGamepad.wButtons)
 						xstate.Gamepad.wButtons &= ~g_hosting._lockedGamepad.wButtons;

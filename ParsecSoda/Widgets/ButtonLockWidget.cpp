@@ -74,7 +74,8 @@ bool ButtonLockWidget::render()
     makeButton("RB", wideButton, GAMEPAD_STATE_RIGHT_SHOULDER);
 
     ImGui::SetCursorPos(ImVec2(135, 50));
-    makeButton("Xbox Button", ultrawideButton, GAMEPAD_STATE_GUIDE);
+    makeButton("Guide Button", ultrawideButton, GAMEPAD_STATE_GUIDE);
+    TitleTooltipWidget::render("Guide button", "Can be permanently disabled in Settings");
     ImGui::SetCursorPos(ImVec2(135, 80));
     makeButton("Back", wideButton, GAMEPAD_STATE_BACK);
     ImGui::SetCursorPos(ImVec2(200, 80));

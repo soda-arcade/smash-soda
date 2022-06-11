@@ -211,6 +211,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             
             if (!MTY_JSONObjGetBool(json, "basicVersion", &preferences.basicVersion)) preferences.basicVersion = false;
             if (!MTY_JSONObjGetBool(json, "disableMicrophone", &preferences.disableMicrophone)) preferences.disableMicrophone = false;
+            if (!MTY_JSONObjGetBool(json, "disableGuideButton", &preferences.disableGuideButton)) preferences.disableGuideButton = false;
 
             if (MTY_JSONObjGetString(json, "websocketURI", websocketURI, 50)) preferences.websocketURI = websocketURI;
             else preferences.websocketURI = "ws://127.0.0.1:9002";
@@ -282,6 +283,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetUInt(json, "ds4PuppetCount", preferences.ds4PuppetCount);
         MTY_JSONObjSetBool(json, "basicVersion", preferences.basicVersion);
         MTY_JSONObjSetBool(json, "disableMicrophone", preferences.disableMicrophone);
+        MTY_JSONObjSetBool(json, "disableGuideButton", preferences.disableGuideButton);
         MTY_JSONObjSetString(json, "websocketURI", preferences.websocketURI.c_str());
         MTY_JSONObjSetString(json, "websocketPassword", preferences.websocketPassword.c_str());
         MTY_JSONObjSetBool(json, "showMasterOfPuppets", preferences.showMasterOfPuppets);
