@@ -63,7 +63,7 @@ const uint32_t ChatBot::getLastUserId() const
 	return this->_lastUserId;
 }
 
-const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState state)
+const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState state, ParsecStatus status)
 {
 	setLastUserId(BOT_GUESTID);
 
@@ -72,22 +72,33 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 	{
 		reply << "@join \t\t " << guest.name << " #" << guest.userID << "\0";
 	}
+	else if (state == GUEST_FAILED)
+	{
+		reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
+	}
 	else
 	{
-		reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
+		switch (status)
+		{
+			case 5:
+				reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			case -12007:
+				reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			case -13014:
+				reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			default:
+				reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+		}
 	}
 
 	const std::string formattedMessage = reply.str();
 	reply.clear();
 	reply.flush();
 	return formattedMessage;
-}
-
-const std::string ChatBot::formatFailedConnection(Guest guest, ParsecStatus status)
-{
-	std::ostringstream reply;
-	reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
-	return reply.str();
 }
 
 const std::string ChatBot::formatBannedGuestMessage(Guest guest)

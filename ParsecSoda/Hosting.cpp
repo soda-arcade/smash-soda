@@ -862,7 +862,8 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 	}
 	else if (state == GUEST_FAILED)
 	{
-		logMessage = _chatBot->formatFailedConnection(guest, status);
+		logMessage = _chatBot->formatGuestConnection(guest, state, status);
+		broadcastChatMessage(logMessage);
 		_chatLog.logCommand(logMessage);
 	}
 	else if (state == GUEST_CONNECTED || state == GUEST_DISCONNECTED)
@@ -878,7 +879,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		}
 		else
 		{
-			logMessage = _chatBot->formatGuestConnection(guest, state);
+			logMessage = _chatBot->formatGuestConnection(guest, state, status);
 			broadcastChatMessage(logMessage);
 			_chatLog.logCommand(logMessage);
 		}

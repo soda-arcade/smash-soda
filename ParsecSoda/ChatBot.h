@@ -68,9 +68,8 @@ public:
 	const uint32_t getLastUserId() const;
 	void setLastUserId(const uint32_t lastId = BOT_GUESTID);
 
-	const std::string formatGuestConnection(Guest guest, ParsecGuestState state);
+	const std::string formatGuestConnection(Guest guest, ParsecGuestState state, ParsecStatus status);
 	const std::string formatBannedGuestMessage(Guest guest);
-	const std::string formatFailedConnection(Guest guest, ParsecStatus status);
 	CommandBotMessage sendBotMessage(const char * msg);
 	void updateSettings();
 
