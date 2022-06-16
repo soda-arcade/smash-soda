@@ -83,6 +83,9 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 			case 5:
 				reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
 				break;
+			case 11:
+				reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
 			case -12007:
 				reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
 				break;
