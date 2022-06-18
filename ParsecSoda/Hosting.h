@@ -31,6 +31,7 @@
 #include "MasterOfPuppets.h"
 #include "WebSocket.h"
 #include "ButtonLock.h"
+#include "Debouncer.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0

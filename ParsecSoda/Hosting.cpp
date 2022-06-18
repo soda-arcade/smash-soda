@@ -837,6 +837,21 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 {
 	static string logMessage;
 
+	static string trickDesc = "";
+	static Debouncer debouncer = Debouncer(500, [&]() {
+		if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
+		{
+			try
+			{
+				if (trickDesc.size() > 0) trickDesc = "";
+				else trickDesc = "-";
+				strcpy_s(_hostConfig.desc, trickDesc.c_str());
+				applyHostConfig();
+			}
+			catch (const std::exception&) {}
+		}
+	});
+
 	if (_webSocket.connected())
 	{
 		MTY_JSON* jmsg = MTY_JSONObjCreate();
@@ -876,6 +891,8 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			logMessage = _chatBot->formatBannedGuestMessage(guest);
 			broadcastChatMessage(logMessage);
 			_chatLog.logCommand(logMessage);
+			if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
+				debouncer.start();
 		}
 		else
 		{
