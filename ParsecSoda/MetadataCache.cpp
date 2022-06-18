@@ -233,6 +233,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetBool(json, "lockedGamepadRX", &preferences.lockedGamepadRX)) preferences.lockedGamepadRX = false;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadRY", &preferences.lockedGamepadRY)) preferences.lockedGamepadRY = false;
             if (!MTY_JSONObjGetUInt(json, "lockedGamepadButtons", &preferences.lockedGamepadButtons)) preferences.lockedGamepadButtons = 0;
+            if (!MTY_JSONObjGetUInt(json, "theme", &preferences.theme)) preferences.theme = 0;
 
             preferences.isValid = true;
 
@@ -300,6 +301,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "lockedGamepadRX", preferences.lockedGamepadRX);
         MTY_JSONObjSetBool(json, "lockedGamepadRY", preferences.lockedGamepadRY);
         MTY_JSONObjSetUInt(json, "lockedGamepadButtons", preferences.lockedGamepadButtons);
+        MTY_JSONObjSetUInt(json, "theme", preferences.theme);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);

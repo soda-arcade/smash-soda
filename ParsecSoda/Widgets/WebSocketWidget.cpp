@@ -8,15 +8,7 @@ WebSocketWidget::WebSocketWidget(Hosting& hosting)
         strcpy_s(_ws_uri, MetadataCache::preferences.websocketURI.c_str());
         strcpy_s(_ws_password, MetadataCache::preferences.websocketPassword.c_str());
     }
-    catch (const std::exception&)
-    {
-        try
-        {
-            strcpy_s(_ws_uri, "");
-            strcpy_s(_ws_password, "");
-        }
-        catch (const std::exception&) {}
-    }
+    catch (const std::exception&) {}
 }
 
 bool WebSocketWidget::render()

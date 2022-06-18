@@ -160,7 +160,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
 
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
-    ImGui::loadStyle();
+    ImGui::loadStyle(MetadataCache::preferences.theme);
 
     bool showHostSettings = true;
     bool showChat = true;

@@ -81,6 +81,7 @@ public:
 		bool lockedGamepadRX = false;
 		bool lockedGamepadRY = false;
 		unsigned int lockedGamepadButtons = 0;
+		unsigned int theme = 0;
 	};
 
 	static SessionCache loadSessionCache();

@@ -19,6 +19,6 @@ public:
 	bool render();
 private:
 	Hosting& _hosting;
-	char _ws_uri[50]{ "" };
-	char _ws_password[32]{ "" };
+	char _ws_uri[50] = "ws://127.0.0.1:9002";
+	char _ws_password[32] = "";
 };

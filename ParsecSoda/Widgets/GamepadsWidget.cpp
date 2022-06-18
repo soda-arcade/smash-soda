@@ -26,10 +26,10 @@ bool GamepadsWidget::render()
     static ImVec2 size;
     size = ImGui::GetContentRegionAvail();
 
-    static float indentDistance;
+    //static float indentDistance;
 
     static bool resetting = false;
-    if (IconButton::render(AppIcons::refresh, AppColors::primary, ImVec2(30, 30)))
+    if (IconButton::render(AppIcons::refresh, AppColors::primary, ImVec2(24, 24)))
     {
         if (!resetting)
         {
@@ -41,7 +41,7 @@ bool GamepadsWidget::render()
     
     ImGui::SameLine();
 
-    if (IconButton::render(AppIcons::padOff, AppColors::primary, ImVec2(30, 30)))
+    if (IconButton::render(AppIcons::padOff, AppColors::primary, ImVec2(24, 24)))
     {
         _hosting.getGamepadClient().disconnectAllGamepads();
     }
@@ -49,7 +49,7 @@ bool GamepadsWidget::render()
 
     ImGui::SameLine();
     
-    if (IconButton::render(AppIcons::sort, AppColors::primary, ImVec2(30, 30)))
+    if (IconButton::render(AppIcons::sort, AppColors::primary, ImVec2(24, 24)))
     {
         _hosting.getGamepadClient().sortGamepads();
     }
@@ -59,7 +59,7 @@ bool GamepadsWidget::render()
 
     if (ToggleIconButtonWidget::render(
         AppIcons::lock, AppIcons::unlock, _hosting.isGamepadLock(),
-        AppColors::negative, AppColors::positive, ImVec2(30, 30)
+        AppColors::negative, AppColors::positive, ImVec2(24, 24)
     ))
     {
         _hosting.toggleGamepadLock();
@@ -71,7 +71,7 @@ bool GamepadsWidget::render()
 
     if (ToggleIconButtonWidget::render(
         AppIcons::buttonLock, AppIcons::buttonLock, _hosting.isGamepadLockButtons(),
-        AppColors::negative, AppColors::positive, ImVec2(30, 30)
+        AppColors::negative, AppColors::positive, ImVec2(24, 24)
     ))
     {
         _hosting.toggleGamepadLockButtons();

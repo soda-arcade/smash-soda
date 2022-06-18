@@ -155,7 +155,7 @@ bool ChatWidget::renderTopBar(bool& isWindowLocked, bool& isClearChat)
     static bool isDeletingChat = false;
     if (!isDeletingChat)
     {
-        if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30)))
+        if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(24, 24)))
         {
             //isDeletingChat = true;
             isClearChat = true;
