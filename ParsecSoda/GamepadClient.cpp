@@ -458,6 +458,7 @@ bool GamepadClient::sendMessage(Guest guest, ParsecMessage message)
 		break;
 
 	case MESSAGE_KEYBOARD:
+		if (g_hosting._disableKeyboard) break;
 		padId = 0;
 		isGamepadRequest = isRequestKeyboard(message);
 		if (sendKeyboardMessage(message.keyboard, guest, slots, guestPrefs)) { return true; }

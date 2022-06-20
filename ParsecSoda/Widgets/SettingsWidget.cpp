@@ -6,6 +6,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _basicVersion = MetadataCache::preferences.basicVersion;
     _disableMicrophone = MetadataCache::preferences.disableMicrophone;
     _disableGuideButton = MetadataCache::preferences.disableGuideButton;
+    _disableKeyboard = MetadataCache::preferences.disableKeyboard;
     _latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
     _latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
 }
@@ -41,6 +42,15 @@ bool SettingsWidget::render()
         MetadataCache::preferences.disableGuideButton = _disableGuideButton;
         MetadataCache::savePreferences();
         _hosting._disableGuideButton = _disableGuideButton;
+    }
+    AppStyle::pop();
+
+    AppStyle::pushInput();
+    if (ImGui::Checkbox("Disable Keyboards", &_disableKeyboard))
+    {
+        MetadataCache::preferences.disableKeyboard = _disableKeyboard;
+        MetadataCache::savePreferences();
+        _hosting._disableKeyboard = _disableKeyboard;
     }
     AppStyle::pop();
 

@@ -104,6 +104,7 @@ public:
 	unsigned int _latencyLimitValue = 0;
 	bool _disableMicrophone = false;
 	bool _disableGuideButton = false;
+	bool _disableKeyboard = false;
 
 private:
 	void initAllModules();

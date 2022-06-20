@@ -65,6 +65,7 @@ public:
 		bool basicVersion = false;
 		bool disableMicrophone = false;
 		bool disableGuideButton = false;
+		bool disableKeyboard = false;
 		string websocketURI = "";
 		string websocketPassword = "";
 		bool showMasterOfPuppets = false;
