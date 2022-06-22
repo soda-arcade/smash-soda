@@ -11,6 +11,8 @@ bool GamepadsWidget::render()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 5));
 
+    static vector<AnimatedGamepadWidget*> agws;
+
     static ImVec2 cursor;
     static bool isWindowLocked = false;
     static bool isConnectionButtonPressed = false;
@@ -128,6 +130,11 @@ bool GamepadsWidget::render()
 
     for (size_t i = 0; i < _gamepads.size(); ++i)
     {
+        while (agws.size() <= i) {
+            agws.push_back(new AnimatedGamepadWidget(true));
+        }
+        AnimatedGamepadWidget* agw = agws[i];
+        //AnimatedGamepadWidget agw;
         AGamepad* gi = _gamepads[i];
         static uint32_t userID;
         userID = gi->owner.guest.userID;
@@ -462,7 +469,9 @@ bool GamepadsWidget::render()
         
         ImGui::SameLine();
 
-        AnimatedGamepadWidget::render(gi->getState().Gamepad, 30);
+        //static AnimatedGamepadWidget agw;
+        //AnimatedGamepadWidget::render(gi->getState().Gamepad, 30);
+        agw->render(gi->getState().Gamepad, 30);
 
         ImGui::EndGroup();
 

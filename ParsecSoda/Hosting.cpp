@@ -51,6 +51,7 @@ Hosting::Hosting()
 	_latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
 	_disableMicrophone = MetadataCache::preferences.disableMicrophone;
 	_disableGuideButton = MetadataCache::preferences.disableGuideButton;
+	_disableKeyboard = MetadataCache::preferences.disableKeyboard;
 	_lockedGamepad.bLeftTrigger = MetadataCache::preferences.lockedGamepadLeftTrigger;
 	_lockedGamepad.bRightTrigger = MetadataCache::preferences.lockedGamepadRightTrigger;
 	_lockedGamepad.sThumbLX = MetadataCache::preferences.lockedGamepadLX;
@@ -860,7 +861,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
 		MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
 		MTY_JSONObjSetUInt(jmsg, "state", state);
-		MTY_JSONObjSetUInt(jmsg, "status", status);
+		MTY_JSONObjSetInt(jmsg, "status", status);
 		MTY_JSONObjSetBool(jmsg, "banned", _banList.isBanned(guest.userID));
 		char* finmsg = MTY_JSONSerialize(jmsg);
 		_webSocket.handle_message(finmsg);

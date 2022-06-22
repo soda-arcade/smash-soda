@@ -138,6 +138,7 @@ void MasterOfPuppetsWidget::renderMaster()
 // ===============================================================
 void MasterOfPuppetsWidget::renderMasterSDL()
 {
+    static vector<AnimatedGamepadWidget*> agws;
     vector<SDLGamepad>& sdlGamepads = _masterOfPuppets.getSDLGamepads();
     static ImVec2 cursor;
 
@@ -154,6 +155,10 @@ void MasterOfPuppetsWidget::renderMasterSDL()
 
     for (int i = 0; i < sdlGamepads.size(); ++i)
     {
+        while (agws.size() <= i) {
+            agws.push_back(new AnimatedGamepadWidget);
+        }
+        AnimatedGamepadWidget* agw = agws[i];
         static float shift1 = 25.0f, shift2 = 30.0f, shift3 = 5.0f;
         cursor = ImGui::GetCursorPos();
 
@@ -217,7 +222,8 @@ void MasterOfPuppetsWidget::renderMasterSDL()
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
 
         XINPUT_GAMEPAD gg = sdlGamepads[i].getGamepadState().state.Gamepad;
-        AnimatedGamepadWidget::render(sdlGamepads[i].getGamepadState().state.Gamepad, 20);
+        //AnimatedGamepadWidget::render(sdlGamepads[i].getGamepadState().state.Gamepad, 20);
+        agw->render(sdlGamepads[i].getGamepadState().state.Gamepad, 20);
         ImGui::PopStyleVar();
 
         ImGui::PopID();
@@ -227,6 +233,7 @@ void MasterOfPuppetsWidget::renderMasterSDL()
 
 void MasterOfPuppetsWidget::renderMasterXInput()
 {
+    static vector<AnimatedGamepadWidget*> agws;
     vector<GamepadState>& xinputGamepads = _masterOfPuppets.getXInputGamepads();
     static ImVec2 cursor;
 
@@ -243,6 +250,11 @@ void MasterOfPuppetsWidget::renderMasterXInput()
 
     for (int i = 0; i < xinputGamepads.size(); ++i)
     {
+        while (agws.size() <= i) {
+            agws.push_back(new AnimatedGamepadWidget);
+        }
+        AnimatedGamepadWidget* agw = agws[i];
+
         static float shift1 = 25.0f, shift2 = 30.0f, shift3 = 5.0f;
         cursor = ImGui::GetCursorPos();
 
@@ -274,7 +286,8 @@ void MasterOfPuppetsWidget::renderMasterXInput()
         ImGui::SetCursorPosX(shift1 + shift2 + shift3);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
 
-        AnimatedGamepadWidget::render(xinputGamepads[i].state.Gamepad, 20);
+        //AnimatedGamepadWidget::render(xinputGamepads[i].state.Gamepad, 20);
+        agw->render(xinputGamepads[i].state.Gamepad, 20);
         ImGui::PopStyleVar();
 
         ImGui::PopID();
@@ -311,6 +324,7 @@ void MasterOfPuppetsWidget::clearPuppets()
 
 void MasterOfPuppetsWidget::renderPuppets()
 {
+    static vector<AnimatedGamepadWidget*> agws;
     vector<AGamepad*>& gamepads = _gamepadClient.gamepads;
 
     static ImVec2 cursor;
@@ -325,6 +339,10 @@ void MasterOfPuppetsWidget::renderPuppets()
 
     for (int i = 0; i < gamepads.size(); ++i)
     {
+        while (agws.size() <= i) {
+            agws.push_back(new AnimatedGamepadWidget);
+        }
+        AnimatedGamepadWidget* agw = agws[i];
         static float shift1 = 10.0f, shift2 = 10.0f, shift3 = 5.0f;
         cursor = ImGui::GetCursorPos();
 
@@ -359,7 +377,9 @@ void MasterOfPuppetsWidget::renderPuppets()
         ImGui::SetCursorPosX(cursor.x + shift1 + shift2 + shift3);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2);
 
-        AnimatedGamepadWidget::render(gamepads[i]->getState().Gamepad, 20);
+        //AnimatedGamepadWidget::render(gamepads[i]->getState().Gamepad, 20);
+        //static AnimatedGamepadWidget agw;
+        agw->render(gamepads[i]->getState().Gamepad, 20);
         ImGui::PopStyleVar();
 
         ImGui::PopID();
