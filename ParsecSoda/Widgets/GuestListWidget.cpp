@@ -28,7 +28,7 @@ bool GuestListWidget::render()
     ImGui::Checkbox("##Blank bans", &_filterNoReason);
     TitleTooltipWidget::render("Filter Guests", "Show only bans with no reason");
 
-    ImGui::Dummy(ImVec2(0, 5));
+    //ImGui::Dummy(ImVec2(0, 5));
     //ImGui::Separator();
     //ImGui::Dummy(ImVec2(0, 5));
 
@@ -68,6 +68,7 @@ bool GuestListWidget::render()
 void GuestListWidget::renderOnlineGuests()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+    ImGui::BeginChild("onlinelist");
 
     static ImVec2 size;
     size = ImGui::GetContentRegionAvail();
@@ -223,12 +224,14 @@ void GuestListWidget::renderOnlineGuests()
         }
     }
     
+    ImGui::EndChild();
     ImGui::PopStyleVar();
 }
 
 void GuestListWidget::renderBannedGuests()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+    ImGui::BeginChild("bannedlist");
 
     static bool showEditPopup = false;
     static size_t popupEditIndex;
@@ -331,12 +334,15 @@ void GuestListWidget::renderBannedGuests()
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();
     }
+
+    ImGui::EndChild();
     ImGui::PopStyleVar();
 }
 
 
 void GuestListWidget::renderHistoryGuests()
 {
+    ImGui::BeginChild("historylist");
     static bool showBanPopup = false;
     static string popupTitle = "";
     static size_t popupIndex;
@@ -404,4 +410,5 @@ void GuestListWidget::renderHistoryGuests()
         ImGui::EndGroup();
         ImGui::PopStyleVar();
     }
+    ImGui::EndChild();
 }
