@@ -23,8 +23,8 @@ This is why I not make any pull request or provide code for the official version
 - Metrics on guest list
   - Colors (1 retransmit in 2 seconds is nothing. Make sure to check how much N: numbers are going up)
     - Green = No retransmits in last 2 sec
-    - Yellow = At least 1 slow retransmits in last 2 sec
-    - Red = At least 1 fast retransmits in last 2 sec
+    - Yellow = At least 1 fast retransmit in the last 2 sec
+    - Red = At least 1 slow retransmit in the last 2 sec
   - Stats
     - Network latency ms
     - B: Bandwidth - Mbps (Same for all but measured every 60 sec)
