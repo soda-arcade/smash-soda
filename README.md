@@ -48,7 +48,7 @@ Below is a list of all the new chat commands...more are planned!
 
 ##### Admin
 |Command|Description|
-| ----------- | ----------- | ----------- | ----------- |
+| ----------- | ----------- |
 |!mod **user_id/user_name**| You can make a user in your lobby a moderator. They will then have Admin tier privileges, having access to those commands.
 
 ## Roadmap
