@@ -22,6 +22,7 @@
 #include "AudioMix.h"
 #include "GamepadClient.h"
 #include "BanList.h"
+#include "ModList.h"
 #include "GuestList.h"
 #include "SFXList.h"
 #include "MetadataCache.h"
@@ -59,6 +60,7 @@ public:
 	vector<Guest>& getGuestList();
 	vector<GuestData>& getGuestHistory();
 	BanList& getBanList();
+	ModList& getModList();
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
@@ -97,6 +99,7 @@ private:
 	AudioMix _audioMix;
 	DX11 _dx11;
 	BanList _banList;
+	ModList _modList;
 	GuestDataList _guestHistory;
 	ChatBot *_chatBot;
 	ChatLog _chatLog;

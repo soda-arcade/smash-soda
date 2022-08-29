@@ -40,6 +40,9 @@ Hosting::Hosting()
 	vector<GuestData> banned = MetadataCache::loadBannedUsers();
 	_banList = BanList(banned);
 
+	vector<GuestData> modded = MetadataCache::loadModdedUsers();
+	_modList = ModList(modded);
+
 	_parsec = nullptr;
 
 	SDL_Init(SDL_INIT_JOYSTICK);
@@ -107,7 +110,7 @@ void Hosting::init()
 	fetchAccountData();
 
 	_chatBot = new ChatBot(
-		audioIn, audioOut, _banList, _dx11,
+		audioIn, audioOut, _banList, _dx11, _modList,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
 		_hostConfig, _parsecSession, _sfxList, _tierList,
 		_isRunning, _host
@@ -208,6 +211,11 @@ vector<GuestData>& Hosting::getGuestHistory()
 BanList& Hosting::getBanList()
 {
 	return _banList;
+}
+
+ModList& Hosting::getModList()
+{
+	return _modList;
 }
 
 vector<AGamepad*>& Hosting::getGamepads()
@@ -588,6 +596,12 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest)
 		ParsecHostKickGuest(_parsec, guest.id);
 		logMessage = _chatBot->formatBannedGuestMessage(guest);
 		broadcastChatMessage(logMessage);
+	}
+	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && _modList.isModded(guest.userID))
+	{
+		logMessage = _chatBot->formatModGuestMessage(guest);
+		broadcastChatMessage(logMessage);
+		_tierList.setTier(guest.userID, Tier::MOD);
 	}
 	else if (state == GUEST_CONNECTED || state == GUEST_DISCONNECTED)
 	{

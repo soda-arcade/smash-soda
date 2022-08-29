@@ -258,6 +258,12 @@
     <ClCompile Include="XBoxGamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Commands\CommandSlap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ModList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioIn.h">
@@ -633,6 +639,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XBoxGamepad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandSlap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandMod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

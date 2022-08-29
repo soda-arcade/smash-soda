@@ -74,6 +74,9 @@ public:
 	static vector<GuestData> loadBannedUsers();
 	static bool saveBannedUsers(vector<GuestData> guests);
 
+	static vector<GuestData> loadModdedUsers();
+	static bool saveModdedUsers(vector<GuestData> guests);
+
 	static vector<GuestTier> loadGuestTiers();
 	static bool saveGuestTiers(vector<GuestTier> guestTiers);
 

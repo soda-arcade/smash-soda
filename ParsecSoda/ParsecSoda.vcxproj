@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Commands\CommandBonk.cpp" />
+    <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
     <ClCompile Include="XBoxGamepad.cpp" />
@@ -238,6 +239,8 @@
     <ClCompile Include="Widgets\NavBar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Commands\CommandMod.h" />
+    <ClInclude Include="ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
     <ClInclude Include="XBoxGamepad.h" />

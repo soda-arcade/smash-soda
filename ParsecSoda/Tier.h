@@ -3,5 +3,6 @@ enum class Tier
 {
 	PLEB,
 	ADMIN,
-	GOD
+	MOD,
+	GOD,
 };

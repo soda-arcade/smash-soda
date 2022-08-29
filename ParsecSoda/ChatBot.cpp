@@ -49,6 +49,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgIsEqual(msg, CommandSetConfig::prefixes()))		return new CommandSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 		if (msgStartsWith(msg, CommandSpeakers::prefixes()))	return new CommandSpeakers(msg, _audioOut);
 		if (msgIsEqual(msg, CommandQuit::prefixes()))			return new CommandQuit(_hostingLoopController);
+		if (msgStartsWith(msg, CommandMod::prefixes()))			return new CommandMod(msg, sender, _parsec, _guests, _guestHistory, _mod);
 	}
 
 	this->setLastUserId(previous);
@@ -86,6 +87,15 @@ const std::string ChatBot::formatBannedGuestMessage(Guest guest)
 	reply << "[ChatBot] | None shall pass! Banned guests don't join us:\n\t\t" << guest.name << " \t (#" << guest.userID << ")\0";
 
 	return reply.str();
+}
+
+const std::string ChatBot::formatModGuestMessage(Guest guest) {
+
+	std::ostringstream reply;
+	reply << "[ChatBot] | Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
+
+	return reply.str();
+
 }
 
 CommandBotMessage ChatBot::sendBotMessage(const char* msg)
