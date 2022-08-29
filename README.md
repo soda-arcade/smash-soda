@@ -73,3 +73,5 @@ Project Link: [https://github.com/MickeyUK/SmashSoda](https://github.com/MickeyU
 ## Acknowledgements
 
 * [MickeyUK] - [GitHub](https://github.com/MickeyUK)
+* [FlavioFS] - [GitHub](https://github.com/FlavioFS/)
+* [v6000] - [GitHub](https://github.com/v6ooo/)
