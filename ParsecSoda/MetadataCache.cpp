@@ -116,6 +116,9 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
         {
             MTY_JSON *json = MTY_JSONReadFile(filepath.c_str());
             char roomName[256] = "", gameID[72] = "", secret[32] = "";
+            char websocketURI[50] = "";
+            char websocketPassword[32] = "";
+            char discord[256] = "";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -207,6 +210,36 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
                 preferences.ds4PuppetCount = 0;
             }
             
+            if (!MTY_JSONObjGetBool(json, "basicVersion", &preferences.basicVersion)) preferences.basicVersion = false;
+            if (!MTY_JSONObjGetBool(json, "disableMicrophone", &preferences.disableMicrophone)) preferences.disableMicrophone = false;
+            if (!MTY_JSONObjGetBool(json, "disableGuideButton", &preferences.disableGuideButton)) preferences.disableGuideButton = false;
+            if (!MTY_JSONObjGetBool(json, "disableKeyboard", &preferences.disableKeyboard)) preferences.disableKeyboard = false;
+
+            if (MTY_JSONObjGetString(json, "websocketURI", websocketURI, 50)) preferences.websocketURI = websocketURI;
+            else preferences.websocketURI = "ws://127.0.0.1:9002";
+
+            if (MTY_JSONObjGetString(json, "websocketPassword", websocketPassword, 32)) preferences.websocketPassword = websocketPassword;
+            else preferences.websocketPassword = "";
+
+            if (!MTY_JSONObjGetBool(json, "showMasterOfPuppets", &preferences.showMasterOfPuppets)) preferences.showMasterOfPuppets = false;
+            if (!MTY_JSONObjGetBool(json, "showAudio", &preferences.showAudio)) preferences.showAudio = false;
+            if (!MTY_JSONObjGetBool(json, "showVideo", &preferences.showVideo)) preferences.showVideo = false;
+            if (!MTY_JSONObjGetBool(json, "showThumbs", &preferences.showThumbs)) preferences.showThumbs = false;
+            if (!MTY_JSONObjGetBool(json, "showWebSocket", &preferences.showWebSocket)) preferences.showWebSocket = false;
+            if (!MTY_JSONObjGetBool(json, "latencyLimitEnabled", &preferences.latencyLimitEnabled)) preferences.latencyLimitEnabled = false;
+            if (!MTY_JSONObjGetUInt(json, "latencyLimitValue", &preferences.latencyLimitValue)) preferences.latencyLimitValue = 200;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadLeftTrigger", &preferences.lockedGamepadLeftTrigger)) preferences.lockedGamepadLeftTrigger = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadRightTrigger", &preferences.lockedGamepadRightTrigger)) preferences.lockedGamepadRightTrigger = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadLX", &preferences.lockedGamepadLX)) preferences.lockedGamepadLX = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadLY", &preferences.lockedGamepadLY)) preferences.lockedGamepadLY = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadRX", &preferences.lockedGamepadRX)) preferences.lockedGamepadRX = false;
+            if (!MTY_JSONObjGetBool(json, "lockedGamepadRY", &preferences.lockedGamepadRY)) preferences.lockedGamepadRY = false;
+            if (!MTY_JSONObjGetUInt(json, "lockedGamepadButtons", &preferences.lockedGamepadButtons)) preferences.lockedGamepadButtons = 0;
+            if (!MTY_JSONObjGetUInt(json, "theme", &preferences.theme)) preferences.theme = 0;
+
+            if (MTY_JSONObjGetString(json, "discord", discord, 256)) preferences.discord = discord;
+            else preferences.discord = "";
+
             preferences.isValid = true;
 
             MTY_JSONDestroy(&json);
@@ -254,6 +287,28 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetUInt(json, "adapter", preferences.adapter);
         MTY_JSONObjSetUInt(json, "xboxPuppetCount", preferences.xboxPuppetCount);
         MTY_JSONObjSetUInt(json, "ds4PuppetCount", preferences.ds4PuppetCount);
+        MTY_JSONObjSetBool(json, "basicVersion", preferences.basicVersion);
+        MTY_JSONObjSetBool(json, "disableMicrophone", preferences.disableMicrophone);
+        MTY_JSONObjSetBool(json, "disableGuideButton", preferences.disableGuideButton);
+        MTY_JSONObjSetBool(json, "disableKeyboard", preferences.disableKeyboard);
+        MTY_JSONObjSetString(json, "websocketURI", preferences.websocketURI.c_str());
+        MTY_JSONObjSetString(json, "websocketPassword", preferences.websocketPassword.c_str());
+        MTY_JSONObjSetBool(json, "showMasterOfPuppets", preferences.showMasterOfPuppets);
+        MTY_JSONObjSetBool(json, "showAudio", preferences.showAudio);
+        MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
+        MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
+        MTY_JSONObjSetBool(json, "showWebSocket", preferences.showWebSocket);
+        MTY_JSONObjSetBool(json, "latencyLimitEnabled", preferences.latencyLimitEnabled);
+        MTY_JSONObjSetUInt(json, "latencyLimitValue", preferences.latencyLimitValue);
+        MTY_JSONObjSetBool(json, "lockedGamepadLeftTrigger", preferences.lockedGamepadLeftTrigger);
+        MTY_JSONObjSetBool(json, "lockedGamepadRightTrigger", preferences.lockedGamepadRightTrigger);
+        MTY_JSONObjSetBool(json, "lockedGamepadLX", preferences.lockedGamepadLX);
+        MTY_JSONObjSetBool(json, "lockedGamepadLY", preferences.lockedGamepadLY);
+        MTY_JSONObjSetBool(json, "lockedGamepadRX", preferences.lockedGamepadRX);
+        MTY_JSONObjSetBool(json, "lockedGamepadRY", preferences.lockedGamepadRY);
+        MTY_JSONObjSetUInt(json, "lockedGamepadButtons", preferences.lockedGamepadButtons);
+        MTY_JSONObjSetUInt(json, "theme", preferences.theme);
+        MTY_JSONObjSetString(json, "discord", preferences.discord.c_str());
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
@@ -289,12 +344,20 @@ vector<GuestData> MetadataCache::loadBannedUsers()
                 
                 char name [128] = "";
                 uint32_t userID = 0;
+                char reason[128] = "";
                 bool nameSuccess = MTY_JSONObjGetString(guest, "name", name, 128);
                 bool userIDSuccess = MTY_JSONObjGetUInt(guest, "userID", &userID);
+                bool reasonSuccess = MTY_JSONObjGetString(guest, "reason", reason, 128);
 
                 if (nameSuccess && userIDSuccess)
                 {
-                    result.push_back(GuestData(name, userID));
+                    if (reasonSuccess)
+                    {
+                        result.push_back(GuestData(name, userID, reason));
+                    }
+                    else {
+                        result.push_back(GuestData(name, userID, ""));
+                    }
                 }
             }
 
@@ -307,6 +370,36 @@ vector<GuestData> MetadataCache::loadBannedUsers()
     }
 
     return result;
+}
+
+bool MetadataCache::saveBannedUsers(vector<GuestData> guests)
+{
+    string dirPath = getUserDir();
+
+    if (!dirPath.empty())
+    {
+        string filepath = dirPath + "banned.json";
+
+        MTY_JSON* json = MTY_JSONArrayCreate();
+
+        vector<GuestData>::iterator gi = guests.begin();
+        for (; gi != guests.end(); ++gi)
+        {
+            MTY_JSON* guest = MTY_JSONObjCreate();
+
+            MTY_JSONObjSetString(guest, "name", (*gi).name.c_str());
+            MTY_JSONObjSetUInt(guest, "userID", (*gi).userID);
+            MTY_JSONObjSetString(guest, "reason", (*gi).reason.c_str());
+            MTY_JSONArrayAppendItem(json, guest);
+        }
+
+        MTY_JSONWriteFile(filepath.c_str(), json);
+        MTY_JSONDestroy(&json);
+
+        return true;
+    }
+
+    return false;
 }
 
 vector<GuestData> MetadataCache::loadModdedUsers() {
@@ -350,37 +443,9 @@ vector<GuestData> MetadataCache::loadModdedUsers() {
 
 }
 
-bool MetadataCache::saveBannedUsers(vector<GuestData> guests)
-{
-    string dirPath = getUserDir();
-
-    if (!dirPath.empty())
-    {
-        string filepath = dirPath + "banned.json";
-
-        MTY_JSON* json = MTY_JSONArrayCreate();
-
-        vector<GuestData>::iterator gi = guests.begin();
-        for (; gi != guests.end(); ++gi)
-        {
-            MTY_JSON* guest = MTY_JSONObjCreate();
-
-            MTY_JSONObjSetString(guest, "name", (*gi).name.c_str());
-            MTY_JSONObjSetUInt(guest, "userID", (*gi).userID);
-            MTY_JSONArrayAppendItem(json, guest);
-        }
-
-        MTY_JSONWriteFile(filepath.c_str(), json);
-        MTY_JSONDestroy(&json);
-
-        return true;
-    }
-
-    return false;
-}
-
 bool MetadataCache::saveModdedUsers(vector<GuestData> guests)
 {
+
     string dirPath = getUserDir();
 
     if (!dirPath.empty())
@@ -580,17 +645,31 @@ bool MetadataCache::saveThumbnails(vector<Thumbnail> thumbnails)
     return result;
 }
 
+bool MetadataCache::saveTheme(int theme) {
+
+    preferences.theme = theme;
+    MetadataCache::savePreferences();
+
+    return true;
+
+}
+
+std::string GetCurrentDirectory()
+{
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+    return std::string(buffer).substr(0, pos);
+}
+
 string MetadataCache::getUserDir()
 {
-    TCHAR tAppdata[1024];
-    if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata)))
+    string dir = GetCurrentDirectory();
+    string appDir = "\\ParsecSodaV\\";
+    if (MTY_FileExists( (dir+"\\portable.txt").c_str()  ))
     {
-        wstring wAppdata(tAppdata);
-        string appdata(wAppdata.begin(), wAppdata.end());
-        string dirPath = appdata + "\\ParsecSoda\\";
-        
+        string dirPath = dir+appDir;
         bool isDirOk = false;
-
         if (!MTY_FileExists(dirPath.c_str()))
         {
             if (MTY_Mkdir(dirPath.c_str()))
@@ -602,10 +681,38 @@ string MetadataCache::getUserDir()
         {
             isDirOk = true;
         }
-
         if (isDirOk)
         {
             return dirPath;
+        }
+    }
+    else
+    {
+        TCHAR tAppdata[1024];
+        if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata)))
+        {
+            wstring wAppdata(tAppdata);
+            string appdata(wAppdata.begin(), wAppdata.end());
+            string dirPath = appdata + appDir;
+
+            bool isDirOk = false;
+
+            if (!MTY_FileExists(dirPath.c_str()))
+            {
+                if (MTY_Mkdir(dirPath.c_str()))
+                {
+                    isDirOk = true;
+                }
+            }
+            else
+            {
+                isDirOk = true;
+            }
+
+            if (isDirOk)
+            {
+                return dirPath;
+            }
         }
     }
 

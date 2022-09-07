@@ -4,5 +4,5 @@ enum class Tier
 	PLEB,
 	ADMIN,
 	MOD,
-	GOD,
+	GOD
 };

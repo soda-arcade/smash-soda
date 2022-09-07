@@ -11,6 +11,7 @@
 #define APPFONTS_SEMI_BOLD		"fonts/Montserrat-SemiBold.ttf"
 #define APPFONTS_BOLD			"fonts/Montserrat-Bold.ttf"
 #define APPFONTS_EXTRA_BOLD		"fonts/Montserrat-ExtraBold.ttf"
+#define APPFONTS_PRETENDO		"fonts/Pretendo.ttf"
 
 class AppFonts
 {
@@ -21,12 +22,14 @@ public:
 	static void pushLabel();
 	static void pushTitle();
 	static void pushInput();
+	static void pushInputArrow();
 	static void pushSugoiDekai();
 	static void pop();
 
 	static ImFont* label;
 	static ImFont* title;
 	static ImFont* input;
+	static ImFont* inputArrow;
 	static ImFont* sugoidekai;
 };
 

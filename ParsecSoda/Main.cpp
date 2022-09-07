@@ -2,6 +2,8 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
+#define _WINSOCKAPI_
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
@@ -33,6 +35,9 @@
 #include "Widgets/VersionWidget.h"
 #include "Widgets/ThumbnailsWidget.h"
 #include "Widgets/MasterOfPuppetsWidget.h"
+#include "Widgets/SettingsWidget.h"
+#include "Widgets/WebSocketWidget.h"
+#include "Widgets/ButtonLockWidget.h"
 
 using namespace std;
 
@@ -73,11 +78,13 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     wc.hIconSm = NULL;
     ::RegisterClassEx(&wc);
     HWND hwnd = ::CreateWindow(
-        wc.lpszClassName, _T("Parsec Soda"), WS_OVERLAPPEDWINDOW,
+        wc.lpszClassName, _T("Smash Soda"), WS_OVERLAPPEDWINDOW,
         MetadataCache::preferences.windowX, MetadataCache::preferences.windowY,
         MetadataCache::preferences.windowW, MetadataCache::preferences.windowH,
         NULL, NULL, wc.hInstance, NULL
     );
+
+    g_hosting.mainWindow = hwnd;
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -95,6 +102,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -127,32 +135,48 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     VideoWidget videoWidget(g_hosting);
     HostInfoWidget hostInfoWidget(g_hosting);
     MasterOfPuppetsWidget masterOfPuppets(g_hosting);
-    
-    FLASHWINFO fi;
-    fi.cbSize = sizeof(FLASHWINFO);
-    fi.hwnd = hwnd;
-    fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
-    fi.uCount = 0;
-    fi.dwTimeout = 0;
-    ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
-        FlashWindowEx(&fi);
-    });
+    SettingsWidget settingsWidget(g_hosting);
+    WebSocketWidget webSocketWidget(g_hosting);
+    ButtonLockWidget buttonLockWidget(g_hosting);
 
-    ImVec4 clear_color = ImVec4(0.01f, 0.01f, 0.01f, 1.00f);
-    ImGui::loadStyle();
+    ChatWidget chatWindow(g_hosting);
+    //FLASHWINFO fi;
+    //fi.cbSize = sizeof(FLASHWINFO);
+    //fi.hwnd = hwnd;
+    ////fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+    //fi.dwFlags = FLASHW_TRAY;
+    ////fi.uCount = 0;
+    //fi.uCount = 1;
+    //fi.dwTimeout = 0;
+    //ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
+    //    FlashWindowEx(&fi);
+    //});
+    
+    //ITaskbarList3* m_pTaskBarlist;
+    //CoCreateInstance(
+    //    CLSID_TaskbarList, NULL, CLSCTX_ALL,
+    //    IID_ITaskbarList3, (void**)&m_pTaskBarlist);
+    //m_pTaskBarlist->SetProgressState(hwnd, TBPF_ERROR);
+    //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
+
+    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
+    ImGui::loadStyle(MetadataCache::preferences.theme);
 
     bool showHostSettings = true;
     bool showChat = true;
     bool showLog = true;
     bool showGuests = true;
     bool showGamepads = true;
-    bool showMasterOfPuppets = false;
-    bool showAudio = false;
-    bool showVideo = false;
+    bool showMasterOfPuppets = MetadataCache::preferences.showMasterOfPuppets;
+    bool showAudio = MetadataCache::preferences.showAudio;
+    bool showVideo = MetadataCache::preferences.showVideo;
     bool showStyles = true;
     bool showInfo = false;
     bool showLogin = true;
-    bool showThumbs = false;
+    bool showThumbs = MetadataCache::preferences.showThumbs;
+    bool showSettings = false;
+    bool showWebSocket = MetadataCache::preferences.showWebSocket;
+    bool showButtonLock = false;
 
     ParsecSession& g_session = g_hosting.getSession();
     vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
@@ -217,10 +241,13 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showVideo)              videoWidget.render();
             if (showInfo)               InfoWidget::render();
             if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
+            if (showSettings)           settingsWidget.render();
+            if (showWebSocket)          webSocketWidget.render();
+            if (showButtonLock)         buttonLockWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket, showButtonLock
             );
             hostInfoWidget.render();
         }
@@ -238,8 +265,16 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-        g_pSwapChain->Present(1, 0); // Present with vsync
+        //g_pSwapChain->Present(1, 0); // Present with vsync
         //g_pSwapChain->Present(0, 0); // Present without vsync
+        static UINT presentFlags = 0;
+        if (g_pSwapChain->Present(1, presentFlags) == DXGI_STATUS_OCCLUDED) {
+            presentFlags = DXGI_PRESENT_TEST;
+            Sleep(4);
+        }
+        else {
+            presentFlags = 0;
+        }
     }
 
     // Cleanup

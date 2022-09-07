@@ -228,8 +228,8 @@ void DX11::enumGPUS()
 
 		_gpus.push_back(GPU(dxgiAdapter, desc));
 
-		wstring wname = wstring(desc.Description);
-		_gpuNames.push_back(string() + "[" + to_string(i) + "] " + string(wname.begin(), wname.end()));
+		std::string wname = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(desc.Description);
+		_gpuNames.push_back("[" + to_string(i) + "] "+ wname);
 	}
 
 	if (_currentGPU >= _gpus.size())
@@ -493,13 +493,10 @@ void DX11::fetchScreenList()
 			continue;
 		}
 
-		wstring wname (_lOutputDesc.DeviceName);
-		string name (wname.begin(), wname.end());
+		std::string name = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(_lOutputDesc.DeviceName);
 		int width = _lOutputDesc.DesktopCoordinates.right - _lOutputDesc.DesktopCoordinates.left;
 		int height = _lOutputDesc.DesktopCoordinates.bottom - _lOutputDesc.DesktopCoordinates.top;
-		_screens.push_back(
-			string() + "[" + to_string(screen) + "] " + name + " (" + to_string(width) + "x" + to_string(height) + ")"
-		);
+		_screens.push_back("["+ to_string(screen) +"] "+ name +" ("+ to_string(width) +"x"+ to_string(height) +")");
 
 		lDxgiOutput->Release();
 

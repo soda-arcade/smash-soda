@@ -252,16 +252,31 @@
     <ClCompile Include="Widgets\VirtualGamepadWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Widgets\WebSocketWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WebSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="DualshockGamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XBoxGamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Commands\CommandSlap.cpp">
+    <ClCompile Include="Widgets\PopupWidgetEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\SettingsWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\ButtonLockWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ModList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CommandBB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -635,19 +650,43 @@
     <ClInclude Include="Widgets\VirtualGamepadWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Widgets\WebSocketWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="DualshockGamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XBoxGamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\CommandSlap.h">
+    <ClInclude Include="Widgets\PopupWidgetEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\SettingsWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\ButtonLockWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonLock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandMod.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandBB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandPing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

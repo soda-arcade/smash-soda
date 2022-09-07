@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include "../imgui/imgui.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
@@ -7,6 +9,7 @@
 #include "IconButton.h"
 #include "ToggleIconButtonWidget.h"
 #include "TitleTooltipWidget.h"
+#include "../MetadataCache.h"
 
 class NavBar
 {
@@ -23,7 +26,10 @@ public:
         bool& showLog,
         bool& showAudio,
         bool& showVideo,
-        bool& showInfo
+        bool& showInfo,
+        bool& showSettings,
+        bool& showWebSocket,
+        bool& showButtonLock
     );
 
 private:

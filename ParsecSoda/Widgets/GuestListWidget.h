@@ -7,6 +7,7 @@
 #include "IconButton.h"
 #include "TitleTooltipWidget.h"
 #include "ConfirmPopupWidget.h"
+#include "PopupWidgetEdit.h"
 
 class GuestListWidget
 {
@@ -25,6 +26,7 @@ private:
 	
 	// Attributes
 	char _filterText[256] = "";
+	bool _filterNoReason = false;
 	string _logBuffer;
 	vector<Guest>& _guests;
 	vector<GuestData>& _guestHistory;

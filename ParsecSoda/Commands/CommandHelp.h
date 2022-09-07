@@ -18,47 +18,55 @@ public:
 
 	bool run() override
 	{
-		const string pleb_commands = string()
-			+ "\n  " + "---- Normal Commands ----"
-#if !BASIC_VERSION
-			+ "\n  " + "!bonk\t\t\t\t |\tBonk another user."
-#endif
-			+ "\n  " + "!help\t\t\t\t  |\tShow command list."
-			+ "\n  " + "!ff\t\t\t\t\t\t |\tDrop your gamepads."
-			+ "\n  " + "!mirror\t\t\t   |\tToggle mirroring of L-Stick into DPad."
-			+ "\n  " + "!one\t\t\t\t    |\tMaps all of your devices to the same gamepad."
-			+ "\n  " + "!pads\t\t\t\t  |\tShow who's holding each gamepad."
-#if !BASIC_VERSION
-			+ "\n  " + "!sfx\t\t\t\t\t  |\tPlay sound effect."
-#endif
-			+ "\n  " + "!swap\t\t\t\t |\tReplace your gamepad with another one."
-			;
+		string pleb_commands = "\n  ---- Normal Commands ----";
+//#if !BASIC_VERSION
+		if (!MetadataCache::preferences.basicVersion)
+		{
+			pleb_commands += "\n  !bonk\t\t\t\t |\tBonk another user.";
+		}
+//#endif
+		pleb_commands += "\n  !discord\t\t\t  |\tGet invite link for host's Discord server.";
+		pleb_commands += "\n  !help\t\t\t\t   |\tShow command list.";
+		pleb_commands += "\n  !ff\t\t\t\t\t\t |\tDrop your gamepads.";
+		pleb_commands += "\n  !mirror\t\t\t   |\tToggle mirroring of L-Stick into DPad.";
+		pleb_commands += "\n  !one\t\t\t\t    |\tMaps all of your devices to the same gamepad.";
+		pleb_commands += "\n  !pads\t\t\t\t   |\tShow who's holding each gamepad.";
+//#if !BASIC_VERSION
+		if (!MetadataCache::preferences.basicVersion)
+		{
+			pleb_commands += "\n  !sfx\t\t\t\t\t  |\tPlay sound effect.";
+		}
+//#endif
+		pleb_commands += "\n  !swap\t\t\t\t |\tReplace your gamepad with another one.";
 
 		const string admin_commands = string()
 			+ pleb_commands
 			+ "\n  " + ""
 			+ "\n  " + "---- Admin Commands ----"
-			+ "\n  " + "!ban\t\t\t\t|\tBan a guest."
-			+ "\n  " + "!dc\t\t\t\t   |\tDisconnect a specific gamepad."
-			+ "\n  " + "!kick\t\t\t   |\tKick user from the room."
-			+ "\n  " + "!strip\t\t\t |\tStrip gamepad from player's hand."
+			+ "\n  " + "!ban\t\t\t\t   |\tBan a guest."
+			+ "\n  " + "!bb\t\t\t\t    |\tPress everybody's B button twice."
+			+ "\n  " + "!dc\t\t\t\t    |\tDisconnect a specific gamepad."
+			+ "\n  " + "!kick\t\t\t    |\tKick user from the room."
+			+ "\n  " + "!strip\t\t\t   |\tStrip gamepad from player's hand."
 			+ "\n  " + "!limit\t\t\t   |\tSet the maximum amount of pads a guest can hold."
-			+ "\n  " + "!unban\t\t   |\tUnban a guest."
+			+ "\n  " + "!unban\t\t     |\tUnban a guest."
 			;
 
 		const string god_commands = string()
 			+ admin_commands
 			+ "\n  " + ""
 			+ "\n  " + "---- God Commands ----"
-			+ "\n  " + "!gameid\t\t|\tSet game id."
-			+ "\n  " + "!guests\t\t  |\tSet the amount of room slots."
-			+ "\n  " + "!mic\t\t\t\t|\tSet microphone volume."
-			+ "\n  " + "!name\t\t\t|\tSet room name."
-			+ "\n  " + "!private\t\t |\tMake the room private."
+			+ "\n  " + "!gameid\t\t   |\tSet game id."
+			+ "\n  " + "!guests\t\t   |\tSet the amount of room slots."
+			+ "\n  " + "!mic\t\t\t\t  |\tSet microphone volume."
+			+ "\n  " + "!mod\t\t\t\t  |\tMake a guest in your room a moderator."
+			+ "\n  " + "!name\t\t\t   |\tSet room name."
+			+ "\n  " + "!private\t\t  |\tMake the room private."
 			+ "\n  " + "!public\t\t   |\tMake the room public."
-			+ "\n  " + "!q\t\t\t\t\t |\tClose stream."
-			+ "\n  " + "!setconfig\t |\tApply config changes."
-			+ "\n  " + "!speakers\t  |\tSet speakers volume."
+			+ "\n  " + "!q\t\t\t\t\t  |\tClose stream."
+			+ "\n  " + "!setconfig\t  |\tApply config changes."
+			+ "\n  " + "!speakers\t   |\tSet speakers volume."
+			+ "\n  " + "!unmod\t\t    |\tRevoke moderator permissions."
 			;
 
 		Tier tier = _tierList.getTier(_sender.userID);

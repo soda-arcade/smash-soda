@@ -15,11 +15,12 @@ bool VersionWidget::render()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0));
 
-    ImGui::SetNextWindowPos(ImVec2(0, res.y - 32));
-    ImGui::SetNextWindowSize(ImVec2(100, 32));
+    ImGui::SetNextWindowPos(ImVec2(res.x - 80, res.y - 107));
+    ImGui::SetNextWindowSize(ImVec2(80, 52));
     ImGui::Begin("##Version", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
     AppStyle::pushLabel();
-    ImGui::Text("v. 1.1.0");
+    ImGui::Text("%.0f", ImGui::GetIO().Framerate);
+    ImGui::Text("v. 2.0");
     AppStyle::pop();
     ImGui::End();
 

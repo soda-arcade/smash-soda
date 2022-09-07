@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include <Windows.h>
 #include <Xinput.h>
 #include "ViGEm/Client.h"
@@ -70,6 +72,9 @@ public:
 	const bool isLocked() const;
 	void setLocked(const bool value);
 	void toggleLocked();
+	const bool isLockedButtons() const;
+	void setLockedButtons(const bool value);
+	void toggleLockedButtons();
 
 	// Child specific implementations
 	virtual bool alloc() = 0;
@@ -92,6 +97,7 @@ protected:
 	bool _isAlive = false;
 	bool _isConnected = false;
 	bool _isLocked = false;
+	bool _isLockedButtons = false;
 
 	XINPUT_STATE _currentState;
 };

@@ -21,12 +21,12 @@ void Debouncer::start()
 				sleepTime = _stopwatch.getRemainingTime();
 			}
 
-			_stopwatch.stop();
 			if (_callback != nullptr)
 			{
 				_callback();
 			}
 			_thread.detach();
+			_stopwatch.stop();
 		});
 	}
 	else

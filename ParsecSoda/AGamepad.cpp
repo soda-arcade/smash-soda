@@ -128,3 +128,18 @@ void AGamepad::toggleLocked()
 {
 	setLocked(!_isLocked);
 }
+
+const bool AGamepad::isLockedButtons() const
+{
+	return _isLockedButtons;
+}
+
+void AGamepad::setLockedButtons(const bool value)
+{
+	_isLockedButtons = value;
+}
+
+void AGamepad::toggleLockedButtons()
+{
+	setLockedButtons(!_isLockedButtons);
+}

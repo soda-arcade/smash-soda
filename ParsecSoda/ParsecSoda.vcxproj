@@ -24,31 +24,32 @@
     <ProjectGuid>{b1691bdb-e677-4d65-aeaa-cd51f7aa8b17}</ProjectGuid>
     <RootNamespace>ParsecSoda</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>SmashSoda</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -88,13 +89,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\32;$(SolutionDir)Dependencies\vigem\bin\debug32;$(SolutionDir)Dependencies\sdl\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\32;$(SolutionDir)Dependencies\vigem\lib\debug\x86;$(SolutionDir)Dependencies\sdl\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec32.lib;libucrtd.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libucrt.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -106,8 +108,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,6 +120,13 @@
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\32;$(SolutionDir)Dependencies\vigem\bin\release32;$(SolutionDir)Dependencies\sdl\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec32.lib;libucrt.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)ParsecSoda\fonts\" "$(TargetDir)fonts\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\icons\" "$(TargetDir)icons\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\sfx\" "$(TargetDir)sfx\" /E
+copy /Y "$(SolutionDir)Dependencies\parsecsdk\windows\parsec32.dll" "$(TargetDir)parsec32.dll"
+copy /Y "$(SolutionDir)Dependencies\sdl\lib\x86\SDL2.dll" "$(TargetDir)SDL2.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -124,13 +134,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\bin\debug64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\lib\debug\x64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec.lib;libucrtd.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libucrt.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -142,28 +153,42 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\bin\release64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\lib\release\x64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec.lib;libucrt.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)ParsecSoda\fonts\" "$(TargetDir)fonts\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\icons\" "$(TargetDir)icons\" /E /Y
+xcopy "$(SolutionDir)ParsecSoda\sfx\" "$(TargetDir)sfx\" /E
+copy /Y "$(SolutionDir)Dependencies\parsecsdk\windows\parsec.dll" "$(TargetDir)parsec.dll"
+copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Commands\CommandBB.cpp" />
     <ClCompile Include="Commands\CommandBonk.cpp" />
     <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
+    <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
+    <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
+    <ClCompile Include="Widgets\SettingsWidget.cpp" />
     <ClCompile Include="XBoxGamepad.cpp" />
     <ClCompile Include="MasterOfPuppets.cpp" />
     <ClCompile Include="SDLGamepad.cpp" />
     <ClCompile Include="SDLGamepadReader.cpp" />
+    <ClCompile Include="WebSocket.cpp" />
     <ClCompile Include="Widgets\VirtualGamepadWidget.cpp" />
+    <ClCompile Include="Widgets\WebSocketWidget.cpp" />
     <ClCompile Include="XInputReader.cpp" />
     <ClCompile Include="Thumbnail.cpp" />
     <ClCompile Include="Widgets\MasterOfPuppetsWidget.cpp" />
@@ -239,15 +264,24 @@
     <ClCompile Include="Widgets\NavBar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ButtonLock.h" />
+    <ClInclude Include="Commands\CommandBB.h" />
     <ClInclude Include="Commands\CommandMod.h" />
+    <ClInclude Include="Commands\CommandPing.h" />
+    <ClInclude Include="TimeT.h" />
     <ClInclude Include="ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
+    <ClInclude Include="Widgets\ButtonLockWidget.h" />
+    <ClInclude Include="Widgets\PopupWidgetEdit.h" />
+    <ClInclude Include="Widgets\SettingsWidget.h" />
     <ClInclude Include="XBoxGamepad.h" />
     <ClInclude Include="MasterOfPuppets.h" />
     <ClInclude Include="SDLGamepad.h" />
     <ClInclude Include="SDLGamepadReader.h" />
+    <ClInclude Include="WebSocket.h" />
     <ClInclude Include="Widgets\VirtualGamepadWidget.h" />
+    <ClInclude Include="Widgets\WebSocketWidget.h" />
     <ClInclude Include="XInputReader.h" />
     <ClInclude Include="IGamepadReader.h" />
     <ClInclude Include="Widgets\MasterOfPuppetsWidget.h" />

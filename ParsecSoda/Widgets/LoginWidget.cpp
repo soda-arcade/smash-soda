@@ -74,9 +74,9 @@ void LoginWidget::render(bool& showLogin)
 
         AppColors::pushInput();
         AppFonts::pushTitle();
-        ImGui::PushStyleColor(ImGuiCol_Button, AppColors::secondary);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.12f, 0.59f, 0.92f, 1.00f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, AppColors::primary);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.00f, 0.50f, 1.00f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.19f, 0.00f, 0.38f, 1.00f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35f, 0.00f, 0.70f, 1.00f));
         if (ImGui::Button(
             "Log in##Login Button",
             ImVec2(w, 50)

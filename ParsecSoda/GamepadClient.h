@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include "XBoxGamepad.h"
 #include "DualshockGamepad.h"
 #include <Windows.h>
@@ -59,9 +61,11 @@ public:
 	void disconnectAllGamepads();
 	void sortGamepads();
 	void resize(size_t xboxCount, size_t dualshockCount);
-	void resetAll();
+	void resetAll(bool& resetting);
 	void toggleLock();
+	void toggleLockButtons();
 	void toggleLockGamepad(int index);
+	void toggleLockButtonsGamepad(int index);
 	AGamepad* connectNextGamepad();
 	void release();
 	AGamepad* getGamepad(int index);
@@ -84,6 +88,7 @@ public:
 	vector<GuestPreferences> guestPreferences;
 
 	bool lock = false;
+	bool lockButtons = false;
 	bool isPuppetMaster = false;
 
 

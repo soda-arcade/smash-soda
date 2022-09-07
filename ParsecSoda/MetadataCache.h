@@ -62,6 +62,28 @@ public:
 		unsigned int bandwidth = 20;
 		unsigned int xboxPuppetCount = 4;
 		unsigned int ds4PuppetCount = 0;
+		bool basicVersion = false;
+		bool disableMicrophone = false;
+		bool disableGuideButton = false;
+		bool disableKeyboard = false;
+		string websocketURI = "";
+		string websocketPassword = "";
+		bool showMasterOfPuppets = false;
+		bool showAudio = false;
+		bool showVideo = false;
+		bool showThumbs = false;
+		bool showWebSocket = false;
+		bool latencyLimitEnabled = false;
+		unsigned int latencyLimitValue = 0;
+		bool lockedGamepadLeftTrigger = false;
+		bool lockedGamepadRightTrigger = false;
+		bool lockedGamepadLX = false;
+		bool lockedGamepadLY = false;
+		bool lockedGamepadRX = false;
+		bool lockedGamepadRY = false;
+		unsigned int lockedGamepadButtons = 0;
+		unsigned int theme = 0;
+		string discord = "";
 	};
 
 	static SessionCache loadSessionCache();
@@ -82,6 +104,8 @@ public:
 
 	static vector<Thumbnail> loadThumbnails();
 	static bool saveThumbnails(vector<Thumbnail> thumbnails);
+
+	static bool saveTheme(int theme);
 
 	static Preferences preferences;
 

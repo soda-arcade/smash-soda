@@ -14,9 +14,11 @@
 #include "Commands/ACommand.h"
 #include "Commands/CommandAFK.h"
 #include "Commands/CommandBan.h"
+#include "Commands/CommandBB.h"
 #include "Commands/CommandBonk.h"
 #include "Commands/CommandBotMessage.h"
 #include "Commands/CommandDefaultMessage.h"
+#include "Commands/CommandDiscord.h"
 #include "Commands/CommandDC.h"
 #include "Commands/CommandFF.h"
 #include "Commands/CommandGameId.h"
@@ -32,6 +34,7 @@
 #include "Commands/CommandLimit.h"
 #include "Commands/CommandOne.h"
 #include "Commands/CommandPads.h"
+#include "Commands/CommandPing.h"
 #include "Commands/CommandPrivate.h"
 #include "Commands/CommandPublic.h"
 #include "Commands/CommandQuit.h"
@@ -43,9 +46,9 @@
 #include "Commands/CommandUnban.h"
 #include "Commands/CommandVideoFix.h"
 #include "CompilerDirectives.h"
+#include "MetadataCache.h"
 
 #define BOT_GUESTID 0
-
 
 class ChatBot
 {
@@ -59,17 +62,20 @@ public:
 		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod), _gamepadClient(gamepadClient),
 		_guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), _parsecSession(parsecSession),
 		_sfxList(sfxList), _tierList(_tierList), _hostingLoopController(hostingLoopController), _host(host)
-	{}
+	{
+		_basicVersion = MetadataCache::preferences.basicVersion;
+	}
 
 	ACommand * identifyUserDataMessage(const char* msg, Guest& sender, bool isHost = false);
 
 	const uint32_t getLastUserId() const;
 	void setLastUserId(const uint32_t lastId = BOT_GUESTID);
 
-	const std::string formatGuestConnection(Guest guest, ParsecGuestState state);
+	const std::string formatGuestConnection(Guest guest, ParsecGuestState state, ParsecStatus status);
 	const std::string formatBannedGuestMessage(Guest guest);
 	const std::string formatModGuestMessage(Guest guest);
 	CommandBotMessage sendBotMessage(const char * msg);
+	void updateSettings();
 
 private:
 	static bool msgStartsWith(const char* msg, const char* pattern);
@@ -95,4 +101,5 @@ private:
 	TierList& _tierList;
 	bool &_hostingLoopController;
 	Guest& _host;
+	bool _basicVersion = false;
 };

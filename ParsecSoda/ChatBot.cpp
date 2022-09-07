@@ -9,6 +9,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 
 	// Pleb commands
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
+	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
 	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandHelp::prefixes()))		return new CommandHelp(sender, _tierList);
 	//if (CommandIpFilter::containsIp(msg))				return new CommandIpFilter(msg, sender, _parsec, _ban, isHost);
@@ -18,23 +19,28 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
 	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
 
-#if !BASIC_VERSION
-	if (msgStartsWith(msg, CommandSFX::prefixes()))		return new CommandSFX(msg, _sfxList);
-	if (msgStartsWith(msg, CommandBonk::prefixes()))	return new CommandBonk(msg, sender, _guests, _host);
-#endif
+//#if !BASIC_VERSION
+	if (!_basicVersion)
+	{
+		if (msgStartsWith(msg, CommandSFX::prefixes()))		return new CommandSFX(msg, _sfxList);
+		if (msgStartsWith(msg, CommandBonk::prefixes()))	return new CommandBonk(msg, sender, _guests, _host);
+	}
+//#endif
 	
 
 	Tier tier = _tierList.getTier(sender.userID);
 
-	// Admin commands
+	// Admin & Moderator commands
 	if (tier >= Tier::ADMIN || isHost)
 	{
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
+		//if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient);
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
+		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
 	}
 
 	// God commands
@@ -61,18 +67,39 @@ const uint32_t ChatBot::getLastUserId() const
 	return this->_lastUserId;
 }
 
-const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState state)
+const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState state, ParsecStatus status)
 {
 	setLastUserId(BOT_GUESTID);
 
 	std::ostringstream reply;
 	if (state == GUEST_CONNECTED)
 	{
-		reply << "@ >>  joined \t " << guest.name << " \t(#" << guest.userID << ")\0";
+		reply << "@join \t\t " << guest.name << " #" << guest.userID << "\0";
+	}
+	else if (state == GUEST_FAILED)
+	{
+		reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
 	}
 	else
 	{
-		reply << "! <<  quit \t\t  " << guest.name << " \t(#" << guest.userID << ")\0";
+		switch (status)
+		{
+			case 5:
+				reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			case 11:
+				reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			case -12007:
+				reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			case -13014:
+				reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+			default:
+				reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
+				break;
+		}
 	}
 
 	const std::string formattedMessage = reply.str();
@@ -84,7 +111,7 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 const std::string ChatBot::formatBannedGuestMessage(Guest guest)
 {
 	std::ostringstream reply;
-	reply << "[ChatBot] | None shall pass! Banned guests don't join us:\n\t\t" << guest.name << " \t (#" << guest.userID << ")\0";
+	reply << "!ban \t\t " << guest.name << " #" << guest.userID << "\0";
 
 	return reply.str();
 }
@@ -145,4 +172,9 @@ bool ChatBot::msgIsEqual(const char* msg, vector<const char*> patterns)
 void ChatBot::setLastUserId(uint32_t lastId)
 {
 	this->_lastUserId = lastId;
+}
+
+void ChatBot::updateSettings()
+{
+	_basicVersion = MetadataCache::preferences.basicVersion;
 }

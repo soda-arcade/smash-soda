@@ -73,6 +73,11 @@ public:
 	static ID3D11ShaderResourceView* btc;
 	static ID3D11ShaderResourceView* ltc;
 	static ID3D11ShaderResourceView* eth;
+	
+	static ID3D11ShaderResourceView* settings;
+	static ID3D11ShaderResourceView* websocket;
+	static ID3D11ShaderResourceView* editReason;
+	static ID3D11ShaderResourceView* buttonLock;
 
 private:
 	static Texture _play;
@@ -139,5 +144,10 @@ private:
 	static Texture _btc;
 	static Texture _ltc;
 	static Texture _eth;
+	
+	static Texture _settings;
+	static Texture _websocket;
+	static Texture _editReason;
+	static Texture _buttonLock;
 };
 

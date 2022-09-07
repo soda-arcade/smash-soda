@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #define D3D_DEBUG_INFO
 
 #include <iostream>
@@ -29,6 +30,9 @@
 #include "CompilerDirectives.h"
 #include "Stopwatch.h"
 #include "MasterOfPuppets.h"
+#include "WebSocket.h"
+#include "ButtonLock.h"
+#include "Debouncer.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -48,7 +52,10 @@ public:
 	void release();
 	bool isReady();
 	bool isRunning();
+	bool isLatencyRunning();
+	bool isGamepadRunning();
 	bool& isGamepadLock();
+	bool& isGamepadLockButtons();
 	Guest& getHost();
 	ParsecSession& getSession();
 	void fetchAccountData(bool sync = false);
@@ -59,6 +66,7 @@ public:
 	vector<string>& getCommandLog();
 	vector<Guest>& getGuestList();
 	vector<GuestData>& getGuestHistory();
+	MyMetrics getMetrics(uint32_t id);
 	BanList& getBanList();
 	ModList& getModList();
 	vector<AGamepad*>& getGamepads();
@@ -66,6 +74,7 @@ public:
 	MasterOfPuppets& getMasterOfPuppets();
 	const char** getGuestNames();
 	void toggleGamepadLock();
+	void toggleGamepadLockButtons();
 	void setGameID(string gameID);
 	void setMaxGuests(uint8_t maxGuests);
 	void setHostConfig(string roomName, string gameId, uint8_t roomSlots, bool isPublicRoom);
@@ -78,22 +87,39 @@ public:
 	void stopHosting();
 	void stripGamepad(int index);
 	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
+	WebSocket& getWebSocket();
+	void webSocketStart(string uri, string password);
+	void webSocketRun(string uri, string password);
+	void webSocketStop();
+	bool webSocketRunning();
 
-	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false);
+	LockedGamepadState _lockedGamepad;
+	void updateButtonLock(LockedGamepadState lockedGamepad);
+
+	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false, bool outside = false);
 	void sendHostMessage(const char* message, bool isHidden = false);
 
 	AudioIn audioIn;
 	AudioOut audioOut;
+	HWND mainWindow;
+	bool _latencyLimitEnabled = false;
+	unsigned int _latencyLimitValue = 0;
+	bool _disableMicrophone = false;
+	bool _disableGuideButton = false;
+	bool _disableKeyboard = false;
 
 private:
 	void initAllModules();
+	void submitSilence();
 	void liveStreamMedia();
 	void mainLoopControl();
 	void pollEvents();
 	void pollInputs();
+	void pollLatency();
+	void pollGamepad();
 	bool parsecArcadeStart();
 	bool isFilteredCommand(ACommand* command);
-	void onGuestStateChange(ParsecGuestState& state, Guest& guest);
+	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
 	// Attributes
 	AudioMix _audioMix;
@@ -106,7 +132,8 @@ private:
 	GamepadClient _gamepadClient;
 	GuestList _guestList;
 	MasterOfPuppets _masterOfPuppets;
-	
+	WebSocket _webSocket;
+
 	ParsecDSO* _parsec;
 	ParsecHostConfig _hostConfig;
 	ParsecSession _parsecSession;
@@ -119,6 +146,9 @@ private:
 	bool _isMediaThreadRunning = false;
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
+	bool _isLatencyThreadRunning = false;
+	bool _isGamepadThreadRunning = false;
+	bool _isWebSocketThreadRunning = false;
 
 	Stopwatch _mediaClock;
 
@@ -126,10 +156,16 @@ private:
 	thread _mediaThread;
 	thread _inputThread;
 	thread _eventThread;
+	thread _latencyThread;
+	thread _gamepadThread;
+	thread _webSocketThread;
 	thread _createGamepadsThread;
 	thread _connectGamepadsThread;
 
 	mutex _mediaMutex;
 	mutex _inputMutex;
 	mutex _eventMutex;
+	mutex _latencyMutex;
+	mutex _gamepadMutex;
+	mutex _webSocketMutex;
 };

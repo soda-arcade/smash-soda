@@ -1,5 +1,7 @@
 #pragma once
 
+#define _WINSOCKAPI_
+
 #include "../imgui/imgui.h"
 #include "../Hosting.h"
 #include "../AudioTools.h"
@@ -50,6 +52,8 @@ private:
 	char _secretLink[128];
 	int32_t _maxGuests;
 	bool _publicGame;
+	bool _latencyLimiter;
+	int32_t _latencyLimit;
 
 	int _micVolume = 80;
 	int _speakersVolume = 30;

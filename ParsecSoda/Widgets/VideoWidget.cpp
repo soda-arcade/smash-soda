@@ -10,12 +10,12 @@ VideoWidget::VideoWidget(Hosting& hosting)
 bool VideoWidget::render()
 {
     static float indentSize = 0;
-    static ImVec2 dummySize = ImVec2(0.0f, 15.0f);
+    static ImVec2 dummySize = ImVec2(0.0f, 5.0f);
     static ImVec2 cursor;
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 280), ImVec2(500, 600));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(500, 600));
     ImGui::Begin("Video");
 
 
@@ -35,10 +35,10 @@ bool VideoWidget::render()
 
     ImGui::SetNextItemWidth(size.x);
 
-    AppStyle::pushLabel();
-    ImGui::Text("Monitors");
-    AppStyle::pop();
-    AppFonts::pushInput();
+    //AppStyle::pushLabel();
+    //ImGui::Text("Monitors");
+    //AppStyle::pop();
+    AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("##Monitor list", screenName.c_str()))
     {
@@ -58,7 +58,7 @@ bool VideoWidget::render()
         }
         ImGui::EndCombo();
     }
-    AppFonts::pop();
+    AppStyle::pop();
     TitleTooltipWidget::render("Monitor List", "Choose the screen you want to display.\n\n* Avoid changing this while stream is already running.");
     
     ImGui::Dummy(dummySize);
@@ -74,10 +74,10 @@ bool VideoWidget::render()
 
     ImGui::SetNextItemWidth(size.x);
 
-    AppStyle::pushLabel();
-    ImGui::Text("Adapters");
-    AppStyle::pop();
-    AppFonts::pushInput();
+    //AppStyle::pushLabel();
+    //ImGui::Text("Adapters");
+    //AppStyle::pop();
+    AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("##Adapter list", gpuName.c_str()))
     {
@@ -101,7 +101,7 @@ bool VideoWidget::render()
         }
         ImGui::EndCombo();
     }
-    AppFonts::pop();
+    AppStyle::pop();
     TitleTooltipWidget::render(
         "Adapter List",
         (
@@ -126,7 +126,7 @@ bool VideoWidget::render()
 
     ImGui::BeginGroup();
     AppStyle::pushLabel();
-    ImGui::Text("Bandwidth (Mbps)");
+    ImGui::Text("Bitrate");
     AppStyle::pop();
     if (IntRangeWidget::render("Bandwidth (Mbps)", _bandwidth, 1, 1000, 1))
     {
