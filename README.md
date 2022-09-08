@@ -42,23 +42,27 @@ The aim of this project is to add additional useful features, with a focus on th
 ## Features
 
   * **Ping Limit**
+
   This allows you to set a latency limit for your lobby. Those whose pings exceed the limit will be kicked automatically.
 
   * **Moderator System**
+
   Grant moderator permissions to users you trust in your lobbies. This will allow your mods to kick troublesome users and other admin tier commands.
 
+
   * **Themes**
+  
   Check out the new *Midnight* theme for Smash Soda or select from some presets!
 
 ## Chat Commands
 
-Below is a list of all the chat commands. Commands new to Smash Soda are highlighted in <span style="color:red">red</span>.
+Below is a list of all the chat commands. Commands new to Smash Soda are in <span style="color:red">bold</span>.
 
 ##### General
 |Command|Description|
 | ----------- | ----------- |
 |!bonk| Bonk another user on the head.
-|<span style="color:red">!discord</span>| If you have set a Discord invite URL set in the Smash Soda configuration settings then this command will print it in chat.
+|<b>!discord</b>| If you have set a Discord invite URL set in the Smash Soda configuration settings then this command will print it in chat.
 |!help| Show command list.
 |!ff| Drop all gamepads you're holding.
 |!mirror| Toggle mirroring of L-Stick into DPad.
@@ -71,12 +75,11 @@ Below is a list of all the chat commands. Commands new to Smash Soda are highlig
 |Command|Description|
 | ----------- | ----------- |
 |!ban| Ban a guest.
-|<span style="color:red">!bb</span>| Useful for when hosting Smash Bros Ultimate. If people leave on the match results screen, this command will press the B button twice on all gamepads.
 |!dc| Disconnect a specific gamepad.
 |!kick| Kick user from the room.
 |!strip| Strip gamepad from player's hand.
 |!limit| Set the maximum amount of pads a guest can hold.
-|<span style="color:red">!ping</span>| Returns the ping for a user.
+|<b>!ping</b>| Returns the ping for a user.
 |!unban| Unban a guest.
 
 ##### God
@@ -85,14 +88,14 @@ Below is a list of all the chat commands. Commands new to Smash Soda are highlig
 |!gameid| Set game ID.
 |!guests| Set the amount of room slots.
 |!mic| Set the microphone volume.
-|<span style="color:red">!mod</span>| You can make a user in your lobby a moderator. They will then have Admin tier privileges, having access to those commands.
+|<b>!mod</b>| You can make a user in your lobby a moderator. They will then have Admin tier privileges, having access to those commands.
 |!name| Set the room name.
 |!private| Make the room private.
 |!public| Make the room public.
 |!q| Close stream.
 |!setconfig| Apply config changes.
 |!speakers| Set speakers volume.
-|<span style="color:red">!unmod| Revoke moderator permissions.
+|<b>!unmod</b>| Revoke moderator permissions.
 
 ## Network Latency
 
