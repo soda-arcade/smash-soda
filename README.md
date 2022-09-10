@@ -75,6 +75,7 @@ Below is a list of all the chat commands. Commands new to Smash Soda are in <spa
 |Command|Description|
 | ----------- | ----------- |
 |!ban| Ban a guest.
+|!bb| Press everybody's B button twice.
 |!dc| Disconnect a specific gamepad.
 |!kick| Kick user from the room.
 |!strip| Strip gamepad from player's hand.

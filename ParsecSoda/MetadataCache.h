@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <ShlObj.h>
 #include "matoya.h"
+#include "Guest.h"
 #include "GuestData.h"
 #include "GuestTier.h"
 #include "Thumbnail.h"
@@ -84,6 +85,8 @@ public:
 		unsigned int lockedGamepadButtons = 0;
 		unsigned int theme = 0;
 		string discord = "";
+		std::vector<int> buttonList;
+		Guest modGuest;
 	};
 
 	static SessionCache loadSessionCache();

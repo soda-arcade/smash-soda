@@ -165,10 +165,11 @@ void GuestListWidget::renderOnlineGuests()
         ImGui::BeginGroup();
 
         AppStyle::pushInput();
-        ImGui::Text("#%d", userID);
+        ImGui::Text("%s", name.c_str());
+        
         ImGui::SameLine();
         ImGui::Indent(85);
-        ImGui::Text("%s", name.c_str());
+        ImGui::Text("#%d", userID);
         AppStyle::pop();
         ImGui::Unindent(85);
         AppFonts::pushInput();

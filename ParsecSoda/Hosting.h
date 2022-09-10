@@ -116,10 +116,14 @@ private:
 	void pollEvents();
 	void pollInputs();
 	void pollLatency();
+	void pollAutoGamepad();
 	void pollGamepad();
 	bool parsecArcadeStart();
 	bool isFilteredCommand(ACommand* command);
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
+
+	void pressButtonForAll(ParsecGamepadButtonMessage button);
+	ParsecGamepadButtonMessage pressButton(ParsecGamepadButton button, bool in);
 
 	// Attributes
 	AudioMix _audioMix;
@@ -147,8 +151,10 @@ private:
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
 	bool _isLatencyThreadRunning = false;
+	bool _isAutoGamepadThreadRunning = false;
 	bool _isGamepadThreadRunning = false;
 	bool _isWebSocketThreadRunning = false;
+	bool _autoIsPressed = false;
 
 	Stopwatch _mediaClock;
 
@@ -157,6 +163,7 @@ private:
 	thread _inputThread;
 	thread _eventThread;
 	thread _latencyThread;
+	thread _autoGamepadThread;
 	thread _gamepadThread;
 	thread _webSocketThread;
 	thread _createGamepadsThread;
@@ -166,6 +173,7 @@ private:
 	mutex _inputMutex;
 	mutex _eventMutex;
 	mutex _latencyMutex;
+	mutex _autoGamepadMutex;
 	mutex _gamepadMutex;
 	mutex _webSocketMutex;
 };

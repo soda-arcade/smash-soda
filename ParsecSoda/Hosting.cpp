@@ -349,6 +349,7 @@ void Hosting::startHosting()
 				_inputThread = thread ([this]() {pollInputs(); });
 				_eventThread = thread ([this]() {pollEvents(); });
 				_latencyThread = thread([this]() {pollLatency(); });
+				_autoGamepadThread = thread([this]() { pollAutoGamepad(); });
 				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
 			}
@@ -688,6 +689,68 @@ void Hosting::pollLatency()
 	_isLatencyThreadRunning = false;
 	_latencyMutex.unlock();
 	_latencyThread.detach();
+}
+
+void Hosting::pollAutoGamepad() {
+	_autoGamepadMutex.lock();
+	_isAutoGamepadThreadRunning = true;
+	while (_isRunning) {
+
+		Sleep(200);
+
+		// Buttons in queue?
+		if (MetadataCache::preferences.buttonList.size() > 0) {
+
+			// Press in
+			if (!_autoIsPressed) {
+
+				ParsecGamepadButtonMessage btn = pressButton((ParsecGamepadButton) MetadataCache::preferences.buttonList.front(), true);
+				Hosting::pressButtonForAll(btn);
+				_autoIsPressed = true;
+
+			}
+			else {
+
+				// Depress
+				ParsecGamepadButtonMessage btn = pressButton((ParsecGamepadButton)MetadataCache::preferences.buttonList.front(), false);
+				Hosting::pressButtonForAll(btn);
+
+				// Remove from queue
+				MetadataCache::preferences.buttonList.erase(MetadataCache::preferences.buttonList.begin());
+				_autoIsPressed = false;
+
+			}
+
+		}
+
+	}
+	_isAutoGamepadThreadRunning = false;
+	_autoGamepadMutex.unlock();
+	_autoGamepadThread.detach();
+}
+
+void Hosting::pressButtonForAll(ParsecGamepadButtonMessage button) {
+
+	ParsecMessage message = {};
+	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
+	message.gamepadButton = button;
+
+	// For every gamepad
+	std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
+	for (; gi != _gamepadClient.gamepads.end(); ++gi) {
+		_gamepadClient.sendMessage((*gi)->owner.guest, message);
+	}
+
+}
+
+ParsecGamepadButtonMessage Hosting::pressButton(ParsecGamepadButton button, bool in) {
+
+	ParsecGamepadButtonMessage msg = {};
+	msg.button = ParsecGamepadButton::GAMEPAD_BUTTON_B;
+	msg.pressed = in;
+
+	return msg;
+
 }
 
 bool Hosting::isLatencyRunning()
