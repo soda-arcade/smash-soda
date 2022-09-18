@@ -35,6 +35,9 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     _latencyLimiter = MetadataCache::preferences.latencyLimitEnabled;
     _latencyLimit = MetadataCache::preferences.latencyLimitValue;
 
+    _hotseat = MetadataCache::preferences.hotseat;
+    _hotseatTime = MetadataCache::preferences.hotseatTime;
+
     vector<Thumbnail>::iterator it;
     for (it = _thumbnails.begin(); it != _thumbnails.end(); ++it)
     {
@@ -182,6 +185,7 @@ bool HostSettingsWidget::render(HWND& hwnd)
     ImGui::Text("LATENCY LIMITER");
         if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _latencyLimiter, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
             _latencyLimiter = !_latencyLimiter;
+            MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
         }
         if (_latencyLimiter)    TitleTooltipWidget::render("Latency Limit Off", "Anyone can join.");
         else                    TitleTooltipWidget::render("Latency Limit On", "Guests who's pings exceed the value on the right will be automatically kicked.");
@@ -190,7 +194,27 @@ bool HostSettingsWidget::render(HWND& hwnd)
 
         if (IntRangeWidget::render("latency limit", _latencyLimit, 0, 64, 0.025f)) {
             TitleTooltipWidget::render("Latency Limit", "The max ping allowed.");
+            MetadataCache::preferences.latencyLimitValue = _latencyLimit;
         }
+    ImGui::EndChild();
+
+    ImGui::Dummy(dummySize);
+
+    ImGui::BeginChild("##Hotseat child", ImVec2(120.0f, 50.0f));
+    ImGui::Text("AUTOMATIC HOTSEAT");
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _hotseat, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        _hotseat = !_hotseat;
+        MetadataCache::preferences.hotseat = _hotseat;
+    }
+    if (_hotseat)           TitleTooltipWidget::render("Hotseat Off", "Players won't be swapped.");
+    else                    TitleTooltipWidget::render("Hotseat On", "Guests will automatically swapped in gamepad 1 after set minutes.");
+
+    ImGui::SameLine();
+
+    if (IntRangeWidget::render("hotseat time", _hotseatTime, 0, 60, 0.025f)) {
+        TitleTooltipWidget::render("Hotseat Time", "Time before player 1 is swapped (in minutes).");
+        MetadataCache::preferences.hotseatTime = _hotseatTime;
+    }
     ImGui::EndChild();
 
     static bool showPopup = false;

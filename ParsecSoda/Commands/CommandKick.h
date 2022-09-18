@@ -29,9 +29,13 @@ public:
 			break;
 
 		case SEARCH_USER_RESULT::FOUND:
+
+			if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
+
 			if (_sender.userID == _targetGuest.userID)
 			{
-				_replyMessage = std::string() + "[ChatBot] | Thou shall not kick thyself, " + _sender.name + " ...\0";
+				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " kicked themselves in confusion!\0";
+				ParsecHostKickGuest(_parsec, _targetGuest.id);
 			}
 			else
 			{

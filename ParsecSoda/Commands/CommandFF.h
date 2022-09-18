@@ -23,10 +23,14 @@ public:
 		if (_droppedPadCount > 1)
 		{
 			reply << "[ChatBot] | " << _sender.name << " has dropped " << _droppedPadCount << " gamepads!\0";
+
+			if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
 		}
 		else if (_droppedPadCount > 0)
 		{
 			reply << "[ChatBot] | " << _sender.name << " has dropped " << _droppedPadCount << " gamepad!\0";
+
+			if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
 		}
 		else
 		{

@@ -17,6 +17,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandMirror::prefixes()))		return new CommandMirror(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandOne::prefixes()))		return new CommandOne(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
+	if (msgIsEqual(msg, CommandSpectate::prefixes()))	return new CommandSpectate(sender);
 	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
 
 //#if !BASIC_VERSION
@@ -55,7 +56,8 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgIsEqual(msg, CommandSetConfig::prefixes()))		return new CommandSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 		if (msgStartsWith(msg, CommandSpeakers::prefixes()))	return new CommandSpeakers(msg, _audioOut);
 		if (msgIsEqual(msg, CommandQuit::prefixes()))			return new CommandQuit(_hostingLoopController);
-		if (msgStartsWith(msg, CommandMod::prefixes()))			return new CommandMod(msg, sender, _parsec, _guests, _guestHistory, _mod);
+		if (msgStartsWith(msg, CommandMod::prefixes()))			return new CommandMod(msg, sender, _parsec, _guests, _guestHistory, _mod, _tierList);
+		if (msgStartsWith(msg, CommandUnmod::prefixes()))		return new CommandUnmod(msg, sender, _mod, _guestHistory);
 	}
 
 	this->setLastUserId(previous);

@@ -122,6 +122,9 @@ private:
 	bool isFilteredCommand(ACommand* command);
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
+	void setHotseatGuest();
+	bool isSpectator();
+
 	void pressButtonForAll(ParsecGamepadButtonMessage button);
 	ParsecGamepadButtonMessage pressButton(ParsecGamepadButton button, bool in);
 
@@ -156,7 +159,13 @@ private:
 	bool _isWebSocketThreadRunning = false;
 	bool _autoIsPressed = false;
 
+	Guest _hotseatGuest;
+	int _hotseatGuestIndex;
+
 	Stopwatch _mediaClock;
+	Stopwatch _hotseatClock;
+	Stopwatch _hotseatReminderClock;
+	bool _hotseatWarning = false;
 
 	thread _mainLoopControlThread;
 	thread _mediaThread;

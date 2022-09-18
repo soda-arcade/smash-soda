@@ -32,10 +32,10 @@ bool SettingsWidget::render()
     ImGui::Begin("Settings");
     AppStyle::pop();
 
+    AppStyle::pushLabel();
+    ImGui::Text("THEME");
     AppStyle::pushInput();
     string themes[4] = { "Midnight", "Parsec Soda", "Parsec Soda V", "Mini" };
-
-    ImGui::Text("Theme");
     if (ImGui::BeginCombo("### Thumbnail picker combo", themes[MetadataCache::preferences.theme].c_str(), ImGuiComboFlags_HeightLarge)) {
         for (size_t i = 0; i < 4; ++i) {
             bool isSelected = (i == MetadataCache::preferences.theme);
@@ -52,9 +52,9 @@ bool SettingsWidget::render()
     AppStyle::pop();
 
     ImGui::Dummy(ImVec2(0, 10.0f));
+    AppStyle::pushLabel();
+    ImGui::Text("DISCORD INVITE LINK");
     AppStyle::pushInput();
-
-    ImGui::Text("Discord Invite Link");
     if (ImGui::InputText("##Secret input", _discord, HOST_NAME_LEN)) {
 
         MetadataCache::preferences.discord = _discord;

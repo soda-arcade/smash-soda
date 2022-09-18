@@ -14,8 +14,8 @@ class CommandMod : public ACommandSearchUserHistory
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::MOD; }
 
-	CommandMod(const char* msg, Guest& sender, ParsecDSO* parsec, GuestList& guests, GuestDataList& guestHistory, ModList& modList)
-		: ACommandSearchUserHistory(msg, internalPrefixes(), guests, guestHistory), _sender(sender), _parsec(parsec), _mod(modList)
+	CommandMod(const char* msg, Guest& sender, ParsecDSO* parsec, GuestList& guests, GuestDataList& guestHistory, ModList& modList, TierList& tierList)
+		: ACommandSearchUserHistory(msg, internalPrefixes(), guests, guestHistory), _sender(sender), _parsec(parsec), _mod(modList), _tierList(tierList)
 	{
 	}
 
@@ -64,6 +64,7 @@ private:
 	ParsecDSO* _parsec;
 	Guest& _sender;
 	ModList& _mod;
+	TierList& _tierList;
 
 	bool handleGuest(GuestData target, bool isOnline, uint32_t guestID = -1)
 	{
@@ -77,10 +78,7 @@ private:
 
 			if (_mod.mod(target))
 			{
-				//if (isOnline) // DO MOD STUFF
-				//{
-				//	ParsecHostKickGuest(_parsec, guestID);
-				//}
+				_tierList.setTier(target.userID, Tier::MOD);
 
 				try {
 					PlaySound(TEXT("./sfx/mod.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);

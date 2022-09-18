@@ -17,9 +17,9 @@ bool GuestListWidget::render()
 
     ImGui::BeginChild("Guest List", ImVec2(size.x, size.y));
 
-    //AppStyle::pushLabel();
-    //ImGui::Text("Filter Guests");
-    //AppStyle::pop();
+    AppStyle::pushLabel();
+    ImGui::Text("FILTER GUESTS");
+    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x-42);
     ImGui::InputText("### Guest List Filter", _filterText, 256);
     TitleTooltipWidget::render("Filter Guests", "Type user Name or ID to filter.");
@@ -28,7 +28,7 @@ bool GuestListWidget::render()
     ImGui::Checkbox("##Blank bans", &_filterNoReason);
     TitleTooltipWidget::render("Filter Guests", "Show only bans with no reason");
 
-    //ImGui::Dummy(ImVec2(0, 5));
+    ImGui::Dummy(ImVec2(0, 5));
     //ImGui::Separator();
     //ImGui::Dummy(ImVec2(0, 5));
 

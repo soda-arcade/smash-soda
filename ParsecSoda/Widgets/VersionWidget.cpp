@@ -20,7 +20,7 @@ bool VersionWidget::render()
     ImGui::Begin("##Version", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
     AppStyle::pushLabel();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
-    ImGui::Text("v. 2.0");
+    ImGui::Text("v. 2.03");
     AppStyle::pop();
     ImGui::End();
 

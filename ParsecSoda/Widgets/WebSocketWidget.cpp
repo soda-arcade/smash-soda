@@ -19,10 +19,10 @@ bool WebSocketWidget::render()
     ImGui::SetNextWindowSizeConstraints(ImVec2(100, 50), ImVec2(500, 600));
     ImGui::Begin("WebSocket");
     AppStyle::pushLabel();
-
     static ImVec2 size;
     size = ImGui::GetContentRegionAvail();
 
+    ImGui::Text("STATUS");
     AppFonts::pushInput();
     string ws_status = ws.status();
     ImGui::Text( ws_status.c_str() );
@@ -51,9 +51,14 @@ bool WebSocketWidget::render()
 
     ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
+    AppStyle::pushLabel();
+    ImGui::Text("URI");
     AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     ImGui::InputText("##uri", _ws_uri, 50);
+    AppStyle::pushLabel();
+    ImGui::Text("PASSWORD");
+    AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     ImGui::InputText("##password", _ws_password, 32, ImGuiInputTextFlags_Password);
     AppStyle::pop();

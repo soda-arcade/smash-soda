@@ -276,7 +276,7 @@
     <ClCompile Include="ModList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Commands\CommandBB.cpp">
+    <ClCompile Include="SpectateList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -687,6 +687,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandPing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandUnmod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpectateList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandSpectate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

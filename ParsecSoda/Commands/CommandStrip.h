@@ -29,6 +29,8 @@ public:
 			return false;
 		}
 
+		if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
+
 		std::ostringstream reply;
 		reply
 			<< "[ChatBot] | Gamepad " << _intArg << " was forcefully dropped by " << _sender.name << "\n"

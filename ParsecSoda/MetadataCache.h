@@ -85,8 +85,12 @@ public:
 		unsigned int lockedGamepadButtons = 0;
 		unsigned int theme = 0;
 		string discord = "";
+		bool hotseat = false;
+		unsigned int hotseatTime = 0;
+
+		bool hotseatReset = false;
 		std::vector<int> buttonList;
-		Guest modGuest;
+		std::vector<uint32_t> spectators;
 	};
 
 	static SessionCache loadSessionCache();

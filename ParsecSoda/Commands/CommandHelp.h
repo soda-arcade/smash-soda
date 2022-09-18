@@ -31,6 +31,7 @@ public:
 		pleb_commands += "\n  !mirror\t\t\t   |\tToggle mirroring of L-Stick into DPad.";
 		pleb_commands += "\n  !one\t\t\t\t    |\tMaps all of your devices to the same gamepad.";
 		pleb_commands += "\n  !pads\t\t\t\t   |\tShow who's holding each gamepad.";
+		pleb_commands += "\n  !spectate\t\t   |\tDon't be swapped in when hotseat mode enabled.";
 //#if !BASIC_VERSION
 		if (!MetadataCache::preferences.basicVersion)
 		{
@@ -71,9 +72,9 @@ public:
 
 		Tier tier = _tierList.getTier(_sender.userID);
 		string commandList = pleb_commands;
-		if		(tier == Tier::ADMIN)	commandList = admin_commands;
-		else if	(tier == Tier::GOD)		commandList = god_commands;
-		else							commandList = pleb_commands;
+		if		(tier == Tier::ADMIN || tier == Tier::MOD)	commandList = admin_commands;
+		else if	(tier == Tier::GOD)							commandList = god_commands;
+		else												commandList = pleb_commands;
 
 		_replyMessage =
 			string("[ChatBot] | Command list: ")

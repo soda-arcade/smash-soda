@@ -240,6 +240,9 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (MTY_JSONObjGetString(json, "discord", discord, 256)) preferences.discord = discord;
             else preferences.discord = "";
 
+            if (!MTY_JSONObjGetBool(json, "hotseat", &preferences.hotseat)) preferences.latencyLimitEnabled = false;
+            if (!MTY_JSONObjGetUInt(json, "hotseatTime", &preferences.hotseatTime)) preferences.hotseatTime = 15;
+
             preferences.isValid = true;
 
             MTY_JSONDestroy(&json);
@@ -309,6 +312,8 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetUInt(json, "lockedGamepadButtons", preferences.lockedGamepadButtons);
         MTY_JSONObjSetUInt(json, "theme", preferences.theme);
         MTY_JSONObjSetString(json, "discord", preferences.discord.c_str());
+        MTY_JSONObjSetBool(json, "hotseat", preferences.hotseat);
+        MTY_JSONObjSetUInt(json, "hotseatTime", preferences.hotseatTime);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);

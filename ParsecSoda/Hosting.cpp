@@ -352,6 +352,20 @@ void Hosting::startHosting()
 				_autoGamepadThread = thread([this]() { pollAutoGamepad(); });
 				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
+
+				// Start hotseat timer
+				uint32_t minutes = MetadataCache::preferences.hotseatTime * 60000;
+				_hotseatClock.setDuration(minutes);
+				_hotseatReminderClock.setDuration(minutes/4);
+
+				// Reset hotseat
+				if (MetadataCache::preferences.hotseat) {
+					_hotseatClock.start();
+					_hotseatReminderClock.start();
+					_hotseatGuestIndex = 0;
+					setHotseatGuest();
+				}
+
 			}
 		}
 		catch (const exception&)
@@ -365,8 +379,13 @@ void Hosting::stopHosting()
 {
 	_isRunning = false;
 	_guestList.clear();
-	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++)
-	{
+
+	// Reset hotseat
+	_hotseatClock.stop();
+	_hotseatReminderClock.stop();
+	_hotseatGuestIndex = 0;
+
+	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
 	}
 }
@@ -625,15 +644,15 @@ void Hosting::pollLatency()
 			_guestList.updateMetrics(guests, guestCount);
 
 			// Test (v6 uncommented this...but seems to work...hmmmmmmm)
-			if (_latencyLimitEnabled) {
+			if (MetadataCache::preferences.latencyLimitEnabled) {
 				for (size_t mi = 0; mi < guestCount; mi++) {
 					MyMetrics m = _guestList.getMetrics(guests[mi].id);
 					if (m.metrics.networkLatency > 0.1f && m.averageNetworkLatencySize <= 3) {
-						_chatLog.logCommand(string("!") + guests[mi].name + " P:" + to_string(m.metrics.packetsSent) + " L:" + to_string(m.metrics.networkLatency));
+						//_chatLog.logCommand(string("!") + guests[mi].name + " P:" + to_string(m.metrics.packetsSent) + " L:" + to_string(m.metrics.networkLatency));
 					}
 					if (m.averageNetworkLatencySize > 5 && m.averageNetworkLatency > _latencyLimitValue) {
 						ParsecHostKickGuest(_parsec, guests[mi].id);
-						_chatLog.logCommand(string("!>") + to_string(_latencyLimitValue) + " \t\t " + guests[mi].name + " #" + to_string(guests[mi].userID));
+						//_chatLog.logCommand(string("!>") + to_string(_latencyLimitValue) + " \t\t " + guests[mi].name + " #" + to_string(guests[mi].userID));
 					}
 				}
 			}
@@ -698,6 +717,90 @@ void Hosting::pollAutoGamepad() {
 
 		Sleep(200);
 
+		// Hotseat enabled and gamepad 1 connected?
+		if (MetadataCache::preferences.hotseat && _gamepadClient.getGamepad(0)->isConnected()) {
+
+			// Start timer if it is not running
+			if (!_hotseatClock.isRunning()) {
+
+				uint32_t minutes = MetadataCache::preferences.hotseatTime * 60000;
+				_hotseatClock.setDuration(minutes);
+				_hotseatReminderClock.setDuration(minutes / 4);
+
+				_hotseatClock.reset();
+				_hotseatClock.start();
+				_hotseatReminderClock.start();
+
+			}
+
+			// Are there guests in the room?
+			if (_guestList.getGuests().size() > 0) {
+
+				// Find hotseat guest in guest list
+				_hotseatGuest = _guestList.getGuests()[_hotseatGuestIndex];
+
+				// Remaining minutes
+				uint32_t time = round(_hotseatClock.getRemainingTime() / 60000);
+
+				// Reminder in chat
+				if (_hotseatReminderClock.isFinished()) {
+					broadcastChatMessage("[ChatBot] | " + _hotseatGuest.name + " has " + std::to_string(time) + " minutes left to play.\0");
+					_hotseatReminderClock.reset();
+				}
+
+				// 10 second warning
+				if (_hotseatWarning && _hotseatClock.getRemainingTime() < 10000) {
+					broadcastChatMessage("[ChatBot] | The gamepad is about to be swapped in 10 SECONDS!\0");
+					_hotseatWarning = false;
+				}
+
+				// If some command has stripped gamepad from guest's hand, timer ended or gamepad 1 not owned
+				if (MetadataCache::preferences.hotseatReset || _hotseatClock.isFinished() || !_gamepadClient.getGamepad(0)->isOwned()) {
+
+					// Reset
+					MetadataCache::preferences.hotseatReset = false;
+
+					// Is the hotseat owner still in the room?
+					if (isSpectator() || _hotseatGuest.isValid()) {
+
+						// Work out who the next guest is
+						if (_hotseatGuestIndex < _guestList.getGuests().size() - 1)
+							_hotseatGuestIndex++;
+						else
+							_hotseatGuestIndex = 0;
+
+					}
+
+					// Set new owner of gamepad
+					setHotseatGuest();
+
+				}
+
+			} else {
+
+				// Reset timers
+				_hotseatClock.reset();
+				_hotseatClock.stop();
+
+			}
+
+		} else 
+
+		// Hotseat was disabled while running
+		if (_hotseatClock.isRunning()) {
+
+			// Reset timers
+			_hotseatClock.reset();
+			_hotseatClock.stop();
+			
+			// Reset to first guy in list
+			if (_guestList.getGuests().size() > 0) {
+				_hotseatGuest = _guestList.getGuests()[0];
+				_hotseatGuestIndex = 0;
+			}
+
+		}
+
 		// Buttons in queue?
 		if (MetadataCache::preferences.buttonList.size() > 0) {
 
@@ -727,6 +830,39 @@ void Hosting::pollAutoGamepad() {
 	_isAutoGamepadThreadRunning = false;
 	_autoGamepadMutex.unlock();
 	_autoGamepadThread.detach();
+}
+
+void Hosting::setHotseatGuest() {
+
+	if (_gamepadClient.getGamepad(0)->isConnected()) {
+
+		// Set gamepad
+		_gamepadClient.getGamepad(0)->setOwner(_hotseatGuest, 0, false);
+
+		// Chatbot
+		_hotseatWarning = true;
+		broadcastChatMessage("[ChatBot] | " + _hotseatGuest.name + " now has control of the gamepad!\0");
+
+		// Reset timer
+		_hotseatClock.reset();
+		_hotseatReminderClock.reset();
+
+	}
+
+}
+
+bool Hosting::isSpectator() {
+
+	if (MetadataCache::preferences.spectators.empty() == false) {
+		for (int i = MetadataCache::preferences.spectators.size() - 1; i >= 0; i--) {
+			if (MetadataCache::preferences.spectators.at(i) == _guestList.getGuests()[_hotseatGuestIndex].userID) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+
 }
 
 void Hosting::pressButtonForAll(ParsecGamepadButtonMessage button) {
@@ -983,6 +1119,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		}
 		else
 		{
+
 			_guestList.deleteMetrics(guest.id);
 			int droppedPads = 0;
 			CommandFF command(guest, _gamepadClient);

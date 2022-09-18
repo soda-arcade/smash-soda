@@ -54,6 +54,8 @@ private:
 	bool _publicGame;
 	bool _latencyLimiter;
 	int32_t _latencyLimit;
+	bool _hotseat;
+	int32_t _hotseatTime;
 
 	int _micVolume = 80;
 	int _speakersVolume = 30;

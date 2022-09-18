@@ -32,6 +32,7 @@ public:
 			break;
 
 		case SEARCH_USER_HISTORY_RESULT::ONLINE:
+			if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
 			handleGuest(GuestData(_onlineGuest.name, _onlineGuest.userID), true, _onlineGuest.id);
 			_guestHistory.pop(_onlineGuest.userID);
 			break;

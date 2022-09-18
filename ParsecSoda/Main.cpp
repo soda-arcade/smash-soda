@@ -125,7 +125,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     g_hosting.init();
 
     HostSettingsWidget hostSettingsWindow(g_hosting, [&hwnd](bool isRunning) {
-            SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Parsec Soda" : L"Parsec Soda");
+            SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Smash Soda" : L"Smash Soda");
     });
     LoginWidget loginWindow(g_hosting, hostSettingsWindow);
     LogWidget logWindow(g_hosting);
