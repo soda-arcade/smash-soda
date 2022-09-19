@@ -25,7 +25,7 @@
     <li><a href="#features">Features</a></li>
     <li><a href="#chat-commands">Chat Commands</a></li>
     <li><a href="#network-latency">Network Latency</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
@@ -41,6 +41,14 @@ The aim of this project is to add additional useful features, with a focus on th
 
 ## Features
 
+  * **Smash Bros Ultimate**
+
+  Some new admin chat commands have been added for making hosting Smash easier. **!bb** will press everybody's B button twice...good when you're stuck the the match results screen!
+
+  Doing 2v2 tournaments on Parsec is tricky, what with the ingame tournament mode not having an option for it. Some new admin chat commands have been added to make it much easier. 
+  
+  **!teams random** will automatically sort all the guests in your room in to teams (or aborting if uneven guest count). Admins can then use the command **!teamswin 1/2** to tell Soda which team has won and it will automatically keep track of everybody's position. It will also automatically put the guests in to the gamepad slots when it is there turn! See all the chat commands <a href="#teams">here</a>.
+
   * **Ping Limit**
 
   This allows you to set a latency limit for your lobby. Those whose pings exceed the limit will be kicked automatically.
@@ -49,6 +57,9 @@ The aim of this project is to add additional useful features, with a focus on th
 
   Grant moderator permissions to users you trust in your lobbies. This will allow your mods to kick troublesome users and other admin tier commands.
 
+  * **Hotseat**
+
+  Hosting a single player game and people aren't sharing nicely? Well now you can set a hotseat timer...when the timer is up, it'll go down the guest list and swap them in to the gamepad 1 slot!
 
   * **Themes**
   
@@ -56,9 +67,12 @@ The aim of this project is to add additional useful features, with a focus on th
 
 ## Chat Commands
 
-Below is a list of all the chat commands. Commands new to Smash Soda are in <span style="color:red">bold</span>.
+Below is a list of all the chat commands.
 
 ##### General
+
+Standard guests, mods and the host can use these commands.
+
 |Command|Description|
 | ----------- | ----------- |
 |!bonk| Bonk another user on the head.
@@ -69,21 +83,41 @@ Below is a list of all the chat commands. Commands new to Smash Soda are in <spa
 |!one| Maps all of your devices to the same gamepad.
 |!pads| Shows who's holding each gamepad.
 |!sfx| Play sound effect.
+|<b>!spectate</b>| Be skipped by hotseat and team commands
 |!swap| Replace your gamepad with another one.
 
 ##### Admin / Moderator
+
+Admins, mods and the host can use these commands.
+
 |Command|Description|
 | ----------- | ----------- |
 |!ban| Ban a guest.
-|!bb| Press everybody's B button twice.
+|<b>!bb</b>| Press everybody's B button twice.
 |!dc| Disconnect a specific gamepad.
 |!kick| Kick user from the room.
-|!strip| Strip gamepad from player's hand.
 |!limit| Set the maximum amount of pads a guest can hold.
+|!strip| Strip gamepad from player's hand.
 |<b>!ping</b>| Returns the ping for a user.
 |!unban| Unban a guest.
 
+##### Teams
+
+Admins, mods and the host can use these commands.
+
+|Command|Description|
+| ----------- | ----------- |
+|!teams random| Sort all the guests in to teams automatically.
+|!teams start| Start the tournament.
+|!teams stop| Stop the tournament.
+|!teams shuffle| Randomize the teams (only when a tournament hasn't started).
+|!teams brackets| Shows the tournament brackets and results in chat.
+|!teamswin [team no.]| Tell the system which team won eg. !teamswin 1
+
 ##### God
+
+Only the host can use these commands.
+
 |Command|Description|
 | ----------- | ----------- |
 |!gameid| Set game ID.
@@ -122,9 +156,18 @@ These values will change colour to give you additional information:
 
 When guests with high latency join your lobby, it can often ruin the quality of your stream for other guests. You can impose a latency limit in the host settings. Guests exceeding the limit will be automatically kicked.
 
-## Roadmap
+## Contributing
 
 See the [open issues](https://github.com/MickeyUK/SmashSoda/issues) for a list of proposed features (and known issues).
+
+Would you like to contribute to the project? That's great! Here's what you do:
+
+
+1. Open a new issue reporting what you're going to do.
+2. Fork this repository.
+3. Create a branch for your feature.
+4. Make your local changes.
+5. Submit a pull request.
 
 
 ## License
