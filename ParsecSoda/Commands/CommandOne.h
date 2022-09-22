@@ -17,7 +17,7 @@ public:
 	{
 		bool isOne = _gamepadClient.toggleIgnoreDeviceID(_sender.userID);
 		_replyMessage = std::string()
-			+ "[ChatBot] | " + _sender.name
+			+ "[MasterHand] | " + _sender.name
 			+ " toggled ignore device ID mode:\t" + (isOne ? "ON" : "OFF")
 			+ "\0";
 		return true;

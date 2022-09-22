@@ -32,7 +32,7 @@ public:
 		//	ParsecHostKickGuest(_parsec, _sender.id);
 		//}
 		//_ban.ban(GuestData(_sender.name, _sender.userID));
-		//_replyMessage = std::string() + "! [ChatBot] | " + _sender.name + " was banned by ChatBot.\n\t\tBEGONE! *MEGA BONK*\0";
+		//_replyMessage = std::string() + "! [MasterHand] | " + _sender.name + " was banned by ChatBot.\n\t\tBEGONE! *MEGA BONK*\0";
 		_replyMessage = "\0";
 
 		//try

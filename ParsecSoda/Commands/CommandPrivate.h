@@ -15,7 +15,7 @@ public:
 
 	bool run() override
 	{
-		_replyMessage = "[ChatBot] | Room set to private.\0";
+		_replyMessage = "[MasterHand] | Room set to private.\0";
 		_config.publicGame = false;
 		return true;
 	}

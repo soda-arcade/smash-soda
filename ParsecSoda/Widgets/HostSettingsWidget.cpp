@@ -10,6 +10,8 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
         strcpy_s(_roomName, cfg.name);
         strcpy_s(_gameID, cfg.gameID);
         strcpy_s(_secret, cfg.secret);
+        strcpy_s(_kioskApplication, "");
+        strcpy_s(_kioskParam, "");
     }
     catch (const std::exception&)
     {
@@ -18,6 +20,8 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
             strcpy_s(_roomName, "");
             strcpy_s(_gameID, "");
             strcpy_s(_secret, "");
+            strcpy_s(_kioskApplication, "");
+            strcpy_s(_kioskParam, "");
         } catch (const std::exception&) {}
     }
     _publicGame = cfg.publicGame;
@@ -38,6 +42,8 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     _hotseat = MetadataCache::preferences.hotseat;
     _hotseatTime = MetadataCache::preferences.hotseatTime;
 
+    _kioskMode = MetadataCache::preferences.kioskMode;
+
     vector<Thumbnail>::iterator it;
     for (it = _thumbnails.begin(); it != _thumbnails.end(); ++it)
     {
@@ -52,6 +58,16 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
         catch (const std::exception&) {}
     }
     updateSecretLink();
+
+    if (strlen(_kioskApplication) == 0) {
+        try { strcpy_s(_kioskApplication, MetadataCache::preferences.kioskApplication.c_str()); }
+        catch (const std::exception&) {}
+    }
+
+    if (strlen(_kioskParam) == 0) {
+        try { strcpy_s(_kioskParam, MetadataCache::preferences.kioskParameters.c_str()); }
+        catch (const std::exception&) {}
+    }
 }
 
 bool HostSettingsWidget::render(HWND& hwnd)
@@ -159,8 +175,33 @@ bool HostSettingsWidget::render(HWND& hwnd)
     cursor = ImGui::GetCursorPos();
 
     AppStyle::pushLabel();
+    ImGui::Text("KIOSK MODE");
+    ImGui::BeginChild("##Kiosk mode child", ImVec2(size.x, 60.0f));
+        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _kioskMode, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+            MetadataCache::preferences.kioskMode = !MetadataCache::preferences.kioskMode;
+            _kioskMode = MetadataCache::preferences.kioskMode;
+        }
+        if (MetadataCache::preferences.kioskMode)    TitleTooltipWidget::render("Kiosk Mode Off", "Don't launch in kiosk mode.");
+        else                    TitleTooltipWidget::render("Kiosk Mode On", "Automatically restart a program if it is closed.");
 
-    ImGui::BeginChild("##Guest slot child", ImVec2(120.0f, 50.0f));
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(size.x - 35);
+        AppStyle::pushInput();
+        if (ImGui::InputText("##Kioskapplication", _kioskApplication, 256)) {
+            MetadataCache::preferences.kioskApplication = _kioskApplication;
+        }
+        TitleTooltipWidget::render("Kiosk Application File Path", "Set the file path of the program you wish to restart.");
+
+        ImGui::SetNextItemWidth(size.x);
+        if (ImGui::InputText("##Kioskparameters", _kioskParam, 256)) {
+            MetadataCache::preferences.kioskParameters = _kioskParam;
+        }
+        TitleTooltipWidget::render("Kiosk Parameters", "Pass any additional parameters to the kiosk application.");
+    ImGui::EndChild();
+
+    AppStyle::pushLabel();
+
+    ImGui::BeginChild("##Guest slot child", ImVec2(size.x/3, 50.0f));
         ImGui::Text("GUEST SLOTS");
         if (IntRangeWidget::render("guest count", _maxGuests, 0, 64, 0.025f)) {
             TitleTooltipWidget::render("Room Slots", "How many guests do you want in this room?");
@@ -169,7 +210,7 @@ bool HostSettingsWidget::render(HWND& hwnd)
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("##Public room child", ImVec2(120.0f, 50.0f));
+    ImGui::BeginChild("##Public room child", ImVec2(size.x / 3, 50.0f));
         ImGui::Text("PUBLIC ROOM");
         ImGui::Indent(20);
         if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _publicGame, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
@@ -181,7 +222,7 @@ bool HostSettingsWidget::render(HWND& hwnd)
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("##Latency child", ImVec2(120.0f, 50.0f));
+    ImGui::BeginChild("##Latency child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("LATENCY LIMITER");
         if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _latencyLimiter, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
             _latencyLimiter = !_latencyLimiter;
@@ -346,6 +387,8 @@ void HostSettingsWidget::savePreferences()
     MetadataCache::preferences.speakersEnabled = _audioOut.isEnabled;
     MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
     MetadataCache::preferences.latencyLimitValue = _latencyLimit;
+    MetadataCache::preferences.kioskApplication = _kioskApplication;
+    MetadataCache::preferences.kioskParameters = _kioskParam;
     MetadataCache::savePreferences();
 }
 

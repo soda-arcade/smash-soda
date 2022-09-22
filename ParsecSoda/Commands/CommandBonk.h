@@ -23,7 +23,7 @@ public:
 		if (!_stopwatch.isFinished())
 		{
 			_replyMessage = std::string() +
-				"[ChatBot] | Bonk command is on cooldown: " +
+				"[MasterHand] | Bonk command is on cooldown: " +
 				to_string(_stopwatch.getRemainingTime()/1000) + " seconds left.\0";
 			return false;
 		}
@@ -57,9 +57,9 @@ public:
 		{
 		case SEARCH_USER_RESULT::NOT_FOUND:
 			if (Dice::roll(BONK_CHANCE))
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " dreams of bonking but the target out of reach.\0";
+				_replyMessage = std::string() + "[MasterHand] | " + _sender.name + " dreams of bonking but the target out of reach.\0";
 			else
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " yearns for bonking but the victim is not here.\0";
+				_replyMessage = std::string() + "[MasterHand] | " + _sender.name + " yearns for bonking but the victim is not here.\0";
 			break;
 
 		case SEARCH_USER_RESULT::FOUND:
@@ -67,7 +67,7 @@ public:
 			rv = true;
 			if (_sender.userID == _targetGuest.userID)
 			{
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " self-bonked. *Bonk!*\0";
+				_replyMessage = std::string() + "[MasterHand] | " + _sender.name + " self-bonked. *Bonk!*\0";
 				try
 				{
 					PlaySound(TEXT("./sfx/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
@@ -76,7 +76,7 @@ public:
 			}
 			else if (Dice::roll(BONK_CHANCE))
 			{
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " bonked " + _targetGuest.name + ". *Bonk!*\0";
+				_replyMessage = std::string() + "[MasterHand] | " + _sender.name + " bonked " + _targetGuest.name + ". *Bonk!*\0";
 				try
 				{
 					PlaySound(TEXT("./sfx/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
@@ -85,7 +85,7 @@ public:
 			}
 			else
 			{
-				_replyMessage = std::string() + "[ChatBot] | " + _targetGuest.name + " dodged " + _sender.name + "'s bonk. *Swoosh!*\0";
+				_replyMessage = std::string() + "[MasterHand] | " + _targetGuest.name + " dodged " + _sender.name + "'s bonk. *Swoosh!*\0";
 				try
 				{
 					PlaySound(TEXT("./sfx/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
@@ -96,7 +96,7 @@ public:
 		
 		case SEARCH_USER_RESULT::FAILED:
 		default:
-			_replyMessage = "[ChatBot] | Usage: !bonk <username>\nExample: !bonk melon\0";
+			_replyMessage = "[MasterHand] | Usage: !bonk <username>\nExample: !bonk melon\0";
 			break;
 		}
 

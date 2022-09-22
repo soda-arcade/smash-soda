@@ -22,13 +22,13 @@ public:
 			for (int i = MetadataCache::preferences.spectators.size() - 1; i >= 0; i--) {
 				if (MetadataCache::preferences.spectators.at(i) == _sender.userID) {
 					MetadataCache::preferences.spectators.erase(MetadataCache::preferences.spectators.begin() + i);
-					_replyMessage = "[ChatBot] | " + _sender.name + " is no longer spectating.\0";
+					_replyMessage = "[MasterHand] | " + _sender.name + " is no longer spectating.\0";
 					return true;
 				}
 			}
 		}
 		
-		_replyMessage = "[ChatBot] | " + _sender.name + " is now spectating.\0";
+		_replyMessage = "[MasterHand] | " + _sender.name + " is now spectating.\0";
 		MetadataCache::preferences.spectators.push_back(_sender.userID);
 		return true;
 	}

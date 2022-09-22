@@ -4,6 +4,8 @@
 #define D3D_DEBUG_INFO
 
 #include <iostream>
+#include <fstream>
+#include <stdlib.h>
 #include <d3d11.h>
 #include <dxgi.h>
 #include <dxgi1_2.h>
@@ -124,6 +126,7 @@ private:
 
 	void setHotseatGuest();
 	bool isSpectator();
+	void kioskMode();
 
 	void pressButtonForAll(ParsecGamepadButtonMessage button);
 	ParsecGamepadButtonMessage pressButton(ParsecGamepadButton button, bool in);

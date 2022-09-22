@@ -17,14 +17,14 @@ public:
 	{
 		if (_sfxList.size() <= 0)
 		{
-			_replyMessage = "[ChatBot] | No sound effects available.\0";
+			_replyMessage = "[MasterHand] | No sound effects available.\0";
 			return false;
 		}
 
 		if ( !ACommandStringArg::run() )
 		{
 			_replyMessage =
-				string("[ChatBot] | Usage: !sfx <sound name> | Example: !sfx bruh\n") +
+				string("[MasterHand] | Usage: !sfx <sound name> | Example: !sfx bruh\n") +
 				string("List of available sound names:\n") +
 				_sfxList.loadedTags() +
 				string("\0");
@@ -37,13 +37,13 @@ public:
 		{
 		case SFXList::SFXPlayResult::COOLDOWN:
 			_replyMessage =
-				string("[ChatBot] | Command !sfx is on cooldown: ") +
+				string("[MasterHand] | Command !sfx is on cooldown: ") +
 				to_string(_sfxList.getRemainingCooldown()) +
 				string(" seconds left.");
 			break;
 		case SFXList::SFXPlayResult::NOT_FOUND:
 			_replyMessage =
-				string("[ChatBot] | This sound does not exist.\n") +
+				string("[MasterHand] | This sound does not exist.\n") +
 				string("List of available sound effects:\n") +
 				_sfxList.loadedTags() +
 				string("\0");

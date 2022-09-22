@@ -87,10 +87,49 @@ public:
 		string discord = "";
 		bool hotseat = false;
 		unsigned int hotseatTime = 0;
+		bool kioskMode = false;
+		string kioskApplication = "";
+		string kioskParameters = "";
 
+		bool kioskRestarting = false;
 		bool hotseatReset = false;
 		std::vector<int> buttonList;
 		std::vector<uint32_t> spectators;
+	};
+
+	class Teams {
+	public:
+
+		class Team {
+		public:
+			vector<string> guests;
+		};
+
+		class Bracket {
+		public:
+			vector<Team> teams;
+			vector<int> scores;
+
+			int winningTeamIndex = 0;
+			bool isOver = false;
+		};
+
+		class Round {
+		public:
+			vector<Bracket> brackets;
+
+			int winningTeamIndex = 0;
+			bool isOver = false;
+		};
+
+		vector<string> guests;
+		vector<Team> teams;
+		vector<Round> rounds;
+
+		bool isStarted = false;
+
+		static bool reset();
+
 	};
 
 	static SessionCache loadSessionCache();
@@ -115,6 +154,7 @@ public:
 	static bool saveTheme(int theme);
 
 	static Preferences preferences;
+	static Teams teams;
 
 private:
 	static string getUserDir();

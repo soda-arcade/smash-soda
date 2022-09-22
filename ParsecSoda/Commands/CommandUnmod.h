@@ -20,7 +20,7 @@ public:
 	{
 		if (!ACommandStringArg::run())
 		{
-			_replyMessage = "[ChatBot] | Usage: !unmod <username>\nExample: !unmod MickeyUK\0";
+			_replyMessage = "[MasterHand] | Usage: !unmod <username>\nExample: !unmod MickeyUK\0";
 			return false;
 		}
 
@@ -46,7 +46,7 @@ public:
 		{
 			std::ostringstream reply;
 			reply
-				<< "[ChatBot] | " << _sender.name << " has revoked mod permissions:\n"
+				<< "[MasterHand] | " << _sender.name << " has revoked mod permissions:\n"
 				<< "\t\t" << unmoddedGuest.name << "\t(#" << unmoddedGuest.userID << ")\0";
 			_replyMessage = reply.str();
 			_guestHistory.add(unmoddedGuest);
@@ -54,7 +54,7 @@ public:
 		}
 		else
 		{
-			_replyMessage = std::string() + "[ChatBot] | " + _sender.name + ", I cannot find the user you want to unmod.\0";
+			_replyMessage = std::string() + "[MasterHand] | " + _sender.name + ", I cannot find the user you want to unmod.\0";
 			return false;
 		}
 	}

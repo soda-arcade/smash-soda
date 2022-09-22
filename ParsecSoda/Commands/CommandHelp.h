@@ -77,7 +77,7 @@ public:
 		else												commandList = pleb_commands;
 
 		_replyMessage =
-			string("[ChatBot] | Command list: ")
+			string("[MasterHand] | Command list: ")
 			+ commandList
 			+ "\n\0";
 

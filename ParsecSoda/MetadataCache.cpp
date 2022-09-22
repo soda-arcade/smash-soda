@@ -8,6 +8,8 @@ string MetadataCache::_nonce = "ParsecSoda**";
 MetadataCache::Preferences MetadataCache::preferences = MetadataCache::Preferences();
 mutex MetadataCache::_mutex;
 
+MetadataCache::Teams MetadataCache::teams = MetadataCache::Teams();
+
 MetadataCache::SessionCache MetadataCache::loadSessionCache()
 {
     SessionCache result = SessionCache();
@@ -118,7 +120,9 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             char roomName[256] = "", gameID[72] = "", secret[32] = "";
             char websocketURI[50] = "";
             char websocketPassword[32] = "";
-            char discord[256] = "";
+            char discord[128] = "";
+            char kioskApplication[256] = "";
+            char kioskParameters[256] = "";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -237,11 +241,17 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetUInt(json, "lockedGamepadButtons", &preferences.lockedGamepadButtons)) preferences.lockedGamepadButtons = 0;
             if (!MTY_JSONObjGetUInt(json, "theme", &preferences.theme)) preferences.theme = 0;
 
-            if (MTY_JSONObjGetString(json, "discord", discord, 256)) preferences.discord = discord;
+            if (MTY_JSONObjGetString(json, "discord", discord, 128)) preferences.discord = discord;
             else preferences.discord = "";
 
             if (!MTY_JSONObjGetBool(json, "hotseat", &preferences.hotseat)) preferences.latencyLimitEnabled = false;
             if (!MTY_JSONObjGetUInt(json, "hotseatTime", &preferences.hotseatTime)) preferences.hotseatTime = 15;
+
+            if (!MTY_JSONObjGetBool(json, "kioskMode", &preferences.kioskMode)) preferences.kioskMode = false;
+            if (MTY_JSONObjGetString(json, "kioskApplication", kioskApplication, 256)) preferences.kioskApplication = kioskApplication;
+            else preferences.kioskApplication = "";
+            if (MTY_JSONObjGetString(json, "kioskParameters", kioskParameters, 256)) preferences.kioskParameters = kioskParameters;
+            else preferences.kioskParameters = "";
 
             preferences.isValid = true;
 
@@ -314,6 +324,9 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetString(json, "discord", preferences.discord.c_str());
         MTY_JSONObjSetBool(json, "hotseat", preferences.hotseat);
         MTY_JSONObjSetUInt(json, "hotseatTime", preferences.hotseatTime);
+        MTY_JSONObjSetBool(json, "kioskMode", preferences.kioskMode);
+        MTY_JSONObjSetString(json, "kioskApplication", preferences.kioskApplication.c_str());
+        MTY_JSONObjSetString(json, "kioskParameters", preferences.kioskParameters.c_str());
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
@@ -722,4 +735,15 @@ string MetadataCache::getUserDir()
     }
 
     return string();
+}
+
+bool MetadataCache::Teams::reset() {
+
+    // Clear lists
+    MetadataCache::teams.guests = vector<string>();
+    MetadataCache::teams.teams = vector<Team>();
+    MetadataCache::teams.rounds = vector<Round>();
+
+    return true;
+
 }

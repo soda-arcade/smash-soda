@@ -50,6 +50,9 @@ private:
 	char _gameID[GAME_ID_LEN];
 	char _secret[HOST_SECRET_LEN];
 	char _secretLink[128];
+	bool _kioskMode;
+	char _kioskApplication[256];
+	char _kioskParam[256];
 	int32_t _maxGuests;
 	bool _publicGame;
 	bool _latencyLimiter;

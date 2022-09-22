@@ -19,6 +19,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
 	if (msgIsEqual(msg, CommandSpectate::prefixes()))	return new CommandSpectate(sender);
 	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
+	if (msgStartsWith(msg, CommandTeams::prefixes()))	return new CommandTeams(msg, sender, _guests, _gamepadClient, _tierList);
 
 //#if !BASIC_VERSION
 	if (!_basicVersion)
@@ -39,6 +40,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
+		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient);
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
 		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
@@ -121,7 +123,7 @@ const std::string ChatBot::formatBannedGuestMessage(Guest guest)
 const std::string ChatBot::formatModGuestMessage(Guest guest) {
 
 	std::ostringstream reply;
-	reply << "[ChatBot] | Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
+	reply << "[MasterHand] | Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
 
 	return reply.str();
 

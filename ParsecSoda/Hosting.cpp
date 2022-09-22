@@ -366,6 +366,10 @@ void Hosting::startHosting()
 					setHotseatGuest();
 				}
 
+				// Start kiosk mode
+				if (MetadataCache::preferences.kioskMode)
+					kioskMode();
+
 			}
 		}
 		catch (const exception&)
@@ -388,6 +392,25 @@ void Hosting::stopHosting()
 	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
 	}
+}
+
+void Hosting::kioskMode() {
+
+	ofstream kioskBatch;
+
+	kioskBatch.open("kioskbatch.bat", ios::out);
+	kioskBatch << "@echo OFF\n";
+	kioskBatch << ":Start\n";
+	kioskBatch << "\"" + MetadataCache::preferences.kioskApplication + "\" " + MetadataCache::preferences.kioskParameters + "\n";
+	kioskBatch << ":: Wait 30 seconds before restarting.\n";
+	kioskBatch << "TIMEOUT /T 30\n";
+	kioskBatch << "GOTO:Start\n";
+
+	kioskBatch.close();
+
+	ShellExecute(NULL, _T("open"), _T("cmd.exe"), _T("/C kioskbatch.bat"), 0, SW_SHOW);
+	//remove("kioskbatch.bat");
+
 }
 
 void Hosting::stripGamepad(int index)
@@ -744,13 +767,13 @@ void Hosting::pollAutoGamepad() {
 
 				// Reminder in chat
 				if (_hotseatReminderClock.isFinished()) {
-					broadcastChatMessage("[ChatBot] | " + _hotseatGuest.name + " has " + std::to_string(time) + " minutes left to play.\0");
+					broadcastChatMessage("[MasterHand] | " + _hotseatGuest.name + " has " + std::to_string(time) + " minutes left to play.\0");
 					_hotseatReminderClock.reset();
 				}
 
 				// 10 second warning
 				if (_hotseatWarning && _hotseatClock.getRemainingTime() < 10000) {
-					broadcastChatMessage("[ChatBot] | The gamepad is about to be swapped in 10 SECONDS!\0");
+					broadcastChatMessage("[MasterHand] | The gamepad is about to be swapped in 10 SECONDS!\0");
 					_hotseatWarning = false;
 				}
 
@@ -841,7 +864,7 @@ void Hosting::setHotseatGuest() {
 
 		// Chatbot
 		_hotseatWarning = true;
-		broadcastChatMessage("[ChatBot] | " + _hotseatGuest.name + " now has control of the gamepad!\0");
+		broadcastChatMessage("[MasterHand] | " + _hotseatGuest.name + " now has control of the gamepad!\0");
 
 		// Reset timer
 		_hotseatClock.reset();

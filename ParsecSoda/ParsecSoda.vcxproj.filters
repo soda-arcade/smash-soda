@@ -698,6 +698,12 @@
     <ClInclude Include="Commands\CommandSpectate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Commands\CommandRestart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandTeams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
