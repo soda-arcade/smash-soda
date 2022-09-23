@@ -39,6 +39,8 @@ This is a modification of <a href="https://github.com/FlavioFS/">ParsecSoda</a>,
 
 The aim of this project is to add additional useful features, with a focus on those who wish to host Super Smash Bros Ultimate.
 
+This is an experimental version of Parsec Soda...expect bugs! Help development by reporting <a href="https://github.com/MickeyUK/SmashSoda/issues">issues</a> and contributing to the <a href="https://github.com/MickeyUK/SmashSoda/discussions">Discussions</a>!
+
 ## Features
 
   * **Smash Bros Ultimate**
@@ -101,19 +103,6 @@ Admins, mods and the host can use these commands.
 |<b>!ping</b>| Returns the ping for a user.
 |!unban| Unban a guest.
 
-##### Teams
-
-Admins, mods and the host can use these commands.
-
-|Command|Description|
-| ----------- | ----------- |
-|!teams random| Sort all the guests in to teams automatically.
-|!teams start| Start the tournament.
-|!teams stop| Stop the tournament.
-|!teams shuffle| Randomize the teams (only when a tournament hasn't started).
-|!teams brackets| Shows the tournament brackets and results in chat.
-|!teamswin [team no.]| Tell the system which team won eg. !teamswin 1
-
 ##### God
 
 Only the host can use these commands.
@@ -169,6 +158,9 @@ Would you like to contribute to the project? That's great! Here's what you do:
 4. Make your local changes.
 5. Submit a pull request.
 
+I am working on this project as a hobby and an opportunity for me to learn more about working with C++. If you love Smash Soda, consider <a href="https://www.paypal.com/donate?hosted_button_id=28PBV9DFYQC72">donating to FlavioFS</a> for his amazing work on Parsec Soda!
+
+Hey though, if you'd like to <a href="https://ko-fi.com/mickeyuk">buy me a coffee</a>, I won't say no!
 
 ## License
 
