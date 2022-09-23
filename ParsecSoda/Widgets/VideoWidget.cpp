@@ -35,9 +35,9 @@ bool VideoWidget::render()
 
     ImGui::SetNextItemWidth(size.x);
 
-    //AppStyle::pushLabel();
-    //ImGui::Text("Monitors");
-    //AppStyle::pop();
+    AppStyle::pushLabel();
+    ImGui::Text("Monitors");
+    AppStyle::pop();
     AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("##Monitor list", screenName.c_str()))
@@ -74,9 +74,9 @@ bool VideoWidget::render()
 
     ImGui::SetNextItemWidth(size.x);
 
-    //AppStyle::pushLabel();
-    //ImGui::Text("Adapters");
-    //AppStyle::pop();
+    AppStyle::pushLabel();
+    ImGui::Text("Adapters");
+    AppStyle::pop();
     AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("##Adapter list", gpuName.c_str()))

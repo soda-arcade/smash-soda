@@ -15,12 +15,14 @@ bool VersionWidget::render()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0));
 
-    ImGui::SetNextWindowPos(ImVec2(res.x - 80, res.y - 107));
-    ImGui::SetNextWindowSize(ImVec2(80, 52));
+    ImGui::SetNextWindowPos(ImVec2(res.x - 150, res.y - 107));
+    ImGui::SetNextWindowSize(ImVec2(150, 52));
     ImGui::Begin("##Version", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
-    AppStyle::pushLabel();
+    AppStyle::pushInput();
+    ImGui::Text("FPS: ");
+    ImGui::SameLine();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
-    ImGui::Text("v. 2.04");
+    ImGui::Text("Smash Soda v. 3.00");
     AppStyle::pop();
     ImGui::End();
 

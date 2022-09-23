@@ -141,7 +141,7 @@ bool GamepadsWidget::render()
 
         ImGui::BeginChild(
             (string("##Gamepad " ) + to_string(i)).c_str(),
-            ImVec2(size.x, 50)
+            ImVec2(size.x, 80)
         );
 
         cursor = ImGui::GetCursorPos();
@@ -215,84 +215,13 @@ bool GamepadsWidget::render()
         ImGui::EndGroup();
 
         ImGui::SameLine();
-
-        if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
-        {
-            if (gi->isOwned() && ws.connected())
-            {
-                MTY_JSON* jmsg = MTY_JSONObjCreate();
-                MTY_JSONObjSetString(jmsg, "type", "gamepadstrip");
-                MTY_JSONObjSetUInt(jmsg, "id", gi->owner.guest.id);
-                MTY_JSONObjSetUInt(jmsg, "userid", gi->owner.guest.userID);
-                MTY_JSONObjSetString(jmsg, "username", gi->owner.guest.name.c_str());
-                MTY_JSONObjSetUInt(jmsg, "index", i);
-                char* finmsg = MTY_JSONSerialize(jmsg);
-                ws.handle_message(finmsg);
-                MTY_JSONDestroy(&jmsg);
-                MTY_Free(finmsg);
-            }
-            gi->clearOwner();
-        }
-        TitleTooltipWidget::render("Strip gamepad", "Unlink current user from this gamepad.");
-
-        ImGui::SameLine();
-
-        if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOff, gi->isConnected(), ImVec2(24, 24)))
-        {
-            if (gi->isConnected()) gi->disconnect();
-            else gi->connect();
-
-            isConnectionButtonPressed = true;
-        }
-        if (gi->isConnected()) TitleTooltipWidget::render("Connected gamepad", "Press to \"physically\" disconnect\nthis gamepad (at O.S. level).");
-        else                  TitleTooltipWidget::render("Disconnected gamepad", "Press to \"physically\" connect\nthis gamepad (at O.S. level).");
-    
-        ImGui::SameLine();
-
-        if (gi->isLocked())
-        {
-            if (IconButton::render(AppIcons::lock, AppColors::negative, ImVec2(24, 24)))
-            {
-                gi->toggleLocked();
-            }
-            TitleTooltipWidget::render("Locked gamepad", "Unlock this specific gamepad, allowing inputs and picking.");
-        }
-        else
-        {
-            if (IconButton::render(AppIcons::unlock, AppColors::positive, ImVec2(24, 24)))
-            {
-                gi->toggleLocked();
-            }
-            TitleTooltipWidget::render("Unlocked gamepad", "Lock this specific gamepad, preventing inputs or picking.");
-        }
-
-        ImGui::SameLine();
-
-        if (gi->isLockedButtons())
-        {
-            if (IconButton::render(AppIcons::buttonLock, AppColors::negative, ImVec2(24, 24)))
-            {
-                gi->toggleLockedButtons();
-            }
-            TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
-        }
-        else
-        {
-            if (IconButton::render(AppIcons::buttonLock, AppColors::positive, ImVec2(24, 24)))
-            {
-                gi->toggleLockedButtons();
-            }
-            TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
-        }
-
-        ImGui::SameLine();
         
         static float gamepadLabelWidth;
-        gamepadLabelWidth = size.x - 210.0f;
+        gamepadLabelWidth = size.x - 75.0f;
         
         ImGui::BeginChild(
             (string("##name ") + to_string(i)).c_str(),
-            ImVec2(gamepadLabelWidth, 35.0f)
+            ImVec2(gamepadLabelWidth, 70.0f)
         );
         cursor = ImGui::GetCursorPos();
 
@@ -315,6 +244,9 @@ bool GamepadsWidget::render()
             name = "    ";
         }
 
+        ImGui::Indent(5.0f);
+        ImGui::Dummy(ImVec2(0, 3.0f));
+
         AppStyle::pushLabel();
         //ImGui::TextWrapped(id.c_str());
         ImGui::Text(id.c_str());
@@ -326,6 +258,8 @@ bool GamepadsWidget::render()
         ImGui::Text(name.c_str());
         AppColors::pop();
         AppFonts::pop();
+
+        ImGui::Unindent();
 
         static ImVec2 backupCursor;
         backupCursor = ImGui::GetCursorPos();
@@ -426,21 +360,95 @@ bool GamepadsWidget::render()
 
         ImGui::SetCursorPos(backupCursor);
 
-        ImGui::EndChild();
-        
+        ImGui::Dummy(ImVec2(0, 8));
+
+        ImGui::Indent(20.0f);
+
+        if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
+        {
+            if (gi->isOwned() && ws.connected())
+            {
+                MTY_JSON* jmsg = MTY_JSONObjCreate();
+                MTY_JSONObjSetString(jmsg, "type", "gamepadstrip");
+                MTY_JSONObjSetUInt(jmsg, "id", gi->owner.guest.id);
+                MTY_JSONObjSetUInt(jmsg, "userid", gi->owner.guest.userID);
+                MTY_JSONObjSetString(jmsg, "username", gi->owner.guest.name.c_str());
+                MTY_JSONObjSetUInt(jmsg, "index", i);
+                char* finmsg = MTY_JSONSerialize(jmsg);
+                ws.handle_message(finmsg);
+                MTY_JSONDestroy(&jmsg);
+                MTY_Free(finmsg);
+            }
+            gi->clearOwner();
+        }
+        TitleTooltipWidget::render("Strip gamepad", "Unlink current user from this gamepad.");
+
         ImGui::SameLine();
-        
+
+        if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOff, gi->isConnected(), ImVec2(24, 24)))
+        {
+            if (gi->isConnected()) gi->disconnect();
+            else gi->connect();
+
+            isConnectionButtonPressed = true;
+        }
+        if (gi->isConnected()) TitleTooltipWidget::render("Connected gamepad", "Press to \"physically\" disconnect\nthis gamepad (at O.S. level).");
+        else                  TitleTooltipWidget::render("Disconnected gamepad", "Press to \"physically\" connect\nthis gamepad (at O.S. level).");
+
+        ImGui::SameLine();
+
+        if (gi->isLocked())
+        {
+            if (IconButton::render(AppIcons::lock, AppColors::negative, ImVec2(24, 24)))
+            {
+                gi->toggleLocked();
+            }
+            TitleTooltipWidget::render("Locked gamepad", "Unlock this specific gamepad, allowing inputs and picking.");
+        }
+        else
+        {
+            if (IconButton::render(AppIcons::unlock, AppColors::positive, ImVec2(24, 24)))
+            {
+                gi->toggleLocked();
+            }
+            TitleTooltipWidget::render("Unlocked gamepad", "Lock this specific gamepad, preventing inputs or picking.");
+        }
+
+        ImGui::SameLine();
+
+        if (gi->isLockedButtons())
+        {
+            if (IconButton::render(AppIcons::buttonLock, AppColors::negative, ImVec2(24, 24)))
+            {
+                gi->toggleLockedButtons();
+            }
+            TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
+        }
+        else
+        {
+            if (IconButton::render(AppIcons::buttonLock, AppColors::positive, ImVec2(24, 24)))
+            {
+                gi->toggleLockedButtons();
+            }
+            TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
+        }
+
+        ImGui::SameLine();
+
         ImGui::BeginGroup();
+
+        ImGui::Indent(10.0f);
+
         if (_hosting.getGamepadClient().isPuppetMaster && gi->isPuppet)
         {
-            //ImGui::Dummy(ImVec2(0, 8));
+            ImGui::Dummy(ImVec2(0, 5.0f));
             ImGui::Image(AppIcons::puppet, ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), AppColors::primary);
             TitleTooltipWidget::render("Puppet", "This gamepad is under control of Master of Puppets.");
         }
         else
         {
             static int deviceIndices[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-            //ImGui::Dummy(ImVec2(0.0f, 12.0f));
+            ImGui::Dummy(ImVec2(0, 5.0f));
             ImGui::SetNextItemWidth(40);
             deviceIndices[i] = gi->owner.deviceID;
 
@@ -457,7 +465,15 @@ bool GamepadsWidget::render()
 
             TitleTooltipWidget::render("Device index", "A guest may have multiple gamepads in the same machine.");
         }
+
         ImGui::EndGroup();
+
+
+        ImGui::EndChild();
+        
+        //ImGui::SameLine();
+        
+        
         ImGui::EndChild();
 
         //ImGui::Dummy(ImVec2(0, 2));

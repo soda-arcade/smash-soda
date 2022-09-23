@@ -159,7 +159,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     //m_pTaskBarlist->SetProgressState(hwnd, TBPF_ERROR);
     //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
 
-    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
     ImGui::loadStyle(MetadataCache::preferences.theme);
 
     bool showHostSettings = true;

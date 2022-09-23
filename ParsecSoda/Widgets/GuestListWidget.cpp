@@ -106,7 +106,7 @@ void GuestListWidget::renderOnlineGuests()
             }
         }
 
-        IconButton::render(AppIcons::kick, AppColors::primary, ImVec2(30, 30));
+        IconButton::render(AppIcons::kick, AppColors::primary, ImVec2(24, 24));
         if (ImGui::IsItemActive())
         {
             showKickPopup = true;
@@ -121,7 +121,7 @@ void GuestListWidget::renderOnlineGuests()
 
         ImGui::SameLine();
 
-        IconButton::render(AppIcons::block, AppColors::primary, ImVec2(30, 30));
+        IconButton::render(AppIcons::block, AppColors::primary, ImVec2(24, 24));
         if (ImGui::IsItemActive())
         {
             showBanPopup = true;
