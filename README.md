@@ -24,7 +24,6 @@
     </li>
     <li><a href="#features">Features</a></li>
     <li><a href="#chat-commands">Chat Commands</a></li>
-    <li><a href="#network-latency">Network Latency</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -40,6 +39,8 @@ This is a modification of <a href="https://github.com/FlavioFS/">ParsecSoda</a>,
 The aim of this project is to add additional useful features, with a focus on those who wish to host Super Smash Bros Ultimate.
 
 This is an experimental version of Parsec Soda...expect bugs! Help development by reporting <a href="https://github.com/MickeyUK/SmashSoda/issues">issues</a> and contributing to the <a href="https://github.com/MickeyUK/SmashSoda/discussions">Discussions</a>!
+
+## <a href="https://github.com/MickeyUK/SmashSoda/releases">DOWNLOAD LATEST VERSION HERE</a>
 
 ## Features
 
@@ -120,30 +121,6 @@ Only the host can use these commands.
 |!setconfig| Apply config changes.
 |!speakers| Set speakers volume.
 |<b>!unmod</b>| Revoke moderator permissions.
-
-## Network Latency
-
-When guests join your lobby you will see a set of numbers below their username. These are metrics that measure how good their connection is to you.
-
-<img src="github/network.png">
-
-|Value|Description|
-| ----------- | ----------- |
-|**Latency**| Latency (or ping) of guest in milliseconds.
-|**Bandwidth**| Maximum rate of data transfer (in Mbps).
-|**Decode**| Queued frames/decode latency in milliseconds.
-|**Encode**| Host encoding latency in milliseconds.
-|**Network**| Slow retransmits/Fast retransmits.
-
-These values will change colour to give you additional information:
-
-|Colour|Description|
-| ----------- | ----------- |
-|<span style="color: green; font-weight: bold">Green</span>| No retransmits in the last 2 seconds.
-|<span style="color: orange; font-weight: bold">Yellow</span>| At least 1 fast retransmit in the last 2 seconds.
-|<span style="color: red; font-weight: bold">Red</span>| At least 1 slow retransmit in the last 2 seconds.
-
-When guests with high latency join your lobby, it can often ruin the quality of your stream for other guests. You can impose a latency limit in the host settings. Guests exceeding the limit will be automatically kicked.
 
 ## Contributing
 
