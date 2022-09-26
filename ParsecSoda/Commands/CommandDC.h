@@ -21,7 +21,7 @@ public:
 		{
 			_replyMessage =
 				std::string() +
-				"[MasterHand] | Usage: !dc <integer in range [1, " +
+				MetadataCache::preferences.chatbotName + " | Usage: !dc <integer in range [1, " +
 				to_string(maxIndex) +
 				"]>\nExample: !dc 1\0"
 				;
@@ -32,16 +32,16 @@ public:
 		std::ostringstream reply;
 		if (_intArg < 1 || _intArg > maxIndex)
 		{
-			reply << "[MasterHand] | Wrong index: " << _intArg << " is not in range [1, " << maxIndex << "].\0";
+			reply << MetadataCache::preferences.chatbotName + " | Wrong index: " << _intArg << " is not in range [1, " << maxIndex << "].\0";
 		}
 
 		if (_gamepadClient.disconnect(_intArg - 1))
 		{
-			reply << "[MasterHand] | Gamepad " << _intArg << " disconnected.\0";
+			reply << MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " disconnected.\0";
 		}
 		else
 		{
-			reply << "[MasterHand] | Gamepad " << _intArg << " fail to disconnect.\0";
+			reply << MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " fail to disconnect.\0";
 		}
 
 		_replyMessage = reply.str();

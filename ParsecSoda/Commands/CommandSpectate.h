@@ -18,18 +18,18 @@ public:
 
 	bool run() override {
 
-		if (MetadataCache::preferences.spectators.empty() == false) {
-			for (int i = MetadataCache::preferences.spectators.size() - 1; i >= 0; i--) {
-				if (MetadataCache::preferences.spectators.at(i) == _sender.userID) {
-					MetadataCache::preferences.spectators.erase(MetadataCache::preferences.spectators.begin() + i);
-					_replyMessage = "[MasterHand] | " + _sender.name + " is no longer spectating.\0";
+		if (MetadataCache::hotseat.spectators.empty() == false) {
+			for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
+				if (MetadataCache::hotseat.spectators.at(i) == _sender.userID) {
+					MetadataCache::hotseat.spectators.erase(MetadataCache::hotseat.spectators.begin() + i);
+					_replyMessage = MetadataCache::preferences.chatbotName + " | " + _sender.name + " is no longer spectating.\0";
 					return true;
 				}
 			}
 		}
 		
-		_replyMessage = "[MasterHand] | " + _sender.name + " is now spectating.\0";
-		MetadataCache::preferences.spectators.push_back(_sender.userID);
+		_replyMessage = MetadataCache::preferences.chatbotName + " | " + _sender.name + " is now spectating.\0";
+		MetadataCache::hotseat.spectators.push_back(_sender.userID);
 		return true;
 	}
 

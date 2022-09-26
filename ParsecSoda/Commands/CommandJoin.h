@@ -14,7 +14,8 @@ public:
 	bool run() override
 	{
 		_replyMessage = std::string()
-			+ "[MasterHand] | You don't need a command to get a gamepad.\n"
+			+ MetadataCache::preferences.chatbotName
+			+ " | You don't need a command to get a gamepad.\n"
 			+ "\tJust press (A, B, X or Y) to pick a random controller,\n"
 			+ "\tif there are any free controllers available.\0";
 

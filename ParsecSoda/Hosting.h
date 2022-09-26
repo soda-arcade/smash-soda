@@ -118,18 +118,18 @@ private:
 	void pollEvents();
 	void pollInputs();
 	void pollLatency();
-	void pollAutoGamepad();
+	void pollSmashSoda();	// Custom features thread
 	void pollGamepad();
 	bool parsecArcadeStart();
 	bool isFilteredCommand(ACommand* command);
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
-	void setHotseatGuest();
-	bool isSpectator();
+	void autoGamepad();
 	void kioskMode();
+	void hotseat();
 
 	void pressButtonForAll(ParsecGamepadButtonMessage button);
-	ParsecGamepadButtonMessage pressButton(ParsecGamepadButton button, bool in);
+	ParsecGamepadButtonMessage createButtonMessage(ParsecGamepadButton button, bool in);
 
 	// Attributes
 	AudioMix _audioMix;
@@ -157,25 +157,18 @@ private:
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
 	bool _isLatencyThreadRunning = false;
-	bool _isAutoGamepadThreadRunning = false;
+	bool _isSmashSodaThreadRunning = false;
 	bool _isGamepadThreadRunning = false;
 	bool _isWebSocketThreadRunning = false;
-	bool _autoIsPressed = false;
-
-	Guest _hotseatGuest;
-	int _hotseatGuestIndex;
 
 	Stopwatch _mediaClock;
-	Stopwatch _hotseatClock;
-	Stopwatch _hotseatReminderClock;
-	bool _hotseatWarning = false;
 
 	thread _mainLoopControlThread;
 	thread _mediaThread;
 	thread _inputThread;
 	thread _eventThread;
 	thread _latencyThread;
-	thread _autoGamepadThread;
+	thread _smashSodaThread;
 	thread _gamepadThread;
 	thread _webSocketThread;
 	thread _createGamepadsThread;
@@ -185,7 +178,7 @@ private:
 	mutex _inputMutex;
 	mutex _eventMutex;
 	mutex _latencyMutex;
-	mutex _autoGamepadMutex;
+	mutex _smashSodaMutex;
 	mutex _gamepadMutex;
 	mutex _webSocketMutex;
 };

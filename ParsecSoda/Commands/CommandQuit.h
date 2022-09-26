@@ -13,7 +13,7 @@ public:
 
 	bool run() override
 	{
-		_replyMessage = "[MasterHand] | Closing stream...\0";
+		_replyMessage = MetadataCache::preferences.chatbotName + " | Closing stream...\0";
 		_hostingLoopController = false;
 		return true;
 	}

@@ -16,10 +16,10 @@ public:
 
 	bool run() override {
 
-		MetadataCache::preferences.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_B);
-		MetadataCache::preferences.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_B);
+		MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_B);
+		MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_B);
 
-		_replyMessage = "[MasterHand] | Everybody's B button was pressed twice!\0";
+		_replyMessage = MetadataCache::preferences.chatbotName + " | Everybody's B button was pressed twice!\0";
 		return true;
 	}
 

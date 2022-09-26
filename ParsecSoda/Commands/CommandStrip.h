@@ -18,22 +18,22 @@ public:
 	{
 		if (!ACommandIntegerArg::run())
 		{
-			_replyMessage = "[MasterHand] | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
 			return false;
 		}
 
 		bool success = _gamepadClient.clearOwner(_intArg-1);
 		if (!success)
 		{
-			_replyMessage = "[MasterHand] | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
 			return false;
 		}
 
-		if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
+		
 
 		std::ostringstream reply;
 		reply
-			<< "[MasterHand] | Gamepad " << _intArg << " was forcefully dropped by " << _sender.name << "\n"
+			<< MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " was forcefully dropped by " << _sender.name << "\n"
 			<< "\t\tType !pads to see the gamepad list.\0";
 
 		_replyMessage = reply.str();

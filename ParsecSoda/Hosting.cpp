@@ -349,22 +349,9 @@ void Hosting::startHosting()
 				_inputThread = thread ([this]() {pollInputs(); });
 				_eventThread = thread ([this]() {pollEvents(); });
 				_latencyThread = thread([this]() {pollLatency(); });
-				_autoGamepadThread = thread([this]() { pollAutoGamepad(); });
+				_smashSodaThread = thread([this]() { pollSmashSoda(); });
 				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
-
-				// Start hotseat timer
-				uint32_t minutes = MetadataCache::preferences.hotseatTime * 60000;
-				_hotseatClock.setDuration(minutes);
-				_hotseatReminderClock.setDuration(minutes/4);
-
-				// Reset hotseat
-				if (MetadataCache::preferences.hotseat) {
-					_hotseatClock.start();
-					_hotseatReminderClock.start();
-					_hotseatGuestIndex = 0;
-					setHotseatGuest();
-				}
 
 				// Start kiosk mode
 				if (MetadataCache::preferences.kioskMode)
@@ -383,11 +370,6 @@ void Hosting::stopHosting()
 {
 	_isRunning = false;
 	_guestList.clear();
-
-	// Reset hotseat
-	_hotseatClock.stop();
-	_hotseatReminderClock.stop();
-	_hotseatGuestIndex = 0;
 
 	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
@@ -733,161 +715,64 @@ void Hosting::pollLatency()
 	_latencyThread.detach();
 }
 
-void Hosting::pollAutoGamepad() {
-	_autoGamepadMutex.lock();
-	_isAutoGamepadThreadRunning = true;
+/// <summary>
+/// This thread handles all the new Smash Soda features!
+/// </summary>
+void Hosting::pollSmashSoda() {
+	_smashSodaMutex.lock();
+	_isSmashSodaThreadRunning = true;
 	while (_isRunning) {
 
 		Sleep(200);
 
-		// Hotseat enabled and gamepad 1 connected?
-		if (MetadataCache::preferences.hotseat && _gamepadClient.getGamepad(0)->isConnected()) {
+		// Handles all the automatic button press stuff
+		Hosting::autoGamepad();
 
-			// Start timer if it is not running
-			if (!_hotseatClock.isRunning()) {
-
-				uint32_t minutes = MetadataCache::preferences.hotseatTime * 60000;
-				_hotseatClock.setDuration(minutes);
-				_hotseatReminderClock.setDuration(minutes / 4);
-
-				_hotseatClock.reset();
-				_hotseatClock.start();
-				_hotseatReminderClock.start();
-
-			}
-
-			// Are there guests in the room?
-			if (_guestList.getGuests().size() > 0) {
-
-				// Find hotseat guest in guest list
-				_hotseatGuest = _guestList.getGuests()[_hotseatGuestIndex];
-
-				// Remaining minutes
-				uint32_t time = round(_hotseatClock.getRemainingTime() / 60000);
-
-				// Reminder in chat
-				if (_hotseatReminderClock.isFinished()) {
-					broadcastChatMessage("[MasterHand] | " + _hotseatGuest.name + " has " + std::to_string(time) + " minutes left to play.\0");
-					_hotseatReminderClock.reset();
-				}
-
-				// 10 second warning
-				if (_hotseatWarning && _hotseatClock.getRemainingTime() < 10000) {
-					broadcastChatMessage("[MasterHand] | The gamepad is about to be swapped in 10 SECONDS!\0");
-					_hotseatWarning = false;
-				}
-
-				// If some command has stripped gamepad from guest's hand, timer ended or gamepad 1 not owned
-				if (MetadataCache::preferences.hotseatReset || _hotseatClock.isFinished() || !_gamepadClient.getGamepad(0)->isOwned()) {
-
-					// Reset
-					MetadataCache::preferences.hotseatReset = false;
-
-					// Is the hotseat owner still in the room?
-					if (isSpectator() || _hotseatGuest.isValid()) {
-
-						// Work out who the next guest is
-						if (_hotseatGuestIndex < _guestList.getGuests().size() - 1)
-							_hotseatGuestIndex++;
-						else
-							_hotseatGuestIndex = 0;
-
-					}
-
-					// Set new owner of gamepad
-					setHotseatGuest();
-
-				}
-
-			} else {
-
-				// Reset timers
-				_hotseatClock.reset();
-				_hotseatClock.stop();
-
-			}
-
-		} else 
-
-		// Hotseat was disabled while running
-		if (_hotseatClock.isRunning()) {
-
-			// Reset timers
-			_hotseatClock.reset();
-			_hotseatClock.stop();
-			
-			// Reset to first guy in list
-			if (_guestList.getGuests().size() > 0) {
-				_hotseatGuest = _guestList.getGuests()[0];
-				_hotseatGuestIndex = 0;
-			}
-
-		}
-
-		// Buttons in queue?
-		if (MetadataCache::preferences.buttonList.size() > 0) {
-
-			// Press in
-			if (!_autoIsPressed) {
-
-				ParsecGamepadButtonMessage btn = pressButton((ParsecGamepadButton) MetadataCache::preferences.buttonList.front(), true);
-				Hosting::pressButtonForAll(btn);
-				_autoIsPressed = true;
-
-			}
-			else {
-
-				// Depress
-				ParsecGamepadButtonMessage btn = pressButton((ParsecGamepadButton)MetadataCache::preferences.buttonList.front(), false);
-				Hosting::pressButtonForAll(btn);
-
-				// Remove from queue
-				MetadataCache::preferences.buttonList.erase(MetadataCache::preferences.buttonList.begin());
-				_autoIsPressed = false;
-
-			}
-
-		}
+		// Handles the hotseat cycling
+		Hosting::hotseat();
 
 	}
-	_isAutoGamepadThreadRunning = false;
-	_autoGamepadMutex.unlock();
-	_autoGamepadThread.detach();
+	_isSmashSodaThreadRunning = false;
+	_smashSodaMutex.unlock();
+	_smashSodaThread.detach();
 }
 
-void Hosting::setHotseatGuest() {
+/// <summary>
+/// This handles all the automatic button presses for guests in the room.
+/// </summary>
+void Hosting::autoGamepad() {
 
-	if (_gamepadClient.getGamepad(0)->isConnected()) {
+	// Buttons in queue?
+	if (MetadataCache::autoGamepad.buttonList.size() > 0) {
 
-		// Set gamepad
-		_gamepadClient.getGamepad(0)->setOwner(_hotseatGuest, 0, false);
+		// Press in
+		if (!MetadataCache::autoGamepad.isPressed) {
 
-		// Chatbot
-		_hotseatWarning = true;
-		broadcastChatMessage("[MasterHand] | " + _hotseatGuest.name + " now has control of the gamepad!\0");
+			ParsecGamepadButtonMessage btn = createButtonMessage((ParsecGamepadButton)MetadataCache::autoGamepad.buttonList.front(), true);
+			Hosting::pressButtonForAll(btn);
+			MetadataCache::autoGamepad.isPressed = true;
 
-		// Reset timer
-		_hotseatClock.reset();
-		_hotseatReminderClock.reset();
+		}
+		else {
+
+			// Depress
+			ParsecGamepadButtonMessage btn = createButtonMessage((ParsecGamepadButton)MetadataCache::autoGamepad.buttonList.front(), false);
+			Hosting::pressButtonForAll(btn);
+
+			// Remove from queue
+			MetadataCache::autoGamepad.buttonList.erase(MetadataCache::autoGamepad.buttonList.begin());
+			MetadataCache::autoGamepad.isPressed = false;
+
+		}
 
 	}
 
 }
 
-bool Hosting::isSpectator() {
-
-	if (MetadataCache::preferences.spectators.empty() == false) {
-		for (int i = MetadataCache::preferences.spectators.size() - 1; i >= 0; i--) {
-			if (MetadataCache::preferences.spectators.at(i) == _guestList.getGuests()[_hotseatGuestIndex].userID) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-
-}
-
+/// <summary>
+/// Press a button for ALL connected guests in your room.
+/// </summary>
+/// <param name="button">The button to press.</param>
 void Hosting::pressButtonForAll(ParsecGamepadButtonMessage button) {
 
 	ParsecMessage message = {};
@@ -902,13 +787,28 @@ void Hosting::pressButtonForAll(ParsecGamepadButtonMessage button) {
 
 }
 
-ParsecGamepadButtonMessage Hosting::pressButton(ParsecGamepadButton button, bool in) {
+/// <summary>
+/// Creates a new button gamepad message.
+/// </summary>
+/// <param name="button">The button to press.</param>
+/// <param name="in">Is the button pressed in or not.</param>
+/// <returns>ParsecGamepadButtonMessage</returns>
+ParsecGamepadButtonMessage Hosting::createButtonMessage(ParsecGamepadButton button, bool in) {
 
 	ParsecGamepadButtonMessage msg = {};
-	msg.button = ParsecGamepadButton::GAMEPAD_BUTTON_B;
+	msg.button = button;
 	msg.pressed = in;
 
 	return msg;
+
+}
+
+/// <summary>
+/// Handles all the hotseat stuff.
+/// </summary>
+void Hosting::hotseat() {
+
+
 
 }
 

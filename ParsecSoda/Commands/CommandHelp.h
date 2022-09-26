@@ -77,7 +77,8 @@ public:
 		else												commandList = pleb_commands;
 
 		_replyMessage =
-			string("[MasterHand] | Command list: ")
+			MetadataCache::preferences.chatbotName
+			+ string(" | Command list: ")
 			+ commandList
 			+ "\n\0";
 

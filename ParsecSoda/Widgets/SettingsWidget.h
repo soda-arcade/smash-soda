@@ -28,7 +28,9 @@ private:
 	bool _disableGuideButton = false;
 	bool _disableKeyboard = false;
 	bool _latencyLimitEnabled = false;
+	bool _leaderboardEnabled = false;
 	unsigned int _latencyLimitValue = 0;
 	unsigned int _theme = 0;
 	char _discord[HOST_NAME_LEN] = "";
+	char _chatbot[HOST_NAME_LEN] = "";
 };

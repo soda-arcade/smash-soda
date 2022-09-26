@@ -19,24 +19,22 @@ public:
 
 		if (MetadataCache::preferences.kioskMode) {
 
-			if (!MetadataCache::preferences.kioskRestarting) {
+			if (!MetadataCache::kiosk.isRestarting) {
 
-				_replyMessage = "[MasterHand] | Restarting yuzu...";
-
-				//MetadataCache::preferences.kioskRestarting = true;
+				_replyMessage = MetadataCache::preferences.chatbotName + " | Restarting yuzu...";
 				_tsystem(_T("taskkill /F /T /IM yuzu.exe"));
 
 			}
 			else {
 
-				_replyMessage = "[MasterHand] | The application is restarting...wait!";
+				_replyMessage = MetadataCache::preferences.chatbotName + " | The application is restarting...wait!";
 
 			}
 
 		}
 		else {
 
-			_replyMessage = "[MasterHand] | The host does not have kiosk mode enabled.";
+			_replyMessage = MetadataCache::preferences.chatbotName + " | The host does not have kiosk mode enabled.";
 
 		}
 		

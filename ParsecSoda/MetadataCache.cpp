@@ -5,10 +5,14 @@
 // actual solution. You should change them in your build.
 string MetadataCache::_key = "ParsecSodaKey***";
 string MetadataCache::_nonce = "ParsecSoda**";
-MetadataCache::Preferences MetadataCache::preferences = MetadataCache::Preferences();
-mutex MetadataCache::_mutex;
 
+MetadataCache::Preferences MetadataCache::preferences = MetadataCache::Preferences();
+MetadataCache::Hotseat MetadataCache::hotseat = MetadataCache::Hotseat();
+MetadataCache::AutoGamepad MetadataCache::autoGamepad = MetadataCache::AutoGamepad();
+MetadataCache::Kiosk MetadataCache::kiosk = MetadataCache::Kiosk();
 MetadataCache::Teams MetadataCache::teams = MetadataCache::Teams();
+
+mutex MetadataCache::_mutex;
 
 MetadataCache::SessionCache MetadataCache::loadSessionCache()
 {
@@ -123,6 +127,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             char discord[128] = "";
             char kioskApplication[256] = "";
             char kioskParameters[256] = "";
+            char chatbot[128] = "ChatBot";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -253,6 +258,13 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (MTY_JSONObjGetString(json, "kioskParameters", kioskParameters, 256)) preferences.kioskParameters = kioskParameters;
             else preferences.kioskParameters = "";
 
+            if (MTY_JSONObjGetString(json, "chatbot", chatbot, 128)) preferences.chatbot = chatbot;
+            else preferences.chatbot = "ChatBot";
+
+            preferences.chatbotName = "[" + preferences.chatbot + "]";
+
+            if (!MTY_JSONObjGetBool(json, "leaderboardEnabled", &preferences.leaderboardEnabled)) preferences.leaderboardEnabled = true;
+
             preferences.isValid = true;
 
             MTY_JSONDestroy(&json);
@@ -327,6 +339,8 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "kioskMode", preferences.kioskMode);
         MTY_JSONObjSetString(json, "kioskApplication", preferences.kioskApplication.c_str());
         MTY_JSONObjSetString(json, "kioskParameters", preferences.kioskParameters.c_str());
+        MTY_JSONObjSetString(json, "chatbot", preferences.chatbot.c_str());
+        MTY_JSONObjSetBool(json, "leaderboardEnabled", preferences.leaderboardEnabled);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
@@ -339,6 +353,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
 
 bool MetadataCache::savePreferences()
 {
+    preferences.chatbotName = "[" + preferences.chatbot + "]";
     return savePreferences(preferences);
 }
 
@@ -683,7 +698,7 @@ std::string GetCurrentDirectory()
 string MetadataCache::getUserDir()
 {
     string dir = GetCurrentDirectory();
-    string appDir = "\\ParsecSodaV\\";
+    string appDir = "\\SmashSoda\\";
     if (MTY_FileExists( (dir+"\\portable.txt").c_str()  ))
     {
         string dirPath = dir+appDir;

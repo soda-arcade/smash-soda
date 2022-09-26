@@ -17,7 +17,8 @@ public:
 	{
 		bool isMirrored = _gamepadClient.toggleMirror(_sender.userID);
 		_replyMessage = std::string()
-			+ "[MasterHand] | " + _sender.name
+			+ MetadataCache::preferences.chatbotName
+			+ " | " + _sender.name
 			+ " toggled mirror mode:\t" + (isMirrored ? "ON" : "OFF")
 			+ "\0";
 		return true;

@@ -18,7 +18,7 @@ public:
 		int clearCount = _padClient.clearAFK(_guests);
 
 		std::ostringstream reply;
-		reply << "[MasterHand] | Retrieving AFK gamepads... Gamepads cleared:  " << clearCount << "\0";
+		reply <<  MetadataCache::preferences.chatbotName + " | Retrieving AFK gamepads... Gamepads cleared:  " << clearCount << "\0";
 
 		_replyMessage = reply.str();
 

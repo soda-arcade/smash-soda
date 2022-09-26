@@ -701,7 +701,13 @@
     <ClInclude Include="Commands\CommandRestart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\CommandTeams.h">
+    <ClInclude Include="Commands\CommandRequest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandDiscord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

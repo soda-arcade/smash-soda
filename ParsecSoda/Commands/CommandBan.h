@@ -28,11 +28,11 @@ public:
 		switch (_searchResult)
 		{
 		case SEARCH_USER_HISTORY_RESULT::NOT_FOUND:
-			_replyMessage = string() + "[MasterHand] | " + _sender.name + ", I cannot find the user you want to ban.\0";
+			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + ", I cannot find the user you want to ban.\0";
 			break;
 
 		case SEARCH_USER_HISTORY_RESULT::ONLINE:
-			if (MetadataCache::preferences.hotseat) MetadataCache::preferences.hotseatReset = true;
+			
 			handleGuest(GuestData(_onlineGuest.name, _onlineGuest.userID), true, _onlineGuest.id);
 			_guestHistory.pop(_onlineGuest.userID);
 			break;
@@ -44,7 +44,7 @@ public:
 
 		case SEARCH_USER_HISTORY_RESULT::FAILED:
 		default:
-			_replyMessage = "[MasterHand] | Usage: !ban <username>\nExample: !ban melon\0";
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !ban <username>\nExample: !ban melon\0";
 			break;
 		}
 
@@ -71,10 +71,10 @@ private:
 		bool result = false;
 
 		if (_sender.userID == target.userID)
-			_replyMessage = string() + "[MasterHand] | Thou shall not ban thyself, " + _sender.name + " ...\0";
+			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | Thou shall not ban thyself, " + _sender.name + " ...\0";
 		else
 		{
-			_replyMessage = string() + "[MasterHand] | " + target.name + " was banned by " + _sender.name + "!\0";
+			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + target.name + " was banned by " + _sender.name + "!\0";
 
 			if (_ban.ban(target))
 			{

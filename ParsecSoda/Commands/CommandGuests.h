@@ -17,13 +17,13 @@ public:
 	{
 		if ( !ACommandIntegerArg::run() )
 		{
-			_replyMessage = "[MasterHand] | Usage: !guests <number>\nExample: !guests 7\0";
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !guests <number>\nExample: !guests 7\0";
 			return false;
 		}
 
 		_config.maxGuests = _intArg;
 		std::ostringstream reply;
-		reply << "[MasterHand] | Max guests set to " << _intArg << "\0";
+		reply << MetadataCache::preferences.chatbotName + " | Max guests set to " << _intArg << "\0";
 		_replyMessage = reply.str();
 
 		return true;

@@ -12,12 +12,17 @@
 #include "GuestTier.h"
 #include "Thumbnail.h"
 #include "Stringer.h"
+#include "Stopwatch.h"
 
 using namespace std;
 
 class MetadataCache
 {
 public:
+
+	/// <summary>
+	/// Stores session info
+	/// </summary>
 	class SessionCache
 	{
 	public:
@@ -36,6 +41,9 @@ public:
 		bool isValid = false;
 	};
 
+	/// <summary>
+	/// Stores all the application and hosting preferences.
+	/// </summary>
 	class Preferences
 	{
 	public:
@@ -43,7 +51,7 @@ public:
 		unsigned int audioOutputDevice = 0;
 		unsigned int micFrequency = 44100;
 		unsigned int micVolume = 80;
-		bool micEnabled = true;
+		bool micEnabled = false;
 		unsigned int speakersFrequency = 44100;
 		unsigned int speakersVolume = 30;
 		bool speakersEnabled = true;
@@ -90,13 +98,54 @@ public:
 		bool kioskMode = false;
 		string kioskApplication = "";
 		string kioskParameters = "";
-
-		bool kioskRestarting = false;
-		bool hotseatReset = false;
-		std::vector<int> buttonList;
-		std::vector<uint32_t> spectators;
+		string chatbot = "ChatBot";
+		string chatbotName = "";
+		bool leaderboardEnabled = true;
+	
 	};
 
+	/// <summary>
+	/// Stores all the kiosk mode information.
+	/// </summary>
+	class Kiosk {
+	public:
+		string filename = "";
+
+		bool isRestarting = false;
+	};
+
+	/// <summary>
+	/// This stores all information for the automatic gamepad
+	/// commands.
+	/// </summary>
+	class AutoGamepad {
+	public:
+		int gamepadIndex = 0;
+		vector<int> buttonList;
+
+		bool isRunning = false;
+		bool isPressed = false;
+	};
+
+	/// <summary>
+	/// This stores all the hotseat and spectator information.
+	/// </summary>
+	class Hotseat {
+	public:
+		Guest guest;
+		std::vector<uint32_t> spectators;
+
+		Stopwatch _hotseatClock;
+		Stopwatch _hotseatReminderClock;
+		Stopwatch _customClock;
+
+		bool isRestarting = false;
+		bool isWarning = false;
+	};
+
+	/// <summary>
+	/// This stores all the team information for tournaments.
+	/// </summary>
 	class Teams {
 	public:
 
@@ -154,6 +203,9 @@ public:
 	static bool saveTheme(int theme);
 
 	static Preferences preferences;
+	static Kiosk kiosk;
+	static AutoGamepad autoGamepad;
+	static Hotseat hotseat;
 	static Teams teams;
 
 private:

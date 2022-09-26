@@ -9,6 +9,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _disableKeyboard = MetadataCache::preferences.disableKeyboard;
     _latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
     _latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
+    _leaderboardEnabled = MetadataCache::preferences.leaderboardEnabled;
 
     try
     {
@@ -19,6 +20,17 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
         try
         {
             strcpy_s(_discord, "");
+        }
+        catch (const std::exception&) {}
+    }
+
+    try {
+        strcpy_s(_chatbot, MetadataCache::preferences.chatbot.c_str());
+    }
+    catch (const std::exception&) {
+        try
+        {
+            strcpy_s(_chatbot, "");
         }
         catch (const std::exception&) {}
     }
@@ -62,6 +74,18 @@ bool SettingsWidget::render()
 
     }
 
+    ImGui::Dummy(ImVec2(0, 10.0f));
+
+    AppStyle::pushLabel();
+    ImGui::Text("CHATBOT NAME");
+    AppStyle::pushInput();
+    if (ImGui::InputText("##Chatbot input", _chatbot, HOST_NAME_LEN)) {
+
+        MetadataCache::preferences.chatbot = _chatbot;
+        MetadataCache::savePreferences();
+
+    }
+
     ImGui::Dummy(ImVec2(0, 20.0f));
 
     AppStyle::pushInput();
@@ -97,6 +121,13 @@ bool SettingsWidget::render()
         MetadataCache::preferences.disableKeyboard = _disableKeyboard;
         MetadataCache::savePreferences();
         _hosting._disableKeyboard = _disableKeyboard;
+    }
+    AppStyle::pop();
+
+    AppStyle::pushInput();
+    if (ImGui::Checkbox("Enable Leaderboard", &_leaderboardEnabled)) {
+        MetadataCache::preferences.leaderboardEnabled = _leaderboardEnabled;
+        MetadataCache::savePreferences();
     }
     AppStyle::pop();
 
