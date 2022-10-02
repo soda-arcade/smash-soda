@@ -6,6 +6,9 @@
 **/Mock.h
 **/Mock.cpp
 
+# CMake
+[Bb]uild/
+
 # User-specific files
 *.rsuser
 *.suo
