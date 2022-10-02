@@ -3,12 +3,12 @@
 #include "parsec-dso.h"
 #include "ACommandStringArg.h"
 
-class CommandRequest : public ACommandStringArg
+class CommandSong : public ACommandStringArg
 {
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::BOT_MESSAGE; }
 
-	CommandRequest(const char* msg)
+	CommandSong(const char* msg)
 		: ACommandStringArg(msg, internalPrefixes())
 	{}
 

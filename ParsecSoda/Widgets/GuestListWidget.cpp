@@ -1,8 +1,8 @@
 #include "GuestListWidget.h"
 
 GuestListWidget::GuestListWidget(Hosting& hosting)
-    : _hosting(hosting), _guests(hosting.getGuestList()),
-    _banList(_hosting.getBanList()), _guestHistory(_hosting.getGuestHistory())
+    : _hosting(hosting), _guests(hosting.getGuestList()), _modList(_hosting.getModList()),
+    _leaderboard(_hosting.getLeaderboardList()), _banList(_hosting.getBanList()), _guestHistory(_hosting.getGuestHistory())
 {
 }
 
@@ -41,6 +41,11 @@ bool GuestListWidget::render()
             renderOnlineGuests();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Mods"))
+        {
+            renderModGuests();
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("Blocked"))
         {
             renderBannedGuests();
@@ -51,6 +56,13 @@ bool GuestListWidget::render()
             renderHistoryGuests();
             ImGui::EndTabItem();
         }
+
+        /* 
+        if (ImGui::BeginTabItem("Leaderboard")) {
+            renderLeaderboardGuests();
+            ImGui::EndTabItem();
+        }
+        */
         AppColors::pop();
         AppFonts::pop();
         ImGui::EndTabBar();
@@ -225,6 +237,90 @@ void GuestListWidget::renderOnlineGuests()
         }
     }
     
+    ImGui::EndChild();
+    ImGui::PopStyleVar();
+}
+
+void GuestListWidget::renderModGuests() {
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+    ImGui::BeginChild("moddedlist");
+
+    static bool showEditPopup = false;
+    static size_t popupEditIndex;
+    static bool showUnmodPopup = false;
+    static string popupTitle = "";
+    static size_t popupIndex;
+    static string name;
+    static uint32_t userID;
+    static vector<GuestData>& _moddedGuests = _modList.getGuests();
+    static string filterTextStr;
+    static bool filterSuccess = false;
+
+    for (size_t i = 0; i < _moddedGuests.size(); ++i)
+    {
+        name = _moddedGuests[i].name;
+        userID = _moddedGuests[i].userID;
+
+        filterTextStr = _filterText;
+        if (!filterTextStr.empty())
+        {
+            filterSuccess = (Stringer::fuzzyDistance(_filterText, name) == 0);
+            if (!filterSuccess)
+            {
+                filterSuccess = (Stringer::fuzzyDistance(_filterText, to_string(userID)) == 0);
+            }
+
+            if (!filterSuccess)
+            {
+                continue;
+            }
+        }
+
+        IconButton::render(AppIcons::userOff, AppColors::primary, ImVec2(30, 30));
+        if (ImGui::IsItemActive())
+        {
+            popupTitle = string("Unmod##Popup");
+            showUnmodPopup = true;
+            popupIndex = i;
+            ImGui::OpenPopup(popupTitle.c_str());
+        }
+        TitleTooltipWidget::render(
+            "Mod user",
+            (string("Press to unmod ") + name + "").c_str()
+        );
+
+        if (i == popupIndex)
+        {
+            if (ConfirmPopupWidget::render(
+                popupTitle.c_str(),
+                showUnmodPopup,
+                ("Unmod\n#" + to_string(userID) + "\n" + name).c_str()
+            ))
+            {
+                _hosting.sendHostMessage((
+                    string("!unmod ") + to_string(userID)
+                    ).c_str(), true);
+            }
+        }
+
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();
+        AppStyle::pushInput();
+        ImGui::Text("#%d", userID);
+        ImGui::SameLine();
+        ImGui::Indent(85);
+        ImGui::Text("%s", name.c_str());
+        AppStyle::pop();
+        ImGui::Unindent(85);
+        AppFonts::pushInput();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.50f, 0.60f, 1.00f));
+        //ImGui::Text(reason.c_str());
+        AppStyle::pop();
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+        ImGui::EndGroup();
+    }
+
     ImGui::EndChild();
     ImGui::PopStyleVar();
 }
@@ -412,4 +508,90 @@ void GuestListWidget::renderHistoryGuests()
         ImGui::PopStyleVar();
     }
     ImGui::EndChild();
+}
+
+void GuestListWidget::renderLeaderboardGuests() {
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+    ImGui::BeginChild("leaderboardlist");
+
+    static bool showEditPopup = false;
+    static size_t popupEditIndex;
+    static bool showLeaderboardPopup = false;
+    static string popupTitle = "";
+    static size_t popupIndex;
+    static string name;
+    static uint32_t userID;
+    static vector<GuestData>& _leaderboardGuests = _leaderboard.getGuests();
+    static string filterTextStr;
+    static bool filterSuccess = false;
+
+    for (size_t i = 0; i < _leaderboardGuests.size(); ++i)
+    {
+        name = _leaderboardGuests[i].name;
+        userID = _leaderboardGuests[i].userID;
+
+        filterTextStr = _filterText;
+        if (!filterTextStr.empty())
+        {
+            filterSuccess = (Stringer::fuzzyDistance(_filterText, name) == 0);
+            if (!filterSuccess)
+            {
+                filterSuccess = (Stringer::fuzzyDistance(_filterText, to_string(userID)) == 0);
+            }
+
+            if (!filterSuccess)
+            {
+                continue;
+            }
+        }
+
+        IconButton::render(AppIcons::userOff, AppColors::primary, ImVec2(30, 30));
+        if (ImGui::IsItemActive())
+        {
+            popupTitle = string("Remove##Popup");
+            showLeaderboardPopup = true;
+            popupIndex = i;
+            ImGui::OpenPopup(popupTitle.c_str());
+        }
+        TitleTooltipWidget::render(
+            "Leaderboard user",
+            (string("Press to remove from leaderboard ") + name + "").c_str()
+        );
+
+        if (i == popupIndex)
+        {
+            /* Remove from leaderboard
+            if (ConfirmPopupWidget::render(
+                popupTitle.c_str(),
+                showLeaderboardPopup,
+                ("Remove\n#" + to_string(userID) + "\n" + name).c_str()
+            ))
+            {
+                _hosting.sendHostMessage((
+                    string("!unmod ") + to_string(userID)
+                    ).c_str(), true);
+            }
+            */
+        }
+
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();
+        AppStyle::pushInput();
+        ImGui::Text("#%d", userID);
+        ImGui::SameLine();
+        ImGui::Indent(85);
+        ImGui::Text("%s", name.c_str());
+        AppStyle::pop();
+        ImGui::Unindent(85);
+        AppFonts::pushInput();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.50f, 0.60f, 1.00f));
+        //ImGui::Text(reason.c_str());
+        AppStyle::pop();
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+        ImGui::EndGroup();
+    }
+
+    ImGui::EndChild();
+    ImGui::PopStyleVar();
 }

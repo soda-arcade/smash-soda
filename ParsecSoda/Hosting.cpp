@@ -242,6 +242,11 @@ ModList& Hosting::getModList()
 	return _modList;
 }
 
+Leaderboard& Hosting::getLeaderboardList()
+{
+	return _leaderboardList;
+}
+
 vector<AGamepad*>& Hosting::getGamepads()
 {
 	return _gamepadClient.gamepads;
@@ -352,6 +357,9 @@ void Hosting::startHosting()
 				_smashSodaThread = thread([this]() { pollSmashSoda(); });
 				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
+
+				// Spotify authorization
+				spotifyInit();
 
 				// Start kiosk mode
 				if (MetadataCache::preferences.kioskMode)
@@ -731,6 +739,9 @@ void Hosting::pollSmashSoda() {
 		// Handles the hotseat cycling
 		Hosting::hotseat();
 
+		// Spotify playlist queue
+		Hosting::spotifyQueue();
+
 	}
 	_isSmashSodaThreadRunning = false;
 	_smashSodaMutex.unlock();
@@ -808,17 +819,180 @@ ParsecGamepadButtonMessage Hosting::createButtonMessage(ParsecGamepadButton butt
 /// </summary>
 void Hosting::hotseat() {
 
+	// Hotseat enabled and gamepad 1 connected?
+	if (MetadataCache::preferences.hotseat && _gamepadClient.getGamepad(0)->isConnected()) {
 
+		// Start timer if it is not running
+		if (!MetadataCache::hotseat.hotseatClock.isRunning())
+			startHotseatTimer();
+
+		// Are there guests in the room?
+		if (_guestList.getGuests().size() > 0) {
+
+			// Hotseat guest is still here
+			if (MetadataCache::hotseat.guest.isValid()) {
+
+				// Get current hotseat guest index
+				hotseatIndex = findHotseatGuest();
+
+				// Remaining minutes
+				uint32_t time = round(MetadataCache::hotseat.hotseatClock.getRemainingTime() / 60000);
+
+				// Reminder in chat
+				if (MetadataCache::hotseat.reminderClock.isFinished()) {
+					broadcastChatMessage("[HOTSEAT] | " + _guestList.getGuests()[hotseatIndex].name + " has " + std::to_string(time) + " minutes left to play.\0");
+					MetadataCache::hotseat.reminderClock.reset();
+				}
+
+				// 10 second warning
+				if (MetadataCache::hotseat.isWarning && MetadataCache::hotseat.hotseatClock.getRemainingTime() < 10000) {
+					broadcastChatMessage("[HOTSEAT] | The gamepad is about to be swapped in 10 SECONDS!\0");
+					MetadataCache::hotseat.isWarning = false;
+				}
+
+				// Time is up. is spectating or gamepad been dropped?
+				if (!_gamepadClient.getGamepad(0)->isOwned() || isSpectator(hotseatIndex) || MetadataCache::hotseat.hotseatClock.isFinished()) {
+
+					// Find next hotseat guest
+					do {
+						if (hotseatIndex < _guestList.getGuests().size() - 1)
+							hotseatIndex++;
+						else
+							hotseatIndex = 0;
+					} while (isSpectator(hotseatIndex));
+
+					// Set new hotseat guest
+					setHotseatGuest(hotseatIndex);
+
+				}
+
+			}
+
+			// Hotseat guest left or something wrong
+			else setHotseatGuest(hotseatIndex);
+
+		}
+
+		// Nobody here, so we can't hotseat yet
+		else stopHotseatTimer();
+
+	}
+	else
+
+	// Stop hotseat timers if running
+	if (MetadataCache::hotseat.hotseatClock.isRunning())
+		stopHotseatTimer();
 
 }
 
-bool Hosting::isLatencyRunning()
-{
+/// <summary>
+/// Starts the hotseat and warning timers.
+/// </summary>
+void Hosting::startHotseatTimer() {
+	uint32_t minutes = MetadataCache::preferences.hotseatTime * 60000;
+
+	MetadataCache::hotseat.hotseatClock.reset(minutes);
+	MetadataCache::hotseat.reminderClock.reset(minutes / 4);
+
+	MetadataCache::hotseat.hotseatClock.start();
+	MetadataCache::hotseat.reminderClock.start();
+
+	MetadataCache::hotseat.isWarning = true;
+}
+
+/// <summary>
+/// Stops the hotseat and warning timers.
+/// </summary>
+void Hosting::stopHotseatTimer() {
+	MetadataCache::hotseat.hotseatClock.reset();
+	MetadataCache::hotseat.reminderClock.reset();
+
+	MetadataCache::hotseat.hotseatClock.stop();
+	MetadataCache::hotseat.reminderClock.stop();
+}
+
+/// <summary>
+/// Loops through guest list to find the next
+/// hotseat guest.
+/// </summary>
+int Hosting::findHotseatGuest() {
+
+	// Loop through guest list until we find current hotseat guest
+	for (int i = 0; i < _guestList.getGuests().size(); i++) {
+		if (_guestList.getGuests()[i].userID == MetadataCache::hotseat.guest.userID)
+			return i;
+	}
+
+	// Hotseat guest not valid or not chosen yet, put first guest in hotseat
+	return 0;
+
+}
+
+/// <summary>
+/// Puts a guest in the guest list in to the hotseat.
+/// </summary>
+/// <param name="index"></param>
+void Hosting::setHotseatGuest(int index) {
+
+	// Set new hotseat guest
+	MetadataCache::hotseat.guest = _guestList.getGuests()[index];
+
+	// Set gamepad
+	_gamepadClient.getGamepad(0)->setOwner(MetadataCache::hotseat.guest, 0, false);
+
+	// Chatbot
+	broadcastChatMessage("[ChatBot] | " + MetadataCache::hotseat.guest.name + " now has control of the gamepad!\0");
+
+	// Reset timers
+	startHotseatTimer();
+
+}
+
+/// <summary>
+/// Initializes Spotify and gets an authorization token.
+/// </summary>
+void Hosting::spotifyInit() {
+
+	// Access token not been set?
+	if (MetadataCache::spotify.accessToken == "") {
+
+		// Authorization stuff
+
+	}
+
+}
+
+/// <summary>
+/// Handles the spotify list queueing.
+/// </summary>
+void Hosting::spotifyQueue() {
+
+}
+
+/// <summary>
+/// Checks to see if a guest is a spectator.
+/// </summary>
+/// <param name="index"></param>
+bool Hosting::isSpectator(int index) {
+
+	if (MetadataCache::hotseat.spectators.empty() == false) {
+		for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
+			if (MetadataCache::hotseat.spectators.at(i) == _guestList.getGuests()[index].userID) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+
+}
+
+bool Hosting::isLatencyRunning() {
 	return _isLatencyThreadRunning;
 }
 
-void Hosting::pollGamepad()
-{
+void Hosting::pollGamepad() {
+
 	_gamepadMutex.lock();
 	_isGamepadThreadRunning = true;
 	while (_isRunning)

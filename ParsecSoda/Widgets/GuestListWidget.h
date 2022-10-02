@@ -17,12 +17,16 @@ public:
 
 private:
 	void renderOnlineGuests();
+	void renderModGuests();
 	void renderBannedGuests();
 	void renderHistoryGuests();
+	void renderLeaderboardGuests();
 
 	// Dependency injection
 	Hosting& _hosting;
 	BanList& _banList;
+	ModList& _modList;
+	Leaderboard& _leaderboard;
 	
 	// Attributes
 	char _filterText[256] = "";

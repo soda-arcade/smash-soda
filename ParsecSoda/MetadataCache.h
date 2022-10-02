@@ -82,6 +82,8 @@ public:
 		bool showVideo = false;
 		bool showThumbs = false;
 		bool showWebSocket = false;
+		bool showSmash = false;
+		bool showSpotify = false;
 		bool latencyLimitEnabled = false;
 		unsigned int latencyLimitValue = 0;
 		bool lockedGamepadLeftTrigger = false;
@@ -101,6 +103,10 @@ public:
 		string chatbot = "ChatBot";
 		string chatbotName = "";
 		bool leaderboardEnabled = true;
+
+		bool spotify = false;
+		string spotifyClientID = "";
+		string spotifyClientSecret = "";
 	
 	};
 
@@ -135,9 +141,9 @@ public:
 		Guest guest;
 		std::vector<uint32_t> spectators;
 
-		Stopwatch _hotseatClock;
-		Stopwatch _hotseatReminderClock;
-		Stopwatch _customClock;
+		Stopwatch hotseatClock;
+		Stopwatch reminderClock;
+		Stopwatch customClock;
 
 		bool isRestarting = false;
 		bool isWarning = false;
@@ -181,6 +187,15 @@ public:
 
 	};
 
+	class Spotify {
+	public:
+		string accessToken = "";
+		string tokenType = "";
+		int expiresIn = 0;
+
+		vector<string> queue;
+	};
+
 	static SessionCache loadSessionCache();
 	static bool saveSessionCache(SessionCache sessionCache);
 
@@ -193,6 +208,9 @@ public:
 
 	static vector<GuestData> loadModdedUsers();
 	static bool saveModdedUsers(vector<GuestData> guests);
+
+	static vector<GuestData> loadLeaderboardUsers();
+	static bool saveLeaderboardUsers(vector<GuestData> guests);
 
 	static vector<GuestTier> loadGuestTiers();
 	static bool saveGuestTiers(vector<GuestTier> guestTiers);
@@ -207,6 +225,7 @@ public:
 	static AutoGamepad autoGamepad;
 	static Hotseat hotseat;
 	static Teams teams;
+	static Spotify spotify;
 
 private:
 	static string getUserDir();

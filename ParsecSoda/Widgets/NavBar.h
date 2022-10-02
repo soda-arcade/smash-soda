@@ -26,6 +26,8 @@ public:
         bool& showLog,
         bool& showAudio,
         bool& showVideo,
+        bool& showSmash,
+        bool& showSpotify,
         bool& showInfo,
         bool& showSettings,
         bool& showWebSocket,

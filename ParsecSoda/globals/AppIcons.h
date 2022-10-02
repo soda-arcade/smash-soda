@@ -79,6 +79,9 @@ public:
 	static ID3D11ShaderResourceView* editReason;
 	static ID3D11ShaderResourceView* buttonLock;
 
+	static ID3D11ShaderResourceView* smash;
+	static ID3D11ShaderResourceView* spotify;
+
 private:
 	static Texture _play;
 	static Texture _stop;
@@ -149,5 +152,8 @@ private:
 	static Texture _websocket;
 	static Texture _editReason;
 	static Texture _buttonLock;
+
+	static Texture _smash;
+	static Texture _spotify;
 };
 

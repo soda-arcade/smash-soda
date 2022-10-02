@@ -279,6 +279,15 @@
     <ClCompile Include="SpectateList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Leaderboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\SmashWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\SpotifyWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioIn.h">
@@ -701,13 +710,37 @@
     <ClInclude Include="Commands\CommandRestart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\CommandRequest.h">
+    <ClInclude Include="Commands\CommandSong.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandDiscord.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandPingAll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Leaderboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\Command1v1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\Command2v2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandKOTH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\SmashWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\SpotifyWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
