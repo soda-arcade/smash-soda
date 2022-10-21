@@ -242,11 +242,6 @@ ModList& Hosting::getModList()
 	return _modList;
 }
 
-Leaderboard& Hosting::getLeaderboardList()
-{
-	return _leaderboardList;
-}
-
 vector<AGamepad*>& Hosting::getGamepads()
 {
 	return _gamepadClient.gamepads;
@@ -357,9 +352,6 @@ void Hosting::startHosting()
 				_smashSodaThread = thread([this]() { pollSmashSoda(); });
 				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
-
-				// Spotify authorization
-				spotifyInit();
 
 				// Start kiosk mode
 				if (MetadataCache::preferences.kioskMode)
@@ -739,13 +731,14 @@ void Hosting::pollSmashSoda() {
 		// Handles the hotseat cycling
 		Hosting::hotseat();
 
-		// Spotify playlist queue
-		Hosting::spotifyQueue();
-
 	}
 	_isSmashSodaThreadRunning = false;
 	_smashSodaMutex.unlock();
 	_smashSodaThread.detach();
+
+	// Hopefully fix any gamepad issues when hosting stopped
+	if (MetadataCache::preferences.hotseat) _gamepadClient.getGamepad(0)->disconnect();
+
 }
 
 /// <summary>
@@ -795,6 +788,21 @@ void Hosting::pressButtonForAll(ParsecGamepadButtonMessage button) {
 	for (; gi != _gamepadClient.gamepads.end(); ++gi) {
 		_gamepadClient.sendMessage((*gi)->owner.guest, message);
 	}
+
+}
+
+/// <summary>
+/// Press a button for a specific guest.
+/// </summary>
+/// <param name="guest">The guest we're targeting.</param>
+/// <param name="button">The button to press.</param>
+void Hosting::pressButtonForGuest(Guest& guest, ParsecGamepadButtonMessage button) {
+
+	ParsecMessage message = {};
+	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
+	message.gamepadButton = button;
+
+	_gamepadClient.sendMessage(guest, message);
 
 }
 
@@ -855,10 +863,13 @@ void Hosting::hotseat() {
 
 					// Find next hotseat guest
 					do {
-						if (hotseatIndex < _guestList.getGuests().size() - 1)
+						if (hotseatIndex < _guestList.getGuests().size() - 1) {
 							hotseatIndex++;
-						else
+						} 
+						else {
 							hotseatIndex = 0;
+						}
+							
 					} while (isSpectator(hotseatIndex));
 
 					// Set new hotseat guest
@@ -879,9 +890,9 @@ void Hosting::hotseat() {
 	}
 	else
 
-	// Stop hotseat timers if running
-	if (MetadataCache::hotseat.hotseatClock.isRunning())
-		stopHotseatTimer();
+		// Stop hotseat timers if running
+		if (MetadataCache::hotseat.hotseatClock.isRunning())
+			stopHotseatTimer();
 
 }
 
@@ -934,38 +945,23 @@ int Hosting::findHotseatGuest() {
 /// <param name="index"></param>
 void Hosting::setHotseatGuest(int index) {
 
+	// Stop vibrating last guest
+	//ParsecHostSubmitRumble(_gamepadClient.getGamepad(0)->parsec, MetadataCache::hotseat.guest.id,_gamepadClient.getGamepad(0)->owner.deviceID, 0, 0);
+
 	// Set new hotseat guest
 	MetadataCache::hotseat.guest = _guestList.getGuests()[index];
 
 	// Set gamepad
 	_gamepadClient.getGamepad(0)->setOwner(MetadataCache::hotseat.guest, 0, false);
 
+	// Press pause for new player
+	MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
+
 	// Chatbot
 	broadcastChatMessage("[ChatBot] | " + MetadataCache::hotseat.guest.name + " now has control of the gamepad!\0");
 
 	// Reset timers
 	startHotseatTimer();
-
-}
-
-/// <summary>
-/// Initializes Spotify and gets an authorization token.
-/// </summary>
-void Hosting::spotifyInit() {
-
-	// Access token not been set?
-	if (MetadataCache::spotify.accessToken == "") {
-
-		// Authorization stuff
-
-	}
-
-}
-
-/// <summary>
-/// Handles the spotify list queueing.
-/// </summary>
-void Hosting::spotifyQueue() {
 
 }
 
@@ -987,12 +983,13 @@ bool Hosting::isSpectator(int index) {
 
 }
 
-bool Hosting::isLatencyRunning() {
+bool Hosting::isLatencyRunning()
+{
 	return _isLatencyThreadRunning;
 }
 
-void Hosting::pollGamepad() {
-
+void Hosting::pollGamepad()
+{
 	_gamepadMutex.lock();
 	_isGamepadThreadRunning = true;
 	while (_isRunning)

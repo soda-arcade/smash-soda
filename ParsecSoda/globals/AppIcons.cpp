@@ -71,9 +71,6 @@ ID3D11ShaderResourceView* AppIcons::websocket;
 ID3D11ShaderResourceView* AppIcons::editReason;
 ID3D11ShaderResourceView* AppIcons::buttonLock;
 
-ID3D11ShaderResourceView* AppIcons::smash;
-ID3D11ShaderResourceView* AppIcons::spotify;
-
 Texture AppIcons::_play;
 Texture AppIcons::_stop;
 
@@ -143,9 +140,6 @@ Texture AppIcons::_settings;
 Texture AppIcons::_websocket;
 Texture AppIcons::_editReason;
 Texture AppIcons::_buttonLock;
-
-Texture AppIcons::_smash;
-Texture AppIcons::_spotify;
 
 void AppIcons::init(ID3D11Device* pd3dDevice)
 {
@@ -219,9 +213,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _editReason.loadFromFile(pd3dDevice, "./icons/editreason.png");
     _buttonLock.loadFromFile(pd3dDevice, "./icons/buttonlock.png");
 
-    _smash.loadFromFile(pd3dDevice, "./icons/smash.png");
-    _spotify.loadFromFile(pd3dDevice, "./icons/spotify.png");
-
     play = _play.texture;
     stop = _stop.texture;
     
@@ -291,8 +282,4 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     websocket = _websocket.texture;
     editReason = _editReason.texture;
     buttonLock = _buttonLock.texture;
-
-    smash = _smash.texture;
-    spotify = _spotify.texture;
-
 }

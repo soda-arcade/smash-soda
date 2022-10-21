@@ -175,7 +175,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Commands\CommandBonk.cpp" />
-    <ClCompile Include="Leaderboard.cpp" />
     <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
@@ -183,8 +182,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
     <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
     <ClCompile Include="Widgets\SettingsWidget.cpp" />
-    <ClCompile Include="Widgets\SmashWidget.cpp" />
-    <ClCompile Include="Widgets\SpotifyWidget.cpp" />
     <ClCompile Include="XBoxGamepad.cpp" />
     <ClCompile Include="MasterOfPuppets.cpp" />
     <ClCompile Include="SDLGamepad.cpp" />
@@ -268,31 +265,24 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ButtonLock.h" />
-    <ClInclude Include="Commands\Command1v1.h" />
     <ClInclude Include="Commands\Command2v2.h" />
     <ClInclude Include="Commands\CommandBB.h" />
     <ClInclude Include="Commands\CommandDiscord.h" />
-    <ClInclude Include="Commands\CommandKOTH.h" />
     <ClInclude Include="Commands\CommandMod.h" />
     <ClInclude Include="Commands\CommandPing.h" />
-    <ClInclude Include="Commands\CommandPingAll.h" />
-    <ClInclude Include="Commands\CommandSong.h" />
+    <ClInclude Include="Commands\CommandRequest.h" />
     <ClInclude Include="Commands\CommandRestart.h" />
     <ClInclude Include="Commands\CommandSpectate.h" />
     <ClInclude Include="Commands\CommandTimer.h" />
     <ClInclude Include="Commands\CommandUnmod.h" />
-    <ClInclude Include="Leaderboard.h" />
     <ClInclude Include="SpectateList.h" />
     <ClInclude Include="TimeT.h" />
     <ClInclude Include="ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
-    <ClInclude Include="Base64.h" />
     <ClInclude Include="Widgets\ButtonLockWidget.h" />
     <ClInclude Include="Widgets\PopupWidgetEdit.h" />
     <ClInclude Include="Widgets\SettingsWidget.h" />
-    <ClInclude Include="Widgets\SmashWidget.h" />
-    <ClInclude Include="Widgets\SpotifyWidget.h" />
     <ClInclude Include="XBoxGamepad.h" />
     <ClInclude Include="MasterOfPuppets.h" />
     <ClInclude Include="SDLGamepad.h" />

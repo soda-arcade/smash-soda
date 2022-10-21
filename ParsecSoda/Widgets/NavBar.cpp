@@ -12,8 +12,6 @@ void NavBar::render(
 	bool& showLog,
 	bool& showAudio,
 	bool& showVideo,
-	bool& showSmash,
-	bool& showSpotify,
 	bool& showInfo,
 	bool& showSettings,
 	bool& showWebSocket,
@@ -82,14 +80,6 @@ void NavBar::render(
 		MetadataCache::preferences.showVideo = showVideo;
 	}
 	renderNavtooltip("Video", showVideo);
-
-	if (ToggleIconButtonWidget::render(AppIcons::smash, AppIcons::smash, showSmash, iconSize)) showSmash = !showSmash;
-	renderNavtooltip("Smash Bros", showSmash);
-
-	/* Coming soon :>
-	if (ToggleIconButtonWidget::render(AppIcons::spotify, AppIcons::spotify, showSpotify, iconSize)) showSpotify = !showSpotify;
-	renderNavtooltip("Spotify", showSpotify);
-	*/
 
 	if (ToggleIconButtonWidget::render(AppIcons::websocket, AppIcons::websocket, showWebSocket, iconSize)) {
 		showWebSocket = !showWebSocket;

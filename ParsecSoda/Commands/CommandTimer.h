@@ -17,17 +17,11 @@ public:
 	bool run() override {
 
 		if (!ACommandIntegerArg::run()) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !timer <minutes>\nExample: !timer 4\0";
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
 			return false;
 		}
 
-		// Set the timer
-		MetadataCache::hotseat.customClock.reset(_intArg);
-
-		std::ostringstream reply;
-		reply << MetadataCache::preferences.chatbotName + " | A timer was set for " << _intArg << " minutes.\n";
-		_replyMessage = reply.str();
-
+		_replyMessage = "test";
 		return true;
 
 	}

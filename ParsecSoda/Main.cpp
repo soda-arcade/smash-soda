@@ -38,8 +38,7 @@
 #include "Widgets/SettingsWidget.h"
 #include "Widgets/WebSocketWidget.h"
 #include "Widgets/ButtonLockWidget.h"
-#include "Widgets/SmashWidget.h"
-#include "Widgets/SpotifyWidget.h"
+
 
 using namespace std;
 
@@ -172,8 +171,6 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showMasterOfPuppets = MetadataCache::preferences.showMasterOfPuppets;
     bool showAudio = MetadataCache::preferences.showAudio;
     bool showVideo = MetadataCache::preferences.showVideo;
-    bool showSmash = MetadataCache::preferences.showSmash;
-    bool showSpotify = MetadataCache::preferences.showSpotify;
     bool showStyles = true;
     bool showInfo = false;
     bool showLogin = true;
@@ -243,8 +240,6 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showMasterOfPuppets)    masterOfPuppets.render();
             if (showAudio)              audioSettingswidget.render();
             if (showVideo)              videoWidget.render();
-            if (showSmash)              SmashWidget::render();
-            if (showSpotify)            SpotifyWidget::render();
             if (showInfo)               InfoWidget::render();
             if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
             if (showSettings)           settingsWidget.render();
@@ -253,7 +248,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showSmash, showSpotify, showInfo, showSettings, showWebSocket, showButtonLock
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket, showButtonLock
             );
             hostInfoWidget.render();
         }

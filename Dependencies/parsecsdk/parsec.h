@@ -716,7 +716,6 @@ typedef struct ParsecGuest {
 	char name[GUEST_NAME_LEN];           ///< UTF-8 null-terminated name guest name string.
 	char externalID[EXTERNAL_ID_LEN];    ///< UTF-8 null-terminated enterprise external ID, will be empty for non-enterprise usage.
 	bool owner;                          ///< The guest is also the owner of the host computer. ::HOST_DESKTOP only.
-	bool spectating;					 ///< Is player to be skipped by gamepad bots?
 	uint8_t __pad[3];
 } ParsecGuest;
 

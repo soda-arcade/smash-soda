@@ -23,7 +23,7 @@ public:
 		{
 			static string role = "";
 			if (_isHost || _tier == Tier::GOD) role = "#  ";
-			else if (_tier == Tier::ADMIN || _tier == Tier::MOD) role = "$  ";
+			else if (_tier == Tier::ADMIN) role = "$  ";
 			else role = ">  ";
 			
 			if (_sender.isValid())

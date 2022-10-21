@@ -27,7 +27,6 @@
 #include "BanList.h"
 #include "ModList.h"
 #include "GuestList.h"
-#include "Leaderboard.h"
 #include "SFXList.h"
 #include "MetadataCache.h"
 #include "CompilerDirectives.h"
@@ -36,13 +35,12 @@
 #include "WebSocket.h"
 #include "ButtonLock.h"
 #include "Debouncer.h"
-#include "Base64.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
 
 #define ROOM_NAME "Coding my own Parsec\nGamepad streaming\0"
-#define ROOM_SECRET "allworkandnoplaymakesmickeyadullboy"
+#define ROOM_SECRET "melonsod"
 
 using namespace std;
 
@@ -73,7 +71,6 @@ public:
 	MyMetrics getMetrics(uint32_t id);
 	BanList& getBanList();
 	ModList& getModList();
-	Leaderboard& getLeaderboardList();
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
@@ -130,10 +127,9 @@ private:
 	void autoGamepad();
 	void kioskMode();
 	void hotseat();
-	void spotifyInit();
-	void spotifyQueue();
 
 	void pressButtonForAll(ParsecGamepadButtonMessage button);
+	void pressButtonForGuest(Guest& guest, ParsecGamepadButtonMessage button);
 	ParsecGamepadButtonMessage createButtonMessage(ParsecGamepadButton button, bool in);
 
 	void startHotseatTimer();
@@ -149,7 +145,6 @@ private:
 	DX11 _dx11;
 	BanList _banList;
 	ModList _modList;
-	Leaderboard _leaderboardList;
 	GuestDataList _guestHistory;
 	ChatBot *_chatBot;
 	ChatLog _chatLog;

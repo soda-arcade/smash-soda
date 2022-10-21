@@ -11,7 +11,6 @@ MetadataCache::Hotseat MetadataCache::hotseat = MetadataCache::Hotseat();
 MetadataCache::AutoGamepad MetadataCache::autoGamepad = MetadataCache::AutoGamepad();
 MetadataCache::Kiosk MetadataCache::kiosk = MetadataCache::Kiosk();
 MetadataCache::Teams MetadataCache::teams = MetadataCache::Teams();
-MetadataCache::Spotify MetadataCache::spotify = MetadataCache::Spotify();
 
 mutex MetadataCache::_mutex;
 
@@ -129,8 +128,6 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             char kioskApplication[256] = "";
             char kioskParameters[256] = "";
             char chatbot[128] = "ChatBot";
-            char spotifyClientID[128] = "";
-            char spotifyClientSecret[128] = "";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -238,8 +235,6 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetBool(json, "showVideo", &preferences.showVideo)) preferences.showVideo = false;
             if (!MTY_JSONObjGetBool(json, "showThumbs", &preferences.showThumbs)) preferences.showThumbs = false;
             if (!MTY_JSONObjGetBool(json, "showWebSocket", &preferences.showWebSocket)) preferences.showWebSocket = false;
-            if (!MTY_JSONObjGetBool(json, "showSmash", &preferences.showSmash)) preferences.showSmash = false;
-            if (!MTY_JSONObjGetBool(json, "showSpotify", &preferences.showSpotify)) preferences.showSpotify = false;
             if (!MTY_JSONObjGetBool(json, "latencyLimitEnabled", &preferences.latencyLimitEnabled)) preferences.latencyLimitEnabled = false;
             if (!MTY_JSONObjGetUInt(json, "latencyLimitValue", &preferences.latencyLimitValue)) preferences.latencyLimitValue = 200;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadLeftTrigger", &preferences.lockedGamepadLeftTrigger)) preferences.lockedGamepadLeftTrigger = false;
@@ -269,12 +264,6 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             preferences.chatbotName = "[" + preferences.chatbot + "]";
 
             if (!MTY_JSONObjGetBool(json, "leaderboardEnabled", &preferences.leaderboardEnabled)) preferences.leaderboardEnabled = true;
-
-            if (!MTY_JSONObjGetBool(json, "spotify", &preferences.spotify)) preferences.spotify = false;
-            if (MTY_JSONObjGetString(json, "spotifyClientID", spotifyClientID, 128)) preferences.spotifyClientID = spotifyClientID;
-            else preferences.spotifyClientID = "";
-            if (MTY_JSONObjGetString(json, "spotifyClientSecret", spotifyClientSecret, 128)) preferences.spotifyClientSecret = spotifyClientSecret;
-            else preferences.spotifyClientSecret = "";
 
             preferences.isValid = true;
 
@@ -334,8 +323,6 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
         MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
         MTY_JSONObjSetBool(json, "showWebSocket", preferences.showWebSocket);
-        MTY_JSONObjSetBool(json, "showSmash", preferences.showSmash);
-        MTY_JSONObjSetBool(json, "showSpotify", preferences.showSpotify);
         MTY_JSONObjSetBool(json, "latencyLimitEnabled", preferences.latencyLimitEnabled);
         MTY_JSONObjSetUInt(json, "latencyLimitValue", preferences.latencyLimitValue);
         MTY_JSONObjSetBool(json, "lockedGamepadLeftTrigger", preferences.lockedGamepadLeftTrigger);
@@ -354,10 +341,6 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetString(json, "kioskParameters", preferences.kioskParameters.c_str());
         MTY_JSONObjSetString(json, "chatbot", preferences.chatbot.c_str());
         MTY_JSONObjSetBool(json, "leaderboardEnabled", preferences.leaderboardEnabled);
-
-        MTY_JSONObjSetBool(json, "spotify", preferences.spotify);
-        MTY_JSONObjSetString(json, "spotifyClientID", preferences.spotifyClientID.c_str());
-        MTY_JSONObjSetString(json, "spotifyClientSecret", preferences.spotifyClientSecret.c_str());
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
@@ -501,77 +484,6 @@ bool MetadataCache::saveModdedUsers(vector<GuestData> guests)
     if (!dirPath.empty())
     {
         string filepath = dirPath + "mods.json";
-
-        MTY_JSON* json = MTY_JSONArrayCreate();
-
-        vector<GuestData>::iterator gi = guests.begin();
-        for (; gi != guests.end(); ++gi)
-        {
-            MTY_JSON* guest = MTY_JSONObjCreate();
-
-            MTY_JSONObjSetString(guest, "name", (*gi).name.c_str());
-            MTY_JSONObjSetUInt(guest, "userID", (*gi).userID);
-            MTY_JSONArrayAppendItem(json, guest);
-        }
-
-        MTY_JSONWriteFile(filepath.c_str(), json);
-        MTY_JSONDestroy(&json);
-
-        return true;
-    }
-
-    return false;
-}
-
-vector<GuestData> MetadataCache::loadLeaderboardUsers() {
-
-    vector<GuestData> result;
-
-    string dirPath = getUserDir();
-    if (!dirPath.empty())
-    {
-        string filepath = dirPath + "leaderboard.json";
-
-        if (MTY_FileExists(filepath.c_str()))
-        {
-            MTY_JSON* json = MTY_JSONReadFile(filepath.c_str());
-            uint32_t size = MTY_JSONGetLength(json);
-
-            for (size_t i = 0; i < size; i++)
-            {
-                const MTY_JSON* guest = MTY_JSONArrayGetItem(json, (uint32_t)i);
-
-                char name[128] = "";
-                uint32_t userID = 0;
-                bool nameSuccess = MTY_JSONObjGetString(guest, "name", name, 128);
-                bool userIDSuccess = MTY_JSONObjGetUInt(guest, "userID", &userID);
-
-                if (nameSuccess && userIDSuccess)
-                {
-                    result.push_back(GuestData(name, userID));
-                }
-            }
-
-            std::sort(result.begin(), result.end(), [](const GuestData a, const GuestData b) {
-                return a.userID < b.userID;
-                });
-
-            MTY_JSONDestroy(&json);
-        }
-    }
-
-    return result;
-
-}
-
-bool MetadataCache::saveLeaderboardUsers(vector<GuestData> guests)
-{
-
-    string dirPath = getUserDir();
-
-    if (!dirPath.empty())
-    {
-        string filepath = dirPath + "leaderboard.json";
 
         MTY_JSON* json = MTY_JSONArrayCreate();
 
