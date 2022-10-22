@@ -80,6 +80,8 @@ public:
 		// Clear team list
 		MetadataCache::teams.teams.clear();
 
+		// Create participants from guest list
+		// TODO
 		// Dummy guests list
 		MetadataCache::teams.guests.push_back("MickeyUK");
 		MetadataCache::teams.guests.push_back("bigboi83");
@@ -89,6 +91,14 @@ public:
 		MetadataCache::teams.guests.push_back("Dr. Puff");
 		MetadataCache::teams.guests.push_back("AlexErBest");
 		MetadataCache::teams.guests.push_back("Altearis");
+		MetadataCache::teams.guests.push_back("Sniggles");
+		MetadataCache::teams.guests.push_back("Ruffio");
+		MetadataCache::teams.guests.push_back("WTF");
+		MetadataCache::teams.guests.push_back("Random");
+		MetadataCache::teams.guests.push_back("lolz");
+		MetadataCache::teams.guests.push_back("dunno");
+		MetadataCache::teams.guests.push_back("something");
+		MetadataCache::teams.guests.push_back("teehee");
 
 		// Do we have enough guests?
 		if (MetadataCache::teams.guests.size() % 2 != 0) return false;
@@ -164,9 +174,9 @@ public:
 		MetadataCache::teams.rounds[0].isStarted = true;
 
 		// Prepare gamepads
-		_gamepadClient.disconnectAllGamepads();
-		_gamepadClient.getGamepad(0)->connect();
-		_gamepadClient.getGamepad(1)->connect();
+		//_gamepadClient.disconnectAllGamepads();
+		//_gamepadClient.getGamepad(0)->connect();
+		//_gamepadClient.getGamepad(1)->connect();
 
 		return true;
 

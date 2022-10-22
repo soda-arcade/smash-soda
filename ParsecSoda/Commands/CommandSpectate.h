@@ -35,7 +35,7 @@ public:
 
 	static vector<const char*> prefixes()
 	{
-		return vector<const char*> { "!spectate", "!spectating", "!watching", "!skipme" };
+		return vector<const char*> { "!spectate", "!spectating", "!watch", "!skipme" };
 	}
 
 protected:

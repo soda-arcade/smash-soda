@@ -373,6 +373,9 @@ void Hosting::stopHosting()
 
 	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
+		if (MetadataCache::preferences.hotseat) {
+			_gamepadClient.gamepads[i]->disconnect();
+		}
 	}
 }
 
@@ -731,13 +734,13 @@ void Hosting::pollSmashSoda() {
 		// Handles the hotseat cycling
 		Hosting::hotseat();
 
+		// Handles welcome messages for new guests
+		//Hosting::welcomeMessage();
+
 	}
 	_isSmashSodaThreadRunning = false;
 	_smashSodaMutex.unlock();
 	_smashSodaThread.detach();
-
-	// Hopefully fix any gamepad issues when hosting stopped
-	if (MetadataCache::preferences.hotseat) _gamepadClient.getGamepad(0)->disconnect();
 
 }
 
@@ -983,6 +986,18 @@ bool Hosting::isSpectator(int index) {
 
 }
 
+void Hosting::welcomeMessage() {
+
+	if (_showWelcome && _welcomeClock.isFinished()) {
+
+		broadcastChatMessage("This is just a test.");
+
+		_showWelcome = false;
+
+	}
+
+}
+
 bool Hosting::isLatencyRunning()
 {
 	return _isLatencyThreadRunning;
@@ -1213,6 +1228,14 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		}
 		else
 		{
+			// Remove from spectator list
+			if (MetadataCache::hotseat.spectators.empty() == false) {
+				for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
+					if (MetadataCache::hotseat.spectators.at(i) == guest.userID) {
+						MetadataCache::hotseat.spectators.erase(MetadataCache::hotseat.spectators.begin() + i);
+					}
+				}
+			}
 
 			_guestList.deleteMetrics(guest.id);
 			int droppedPads = 0;

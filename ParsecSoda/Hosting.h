@@ -127,6 +127,7 @@ private:
 	void autoGamepad();
 	void kioskMode();
 	void hotseat();
+	void welcomeMessage();
 
 	void pressButtonForAll(ParsecGamepadButtonMessage button);
 	void pressButtonForGuest(Guest& guest, ParsecGamepadButtonMessage button);
@@ -171,6 +172,10 @@ private:
 	bool _isWebSocketThreadRunning = false;
 
 	Stopwatch _mediaClock;
+	Stopwatch _welcomeClock;
+
+	string _welcomeGuest;
+	bool _showWelcome = false;
 
 	thread _mainLoopControlThread;
 	thread _mediaThread;

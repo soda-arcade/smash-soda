@@ -22,7 +22,7 @@ bool VersionWidget::render()
     ImGui::Text("FPS: ");
     ImGui::SameLine();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
-    ImGui::Text("Smash Soda v. 3.00");
+    ImGui::Text("Smash Soda v. 2.52");
     AppStyle::pop();
     ImGui::End();
 

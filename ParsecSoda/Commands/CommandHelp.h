@@ -86,7 +86,7 @@ public:
 
 		*/
 
-		_replyMessage = MetadataCache::preferences.chatbotName + "For a full list of commands, visit: https://github.com/MickeyUK/SmashSoda/wiki/Chat-Commands";
+		_replyMessage = MetadataCache::preferences.chatbotName + "For a full list of commands, visit: https://bit.ly/smash-soda";
 
 		return true;
 	}

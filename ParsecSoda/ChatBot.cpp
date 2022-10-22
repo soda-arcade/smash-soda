@@ -39,6 +39,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
 		if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
+		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
 		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
@@ -48,7 +49,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
 
 		// Tournaments
-		if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient);
+		//if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient);
 	}
 
 	// God commands
@@ -128,7 +129,7 @@ const std::string ChatBot::formatBannedGuestMessage(Guest guest)
 const std::string ChatBot::formatModGuestMessage(Guest guest) {
 
 	std::ostringstream reply;
-	reply << "[MasterHand] | Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
+	reply << MetadataCache::preferences.chatbotName + " | Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
 
 	return reply.str();
 

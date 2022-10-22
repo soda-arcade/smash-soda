@@ -21,6 +21,7 @@
 #include "Commands/CommandDefaultMessage.h"
 #include "Commands/CommandDiscord.h"
 #include "Commands/CommandDC.h"
+#include "Commands/CommandExtend.h"
 #include "Commands/CommandFF.h"
 #include "Commands/CommandGameId.h"
 #include "Commands/CommandGuests.h"
