@@ -958,7 +958,7 @@ void Hosting::setHotseatGuest(int index) {
 	_gamepadClient.getGamepad(0)->setOwner(MetadataCache::hotseat.guest, 0, false);
 
 	// Press pause for new player
-	MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
+	//MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
 
 	// Chatbot
 	broadcastChatMessage("[ChatBot] | " + MetadataCache::hotseat.guest.name + " now has control of the gamepad!\0");
@@ -1225,6 +1225,11 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		if (state == GUEST_CONNECTED)
 		{
 			_guestHistory.add(GuestData(guest.name, guest.userID));
+
+			// Is the connecting guest the host?
+			if (guest.userID == _host.userID)
+				_tierList.setTier(guest.userID, Tier::GOD);
+
 		}
 		else
 		{
