@@ -11,6 +11,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
 	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
 	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandFortune::prefixes()))	return new CommandFortune(sender);
 	if (msgIsEqual(msg, CommandHelp::prefixes()))		return new CommandHelp(sender, _tierList);
 	//if (CommandIpFilter::containsIp(msg))				return new CommandIpFilter(msg, sender, _parsec, _ban, isHost);
 	if (msgIsEqual(msg, CommandJoin::prefixes()))		return new CommandJoin();
@@ -38,6 +39,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	{
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
 		if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient);
+		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);

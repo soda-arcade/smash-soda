@@ -269,6 +269,8 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\CommandBB.h" />
     <ClInclude Include="Commands\CommandDiscord.h" />
     <ClInclude Include="Commands\CommandExtend.h" />
+    <ClInclude Include="Commands\CommandFortune.h" />
+    <ClInclude Include="Commands\CommandHotseat.h" />
     <ClInclude Include="Commands\CommandMod.h" />
     <ClInclude Include="Commands\CommandPing.h" />
     <ClInclude Include="Commands\CommandRequest.h" />

@@ -949,6 +949,7 @@ int Hosting::findHotseatGuest() {
 void Hosting::setHotseatGuest(int index) {
 
 	// Stop vibrating last guest
+	// I dungeddit :(
 	//ParsecHostSubmitRumble(_gamepadClient.getGamepad(0)->parsec, MetadataCache::hotseat.guest.id,_gamepadClient.getGamepad(0)->owner.deviceID, 0, 0);
 
 	// Set new hotseat guest
@@ -958,13 +959,16 @@ void Hosting::setHotseatGuest(int index) {
 	_gamepadClient.getGamepad(0)->setOwner(MetadataCache::hotseat.guest, 0, false);
 
 	// Press pause for new player
-	//MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
+	MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
 
 	// Chatbot
 	broadcastChatMessage("[ChatBot] | " + MetadataCache::hotseat.guest.name + " now has control of the gamepad!\0");
 
 	// Reset timers
 	startHotseatTimer();
+
+	// Start AFK timer
+	_afkClock.reset(6000);
 
 }
 

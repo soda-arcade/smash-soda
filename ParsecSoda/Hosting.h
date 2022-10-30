@@ -173,6 +173,7 @@ private:
 
 	Stopwatch _mediaClock;
 	Stopwatch _welcomeClock;
+	Stopwatch _afkClock;
 
 	string _welcomeGuest;
 	bool _showWelcome = false;
