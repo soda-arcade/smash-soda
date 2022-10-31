@@ -12,8 +12,8 @@ class CommandUnmod : public ACommandStringArg
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::MOD; }
 
-	CommandUnmod(const char* msg, Guest& sender, ModList& modList, GuestDataList& guestHistory)
-		: ACommandStringArg(msg, internalPrefixes()), _sender(sender), _mod(modList), _guestHistory(guestHistory)
+	CommandUnmod(const char* msg, Guest& sender, ModList& modList, GuestDataList& guestHistory, TierList& tierList)
+		: ACommandStringArg(msg, internalPrefixes()), _sender(sender), _mod(modList), _guestHistory(guestHistory), _tierList(tierList)
 	{}
 
 	bool run() override
@@ -50,6 +50,7 @@ public:
 				<< "\t\t" << unmoddedGuest.name << "\t(#" << unmoddedGuest.userID << ")\0";
 			_replyMessage = reply.str();
 			_guestHistory.add(unmoddedGuest);
+			_tierList.setTier(unmoddedGuest.userID, Tier::PLEB);
 			return true;
 		}
 		else
@@ -73,5 +74,6 @@ protected:
 	Guest& _sender;
 	ModList& _mod;
 	GuestDataList& _guestHistory;
+	TierList& _tierList;
 };
 

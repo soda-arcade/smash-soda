@@ -968,7 +968,7 @@ void Hosting::setHotseatGuest(int index) {
 	startHotseatTimer();
 
 	// Start AFK timer
-	_afkClock.reset(6000);
+	_afkClock.reset(60000);
 
 }
 
@@ -1067,6 +1067,29 @@ void Hosting::pollInputs()
 			{
 					_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
 			}
+
+			// Hotseat
+			if (MetadataCache::preferences.hotseat) {
+				_afkClock.reset(60000);
+			}
+
+		}
+		else {
+
+			// Hotseat enabled
+			if (MetadataCache::preferences.hotseat) {
+
+				// Guest has been afk for a minute 
+				if (_afkClock.isFinished()) {
+					if (_guestList.getGuests().size() > 0 && MetadataCache::hotseat.guest.isValid()) {
+						broadcastChatMessage(MetadataCache::hotseat.guest.name + "  was AFK for 1 minute and has now been set to !spectate");
+						MetadataCache::hotseat.spectators.push_back(MetadataCache::hotseat.guest.userID);
+					}
+					_afkClock.reset(60000);
+				}
+
+			}
+
 		}
 	}
 
@@ -1187,6 +1210,13 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		MTY_Free(finmsg);
 	}
 
+	// Is the connecting guest the host?
+	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && (_host.userID == guest.userID))
+	{
+		_tierList.setTier(guest.userID, Tier::GOD);
+	}
+	else
+
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && _banList.isBanned(guest.userID))
 	{
 		ParsecHostKickGuest(_parsec, guest.id);
@@ -1226,14 +1256,8 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			_chatLog.logCommand(logMessage);
 		}
 
-		if (state == GUEST_CONNECTED)
-		{
+		if (state == GUEST_CONNECTED) {
 			_guestHistory.add(GuestData(guest.name, guest.userID));
-
-			// Is the connecting guest the host?
-			if (guest.userID == _host.userID)
-				_tierList.setTier(guest.userID, Tier::GOD);
-
 		}
 		else
 		{
