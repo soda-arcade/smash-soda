@@ -437,10 +437,10 @@ void HostSettingsWidget::renderHotseat() {
     AppStyle::pushLabel();
     ImGui::Text("AFK STRIP");
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _hotseatAFK, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        _hotseat = !_hotseat;
+        _hotseatAFK = !_hotseatAFK;
         MetadataCache::preferences.hotseatAFK = _hotseatAFK;
     }
-    if (_hotseat)           TitleTooltipWidget::render("AFK Strip Off", "AFK hotseat guest won't have gamepad stripped.");
+    if (_hotseatAFK)           TitleTooltipWidget::render("AFK Strip Off", "AFK hotseat guest won't have gamepad stripped.");
     else                    TitleTooltipWidget::render("AFK Strip On", "AFK hotseat guest will automatically be moved to spectate list.");
     AppStyle::pushLabel();
     ImGui::TextWrapped("If the current hotseat guest goes AFK for a set period of time, they will automatically set to spectate.");
