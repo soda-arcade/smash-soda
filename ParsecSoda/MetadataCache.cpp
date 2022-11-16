@@ -249,9 +249,14 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (MTY_JSONObjGetString(json, "discord", discord, 128)) preferences.discord = discord;
             else preferences.discord = "";
 
+            // HOTSEAT
             if (!MTY_JSONObjGetBool(json, "hotseat", &preferences.hotseat)) preferences.latencyLimitEnabled = false;
             if (!MTY_JSONObjGetUInt(json, "hotseatTime", &preferences.hotseatTime)) preferences.hotseatTime = 15;
+            if (!MTY_JSONObjGetBool(json, "hotseatAFK", &preferences.hotseatAFK)) preferences.hotseatAFK = false;
+            if (!MTY_JSONObjGetUInt(json, "hotseatAFKTime", &preferences.hotseatAFKTime)) preferences.hotseatAFKTime = 5;
+            if (!MTY_JSONObjGetBool(json, "hotseatPause", &preferences.hotseatPause)) preferences.hotseatPause = true;
 
+            // KIOSK MODE
             if (!MTY_JSONObjGetBool(json, "kioskMode", &preferences.kioskMode)) preferences.kioskMode = false;
             if (MTY_JSONObjGetString(json, "kioskApplication", kioskApplication, 256)) preferences.kioskApplication = kioskApplication;
             else preferences.kioskApplication = "";
@@ -334,12 +339,20 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetUInt(json, "lockedGamepadButtons", preferences.lockedGamepadButtons);
         MTY_JSONObjSetUInt(json, "theme", preferences.theme);
         MTY_JSONObjSetString(json, "discord", preferences.discord.c_str());
+
+        // Hotseat
         MTY_JSONObjSetBool(json, "hotseat", preferences.hotseat);
         MTY_JSONObjSetUInt(json, "hotseatTime", preferences.hotseatTime);
         MTY_JSONObjSetBool(json, "kioskMode", preferences.kioskMode);
+        MTY_JSONObjSetBool(json, "hotseatAFK", preferences.hotseatAFK);
+        MTY_JSONObjSetUInt(json, "hotseatAFKTime", preferences.hotseatAFKTime);
+        MTY_JSONObjSetBool(json, "hotseatPause", preferences.hotseatPause);
+
+        // Kiosk Mode
         MTY_JSONObjSetString(json, "kioskApplication", preferences.kioskApplication.c_str());
         MTY_JSONObjSetString(json, "kioskParameters", preferences.kioskParameters.c_str());
         MTY_JSONObjSetString(json, "chatbot", preferences.chatbot.c_str());
+
         MTY_JSONObjSetBool(json, "leaderboardEnabled", preferences.leaderboardEnabled);
 
         MTY_JSONWriteFile(filepath.c_str(), json);

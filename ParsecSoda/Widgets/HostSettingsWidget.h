@@ -26,6 +26,10 @@ class HostSettingsWidget
 public:
 	HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback);
 	bool render(HWND& hwnd);
+	void renderGeneral(HWND& hwnd);
+	void renderAudio();
+	void renderHotseat();
+	void renderKiosk();
 	void updateSecretLink();
 
 	const ImVec2 DEFAULT_BUTTON_SIZE = ImVec2(40, 40);
@@ -57,8 +61,13 @@ private:
 	bool _publicGame;
 	bool _latencyLimiter;
 	int32_t _latencyLimit;
+
+	// Hotseat
 	bool _hotseat;
 	int32_t _hotseatTime;
+	bool _hotseatAFK;
+	int32_t _hotseatAFKTime;
+	bool _hotseatPause;
 
 	int _micVolume = 80;
 	int _speakersVolume = 30;

@@ -51,7 +51,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
 
 		// Tournaments
-		//if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient);
+		if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient);
 	}
 
 	// God commands

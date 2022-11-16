@@ -126,7 +126,7 @@ private:
 
 	void autoGamepad();
 	void kioskMode();
-	void hotseat();
+	bool hotseat();
 	void welcomeMessage();
 
 	void pressButtonForAll(ParsecGamepadButtonMessage button);
@@ -137,9 +137,11 @@ private:
 	void stopHotseatTimer();
 	int findHotseatGuest();
 	void setHotseatGuest(int index);
+	bool hotseatModeTest();
 	bool isSpectator(int index);
 
 	int hotseatIndex = 0;
+	int hotseatError = -1;
 
 	// Attributes
 	AudioMix _audioMix;

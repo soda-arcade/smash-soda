@@ -370,6 +370,7 @@ void Hosting::stopHosting()
 {
 	_isRunning = false;
 	_guestList.clear();
+	hotseatError = false;
 
 	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
@@ -828,10 +829,13 @@ ParsecGamepadButtonMessage Hosting::createButtonMessage(ParsecGamepadButton butt
 /// <summary>
 /// Handles all the hotseat stuff.
 /// </summary>
-void Hosting::hotseat() {
+bool Hosting::hotseat() {
 
 	// Hotseat enabled and gamepad 1 connected?
-	if (MetadataCache::preferences.hotseat && _gamepadClient.getGamepad(0)->isConnected()) {
+	if (MetadataCache::preferences.hotseat) {
+
+		// Need to do several checks to see if hotseat mode can be enabled
+		if (!hotseatModeTest()) return false;
 
 		// Start timer if it is not running
 		if (!MetadataCache::hotseat.hotseatClock.isRunning())
@@ -891,11 +895,15 @@ void Hosting::hotseat() {
 		else stopHotseatTimer();
 
 	}
-	else
+	else {
 
 		// Stop hotseat timers if running
 		if (MetadataCache::hotseat.hotseatClock.isRunning())
 			stopHotseatTimer();
+
+	}
+
+	return true;
 
 }
 
@@ -959,7 +967,8 @@ void Hosting::setHotseatGuest(int index) {
 	_gamepadClient.getGamepad(0)->setOwner(MetadataCache::hotseat.guest, 0, false);
 
 	// Press pause for new player
-	MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
+	if (MetadataCache::preferences.hotseatPause)
+		MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
 
 	// Chatbot
 	broadcastChatMessage("[ChatBot] | " + MetadataCache::hotseat.guest.name + " now has control of the gamepad!\0");
@@ -968,7 +977,67 @@ void Hosting::setHotseatGuest(int index) {
 	startHotseatTimer();
 
 	// Start AFK timer
-	_afkClock.reset(60000);
+	if (MetadataCache::preferences.hotseatAFK) {
+		_afkClock.reset(MetadataCache::preferences.hotseatAFKTime * 60000);
+	}
+
+}
+
+/// <summary>
+/// Checks to see if hotseat mode can be started.
+/// Messing with gamepads is BSOD territory, so here we want
+/// to make absolutely sure we can go in to hotseat mode.
+/// </summary>
+/// <returns>boolean</returns>
+bool Hosting::hotseatModeTest() {
+
+	// Are there people in the room?
+	if (_guestList.getGuests().size() < 1) {
+		if (hotseatError != 1) {
+			_chatLog.logMessage("[HOTSEAT] There needs to be at least one guest in the room.");
+			hotseatError = 1;
+		}
+		return false;
+	}
+
+	// Ensure at least one gamepad has been enabled
+	if (_gamepadClient.gamepads.size() < 1) {
+		if (hotseatError != 1) {
+			_chatLog.logMessage("[HOTSEAT] Please enable at least one Xbox gamepad.");
+			hotseatError = 1;
+		}
+		return false;
+	}
+
+	// Ensure gamepad 1 is attached and connected
+	if (!_gamepadClient.getGamepad(0)->isAttached()) {
+		if (hotseatError != 2) {
+			_chatLog.logMessage("[HOTSEAT] Please enable the first gamepad.");
+			hotseatError = 2;
+		}
+		return false;
+	}
+
+	// Xbox controller only
+	if (_gamepadClient.getGamepad(0)->type() != AGamepad::Type::XBOX) {
+		if (hotseatError != 3) {
+			_chatLog.logMessage("[HOTSEAT] Make sure the first gamepad is an Xbox gamepad (not Playstation controller).");
+			hotseatError = 3;
+		}
+		return false;
+	}
+
+	// Xbox index 1?
+	if (_gamepadClient.getGamepad(0)->getIndex() != 0) {
+		if (hotseatError != 4) {
+			_chatLog.logMessage("[HOTSEAT] Most single player games will only work with the first Xbox controller connected. The host needs to disconnect their controller.");
+			hotseatError = 4;
+		}
+		return false;
+	}
+
+	hotseatError = -1;
+	return true;
 
 }
 
@@ -1068,9 +1137,9 @@ void Hosting::pollInputs()
 					_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
 			}
 
-			// Hotseat
-			if (MetadataCache::preferences.hotseat) {
-				_afkClock.reset(60000);
+			// Hotseat AFK Timer
+			if (MetadataCache::preferences.hotseat && MetadataCache::preferences.hotseatAFK) {
+				_afkClock.reset(MetadataCache::preferences.hotseatAFKTime * 60000);
 			}
 
 		}
@@ -1080,12 +1149,12 @@ void Hosting::pollInputs()
 			if (MetadataCache::preferences.hotseat) {
 
 				// Guest has been afk for a minute 
-				if (_afkClock.isFinished()) {
+				if (MetadataCache::preferences.hotseatAFK && _afkClock.isFinished()) {
 					if (_guestList.getGuests().size() > 0 && MetadataCache::hotseat.guest.isValid()) {
-						broadcastChatMessage(MetadataCache::hotseat.guest.name + "  was AFK for 1 minute and has now been set to !spectate");
+						broadcastChatMessage(MetadataCache::hotseat.guest.name + "  was AFK and has now been set to !spectate");
 						MetadataCache::hotseat.spectators.push_back(MetadataCache::hotseat.guest.userID);
 					}
-					_afkClock.reset(60000);
+					_afkClock.reset(MetadataCache::preferences.hotseatAFKTime * 60000);
 				}
 
 			}
@@ -1229,6 +1298,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		logMessage = _chatBot->formatModGuestMessage(guest);
 		broadcastChatMessage(logMessage);
 		_tierList.setTier(guest.userID, Tier::MOD);
+		_chatLog.logCommand(logMessage);
 	}
 	else if (state == GUEST_FAILED)
 	{

@@ -33,13 +33,35 @@ public:
 			
 		}
 
+		if (_stringArg == "stop") _replyMessage = stopTournament();
+
+		if (_stringArg == "brackets") _replyMessage = showBrackets();
+
 		return true;
+
+	}
+
+	void resetTournament() {
+		// Clear guest list
+		MetadataCache::teams.guests.erase(MetadataCache::teams.guests.begin(), MetadataCache::teams.guests.end());
+		MetadataCache::teams.guests.clear();
+		MetadataCache::teams.guests.shrink_to_fit();
+
+		// Clear team list
+		for (int i = 0; i < MetadataCache::teams.teams.size(); i++) {
+			delete(&MetadataCache::teams.teams[i]);
+		}
+		MetadataCache::teams.teams.clear();
+		MetadataCache::teams.teams.shrink_to_fit();
 	}
 
 	/// <summary>
 	/// Initializes the 2v2 Tournament.
 	/// </summary>
 	bool initTournament() {
+
+		// Clear previous tournament
+		resetTournament();
 
 		// It has begun...
 		MetadataCache::teams.isInitiated = true;
@@ -72,33 +94,11 @@ public:
 	/// </summary>
 	bool createTeams() {
 
-		// Clear guest list
-		MetadataCache::teams.guests.clear();
-		MetadataCache::teams.guests.erase(MetadataCache::teams.guests.begin(), MetadataCache::teams.guests.end());
-		MetadataCache::teams.guests.shrink_to_fit();
-
-		// Clear team list
-		MetadataCache::teams.teams.clear();
-
 		// Create participants from guest list
-		// TODO
-		// Dummy guests list
-		MetadataCache::teams.guests.push_back("MickeyUK");
-		MetadataCache::teams.guests.push_back("bigboi83");
-		MetadataCache::teams.guests.push_back("RefffiK");
-		MetadataCache::teams.guests.push_back("oscar");
-		MetadataCache::teams.guests.push_back("Irish-Bstard");
-		MetadataCache::teams.guests.push_back("Dr. Puff");
-		MetadataCache::teams.guests.push_back("AlexErBest");
-		MetadataCache::teams.guests.push_back("Altearis");
-		MetadataCache::teams.guests.push_back("Sniggles");
-		MetadataCache::teams.guests.push_back("Ruffio");
-		MetadataCache::teams.guests.push_back("WTF");
-		MetadataCache::teams.guests.push_back("Random");
-		MetadataCache::teams.guests.push_back("lolz");
-		MetadataCache::teams.guests.push_back("dunno");
-		MetadataCache::teams.guests.push_back("something");
-		MetadataCache::teams.guests.push_back("teehee");
+		int guestCount = 16;
+		for (int i = 0; i < guestCount; i++) {
+			MetadataCache::teams.guests.push_back(random_string(6));
+		}
 
 		// Do we have enough guests?
 		if (MetadataCache::teams.guests.size() % 2 != 0) return false;
@@ -238,12 +238,39 @@ public:
 
 	}
 
+	string stopTournament() {
+
+		MetadataCache::teams.isInitiated = false;
+
+		return "[2v2Bot] | The tournament has been stopped";
+
+	}
+
 	/// <summary>
 	/// Command prefixes.
 	/// </summary>
 	/// <returns>Vector</returns>
 	static vector<const char*> prefixes() {
 		return vector<const char*> { "!2v2" };
+	}
+
+	/// <summary>
+	/// Random string helper
+	/// </summary>
+	/// <returns>Vector</returns>
+	std::string random_string(size_t length) {
+		auto randchar = []() -> char
+		{
+			const char charset[] =
+				"0123456789"
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+				"abcdefghijklmnopqrstuvwxyz";
+			const size_t max_index = (sizeof(charset) - 1);
+			return charset[rand() % max_index];
+		};
+		std::string str(length, 0);
+		std::generate_n(str.begin(), length, randchar);
+		return str;
 	}
 
 protected:

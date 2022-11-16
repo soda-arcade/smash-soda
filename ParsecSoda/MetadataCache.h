@@ -93,13 +93,20 @@ public:
 		unsigned int lockedGamepadButtons = 0;
 		unsigned int theme = 0;
 		string discord = "";
+
 		bool hotseat = false;
-		unsigned int hotseatTime = 0;
+		unsigned int hotseatTime = 15;
+		bool hotseatAFK = false;
+		unsigned int hotseatAFKTime = 5;
+		bool hotseatPause = true;
+
 		bool kioskMode = false;
 		string kioskApplication = "";
 		string kioskParameters = "";
+
 		string chatbot = "ChatBot";
 		string chatbotName = "";
+
 		bool leaderboardEnabled = true;
 	
 	};

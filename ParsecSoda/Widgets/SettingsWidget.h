@@ -17,6 +17,8 @@ class SettingsWidget
 public:
 	SettingsWidget(Hosting& hosting);
 	bool render();
+	void renderGeneral();
+	void renderChatbot();
 
 private:
 	// Dependency injection
