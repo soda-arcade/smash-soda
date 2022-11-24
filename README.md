@@ -40,17 +40,49 @@ The aim of this project is to add additional useful features, with a focus on th
 
 This is an experimental version of Parsec Soda...expect bugs! Help development by reporting <a href="https://github.com/MickeyUK/SmashSoda/issues">issues</a> and contributing to the <a href="https://github.com/MickeyUK/SmashSoda/discussions">Discussions</a>!
 
-## <a href="https://github.com/MickeyUK/SmashSoda/releases">DOWNLOAD LATEST VERSION HERE</a>
+Still lost? Check out the beginner guide <a href="https://github.com/MickeyUK/SmashSoda/wiki/beginner-guide">HERE</a>!
+
+Check out the comprehensive Wiki guide on how to use Smash Soda <a href="https://github.com/MickeyUK/SmashSoda/wiki/">HERE</a>!
+
+
+<table>
+    <tr>
+        <td align="center">
+           <a href="https://github.com/MickeyUK/SmashSoda/releases">
+               <img src="https://raw.githubusercontent.com/MickeyUK/SmashSoda/master/github/Icons/download.png">
+               <div>Download</div>
+           </a>
+           <div>Download latest<br>version</div>
+        </td>
+        <td align="center">
+           <a href="https://github.com/MickeyUK/SmashSoda/issues">
+               <img width="60px" src="https://raw.githubusercontent.com/MickeyUK/SmashSoda/master/github/Icons/fix.png">
+               <div>Issues</div>
+           </a>
+           <div>Report issues and<br>request features</div>
+        </td>
+        <td align="center">
+           <a href="https://discord.gg/9ZHmwce">
+               <img width="60px" src="https://raw.githubusercontent.com/MickeyUK/SmashSoda/master/github/Icons/discord.png">
+               <div>Discord</div>
+           </a>
+           <div>Join the Discord<br>community!</div>
+        </td>
+        <td align="center">
+           <a href="https://discord.gg/9ZHmwce">
+               <img width="60px" src="https://raw.githubusercontent.com/MickeyUK/SmashSoda/master/github/Icons/help.png">
+               <div>Wiki</div>
+           </a>
+           <div>Read the full wiki<br>guide here!</div>
+        </td>
+    </tr>
+</table>
 
 ## Features
 
   * **Smash Bros Ultimate**
 
   Some new admin chat commands have been added for making hosting Smash easier. **!bb** will press everybody's B button twice...good when you're stuck the the match results screen!
-
-  Doing 2v2 tournaments on Parsec is tricky, what with the ingame tournament mode not having an option for it. Some new admin chat commands have been added to make it much easier. 
-  
-  **!teams random** will automatically sort all the guests in your room in to teams (or aborting if uneven guest count). Admins can then use the command **!teamswin 1/2** to tell Soda which team has won and it will automatically keep track of everybody's position. It will also automatically put the guests in to the gamepad slots when it is there turn! See all the chat commands <a href="#teams">here</a>.
 
   * **Ping Limit**
 
@@ -67,60 +99,6 @@ This is an experimental version of Parsec Soda...expect bugs! Help development b
   * **Themes**
   
   Check out the new *Midnight* theme for Smash Soda or select from some presets!
-
-## Chat Commands
-
-Below is a list of all the chat commands.
-
-##### General
-
-Standard guests, mods and the host can use these commands.
-
-|Command|Description|
-| ----------- | ----------- |
-|!bonk| Bonk another user on the head.
-|<b>!discord</b>| If you have set a Discord invite URL set in the Smash Soda configuration settings then this command will print it in chat.
-|!help| Show command list.
-|!ff| Drop all gamepads you're holding.
-|!mirror| Toggle mirroring of L-Stick into DPad.
-|!one| Maps all of your devices to the same gamepad.
-|!pads| Shows who's holding each gamepad.
-|!sfx| Play sound effect.
-|<b>!spectate</b>| Be skipped by hotseat and team commands
-|!swap| Replace your gamepad with another one.
-
-##### Admin / Moderator
-
-Admins, mods and the host can use these commands.
-
-|Command|Description|
-| ----------- | ----------- |
-|!ban| Ban a guest.
-|<b>!bb</b>| Press everybody's B button twice.
-|!dc| Disconnect a specific gamepad.
-|!kick| Kick user from the room.
-|!limit| Set the maximum amount of pads a guest can hold.
-|!strip| Strip gamepad from player's hand.
-|<b>!ping</b>| Returns the ping for a user.
-|!unban| Unban a guest.
-
-##### God
-
-Only the host can use these commands.
-
-|Command|Description|
-| ----------- | ----------- |
-|!gameid| Set game ID.
-|!guests| Set the amount of room slots.
-|!mic| Set the microphone volume.
-|<b>!mod</b>| You can make a user in your lobby a moderator. They will then have Admin tier privileges, having access to those commands.
-|!name| Set the room name.
-|!private| Make the room private.
-|!public| Make the room public.
-|!q| Close stream.
-|!setconfig| Apply config changes.
-|!speakers| Set speakers volume.
-|<b>!unmod</b>| Revoke moderator permissions.
 
 ## Contributing
 
