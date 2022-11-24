@@ -69,7 +69,7 @@ Check out the comprehensive Wiki guide on how to use Smash Soda <a href="https:/
            <div>Join the Discord<br>community!</div>
         </td>
         <td align="center">
-           <a href="https://discord.gg/9ZHmwce">
+           <a href="https://github.com/MickeyUK/SmashSoda/wiki">
                <img width="60px" src="https://raw.githubusercontent.com/MickeyUK/SmashSoda/master/github/Icons/help.png">
                <div>Wiki</div>
            </a>
