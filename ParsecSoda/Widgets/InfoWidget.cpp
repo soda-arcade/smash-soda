@@ -23,22 +23,30 @@ bool InfoWidget::render()
     ImGui::SetCursorPosX(25);
     ImGui::TextWrapped("Parsec Soda is FREE and Open Source. If you paid for this app, you have been scammed. You can find the source code at this address.");
 
-    ImGui::Dummy(ImVec2(0, 15));
+    ImGui::Dummy(ImVec2(0, 10));
     ImGui::Separator();
-    ImGui::Dummy(ImVec2(0, 15));
+    ImGui::Dummy(ImVec2(0, 10));
 
     renderSugoiButton("linktr.ee/flafcodes", L"https://linktr.ee/flafcodes");
     ImGui::SetCursorPosX(25);
     ImGui::TextWrapped("Parsec Soda was created by FlaF. You can find all my social media links there.");
 
-    ImGui::Dummy(ImVec2(0, 15));
+    ImGui::Dummy(ImVec2(0, 10));
     ImGui::Separator();
-    ImGui::Dummy(ImVec2(0, 15));
+    ImGui::Dummy(ImVec2(0, 10));
+
+    renderSugoiButton("github.com/MickeyUK/SmashSoda/", L"https://github.com/MickeyUK/SmashSoda/");
+    ImGui::SetCursorPosX(25);
+    ImGui::TextWrapped("Smash Soda is an unofficial modified version of Parsec Soda. You can find latest releases, guides and source code here!");
+
+    ImGui::Dummy(ImVec2(0, 10));
+    ImGui::Separator();
+    ImGui::Dummy(ImVec2(0, 10));
 
     ImGui::BeginGroup();
     renderSugoiButton("Donate", L"https://github.com/FlavioFS/ParsecSoda#donate");
     ImGui::SetCursorPosX(25);
-    ImGui::TextWrapped("Want to support my work?");
+    ImGui::TextWrapped("If you love Smash Soda then you should support Flávio by donating to him with the links below!");
 
     ImGui::Dummy(ImVec2(0, 10));
     

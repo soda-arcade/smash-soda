@@ -108,6 +108,9 @@ public:
 		string chatbotName = "";
 
 		bool leaderboardEnabled = true;
+
+		vector<uint32_t> mutedGuests;
+		vector<uint32_t> mutedGuestsDuration;
 	
 	};
 

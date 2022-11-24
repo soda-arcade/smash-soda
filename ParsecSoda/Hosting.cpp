@@ -418,6 +418,12 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 
 void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside)
 {
+	// Has the guest been muted?
+	for (int i = 0; i < MetadataCache::preferences.mutedGuests.size(); i++) {
+		if (guest.userID == MetadataCache::preferences.mutedGuests[i]) 
+			return;
+	}
+
 	ACommand* command = _chatBot->identifyUserDataMessage(message, guest, isHost);
 	command->run();
 
@@ -479,6 +485,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	}
 
 	delete command;
+
 }
 
 void Hosting::sendHostMessage(const char* message, bool isHidden)

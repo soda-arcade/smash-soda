@@ -34,6 +34,7 @@
 #include "Commands/CommandMic.h"
 #include "Commands/CommandMirror.h"
 #include "Commands/CommandMod.h"
+#include "Commands/CommandMute.h"
 #include "Commands/CommandName.h"
 #include "Commands/CommandLimit.h"
 #include "Commands/CommandOne.h"

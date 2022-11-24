@@ -1,8 +1,10 @@
 #include "AGamepad.h"
 
+/// <summary>
+/// A default AGamepad object.
+/// </summary>
 AGamepad::AGamepad()
-	: parsec(nullptr)
-{
+	: parsec(nullptr) {
 	_client = nullptr;
 	_isAlive = false;
 	_index = GAMEPAD_INDEX_ERROR;
@@ -10,9 +12,13 @@ AGamepad::AGamepad()
 	clearOwner();
 }
 
+/// <summary>
+/// A default AGamepad object.
+/// </summary>
+/// <param name="parsec">ParsecDSO</param>
+/// <param name="client">Driver connection object</param>
 AGamepad::AGamepad(ParsecDSO* parsec, PVIGEM_CLIENT client)
-	: parsec(parsec)
-{
+	: parsec(parsec) {
 	_client = client;
 	_isAlive = false;
 	_index = GAMEPAD_INDEX_ERROR;
@@ -20,14 +26,20 @@ AGamepad::AGamepad(ParsecDSO* parsec, PVIGEM_CLIENT client)
 	clearOwner();
 }
 
-bool AGamepad::realloc()
-{
+/// <summary>
+/// Reallocates AGamepad object.
+/// </summary>
+/// <returns>XBoxGamepad::alloc()</returns>
+bool AGamepad::realloc() {
 	release();
 	return alloc();
 }
 
-bool AGamepad::disconnect()
-{
+/// <summary>
+/// Disconnects AGamepad object.
+/// </summary>
+/// <returns>true if successful.</returns>
+bool AGamepad::disconnect() {
 	if (!_isAlive || _client == nullptr)
 	{
 		_isConnected = false;
@@ -45,8 +57,10 @@ bool AGamepad::disconnect()
 	return true;
 }
 
-void AGamepad::release()
-{
+/// <summary>
+/// Releases AGamepad object.
+/// </summary>
+void AGamepad::release() {
 	if (_isAlive)
 	{
 		disconnect();
@@ -57,8 +71,11 @@ void AGamepad::release()
 	}
 }
 
-bool AGamepad::isAttached()
-{
+/// <summary>
+/// Checks to see if AGamepad is attached.
+/// </summary>
+/// <returns>True if attached</returns>
+bool AGamepad::isAttached() {
 	if (_isAlive)
 	{
 		return vigem_target_is_attached(_pad);
@@ -67,18 +84,24 @@ bool AGamepad::isAttached()
 	return false;
 }
 
-void AGamepad::setIndex(ULONG index)
-{
+/// <summary>
+/// Sets the index for AGamepad object.
+/// </summary>
+/// <param name="index"></param>
+void AGamepad::setIndex(ULONG index) {
 	_index = index;
 }
 
-ULONG AGamepad::getIndex() const
-{
+/// <summary>
+/// Gets the index for AGamepad object.
+/// </summary>
+/// <param name="index"></param>
+ULONG AGamepad::getIndex() const {
 	return _index;
 }
 
-XINPUT_STATE AGamepad::getState()
-{
+
+XINPUT_STATE AGamepad::getState() {
 	return _currentState;
 }
 
