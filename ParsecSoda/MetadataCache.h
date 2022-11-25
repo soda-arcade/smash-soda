@@ -39,6 +39,7 @@ public:
 		uint32_t start = 0;
 		uint32_t expiry = 0;
 		bool isValid = false;
+
 	};
 
 	/// <summary>
@@ -109,8 +110,13 @@ public:
 
 		bool leaderboardEnabled = true;
 
-		vector<uint32_t> mutedGuests;
-		vector<uint32_t> mutedGuestsDuration;
+		class MutedGuest {
+		public:
+			uint32_t id;
+			string name;
+			Stopwatch stopwatch;
+		};
+		vector<MutedGuest> mutedGuests;
 	
 	};
 

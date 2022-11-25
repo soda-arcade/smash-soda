@@ -137,7 +137,7 @@ public:
 			MetadataCache::Teams::Round round = MetadataCache::Teams::Round();
 
 			// Create brackets for that round
-			int nBrackets = log2(nBrackets / 2);
+			nBrackets = log2(nBrackets / 2);
 			for (int j = 0; j < nBrackets; j++) {
 
 				// New bracket

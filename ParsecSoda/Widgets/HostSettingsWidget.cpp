@@ -104,13 +104,6 @@ bool HostSettingsWidget::render(HWND& hwnd) {
         }
         AppFonts::pushInput();
         AppColors::pushTitle();
-        if (ImGui::BeginTabItem("Audio"))
-        {
-            renderAudio();
-            ImGui::EndTabItem();
-        }
-        AppFonts::pushInput();
-        AppColors::pushTitle();
         if (ImGui::BeginTabItem("Hotseat"))
         {
             renderHotseat();
@@ -524,6 +517,7 @@ void HostSettingsWidget::renderKiosk() {
     ImGui::Text("LAUNCH PARAMETERS");
 
     ImGui::SetNextItemWidth(size.x - 10);
+    AppStyle::pushInput();
     if (ImGui::InputText("##Kioskparameters", _kioskParam, 256)) {
         MetadataCache::preferences.kioskParameters = _kioskParam;
     }

@@ -13,11 +13,13 @@
 
 #include "Commands/ACommand.h"
 #include "Commands/Command2v2.h"
+#include "Commands/Command8ball.h"
 #include "Commands/CommandAFK.h"
 #include "Commands/CommandBan.h"
 #include "Commands/CommandBB.h"
 #include "Commands/CommandBonk.h"
 #include "Commands/CommandBotMessage.h"
+#include "Commands/CommandDecrease.h"
 #include "Commands/CommandDefaultMessage.h"
 #include "Commands/CommandDiscord.h"
 #include "Commands/CommandDC.h"

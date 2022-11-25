@@ -11,6 +11,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
 	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
 	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient);
+	if (msgIsEqual(msg, Command8Ball::prefixes()))		return new Command8Ball(sender);
 	if (msgIsEqual(msg, CommandFortune::prefixes()))	return new CommandFortune(sender);
 	if (msgIsEqual(msg, CommandHelp::prefixes()))		return new CommandHelp(sender, _tierList);
 	//if (CommandIpFilter::containsIp(msg))				return new CommandIpFilter(msg, sender, _parsec, _ban, isHost);
@@ -18,7 +19,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandMirror::prefixes()))		return new CommandMirror(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandOne::prefixes()))		return new CommandOne(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
-	if (msgIsEqual(msg, CommandSpectate::prefixes()))	return new CommandSpectate(sender);
+	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList);
 	if (msgStartsWith(msg, CommandRequest::prefixes()))	return new CommandRequest(msg);
 	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
 	//if (msgStartsWith(msg, CommandTeams::prefixes()))	return new CommandTeams(msg, sender, _guests, _gamepadClient, _tierList);
@@ -41,6 +42,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient);
 		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
+		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg);
 		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);

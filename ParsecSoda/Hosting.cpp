@@ -420,8 +420,22 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 {
 	// Has the guest been muted?
 	for (int i = 0; i < MetadataCache::preferences.mutedGuests.size(); i++) {
-		if (guest.userID == MetadataCache::preferences.mutedGuests[i]) 
-			return;
+		if (guest.userID == MetadataCache::preferences.mutedGuests[i].id) {
+
+			// Has their suffering gone on long enough?
+			if (MetadataCache::preferences.mutedGuests[i].stopwatch.isFinished()) {
+				MetadataCache::preferences.mutedGuests.erase(MetadataCache::preferences.mutedGuests.begin() + i);
+				MetadataCache::preferences.mutedGuests.shrink_to_fit();
+				break;
+			}
+			else {
+
+				// Shhhhhhhhh
+				return;
+
+			}
+
+		}
 	}
 
 	ACommand* command = _chatBot->identifyUserDataMessage(message, guest, isHost);
@@ -857,7 +871,7 @@ bool Hosting::hotseat() {
 				// Get current hotseat guest index
 				hotseatIndex = findHotseatGuest();
 
-				// Remaining minutes
+				// Remaining time
 				uint32_t time = round(MetadataCache::hotseat.hotseatClock.getRemainingTime() / 60000);
 
 				// Reminder in chat
