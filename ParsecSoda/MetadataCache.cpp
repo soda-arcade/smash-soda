@@ -270,6 +270,10 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
 
             if (!MTY_JSONObjGetBool(json, "leaderboardEnabled", &preferences.leaderboardEnabled)) preferences.leaderboardEnabled = true;
 
+            // Overlay
+            if (!MTY_JSONObjGetBool(json, "overlayShow", &preferences.overlayShow)) preferences.overlayShow = false;
+            if (!MTY_JSONObjGetBool(json, "overlayHotseat", &preferences.overlayHotseat)) preferences.overlayHotseat = false;
+
             preferences.isValid = true;
 
             MTY_JSONDestroy(&json);
@@ -354,6 +358,10 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetString(json, "chatbot", preferences.chatbot.c_str());
 
         MTY_JSONObjSetBool(json, "leaderboardEnabled", preferences.leaderboardEnabled);
+
+        // Overlay
+        MTY_JSONObjSetBool(json, "overlayShow", preferences.overlayShow);
+        MTY_JSONObjSetBool(json, "overlayHotseat", preferences.overlayHotseat);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);

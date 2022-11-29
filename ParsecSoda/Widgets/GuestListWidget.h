@@ -19,10 +19,13 @@ private:
 	void renderOnlineGuests();
 	void renderBannedGuests();
 	void renderHistoryGuests();
+	void renderModdedGuests();
+	//void renderSpectatorGuests();
 
 	// Dependency injection
 	Hosting& _hosting;
 	BanList& _banList;
+	ModList& _modList;
 	
 	// Attributes
 	char _filterText[256] = "";

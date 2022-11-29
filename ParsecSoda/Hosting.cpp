@@ -357,6 +357,9 @@ void Hosting::startHosting()
 				if (MetadataCache::preferences.kioskMode)
 					kioskMode();
 
+				// Init overlay
+				
+
 			}
 		}
 		catch (const exception&)

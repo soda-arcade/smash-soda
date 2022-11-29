@@ -71,9 +71,9 @@ public:
 		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
 		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, bool& hostingLoopController, Guest& host
 	)
-		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod), _gamepadClient(gamepadClient),
-		_guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), _parsecSession(parsecSession),
-		_sfxList(sfxList), _tierList(_tierList), _hostingLoopController(hostingLoopController), _host(host)
+		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod),
+		_gamepadClient(gamepadClient), _guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), 
+		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _hostingLoopController(hostingLoopController), _host(host)
 	{
 		_basicVersion = MetadataCache::preferences.basicVersion;
 	}
@@ -101,7 +101,7 @@ private:
 	ParsecDSO* _parsec;
 	AudioIn& _audioIn;
 	AudioOut& _audioOut;
-	BanList &_ban;
+	BanList& _ban;
 	ModList& _mod;
 	DX11 &_dx11;
 	GamepadClient& _gamepadClient;

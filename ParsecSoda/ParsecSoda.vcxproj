@@ -178,7 +178,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
-    <ClCompile Include="SpectateList.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
     <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
     <ClCompile Include="Widgets\SettingsWidget.cpp" />
@@ -281,7 +280,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\CommandSpectate.h" />
     <ClInclude Include="Commands\CommandTimer.h" />
     <ClInclude Include="Commands\CommandUnmod.h" />
-    <ClInclude Include="SpectateList.h" />
     <ClInclude Include="TimeT.h" />
     <ClInclude Include="ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />

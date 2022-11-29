@@ -110,6 +110,9 @@ public:
 
 		bool leaderboardEnabled = true;
 
+		bool overlayShow = false;
+		bool overlayHotseat = false;
+
 		class MutedGuest {
 		public:
 			uint32_t id;
