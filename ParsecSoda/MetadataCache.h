@@ -8,7 +8,8 @@
 #include <ShlObj.h>
 #include "matoya.h"
 #include "Guest.h"
-#include "GuestData.h"
+#include "Models/GuestData.h"
+#include "GameData.h"
 #include "GuestTier.h"
 #include "Thumbnail.h"
 #include "Stringer.h"
@@ -165,12 +166,12 @@ public:
 	/// <summary>
 	/// This stores all the team information for tournaments.
 	/// </summary>
-	class Teams {
+	class Tournament {
 	public:
 
 		class Team {
 		public:
-			vector<string*> guests;
+			vector<string> guests;
 		};
 
 		class Bracket {
@@ -195,10 +196,8 @@ public:
 		vector<Team> teams;
 		vector<Round> rounds;
 
-		bool isInitiated = false;
+		bool isInit = false;
 		bool isStarted = false;
-
-		static bool reset();
 
 	};
 
@@ -215,6 +214,9 @@ public:
 	static vector<GuestData> loadModdedUsers();
 	static bool saveModdedUsers(vector<GuestData> guests);
 
+	static vector<GameData> loadGamesList();
+	static bool saveGamesList(vector<GameData> games);
+
 	static vector<GuestTier> loadGuestTiers();
 	static bool saveGuestTiers(vector<GuestTier> guestTiers);
 
@@ -227,7 +229,7 @@ public:
 	static Kiosk kiosk;
 	static AutoGamepad autoGamepad;
 	static Hotseat hotseat;
-	static Teams teams;
+	static Tournament tournament;
 
 private:
 	static string getUserDir();

@@ -33,7 +33,7 @@ Hosting::Hosting()
 	);
 	setHostVideoConfig(MetadataCache::preferences.fps, MetadataCache::preferences.bandwidth);
 
-	_sfxList.init("./sfx/custom/_sfx.json");
+	_sfxList.init("./SFX/custom/_sfx.json");
 	
 	_tierList.loadTiers();
 	_tierList.saveTiers();
@@ -43,6 +43,9 @@ Hosting::Hosting()
 
 	vector<GuestData> modded = MetadataCache::loadModdedUsers();
 	_modList = ModList(modded);
+
+	vector<GameData> games = MetadataCache::loadGamesList();
+	_gamesList = GameDataList(games);
 
 	_parsec = nullptr;
 
@@ -127,7 +130,7 @@ void Hosting::init()
 		audioIn, audioOut, _banList, _dx11, _modList,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
 		_hostConfig, _parsecSession, _sfxList, _tierList,
-		_isRunning, _host
+		_tournament, _isRunning, _host
 	);
 
 	CommandBonk::init();
@@ -242,6 +245,11 @@ ModList& Hosting::getModList()
 	return _modList;
 }
 
+GameDataList& Hosting::getGameList()
+{
+	return _gamesList;
+}
+
 vector<AGamepad*>& Hosting::getGamepads()
 {
 	return _gamepadClient.gamepads;
@@ -336,6 +344,7 @@ void Hosting::setRoomSecret(string secret)
 
 void Hosting::startHosting()
 {
+
 	if (!_isRunning)
 	{
 		_isRunning = true;
@@ -1376,4 +1385,14 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			}
 		}
 	}
+}
+
+bool Hosting::removeGame(string name) {
+
+	_gamesList.remove(name, [&](GameData& guest) {
+		
+	});
+
+	return true;
+
 }

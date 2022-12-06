@@ -27,6 +27,7 @@
 #include "BanList.h"
 #include "ModList.h"
 #include "GuestList.h"
+#include "GameDataList.h"
 #include "SFXList.h"
 #include "MetadataCache.h"
 #include "CompilerDirectives.h"
@@ -35,6 +36,7 @@
 #include "WebSocket.h"
 #include "ButtonLock.h"
 #include "Debouncer.h"
+#include "Modules/Tournament.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -71,6 +73,7 @@ public:
 	MyMetrics getMetrics(uint32_t id);
 	BanList& getBanList();
 	ModList& getModList();
+	GameDataList& getGameList();
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
@@ -94,6 +97,8 @@ public:
 	void webSocketRun(string uri, string password);
 	void webSocketStop();
 	bool webSocketRunning();
+
+	bool removeGame(string name);
 
 	LockedGamepadState _lockedGamepad;
 	void updateButtonLock(LockedGamepadState lockedGamepad);
@@ -149,6 +154,7 @@ private:
 	BanList _banList;
 	ModList _modList;
 	GuestDataList _guestHistory;
+	GameDataList _gamesList;
 	ChatBot *_chatBot;
 	ChatLog _chatLog;
 	GamepadClient _gamepadClient;
@@ -163,6 +169,7 @@ private:
 	Guest _host;
 	SFXList _sfxList;
 	TierList _tierList;
+	Tournament _tournament;
 
 	bool _isRunning = false;
 	bool _isMediaThreadRunning = false;

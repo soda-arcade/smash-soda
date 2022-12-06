@@ -10,7 +10,7 @@ MetadataCache::Preferences MetadataCache::preferences = MetadataCache::Preferenc
 MetadataCache::Hotseat MetadataCache::hotseat = MetadataCache::Hotseat();
 MetadataCache::AutoGamepad MetadataCache::autoGamepad = MetadataCache::AutoGamepad();
 MetadataCache::Kiosk MetadataCache::kiosk = MetadataCache::Kiosk();
-MetadataCache::Teams MetadataCache::teams = MetadataCache::Teams();
+MetadataCache::Tournament MetadataCache::tournament = MetadataCache::Tournament();
 
 mutex MetadataCache::_mutex;
 
@@ -527,6 +527,88 @@ bool MetadataCache::saveModdedUsers(vector<GuestData> guests)
     return false;
 }
 
+vector<GameData> MetadataCache::loadGamesList() {
+
+    vector<GameData> result;
+
+    string dirPath = getUserDir();
+    if (!dirPath.empty())
+    {
+        string filepath = dirPath + "games.json";
+
+        if (MTY_FileExists(filepath.c_str()))
+        {
+            MTY_JSON* json = MTY_JSONReadFile(filepath.c_str());
+            uint32_t size = MTY_JSONGetLength(json);
+
+            for (size_t i = 0; i < size; i++)
+            {
+                const MTY_JSON* game = MTY_JSONArrayGetItem(json, (uint32_t)i);
+
+                char name[128] = "";
+                char path[256] = "";
+                char parameters[256] = "";
+                char thumbnailPath[256] = "";
+                uint32_t gameID = 0;
+
+                bool nameSuccess = MTY_JSONObjGetString(game, "name", name, 128);
+                bool pathSuccess = MTY_JSONObjGetString(game, "path", path, 256);
+                bool paramSuccess = MTY_JSONObjGetString(game, "parameters", parameters, 256);
+                bool thumbSuccess = MTY_JSONObjGetString(game, "thumbnailPath", thumbnailPath, 256);
+                bool gameIDSuccess = MTY_JSONObjGetUInt(game, "gameID", &gameID);
+
+                if (nameSuccess && pathSuccess && paramSuccess && thumbSuccess && gameIDSuccess)
+                {
+                    result.push_back(GameData(name, path, parameters, thumbnailPath, gameID));
+                }
+            }
+
+            std::sort(result.begin(), result.end(), [](const GameData a, const GameData b) {
+                return a.gameID < b.gameID;
+                });
+
+            MTY_JSONDestroy(&json);
+        }
+    }
+
+    return result;
+
+}
+
+bool MetadataCache::saveGamesList(vector<GameData> games)
+{
+
+    string dirPath = getUserDir();
+
+    if (!dirPath.empty())
+    {
+        string filepath = dirPath + "games.json";
+
+        MTY_JSON* json = MTY_JSONArrayCreate();
+
+        vector<GameData>::iterator gi = games.begin();
+        for (; gi != games.end(); ++gi)
+        {
+            MTY_JSON* game = MTY_JSONObjCreate();
+
+            MTY_JSONObjSetString(game, "name", (*gi).name.c_str());
+            MTY_JSONObjSetString(game, "path", (*gi).path.c_str());
+            MTY_JSONObjSetString(game, "parameters", (*gi).parameters.c_str());
+            MTY_JSONObjSetString(game, "thumbnailPath", (*gi).thumbnailPath.c_str());
+            MTY_JSONObjSetUInt(game, "gameID", (*gi).gameID);
+
+            MTY_JSONArrayAppendItem(json, game);
+        }
+
+        MTY_JSONWriteFile(filepath.c_str(), json);
+        MTY_JSONDestroy(&json);
+
+        return true;
+    }
+
+    return false;
+}
+
 vector<GuestTier> MetadataCache::loadGuestTiers()
 {
     vector<GuestTier> result;
@@ -771,15 +853,4 @@ string MetadataCache::getUserDir()
     }
 
     return string();
-}
-
-bool MetadataCache::Teams::reset() {
-
-    // Clear lists
-    MetadataCache::teams.guests = vector<string>();
-    MetadataCache::teams.teams = vector<Team>();
-    MetadataCache::teams.rounds = vector<Round>();
-
-    return true;
-
 }

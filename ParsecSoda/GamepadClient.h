@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <functional>
 #include <thread>
-#include "GuestData.h"
+#include "Models/GuestData.h"
 #include "KeyboardMaps.h"
 #include "GuestList.h"
 #include "MetadataCache.h"

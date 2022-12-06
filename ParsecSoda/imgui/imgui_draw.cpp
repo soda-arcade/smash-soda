@@ -2096,7 +2096,7 @@ ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
     return new_font_cfg.DstFont;
 }
 
-// Default font TTF is compressed with stb_compress then base85 encoded (see misc/fonts/binary_to_compressed_c.cpp for encoder)
+// Default font TTF is compressed with stb_compress then base85 encoded (see misc/Fonts/binary_to_compressed_c.cpp for encoder)
 static unsigned int stb_decompress_length(const unsigned char* input);
 static unsigned int stb_decompress(unsigned char* output, const unsigned char* input, unsigned int length);
 static const char*  GetDefaultCompressedFontDataTTFBase85();
@@ -3954,7 +3954,7 @@ void ImGui::RenderColorRectWithAlphaCheckerboard(ImDrawList* draw_list, ImVec2 p
 // [SECTION] Decompression code
 //-----------------------------------------------------------------------------
 // Compressed with stb_compress() then converted to a C array and encoded as base85.
-// Use the program in misc/fonts/binary_to_compressed_c.cpp to create the array from a TTF file.
+// Use the program in misc/Fonts/binary_to_compressed_c.cpp to create the array from a TTF file.
 // The purpose of encoding as base85 instead of "0x00,0x01,..." style is only save on _source code_ size.
 // Decompression from stb.h (public domain) by Sean Barrett https://github.com/nothings/stb/blob/master/stb.h
 //-----------------------------------------------------------------------------
@@ -4078,7 +4078,7 @@ static unsigned int stb_decompress(unsigned char *output, const unsigned char *i
 // Download and more information at http://upperbounds.net
 //-----------------------------------------------------------------------------
 // File: 'ProggyClean.ttf' (41208 bytes)
-// Exported using misc/fonts/binary_to_compressed_c.cpp (with compression + base85 string encoding).
+// Exported using misc/Fonts/binary_to_compressed_c.cpp (with compression + base85 string encoding).
 // The purpose of encoding as base85 instead of "0x00,0x01,..." style is only save on _source code_ size.
 //-----------------------------------------------------------------------------
 static const char proggy_clean_ttf_compressed_data_base85[11980 + 1] =

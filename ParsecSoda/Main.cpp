@@ -4,10 +4,10 @@
 
 #define _WINSOCKAPI_
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_win32.h"
-#include "imgui/imgui_impl_dx11.h"
-#include "imgui/imgui_colors.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_win32.h"
+#include "ImGui/imgui_impl_dx11.h"
+#include "ImGui/imgui_colors.h"
 #include <d3d11.h>
 #include <tchar.h>
 #include <Windows.h>
@@ -17,9 +17,9 @@
 #include "resource.h"
 #include "Hosting.h"
 #include "Texture.h"
-#include "globals/AppIcons.h"
-#include "globals/AppFonts.h"
-#include "globals/AppColors.h"
+#include "Globals/AppIcons.h"
+#include "Globals/AppFonts.h"
+#include "Globals/AppColors.h"
 #include "Widgets/LoginWidget.h"
 #include "Widgets/NavBar.h"
 #include "Widgets/HostInfoWidget.h"
@@ -38,7 +38,7 @@
 #include "Widgets/SettingsWidget.h"
 #include "Widgets/WebSocketWidget.h"
 #include "Widgets/ButtonLockWidget.h"
-
+#include "Widgets/LibraryWidget.h"
 
 using namespace std;
 
@@ -139,6 +139,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     SettingsWidget settingsWidget(g_hosting);
     WebSocketWidget webSocketWidget(g_hosting);
     ButtonLockWidget buttonLockWidget(g_hosting);
+    LibraryWidget libraryWidget(g_hosting);
 
     ChatWidget chatWindow(g_hosting);
     //FLASHWINFO fi;
@@ -178,6 +179,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showSettings = false;
     bool showWebSocket = MetadataCache::preferences.showWebSocket;
     bool showButtonLock = false;
+    bool showLibrary = false;
 
     ParsecSession& g_session = g_hosting.getSession();
     vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
@@ -245,10 +247,11 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showSettings)           settingsWidget.render();
             if (showWebSocket)          webSocketWidget.render();
             if (showButtonLock)         buttonLockWidget.render();
+            if (showLibrary)            libraryWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket, showButtonLock
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket, showButtonLock, showLibrary
             );
             hostInfoWidget.render();
         }

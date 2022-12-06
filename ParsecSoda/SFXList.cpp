@@ -82,7 +82,7 @@ SFXList::SFXPlayResult SFXList::play(const string tag)
 				return SFXPlayResult::COOLDOWN;
 			}
 
-			string path = string("./sfx/custom/") + string((*it).path);
+			string path = string("./SFX/custom/") + string((*it).path);
 			wstring wide (path.begin(), path.end());
 			PlaySound(wide.c_str(), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
 			_lastCooldown = (*it).cooldown;

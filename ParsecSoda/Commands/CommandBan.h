@@ -85,7 +85,7 @@ private:
 
 				//try
 				//{
-				//	PlaySound(TEXT("./sfx/ban.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				//	PlaySound(TEXT("./SFX/ban.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
 				//}
 				//catch (const std::exception&) {}
 

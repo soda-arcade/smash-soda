@@ -71,6 +71,8 @@ ID3D11ShaderResourceView* AppIcons::websocket;
 ID3D11ShaderResourceView* AppIcons::editReason;
 ID3D11ShaderResourceView* AppIcons::buttonLock;
 
+ID3D11ShaderResourceView* AppIcons::library;
+
 Texture AppIcons::_play;
 Texture AppIcons::_stop;
 
@@ -141,77 +143,81 @@ Texture AppIcons::_websocket;
 Texture AppIcons::_editReason;
 Texture AppIcons::_buttonLock;
 
+Texture AppIcons::_library;
+
 void AppIcons::init(ID3D11Device* pd3dDevice)
 {
-    _play.loadFromFile(pd3dDevice, "./icons/play.png");
-    _stop.loadFromFile(pd3dDevice, "./icons/stop.png");
+    _play.loadFromFile(pd3dDevice, "./Icons/play.png");
+    _stop.loadFromFile(pd3dDevice, "./Icons/stop.png");
 
-    _yes.loadFromFile(pd3dDevice, "./icons/check-on.png");
-    _no.loadFromFile(pd3dDevice, "./icons/close-circle.png");
+    _yes.loadFromFile(pd3dDevice, "./Icons/check-on.png");
+    _no.loadFromFile(pd3dDevice, "./Icons/close-circle.png");
 
-    _lock.loadFromFile(pd3dDevice, "./icons/lock.png");
-    _unlock.loadFromFile(pd3dDevice, "./icons/unlock.png");
+    _lock.loadFromFile(pd3dDevice, "./Icons/lock.png");
+    _unlock.loadFromFile(pd3dDevice, "./Icons/unlock.png");
 
-    _padOn.loadFromFile(pd3dDevice, "./icons/pad-on.png");
-    _padOff.loadFromFile(pd3dDevice, "./icons/pad-off.png");
-    _plug.loadFromFile(pd3dDevice, "./icons/plug.png");
+    _padOn.loadFromFile(pd3dDevice, "./Icons/pad-on.png");
+    _padOff.loadFromFile(pd3dDevice, "./Icons/pad-off.png");
+    _plug.loadFromFile(pd3dDevice, "./Icons/plug.png");
 
-    _send.loadFromFile(pd3dDevice, "./icons/send.png");
-    _back.loadFromFile(pd3dDevice, "./icons/back.png");
+    _send.loadFromFile(pd3dDevice, "./Icons/send.png");
+    _back.loadFromFile(pd3dDevice, "./Icons/back.png");
 
-    _micOn.loadFromFile(pd3dDevice, "./icons/microphone-on.png");
-    _micOff.loadFromFile(pd3dDevice, "./icons/microphone-off.png");
-    _speakersOn.loadFromFile(pd3dDevice, "./icons/speakers-on.png");
-    _speakersOff.loadFromFile(pd3dDevice, "./icons/speakers-off.png");
+    _micOn.loadFromFile(pd3dDevice, "./Icons/microphone-on.png");
+    _micOff.loadFromFile(pd3dDevice, "./Icons/microphone-off.png");
+    _speakersOn.loadFromFile(pd3dDevice, "./Icons/speakers-on.png");
+    _speakersOff.loadFromFile(pd3dDevice, "./Icons/speakers-off.png");
 
-    _video.loadFromFile(pd3dDevice, "./icons/video.png");
+    _video.loadFromFile(pd3dDevice, "./Icons/video.png");
 
-    _refresh.loadFromFile(pd3dDevice, "./icons/refresh.png");
-    _sort.loadFromFile(pd3dDevice, "./icons/sort.png");
-    _submit.loadFromFile(pd3dDevice, "./icons/submit.png");
-    _saveOn.loadFromFile(pd3dDevice, "./icons/save-on.png");
-    _saveOff.loadFromFile(pd3dDevice, "./icons/save-off.png");
-    _edit.loadFromFile(pd3dDevice, "./icons/edit.png");
-    _image.loadFromFile(pd3dDevice, "./icons/image.png");
-    _trash.loadFromFile(pd3dDevice, "./icons/trash.png");
-    _move.loadFromFile(pd3dDevice, "./icons/move.png");
+    _refresh.loadFromFile(pd3dDevice, "./Icons/refresh.png");
+    _sort.loadFromFile(pd3dDevice, "./Icons/sort.png");
+    _submit.loadFromFile(pd3dDevice, "./Icons/submit.png");
+    _saveOn.loadFromFile(pd3dDevice, "./Icons/save-on.png");
+    _saveOff.loadFromFile(pd3dDevice, "./Icons/save-off.png");
+    _edit.loadFromFile(pd3dDevice, "./Icons/edit.png");
+    _image.loadFromFile(pd3dDevice, "./Icons/image.png");
+    _trash.loadFromFile(pd3dDevice, "./Icons/trash.png");
+    _move.loadFromFile(pd3dDevice, "./Icons/move.png");
 
-    _chat.loadFromFile(pd3dDevice, "./icons/chat.png");
-    _users.loadFromFile(pd3dDevice, "./icons/users.png");
-    _log.loadFromFile(pd3dDevice, "./icons/log.png");
-    _logoff.loadFromFile(pd3dDevice, "./icons/logoff.png");
+    _chat.loadFromFile(pd3dDevice, "./Icons/chat.png");
+    _users.loadFromFile(pd3dDevice, "./Icons/users.png");
+    _log.loadFromFile(pd3dDevice, "./Icons/log.png");
+    _logoff.loadFromFile(pd3dDevice, "./Icons/logoff.png");
 
-    _userOn.loadFromFile(pd3dDevice, "./icons/user-on.png");
-    _userOff.loadFromFile(pd3dDevice, "./icons/user-off.png");
-    _block.loadFromFile(pd3dDevice, "./icons/block.png");
-    _kick.loadFromFile(pd3dDevice, "./icons/kick.png");
+    _userOn.loadFromFile(pd3dDevice, "./Icons/user-on.png");
+    _userOff.loadFromFile(pd3dDevice, "./Icons/user-off.png");
+    _block.loadFromFile(pd3dDevice, "./Icons/block.png");
+    _kick.loadFromFile(pd3dDevice, "./Icons/kick.png");
 
-    _info.loadFromFile(pd3dDevice, "./icons/info.png");
-    _logo.loadFromFile(pd3dDevice, "./icons/logo.png");
+    _info.loadFromFile(pd3dDevice, "./Icons/info.png");
+    _logo.loadFromFile(pd3dDevice, "./Icons/logo.png");
 
-    _puppet.loadFromFile(pd3dDevice, "./icons/puppet.png");
-    _xinput.loadFromFile(pd3dDevice, "./icons/xinput.png");
-    _dinput.loadFromFile(pd3dDevice, "./icons/dinput.png");
-    _ds4.loadFromFile(pd3dDevice, "./icons/ds4.png");
-    _windows.loadFromFile(pd3dDevice, "./icons/windows.png");
-    _sdl.loadFromFile(pd3dDevice, "./icons/sdl.png");
+    _puppet.loadFromFile(pd3dDevice, "./Icons/puppet.png");
+    _xinput.loadFromFile(pd3dDevice, "./Icons/xinput.png");
+    _dinput.loadFromFile(pd3dDevice, "./Icons/dinput.png");
+    _ds4.loadFromFile(pd3dDevice, "./Icons/ds4.png");
+    _windows.loadFromFile(pd3dDevice, "./Icons/windows.png");
+    _sdl.loadFromFile(pd3dDevice, "./Icons/sdl.png");
 
-    _xbox.loadFromFile(pd3dDevice, "./icons/xbox.png");
-    _xbox1.loadFromFile(pd3dDevice, "./icons/xbox1.png");
-    _xbox2.loadFromFile(pd3dDevice, "./icons/xbox2.png");
-    _xbox3.loadFromFile(pd3dDevice, "./icons/xbox3.png");
-    _xbox4.loadFromFile(pd3dDevice, "./icons/xbox4.png");
+    _xbox.loadFromFile(pd3dDevice, "./Icons/xbox.png");
+    _xbox1.loadFromFile(pd3dDevice, "./Icons/xbox1.png");
+    _xbox2.loadFromFile(pd3dDevice, "./Icons/xbox2.png");
+    _xbox3.loadFromFile(pd3dDevice, "./Icons/xbox3.png");
+    _xbox4.loadFromFile(pd3dDevice, "./Icons/xbox4.png");
 
-    _vpad.loadFromFile(pd3dDevice, "./icons/vpad.png");
+    _vpad.loadFromFile(pd3dDevice, "./Icons/vpad.png");
 
-    _btc.loadFromFile(pd3dDevice, "./icons/btc.png");
-    _ltc.loadFromFile(pd3dDevice, "./icons/ltc.png");
-    _eth.loadFromFile(pd3dDevice, "./icons/eth.png");
+    _btc.loadFromFile(pd3dDevice, "./Icons/btc.png");
+    _ltc.loadFromFile(pd3dDevice, "./Icons/ltc.png");
+    _eth.loadFromFile(pd3dDevice, "./Icons/eth.png");
 
-    _settings.loadFromFile(pd3dDevice, "./icons/settings.png");
-    _websocket.loadFromFile(pd3dDevice, "./icons/websocket.png");
-    _editReason.loadFromFile(pd3dDevice, "./icons/editreason.png");
-    _buttonLock.loadFromFile(pd3dDevice, "./icons/buttonlock.png");
+    _settings.loadFromFile(pd3dDevice, "./Icons/settings.png");
+    _websocket.loadFromFile(pd3dDevice, "./Icons/websocket.png");
+    _editReason.loadFromFile(pd3dDevice, "./Icons/editreason.png");
+    _buttonLock.loadFromFile(pd3dDevice, "./Icons/buttonlock.png");
+
+    _library.loadFromFile(pd3dDevice, "./Icons/library.png");
 
     play = _play.texture;
     stop = _stop.texture;
@@ -282,4 +288,6 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     websocket = _websocket.texture;
     editReason = _editReason.texture;
     buttonLock = _buttonLock.texture;
+
+    library = _library.texture;
 }

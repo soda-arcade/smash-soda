@@ -29,7 +29,8 @@ public:
         bool& showInfo,
         bool& showSettings,
         bool& showWebSocket,
-        bool& showButtonLock
+        bool& showButtonLock,
+        bool& showLibrary
     );
 
 private:

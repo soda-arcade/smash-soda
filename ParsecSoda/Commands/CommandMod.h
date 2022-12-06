@@ -81,7 +81,7 @@ private:
 				_tierList.setTier(target.userID, Tier::MOD);
 
 				try {
-					PlaySound(TEXT("./sfx/mod.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+					PlaySound(TEXT("./SFX/mod.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
 				}
 				catch (const std::exception&) {}
 

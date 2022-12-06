@@ -59,6 +59,7 @@
 #include "Commands/CommandVideoFix.h"
 #include "CompilerDirectives.h"
 #include "MetadataCache.h"
+#include "Tournament.h"
 
 #define BOT_GUESTID 0
 
@@ -69,11 +70,11 @@ public:
 	ChatBot(
 		AudioIn& audioIn, AudioOut& audioOut, BanList& ban, DX11& dx11, ModList& mod,
 		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
-		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, bool& hostingLoopController, Guest& host
+		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, Tournament& tournament, bool& hostingLoopController, Guest& host
 	)
 		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod),
 		_gamepadClient(gamepadClient), _guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), 
-		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _hostingLoopController(hostingLoopController), _host(host)
+		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _tournament(tournament), _hostingLoopController(hostingLoopController), _host(host)
 	{
 		_basicVersion = MetadataCache::preferences.basicVersion;
 	}
@@ -111,6 +112,7 @@ private:
 	ParsecSession &_parsecSession;
 	SFXList& _sfxList;
 	TierList& _tierList;
+	Tournament& _tournament;
 	bool &_hostingLoopController;
 	Guest& _host;
 	bool _basicVersion = false;

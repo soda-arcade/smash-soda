@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GuestData.h"
+#include "Models/GuestData.h"
 #include "Tier.h"
 
 class GuestTier

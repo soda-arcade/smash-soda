@@ -4,13 +4,13 @@
 #include "../imgui/imgui_impl_win32.h"
 #include "../imgui/imgui_impl_dx11.h"
 
-#define APPFONTS_EXTRA_LIGHT	"fonts/Montserrat-ExtraLight.ttf"
-#define APPFONTS_LIGHT			"fonts/Montserrat-Light.ttf"
-#define APPFONTS_REGULAR		"fonts/Montserrat-Regular.ttf"
-#define APPFONTS_MEDIUM			"fonts/Montserrat-Medium.ttf"
-#define APPFONTS_SEMI_BOLD		"fonts/Montserrat-SemiBold.ttf"
-#define APPFONTS_BOLD			"fonts/Montserrat-Bold.ttf"
-#define APPFONTS_EXTRA_BOLD		"fonts/Montserrat-ExtraBold.ttf"
+#define APPFONTS_EXTRA_LIGHT	"Fonts/Montserrat-ExtraLight.ttf"
+#define APPFONTS_LIGHT			"Fonts/Montserrat-Light.ttf"
+#define APPFONTS_REGULAR		"Fonts/Montserrat-Regular.ttf"
+#define APPFONTS_MEDIUM			"Fonts/Montserrat-Medium.ttf"
+#define APPFONTS_SEMI_BOLD		"Fonts/Montserrat-SemiBold.ttf"
+#define APPFONTS_BOLD			"Fonts/Montserrat-Bold.ttf"
+#define APPFONTS_EXTRA_BOLD		"Fonts/Montserrat-ExtraBold.ttf"
 
 class AppFonts
 {

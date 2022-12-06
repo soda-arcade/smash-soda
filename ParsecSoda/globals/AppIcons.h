@@ -79,6 +79,8 @@ public:
 	static ID3D11ShaderResourceView* editReason;
 	static ID3D11ShaderResourceView* buttonLock;
 
+	static ID3D11ShaderResourceView* library;
+
 private:
 	static Texture _play;
 	static Texture _stop;
@@ -149,5 +151,7 @@ private:
 	static Texture _websocket;
 	static Texture _editReason;
 	static Texture _buttonLock;
+
+	static Texture _library;
 };
 

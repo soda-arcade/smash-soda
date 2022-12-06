@@ -15,7 +15,8 @@ void NavBar::render(
 	bool& showInfo,
 	bool& showSettings,
 	bool& showWebSocket,
-	bool& showButtonLock
+	bool& showButtonLock,
+	bool& showLibrary
 )
 {
 	static ImVec2 iconSize = ImVec2(24, 24);
@@ -59,6 +60,9 @@ void NavBar::render(
 
 	if (ToggleIconButtonWidget::render(AppIcons::users, AppIcons::users, showGuests, iconSize))	showGuests = !showGuests;
 	renderNavtooltip("Guests", showGuests);
+
+	if (ToggleIconButtonWidget::render(AppIcons::library, AppIcons::library, showLibrary, iconSize))	showLibrary = !showLibrary;
+	renderNavtooltip("Library", showLibrary);
 
 	if (ToggleIconButtonWidget::render(AppIcons::image, AppIcons::image, showThumbnails, iconSize)) {
 		showThumbnails = !showThumbnails;

@@ -54,34 +54,34 @@
     <ClCompile Include="BanList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GuestData.cpp">
+    <ClCompile Include="Models\GuestData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Bitwise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui.cpp">
+    <ClCompile Include="ImGui\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_demo.cpp">
+    <ClCompile Include="ImGui\imgui_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_draw.cpp">
+    <ClCompile Include="ImGui\imgui_draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_tables.cpp">
+    <ClCompile Include="ImGui\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_widgets.cpp">
+    <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_dx11.cpp">
+    <ClCompile Include="ImGui\imgui_impl_dx11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_win32.cpp">
+    <ClCompile Include="ImGui\imgui_impl_win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Guest.cpp">
@@ -102,19 +102,19 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="globals\AppIcons.cpp">
+    <ClCompile Include="Globals\AppIcons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\ChatWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="globals\AppFonts.cpp">
+    <ClCompile Include="Globals\AppFonts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="globals\AppColors.cpp">
+    <ClCompile Include="Globals\AppColors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="globals\AppStyle.cpp">
+    <ClCompile Include="Globals\AppStyle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\TooltipWidget.cpp">
@@ -276,6 +276,18 @@
     <ClCompile Include="ModList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Widgets\LibraryWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameDataList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Tournament.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioIn.h">
@@ -323,7 +335,7 @@
     <ClInclude Include="Commands\CommandDefaultMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GuestData.h">
+    <ClInclude Include="Models\GuestData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandHelp.h">
@@ -422,28 +434,28 @@
     <ClInclude Include="Commands\CommandJoin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imconfig.h">
+    <ClInclude Include="ImGui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui.h">
+    <ClInclude Include="ImGui\imgui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_internal.h">
+    <ClInclude Include="ImGui\imgui_internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imstb_rectpack.h">
+    <ClInclude Include="ImGui\imstb_rectpack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imstb_textedit.h">
+    <ClInclude Include="ImGui\imstb_textedit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imstb_truetype.h">
+    <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_dx11.h">
+    <ClInclude Include="ImGui\imgui_impl_dx11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_win32.h">
+    <ClInclude Include="ImGui\imgui_impl_win32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Guest.h">
@@ -458,7 +470,7 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_colors.h">
+    <ClInclude Include="ImGui\imgui_colors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
@@ -473,19 +485,19 @@
     <ClInclude Include="Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globals\AppIcons.h">
+    <ClInclude Include="Globals\AppIcons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\ChatWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globals\AppFonts.h">
+    <ClInclude Include="Globals\AppFonts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globals\AppColors.h">
+    <ClInclude Include="Globals\AppColors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globals\AppStyle.h">
+    <ClInclude Include="Globals\AppStyle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\TooltipWidget.h">
@@ -723,6 +735,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\Command8Ball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\LibraryWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameDataList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Tournament.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
