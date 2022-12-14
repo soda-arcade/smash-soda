@@ -2,7 +2,7 @@
 
 GuestListWidget::GuestListWidget(Hosting& hosting)
     : _hosting(hosting), _guests(hosting.getGuestList()), _modList(_hosting.getModList()),
-    _banList(_hosting.getBanList()), _guestHistory(_hosting.getGuestHistory())
+    _banList(_hosting.getBanList()), _vipList(hosting.getVIPList()), _guestHistory(_hosting.getGuestHistory())
 {
 }
 
@@ -49,6 +49,11 @@ bool GuestListWidget::render()
         if (ImGui::BeginTabItem("Mods"))
         {
             renderModdedGuests();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("VIP"))
+        {
+            renderVIPGuests();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("History"))
@@ -502,6 +507,101 @@ void GuestListWidget::renderModdedGuests() {
         AppFonts::pushInput();
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.50f, 0.60f, 1.00f));
         ImGui::Text(reason.c_str());
+        AppStyle::pop();
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+        ImGui::EndGroup();
+    }
+
+    ImGui::EndChild();
+    ImGui::PopStyleVar();
+
+    AppFonts::pushInput();
+    AppColors::pushTitle();
+}
+
+void GuestListWidget::renderVIPGuests() {
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+    ImGui::BeginChild("viplist");
+
+    static bool showEditPopup = false;
+    static size_t popupEditIndex;
+    static bool showUnmodPopup = false;
+    static string popupTitle = "";
+    static size_t popupIndex;
+    static string name;
+    static string reason;
+    static uint32_t userID;
+    static vector<GuestData>& _moddedGuests = _vipList.getGuests();
+    static string filterTextStr;
+    static bool filterSuccess = false;
+
+    for (size_t i = 0; i < _moddedGuests.size(); ++i)
+    {
+        name = _moddedGuests[i].name;
+        userID = _moddedGuests[i].userID;
+        //reason = _moddedGuests[i].reason;
+
+        filterTextStr = _filterText;
+        if (!filterTextStr.empty())
+        {
+            filterSuccess = (Stringer::fuzzyDistance(_filterText, name) == 0);
+            if (!filterSuccess)
+            {
+                filterSuccess = (Stringer::fuzzyDistance(_filterText, to_string(userID)) == 0);
+            }
+            if (!filterSuccess && reason.size() > 0)
+            {
+                filterSuccess = (Stringer::fuzzyDistance(_filterText, reason) == 0);
+            }
+
+            if (!filterSuccess)
+            {
+                continue;
+            }
+        }
+
+        if (_filterNoReason && reason.size() > 0) continue;
+
+        IconButton::render(AppIcons::userOff, AppColors::primary, ImVec2(30, 30));
+        if (ImGui::IsItemActive())
+        {
+            popupTitle = string("Unvip##Popup");
+            showUnmodPopup = true;
+            popupIndex = i;
+            ImGui::OpenPopup(popupTitle.c_str());
+        }
+        TitleTooltipWidget::render(
+            "VIP",
+            (string("Press to unvip ") + name + "").c_str()
+        );
+
+        if (i == popupIndex)
+        {
+            if (ConfirmPopupWidget::render(
+                popupTitle.c_str(),
+                showUnmodPopup,
+                ("Unvip\n#" + to_string(userID) + "\n" + name).c_str()
+            ))
+            {
+                _hosting.sendHostMessage((
+                    string("!unvip ") + to_string(userID)
+                    ).c_str(), true);
+            }
+        }
+
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();
+        AppStyle::pushInput();
+        ImGui::Text("#%d", userID);
+        ImGui::SameLine();
+        ImGui::Indent(85);
+        ImGui::Text("%s", name.c_str());
+        AppStyle::pop();
+        ImGui::Unindent(85);
+        AppFonts::pushInput();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.50f, 0.60f, 1.00f));
+        //ImGui::Text(reason.c_str());
         AppStyle::pop();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();

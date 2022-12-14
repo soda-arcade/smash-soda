@@ -28,6 +28,7 @@ public:
 	const bool find(uint32_t targetGuestID, Guest *result);
 	const bool find(const char* targetName, Guest* result);
 	const bool find(string targetName, Guest* result);
+	const int findIndex(uint32_t targetGuestID);
 	MyMetrics getMetrics(uint32_t id);
 	void deleteMetrics(uint32_t id);
 	void updateMetrics(ParsecGuest* guests, int guestCount);

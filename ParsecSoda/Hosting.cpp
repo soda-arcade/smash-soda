@@ -44,6 +44,9 @@ Hosting::Hosting()
 	vector<GuestData> modded = MetadataCache::loadModdedUsers();
 	_modList = ModList(modded);
 
+	vector<GuestData> vip = MetadataCache::loadVIPUsers();
+	_vipList = VIPList(vip);
+
 	vector<GameData> games = MetadataCache::loadGamesList();
 	_gamesList = GameDataList(games);
 
@@ -127,7 +130,7 @@ void Hosting::init()
 	fetchAccountData();
 
 	_chatBot = new ChatBot(
-		audioIn, audioOut, _banList, _dx11, _modList,
+		audioIn, audioOut, _banList, _dx11, _modList, _vipList,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
 		_hostConfig, _parsecSession, _sfxList, _tierList,
 		_tournament, _isRunning, _host
@@ -243,6 +246,11 @@ BanList& Hosting::getBanList()
 ModList& Hosting::getModList()
 {
 	return _modList;
+}
+
+VIPList& Hosting::getVIPList()
+{
+	return _vipList;
 }
 
 GameDataList& Hosting::getGameList()
@@ -1080,15 +1088,7 @@ bool Hosting::hotseatModeTest() {
 /// <param name="index"></param>
 bool Hosting::isSpectator(int index) {
 
-	if (MetadataCache::hotseat.spectators.empty() == false) {
-		for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
-			if (MetadataCache::hotseat.spectators.at(i) == _guestList.getGuests()[index].userID) {
-				return true;
-			}
-		}
-	}
-
-	return false;
+	return MetadataCache::isSpectating(_guestList.getGuests()[index]);
 
 }
 
@@ -1316,6 +1316,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && (_host.userID == guest.userID))
 	{
 		_tierList.setTier(guest.userID, Tier::GOD);
+		MetadataCache::addActiveGuest(guest);
 	}
 	else
 
@@ -1332,6 +1333,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		broadcastChatMessage(logMessage);
 		_tierList.setTier(guest.userID, Tier::MOD);
 		_chatLog.logCommand(logMessage);
+		MetadataCache::addActiveGuest(guest);
 	}
 	else if (state == GUEST_FAILED)
 	{
@@ -1361,10 +1363,19 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 
 		if (state == GUEST_CONNECTED) {
 			_guestHistory.add(GuestData(guest.name, guest.userID));
+			MetadataCache::addActiveGuest(guest);
 		}
 		else
 		{
+			// Were extra spots made?
+			if (status != 11 && MetadataCache::preferences.extraSpots > 0) {
+				_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
+				MetadataCache::preferences.extraSpots--;
+				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+			}
+
 			// Remove from spectator list
+			MetadataCache::removeActiveGuest(guest);
 			if (MetadataCache::hotseat.spectators.empty() == false) {
 				for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
 					if (MetadataCache::hotseat.spectators.at(i) == guest.userID) {

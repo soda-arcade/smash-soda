@@ -49,6 +49,16 @@ const bool GuestList::find(uint32_t targetGuestID, Guest* result)
 	return false;
 }
 
+
+const int GuestList::findIndex(uint32_t targetGuestID) {
+	for (int i = 0; i != _guests.size(); ++i) {
+		if (_guests[i].userID == targetGuestID)
+			return i;
+	}
+
+	return -1;
+}
+
 const bool GuestList::find(const char* targetName, Guest* result)
 {
 	return find(string(targetName), result);

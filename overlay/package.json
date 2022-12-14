@@ -6,11 +6,18 @@
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/electron/electron-quick-start.git"
+  },
   "author": "Michael Dearman",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^21.2.3",
     "ws": "^8.5.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/electron/electron-quick-start/issues"
+  },
+  "homepage": "https://github.com/electron/electron-quick-start#readme"
 }

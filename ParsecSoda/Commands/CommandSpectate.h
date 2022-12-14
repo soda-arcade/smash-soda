@@ -50,19 +50,19 @@ public:
 
 	bool addGuestToSpectators(Guest guest) {
 
-		if (MetadataCache::hotseat.spectators.empty() == false) {
-			for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
-				if (MetadataCache::hotseat.spectators.at(i) == guest.userID) {
-					MetadataCache::hotseat.spectators.erase(MetadataCache::hotseat.spectators.begin() + i);
-					MetadataCache::hotseat.spectators.shrink_to_fit();
-					_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is no longer spectating.\0";
-					return true;
-				}
-			}
+		if (MetadataCache::isSpectating(guest)) {
+
+			MetadataCache::addActiveGuest(guest);
+			_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is no longer spectating.\0";
+
+		}
+		else {
+
+			MetadataCache::removeActiveGuest(guest);
+			_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is now spectating.\0";
+
 		}
 
-		_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is now spectating.\0";
-		MetadataCache::hotseat.spectators.push_back(guest.userID);
 		return true;
 
 	}

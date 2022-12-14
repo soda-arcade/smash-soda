@@ -117,10 +117,11 @@ bool LibraryWidget::renderGameList() {
         }
 
         if (ImGui::BeginPopup(name.c_str())) {
-            
-            // Widget top
-            AppStyle::pushTitle();
+
+            AppStyle::pushLabel();
             ImGui::Text("Edit Game");
+
+            AppStyle::pushInput();
 
             AppStyle::pop();
             ImGui::EndPopup();

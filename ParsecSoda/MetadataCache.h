@@ -108,11 +108,15 @@ public:
 
 		string chatbot = "ChatBot";
 		string chatbotName = "";
+		unsigned int muteTime = 5;
+		bool autoMute = true;
 
 		bool leaderboardEnabled = true;
 
 		bool overlayShow = false;
 		bool overlayHotseat = false;
+
+		vector<Guest> activeGuests;
 
 		class MutedGuest {
 		public:
@@ -121,6 +125,8 @@ public:
 			Stopwatch stopwatch;
 		};
 		vector<MutedGuest> mutedGuests;
+
+		int extraSpots = 0;
 	
 	};
 
@@ -171,7 +177,7 @@ public:
 
 		class Team {
 		public:
-			vector<string> guests;
+			vector<Guest> guests;
 		};
 
 		class Bracket {
@@ -199,6 +205,9 @@ public:
 		bool isInit = false;
 		bool isStarted = false;
 
+		int type = 0;
+		int teamSize = 0;
+
 	};
 
 	static SessionCache loadSessionCache();
@@ -214,6 +223,9 @@ public:
 	static vector<GuestData> loadModdedUsers();
 	static bool saveModdedUsers(vector<GuestData> guests);
 
+	static vector<GuestData> loadVIPUsers();
+	static bool saveVIPUsers(vector<GuestData> guests);
+
 	static vector<GameData> loadGamesList();
 	static bool saveGamesList(vector<GameData> games);
 
@@ -224,6 +236,11 @@ public:
 	static bool saveThumbnails(vector<Thumbnail> thumbnails);
 
 	static bool saveTheme(int theme);
+
+	static bool isSpectating(Guest guest);
+
+	static bool addActiveGuest(Guest guest);
+	static bool removeActiveGuest(Guest guest);
 
 	static Preferences preferences;
 	static Kiosk kiosk;

@@ -49,12 +49,14 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
+		//if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _parsec, _hostConfig, _parsecSession.sessionId.c_str());
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient);
 		if (msgStartsWith(msg, CommandTimer::prefixes()))		return new CommandTimer(msg);
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
 
 		// Tournaments
-		if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient);
+		//if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _guests, _gamepadClient, _tournament);
+		//if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient, _tournament);
 	}
 
 	// God commands
@@ -71,6 +73,9 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgIsEqual(msg, CommandQuit::prefixes()))			return new CommandQuit(_hostingLoopController);
 		if (msgStartsWith(msg, CommandMod::prefixes()))			return new CommandMod(msg, sender, _parsec, _guests, _guestHistory, _mod, _tierList);
 		if (msgStartsWith(msg, CommandUnmod::prefixes()))		return new CommandUnmod(msg, sender, _mod, _guestHistory, _tierList);
+
+		if (msgStartsWith(msg, CommandVIP::prefixes()))			return new CommandVIP(msg, sender, _parsec, _guests, _guestHistory, _vip, _tierList);
+		if (msgStartsWith(msg, CommandUnVIP::prefixes()))		return new CommandUnVIP(msg, sender, _vip, _guestHistory, _tierList);
 	}
 
 	this->setLastUserId(previous);
@@ -103,7 +108,21 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 				reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
 				break;
 			case 11:
-				reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+			
+				// VIP Spots
+				if (_vip.isVIP(guest.userID)) {
+					_hostConfig.maxGuests = _hostConfig.maxGuests + 1;
+					MetadataCache::preferences.extraSpots++;
+					ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+
+					reply << "!full \t\t but made extra spot for " << guest.name << " #" << guest.userID << "\0";
+				}
+				else {
+
+					reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+
+				}
+
 				break;
 			case -12007:
 				reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";

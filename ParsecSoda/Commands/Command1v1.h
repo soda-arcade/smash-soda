@@ -6,11 +6,11 @@
 #include <random>
 #include "../Modules/Tournament.h"
 
-class Command2v2 : public ACommandStringArg {
+class Command1v1 : public ACommandStringArg {
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::BOT_MESSAGE; }
 
-	Command2v2(const char* msg, GuestList& guests, GamepadClient& gamepadClient, Tournament tournament)
+	Command1v1(const char* msg, GuestList& guests, GamepadClient& gamepadClient, Tournament tournament)
 		: ACommandStringArg(msg, internalPrefixes()), _guests(guests), _gamepadClient(gamepadClient), _tournament(tournament)
 	{}
 
@@ -25,14 +25,14 @@ public:
 
 			// Start tournament
 			if (!MetadataCache::tournament.isInit) {
-				_replyMessage = _tournament.setup(1, 2);
+				_replyMessage = _tournament.setup(1, 1);
 				return true;
 			}
 			else {
 				_replyMessage = "[TourneyBot] Usage: https://github.com/MickeyUK/SmashSoda/wiki/Tournaments\0";
 				return false;
 			}
-			
+
 		}
 
 		// Sub commands
@@ -50,7 +50,7 @@ public:
 	/// </summary>
 	/// <returns>Vector</returns>
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!2v2" };
+		return vector<const char*> { "!1v1" };
 	}
 
 protected:
@@ -64,7 +64,7 @@ protected:
 	/// </summary>
 	/// <returns>Vector</returns>
 	static vector<const char*> internalPrefixes() {
-		return vector<const char*> { "!2v2 " };
+		return vector<const char*> { "!1v1 " };
 	}
 
 };

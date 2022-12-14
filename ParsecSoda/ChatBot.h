@@ -12,6 +12,7 @@
 #include "TierList.h"
 
 #include "Commands/ACommand.h"
+#include "Commands/Command1v1.h"
 #include "Commands/Command2v2.h"
 #include "Commands/Command8ball.h"
 #include "Commands/CommandAFK.h"
@@ -51,15 +52,19 @@
 #include "Commands/CommandSFX.h"
 #include "Commands/CommandSpeakers.h"
 #include "Commands/CommandSpectate.h"
+#include "Commands/CommandSpot.h"
 #include "Commands/CommandStrip.h"
 #include "Commands/CommandSwap.h"
 #include "Commands/CommandTimer.h"
 #include "Commands/CommandUnban.h"
 #include "Commands/CommandUnmod.h"
+#include "Commands/CommandUnVIP.h"
 #include "Commands/CommandVideoFix.h"
+#include "Commands/CommandVIP.h"
 #include "CompilerDirectives.h"
 #include "MetadataCache.h"
-#include "Tournament.h"
+#include "Modules/Tournament.h"
+#include "VIPList.h"
 
 #define BOT_GUESTID 0
 
@@ -68,11 +73,11 @@ class ChatBot
 public:
 
 	ChatBot(
-		AudioIn& audioIn, AudioOut& audioOut, BanList& ban, DX11& dx11, ModList& mod,
+		AudioIn& audioIn, AudioOut& audioOut, BanList& ban, DX11& dx11, ModList& mod, VIPList& vip,
 		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
 		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, Tournament& tournament, bool& hostingLoopController, Guest& host
 	)
-		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod),
+		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod), _vip(vip),
 		_gamepadClient(gamepadClient), _guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), 
 		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _tournament(tournament), _hostingLoopController(hostingLoopController), _host(host)
 	{
@@ -104,6 +109,7 @@ private:
 	AudioOut& _audioOut;
 	BanList& _ban;
 	ModList& _mod;
+	VIPList& _vip;
 	DX11 &_dx11;
 	GamepadClient& _gamepadClient;
 	GuestList& _guests;

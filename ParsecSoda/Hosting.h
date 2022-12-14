@@ -26,6 +26,7 @@
 #include "GamepadClient.h"
 #include "BanList.h"
 #include "ModList.h"
+#include "VIPList.h"
 #include "GuestList.h"
 #include "GameDataList.h"
 #include "SFXList.h"
@@ -73,6 +74,7 @@ public:
 	MyMetrics getMetrics(uint32_t id);
 	BanList& getBanList();
 	ModList& getModList();
+	VIPList& getVIPList();
 	GameDataList& getGameList();
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
@@ -153,6 +155,7 @@ private:
 	DX11 _dx11;
 	BanList _banList;
 	ModList _modList;
+	VIPList _vipList;
 	GuestDataList _guestHistory;
 	GameDataList _gamesList;
 	ChatBot *_chatBot;

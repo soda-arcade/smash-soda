@@ -1,4 +1,5 @@
 #include "SettingsWidget.h"
+#include "../ImGui/imform.h"
 
 SettingsWidget::SettingsWidget(Hosting& hosting)
     : _hosting(hosting)
@@ -10,6 +11,9 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
     _latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
     _leaderboardEnabled = MetadataCache::preferences.leaderboardEnabled;
+
+    _muteTime = MetadataCache::preferences.muteTime;
+    _autoMute = MetadataCache::preferences.autoMute;
 
     try
     {
@@ -181,25 +185,28 @@ void SettingsWidget::renderChatbot() {
 
     ImGui::Dummy(ImVec2(0, 10.0f));
 
-    AppStyle::pushLabel();
-    ImGui::Text("CHATBOT NAME");
-    AppStyle::pushInput();
-    if (ImGui::InputText("##Chatbot input", _chatbot, HOST_NAME_LEN)) {
-
+    if (ImForm::InputText("CHATBOT NAME", _chatbot, 
+        "Can give the ChatBot a silly name if you want!")) {
         MetadataCache::preferences.chatbot = _chatbot;
         MetadataCache::savePreferences();
-
     }
 
-    ImGui::Dummy(ImVec2(0, 10.0f));
-    AppStyle::pushLabel();
-    ImGui::Text("DISCORD INVITE LINK");
-    AppStyle::pushInput();
-    if (ImGui::InputText("##Secret input", _discord, HOST_NAME_LEN)) {
-
+    if (ImForm::InputText("DISCORD INVITE LINK", _discord,
+        "Automatically print invite link in chat with !discord")) {
         MetadataCache::preferences.discord = _discord;
         MetadataCache::savePreferences();
-
     }
+
+    if (ImForm::InputNumber("MUTE TIME", _muteTime, 5, 60,
+        "How long a person stays gagged with the !mute command")) {
+        MetadataCache::preferences.muteTime = _muteTime;
+        MetadataCache::savePreferences();
+    }
+
+    //if (ImForm::InputCheckbox("Auto Mute", _autoMute,
+    //    "Automatically mutes a guest if they send a lot of messages quickly")) {
+    //    MetadataCache::preferences.autoMute = _autoMute;
+    //    MetadataCache::savePreferences();
+    //}
 
 }

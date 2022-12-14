@@ -1,4 +1,5 @@
 ﻿#include "HostSettingsWidget.h"
+#include "../ImGui/imform.h"
 
 HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback)
     : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut),
@@ -400,74 +401,35 @@ void HostSettingsWidget::renderHotseat() {
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-    ImGui::BeginChild("##Hotseat child", ImVec2(size.x - 10, 90.0f));
-        AppStyle::pushLabel();
-        ImGui::Text("HOTSEAT");
-        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _hotseat, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-            _hotseat = !_hotseat;
-            MetadataCache::preferences.hotseat = _hotseat;
-        }
-        if (!_hotseat)    TitleTooltipWidget::render("Hotseat off", "Players won't be swapped.");
-        else              TitleTooltipWidget::render("Hotseat on", "Guests will automatically swapped in gamepad 1 after set minutes.");
+    if (ImForm::InputToggle("HOTSEAT", _hotseat,
+        "When hotseat mode is enabled, the active gamepad(s) will be swapped between your guests.")) {
+        MetadataCache::preferences.hotseat = _hotseat;
+        MetadataCache::savePreferences();
+    }
 
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("When hotseat mode is enabled, the active gamepad(s) will be swapped between your guests.");
-        AppStyle::pop();
-    ImGui::EndChild();
+    if (ImForm::InputNumber("HOTSEAT TIME", _hotseatTime, 5, 60,
+        "The amount of time the hotseat guest(s) has to play.")) {
+        MetadataCache::preferences.hotseatTime = _hotseatTime;
+        MetadataCache::savePreferences();
+    }
 
-    ImGui::BeginChild("##Hotseat time child", ImVec2(size.x - 10, 80.0f));
-        AppStyle::pushLabel();
-        ImGui::Text("HOTSEAT TIME");
-        AppStyle::pushInput();
-        if (IntRangeWidget::render("hotseat time", _hotseatTime, 5, 60, 0.025f)) {
-            TitleTooltipWidget::render("Hotseat Time", "Time before player 1 is swapped (in minutes).");
-            MetadataCache::preferences.hotseatTime = _hotseatTime;
-        }
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("The amount of time the hotseat guest(s) has to play.");
-        AppStyle::pop();
-    ImGui::EndChild();
+    if (ImForm::InputCheckbox("AFK Strip", _hotseatAFK,
+        "If the current hotseat guest goes AFK for a set period of time, they will automatically set to spectate.")) {
+        MetadataCache::preferences.hotseatAFK = _hotseatAFK;
+        MetadataCache::savePreferences();
+    }
 
-    ImGui::BeginChild("##Afk strip child", ImVec2(size.x - 10, 90.0f));
-        AppStyle::pushLabel();
-        ImGui::Text("AFK STRIP");
-        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _hotseatAFK, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-            _hotseatAFK = !_hotseatAFK;
-            MetadataCache::preferences.hotseatAFK = _hotseatAFK;
-        }
-        if (!_hotseatAFK)    TitleTooltipWidget::render("AFK STRIP Off", "AFK hotseat guest won't have gamepad stripped.");
-        else                 TitleTooltipWidget::render("AFK STRIP On", "AFK hotseat guest will automatically be moved to spectate list.");
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("If the current hotseat guest goes AFK for a set period of time, they will automatically set to spectate.");
-        AppStyle::pop();
-    ImGui::EndChild();
+    if (ImForm::InputNumber("AFK TIME", _hotseatTime, 5, 60,
+        "If AFK STRIP is enabled, if the hotseat guest is away for this amount of time they'll be moved to spectate.")) {
+        MetadataCache::preferences.hotseatAFKTime = _hotseatAFKTime;
+        MetadataCache::savePreferences();
+    }
 
-    ImGui::BeginChild("##Afk time child", ImVec2(size.x - 10, 90.0f));
-        AppStyle::pushLabel();
-        ImGui::Text("AFK TIME");
-        AppStyle::pushInput();
-        if (IntRangeWidget::render("hotseat afk time", _hotseatAFKTime, 5, 60, 0.025f)) {
-            TitleTooltipWidget::render("Hotseat AFK Time", "Time before afk guest is swapped (in minutes).");
-            MetadataCache::preferences.hotseatAFKTime = _hotseatAFKTime;
-        }
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("If AFK STRIP is enabled, if the hotseat guest is away for this amount of time they'll be moved to spectate.");
-        AppStyle::pop();
-    ImGui::EndChild();
-
-    ImGui::BeginChild("##Pause swap child", ImVec2(size.x - 10, 90.0f));
-        AppStyle::pushLabel();
-        ImGui::Text("PAUSE ON SWAP");
-        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _hotseatPause, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-            _hotseatPause = !_hotseatPause;
-            MetadataCache::preferences.hotseatPause = _hotseatPause;
-        }
-        if (_hotseat)           TitleTooltipWidget::render("Don't pause on swap", "Start button won't be pressed on swap.");
-        else                    TitleTooltipWidget::render("Pause on swap", "Start button will be pressed on swap.");
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("Have the start button be pressed automatically when the hotseat guest is swapped.");
-        AppStyle::pop();
-    ImGui::EndChild();
+    if (ImForm::InputCheckbox("Pause on Swap", _hotseatPause,
+        "Have the start button be pressed automatically when the hotseat guest is swapped.")) {
+        MetadataCache::preferences.hotseatPause = _hotseatPause;
+        MetadataCache::savePreferences();
+    }
 
     ImGui::Dummy(ImVec2(0.0f, 20.0f));
 

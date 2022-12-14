@@ -1,18 +1,12 @@
 #pragma once
 
 #include "../GamepadClient.h"
+#include <functional>
 
 class Tournament {
 public:
 
-	Tournament() {}
-
-	enum Type {
-		KOTH,
-		BRACKETS
-	};
-
-	string init(Tournament::Type type, int teamSize);
+	string setup(int tournamentType, int setTeamSize);
 	void reset();
 
 	string shuffle();
@@ -22,8 +16,13 @@ public:
 	string start();
 	string stop();
 
+private:
+
+	bool setPlayers();
 	bool setTeams();
 	bool setRounds();
 	bool setMatch();
+
+	string msg(string message);
 
 };
