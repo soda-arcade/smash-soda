@@ -5,7 +5,7 @@
 #include "ACommand.h"
 #include "../Guest.h"
 #include "../Tier.h"
-#include "../Stringer.h"
+#include "../Helpers/Stringer.h"
 
 class CommandDefaultMessage : public ACommand
 {

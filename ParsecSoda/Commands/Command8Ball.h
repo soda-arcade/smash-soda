@@ -3,7 +3,7 @@
 #include "ACommand.h"
 #include <iostream>
 #include "../CompilerDirectives.h"
-#include "../Dice.h"
+#include "../Helpers/Dice.h"
 
 using namespace std;
 

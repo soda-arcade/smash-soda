@@ -19,7 +19,7 @@
 #include "TierList.h"
 #include "ChatBot.h"
 #include "ChatLog.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "AudioIn.h"
 #include "AudioOut.h"
 #include "AudioMix.h"
@@ -32,11 +32,11 @@
 #include "SFXList.h"
 #include "MetadataCache.h"
 #include "CompilerDirectives.h"
-#include "Stopwatch.h"
+#include "Helpers/Stopwatch.h"
 #include "MasterOfPuppets.h"
 #include "WebSocket.h"
 #include "ButtonLock.h"
-#include "Debouncer.h"
+#include "Helpers/Debouncer.h"
 #include "Modules/Tournament.h"
 
 #define PARSEC_APP_CHAT_MSG 0

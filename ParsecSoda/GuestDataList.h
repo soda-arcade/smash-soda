@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Models/GuestData.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include <functional>
 #include <vector>
 

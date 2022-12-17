@@ -5,7 +5,7 @@
 #include "../imgui/imgui.h"
 #include "../Hosting.h"
 #include "../AudioTools.h"
-#include "../Debouncer.h"
+#include "../Helpers/Debouncer.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppFonts.h"
 #include "../globals/AppColors.h"

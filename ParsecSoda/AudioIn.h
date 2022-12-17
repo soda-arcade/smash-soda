@@ -9,7 +9,7 @@
 #include <mutex>
 #include <functiondiscoverykeys.h>
 #include <initguid.h>
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "AudioTools.h"
 #include "MetadataCache.h"
 #include "Frequency.h"

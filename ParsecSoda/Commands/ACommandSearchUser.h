@@ -2,7 +2,7 @@
 
 #include "ACommandPrefix.h"
 #include "parsec-dso.h"
-#include "../Stringer.h"
+#include "../Helpers/Stringer.h"
 #include "../GuestList.h"
 
 enum class SEARCH_USER_RESULT

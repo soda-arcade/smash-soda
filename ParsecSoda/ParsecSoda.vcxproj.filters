@@ -27,7 +27,7 @@
     <ClCompile Include="ChatBot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Dice.cpp">
+    <ClCompile Include="Helpers\Dice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DX11.cpp">
@@ -39,10 +39,10 @@
     <ClCompile Include="StressTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Stringer.cpp">
+    <ClCompile Include="Helpers\Stringer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
+    <ClCompile Include="Helpers\Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GamepadClient.cpp">
@@ -57,7 +57,7 @@
     <ClCompile Include="Models\GuestData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bitwise.cpp">
+    <ClCompile Include="Helpers\Bitwise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\imgui.cpp">
@@ -198,16 +198,16 @@
     <ClCompile Include="Widgets\VideoWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Stopwatch.cpp">
+    <ClCompile Include="Helpers\Stopwatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debouncer.cpp">
+    <ClCompile Include="Helpers\Debouncer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AnimatedGamepadWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Clock.cpp">
+    <ClCompile Include="Helpers\Clock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\ProgressCircularWidget.cpp">
@@ -216,7 +216,7 @@
     <ClCompile Include="Widgets\Vec2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Timespan.cpp">
+    <ClCompile Include="Helpers\Timespan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ThumbnailList.cpp">
@@ -305,7 +305,7 @@
     <ClInclude Include="ChatBot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dice.h">
+    <ClInclude Include="Helpers\Dice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DX11.h">
@@ -317,10 +317,10 @@
     <ClInclude Include="StressTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Stringer.h">
+    <ClInclude Include="Helpers\Stringer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="Helpers\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GamepadClient.h">
@@ -407,7 +407,7 @@
     <ClInclude Include="Commands\CommandUnban.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Bitwise.h">
+    <ClInclude Include="Helpers\Bitwise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandMirror.h">
@@ -608,16 +608,16 @@
     <ClInclude Include="CompilerDirectives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Stopwatch.h">
+    <ClInclude Include="Helpers\Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Debouncer.h">
+    <ClInclude Include="Helpers\Debouncer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\AnimatedGamepadWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Clock.h">
+    <ClInclude Include="Helpers\Clock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\ProgressCircularWidget.h">
@@ -626,7 +626,7 @@
     <ClInclude Include="Widgets\Vec2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Timespan.h">
+    <ClInclude Include="Helpers\Timespan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Thumbnail.h">
@@ -695,7 +695,7 @@
     <ClInclude Include="Commands\CommandBB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TimeT.h">
+    <ClInclude Include="Helpers\TimeT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandPing.h">

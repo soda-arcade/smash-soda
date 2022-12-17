@@ -6,7 +6,7 @@
 #include <regex>
 #include "parsec-dso.h"
 #include "ParsecSession.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "GamepadClient.h"
 #include "DX11.h"
 #include "TierList.h"

@@ -5,8 +5,8 @@
 #include "../imgui/imgui.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
-#include "../Stopwatch.h"
-#include "../Debouncer.h"
+#include "../Helpers/Stopwatch.h"
+#include "../Helpers/Debouncer.h"
 #include "../Hosting.h"
 
 #include "ProgressCircularWidget.h"

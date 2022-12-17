@@ -9,7 +9,7 @@
 #include <functiondiscoverykeys.h>
 #include <Audioclient.h>
 #include <initguid.h>
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "AudioTools.h"
 #include "Frequency.h"
 #include "MetadataCache.h"

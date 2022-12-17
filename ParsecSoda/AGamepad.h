@@ -9,10 +9,10 @@
 #include <iostream>
 #include <functional>
 #include "parsec-dso.h"
-#include "Bitwise.h"
+#include "Helpers/Bitwise.h"
 #include "KeyboardMaps.h"
 #include "GuestDevice.h"
-#include "Dice.h"
+#include "Helpers/Dice.h"
 
 using namespace std;
 

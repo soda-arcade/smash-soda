@@ -1,5 +1,5 @@
 #include "ModList.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 
 ModList::ModList() {}
 

@@ -4,7 +4,7 @@
 #include <sstream>
 #include "parsec.h"
 #include "Guest.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include <map>
 
 using namespace std;

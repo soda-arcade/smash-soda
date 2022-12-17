@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameData.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "MetadataCache.h"
 #include <functional>
 #include <vector>

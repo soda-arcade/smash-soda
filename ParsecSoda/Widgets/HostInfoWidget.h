@@ -6,9 +6,9 @@
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
 #include "../Hosting.h"
-#include "../Clock.h"
-#include "../Stopwatch.h"
-#include "../Debouncer.h"
+#include "../Helpers/Clock.h"
+#include "../Helpers/Stopwatch.h"
+#include "../Helpers/Debouncer.h"
 #include "TitleTooltipWidget.h"
 #include "ProgressCircularWidget.h"
 

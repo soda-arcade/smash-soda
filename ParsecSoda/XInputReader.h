@@ -9,7 +9,7 @@
 
 #include "ViGEm/Client.h"
 #include "GamepadState.h"
-#include "Bitwise.h"
+#include "Helpers/Bitwise.h"
 
 using namespace ABI::Windows::Foundation::Collections;
 using namespace ABI::Windows::Gaming;

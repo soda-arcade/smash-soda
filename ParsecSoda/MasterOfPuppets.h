@@ -3,7 +3,7 @@
 #include "GamepadClient.h"
 #include "SDLGamepadReader.h"
 #include "XInputReader.h"
-#include "Stopwatch.h"
+#include "Helpers/Stopwatch.h"
 #include <thread>
 #include <mutex>
 

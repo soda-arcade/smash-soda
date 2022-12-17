@@ -6,8 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include "parsec.h"
-#include "../Dice.h"
-#include "../Stopwatch.h"
+#include "../Helpers/Dice.h"
+#include "../Helpers/Stopwatch.h"
 
 class CommandBonk : public ACommandSearchUser
 {

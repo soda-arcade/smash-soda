@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ACommand.h"
-#include "../Stringer.h"
+#include "../Helpers/Stringer.h"
 #include <vector>
 
 class ACommandPrefix : public ACommand

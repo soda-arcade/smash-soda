@@ -9,7 +9,7 @@
 #include <Windows.h>
 #include <mmeapi.h>
 #include <codecvt>
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "matoya.h"
 
 using namespace chrono;

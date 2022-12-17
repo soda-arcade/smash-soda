@@ -8,7 +8,7 @@
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
 #include "../Hosting.h"
-#include "../Stopwatch.h"
+#include "../Helpers/Stopwatch.h"
 #include <functional>
 
 class ChatWidget

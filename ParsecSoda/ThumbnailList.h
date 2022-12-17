@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 #include "Thumbnail.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 #include "MetadataCache.h"
 
 using namespace std;

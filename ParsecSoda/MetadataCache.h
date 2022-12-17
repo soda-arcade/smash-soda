@@ -12,8 +12,8 @@
 #include "GameData.h"
 #include "GuestTier.h"
 #include "Thumbnail.h"
-#include "Stringer.h"
-#include "Stopwatch.h"
+#include "Helpers/Stringer.h"
+#include "Helpers/Stopwatch.h"
 
 using namespace std;
 

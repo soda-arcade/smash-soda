@@ -1,5 +1,5 @@
 #include "BanList.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 
 BanList::BanList()
 {

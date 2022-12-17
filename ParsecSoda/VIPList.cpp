@@ -1,5 +1,5 @@
 #include "VIPList.h"
-#include "Stringer.h"
+#include "Helpers/Stringer.h"
 
 VIPList::VIPList()
 {

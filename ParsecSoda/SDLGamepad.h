@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <ViGEm/Client.h>
 #include "GamepadState.h"
-#include "Bitwise.h"
+#include "Helpers/Bitwise.h"
 
 #define SDL_AXIS_RANGE (SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN)
 

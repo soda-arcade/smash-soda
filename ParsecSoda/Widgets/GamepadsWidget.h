@@ -4,7 +4,7 @@
 #include "../Hosting.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
-#include "../Stopwatch.h"
+#include "../Helpers/Stopwatch.h"
 #include "ToggleIconButtonWidget.h"
 #include "TitleTooltipWidget.h"
 #include "AnimatedGamepadWidget.h"

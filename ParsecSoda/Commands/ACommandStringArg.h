@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ACommandPrefix.h"
-#include "../Stringer.h"
+#include "../Helpers/Stringer.h"
 
 class ACommandStringArg : public ACommandPrefix
 {
