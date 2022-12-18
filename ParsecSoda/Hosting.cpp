@@ -101,6 +101,7 @@ void Hosting::init()
 	_createGamepadsThread = thread([&]() {
 		_gamepadClient.createAllGamepads();
 		_createGamepadsThread.detach();
+		_macro.init(_gamepadClient, _masterOfPuppets);
 	});
 
 	audioOut.fetchDevices();
@@ -133,7 +134,7 @@ void Hosting::init()
 		audioIn, audioOut, _banList, _dx11, _modList, _vipList,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
 		_hostConfig, _parsecSession, _sfxList, _tierList,
-		_tournament, _isRunning, _host
+		_tournament, _macro, _isRunning, _host
 	);
 
 	CommandBonk::init();
@@ -771,7 +772,7 @@ void Hosting::pollSmashSoda() {
 		Sleep(200);
 
 		// Handles all the automatic button press stuff
-		Hosting::autoGamepad();
+		_macro.run();
 
 		// Handles the hotseat cycling
 		Hosting::hotseat();
@@ -783,87 +784,6 @@ void Hosting::pollSmashSoda() {
 	_isSmashSodaThreadRunning = false;
 	_smashSodaMutex.unlock();
 	_smashSodaThread.detach();
-
-}
-
-/// <summary>
-/// This handles all the automatic button presses for guests in the room.
-/// </summary>
-void Hosting::autoGamepad() {
-
-	// Buttons in queue?
-	if (MetadataCache::autoGamepad.buttonList.size() > 0) {
-
-		// Press in
-		if (!MetadataCache::autoGamepad.isPressed) {
-
-			ParsecGamepadButtonMessage btn = createButtonMessage((ParsecGamepadButton)MetadataCache::autoGamepad.buttonList.front(), true);
-			Hosting::pressButtonForAll(btn);
-			MetadataCache::autoGamepad.isPressed = true;
-
-		}
-		else {
-
-			// Depress
-			ParsecGamepadButtonMessage btn = createButtonMessage((ParsecGamepadButton)MetadataCache::autoGamepad.buttonList.front(), false);
-			Hosting::pressButtonForAll(btn);
-
-			// Remove from queue
-			MetadataCache::autoGamepad.buttonList.erase(MetadataCache::autoGamepad.buttonList.begin());
-			MetadataCache::autoGamepad.isPressed = false;
-
-		}
-
-	}
-
-}
-
-/// <summary>
-/// Press a button for ALL connected guests in your room.
-/// </summary>
-/// <param name="button">The button to press.</param>
-void Hosting::pressButtonForAll(ParsecGamepadButtonMessage button) {
-
-	ParsecMessage message = {};
-	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
-	message.gamepadButton = button;
-
-	// For every gamepad
-	std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
-	for (; gi != _gamepadClient.gamepads.end(); ++gi) {
-		_gamepadClient.sendMessage((*gi)->owner.guest, message);
-	}
-
-}
-
-/// <summary>
-/// Press a button for a specific guest.
-/// </summary>
-/// <param name="guest">The guest we're targeting.</param>
-/// <param name="button">The button to press.</param>
-void Hosting::pressButtonForGuest(Guest& guest, ParsecGamepadButtonMessage button) {
-
-	ParsecMessage message = {};
-	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
-	message.gamepadButton = button;
-
-	_gamepadClient.sendMessage(guest, message);
-
-}
-
-/// <summary>
-/// Creates a new button gamepad message.
-/// </summary>
-/// <param name="button">The button to press.</param>
-/// <param name="in">Is the button pressed in or not.</param>
-/// <returns>ParsecGamepadButtonMessage</returns>
-ParsecGamepadButtonMessage Hosting::createButtonMessage(ParsecGamepadButton button, bool in) {
-
-	ParsecGamepadButtonMessage msg = {};
-	msg.button = button;
-	msg.pressed = in;
-
-	return msg;
 
 }
 

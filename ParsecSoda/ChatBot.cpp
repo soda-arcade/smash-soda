@@ -39,7 +39,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (tier >= Tier::ADMIN || isHost)
 	{
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
-		if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient);
+		if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro);
 		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg);

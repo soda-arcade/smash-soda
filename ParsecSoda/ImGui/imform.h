@@ -4,6 +4,9 @@
 #include "imgui.h"
 #include "../Widgets/ToggleIconButtonWidget.h"
 
+/// <summary>
+/// Helper class for making form elements.
+/// </summary>
 class ImForm {
 public:
 

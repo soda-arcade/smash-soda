@@ -38,6 +38,7 @@
 #include "ButtonLock.h"
 #include "Helpers/Debouncer.h"
 #include "Modules/Tournament.h"
+#include "Modules/Macro.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -79,6 +80,7 @@ public:
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
+	Macro& getMacro();
 	const char** getGuestNames();
 	void toggleGamepadLock();
 	void toggleGamepadLockButtons();
@@ -136,10 +138,6 @@ private:
 	bool hotseat();
 	void welcomeMessage();
 
-	void pressButtonForAll(ParsecGamepadButtonMessage button);
-	void pressButtonForGuest(Guest& guest, ParsecGamepadButtonMessage button);
-	ParsecGamepadButtonMessage createButtonMessage(ParsecGamepadButton button, bool in);
-
 	void startHotseatTimer();
 	void stopHotseatTimer();
 	int findHotseatGuest();
@@ -173,6 +171,7 @@ private:
 	SFXList _sfxList;
 	TierList _tierList;
 	Tournament _tournament;
+	Macro _macro;
 
 	bool _isRunning = false;
 	bool _isMediaThreadRunning = false;

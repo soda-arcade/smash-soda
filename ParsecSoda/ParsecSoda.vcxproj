@@ -180,6 +180,8 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
+    <ClCompile Include="Modules\Hotseat.cpp" />
+    <ClCompile Include="Modules\Macro.cpp" />
     <ClCompile Include="Modules\Tournament.cpp" />
     <ClCompile Include="VIPList.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
@@ -292,6 +294,8 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="GameData.h" />
     <ClInclude Include="GameDataList.h" />
     <ClInclude Include="ImGui\imform.h" />
+    <ClInclude Include="Modules\Hotseat.h" />
+    <ClInclude Include="Modules\Macro.h" />
     <ClInclude Include="Modules\Tournament.h" />
     <ClInclude Include="Helpers\TimeT.h" />
     <ClInclude Include="ModList.h" />
