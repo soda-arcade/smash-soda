@@ -9,6 +9,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 
 	// Pleb commands
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
+	if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
 	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
 	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient);
 	if (msgIsEqual(msg, Command8Ball::prefixes()))		return new Command8Ball(sender);
@@ -39,7 +40,6 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (tier >= Tier::ADMIN || isHost)
 	{
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
-		if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro);
 		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg);
@@ -49,7 +49,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
-		//if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _parsec, _hostConfig, _parsecSession.sessionId.c_str());
+		if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient);
 		if (msgStartsWith(msg, CommandTimer::prefixes()))		return new CommandTimer(msg);
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);

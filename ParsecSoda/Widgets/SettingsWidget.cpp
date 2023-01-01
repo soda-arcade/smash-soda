@@ -14,6 +14,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
 
     _muteTime = MetadataCache::preferences.muteTime;
     _autoMute = MetadataCache::preferences.autoMute;
+    _saveChat = MetadataCache::preferences.saveLog;
 
     try
     {
@@ -67,8 +68,7 @@ bool SettingsWidget::render()
             ImGui::EndTabItem();
         }
         AppColors::pushTitle();
-        if (ImGui::BeginTabItem("Chatbot"))
-        {
+        if (ImGui::BeginTabItem("Chat")) {
             renderChatbot();
             ImGui::EndTabItem();
         }
@@ -121,57 +121,26 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
-    AppStyle::pushInput();
-    if (ImGui::Checkbox("Disable !sfx & !bonk (Basic version)", &_basicVersion))
-    {
-        MetadataCache::preferences.basicVersion = _basicVersion;
-        MetadataCache::savePreferences();
-        _hosting.getChatBot()->updateSettings();
-    }
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("Prevents guests from using these commands in chat.");
-    AppStyle::pop();
-
-    AppStyle::pushInput();
-    if (ImGui::Checkbox("Disable Microphone", &_disableMicrophone))
-    {
+    if (ImForm::InputCheckbox("Disable Microphone", _disableMicrophone,
+        "When enabled, the microphone cause audio issues in some games.")) {
         MetadataCache::preferences.disableMicrophone = _disableMicrophone;
         MetadataCache::savePreferences();
         _hosting._disableMicrophone = _disableMicrophone;
     }
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("When enabled, the microphone cause audio issues in some games.");
-    AppStyle::pop();
 
-    AppStyle::pushInput();
-    if (ImGui::Checkbox("Disable Guide Button", &_disableGuideButton))
-    {
+    if (ImForm::InputCheckbox("Disable Guide Button", _disableGuideButton,
+        "The guide button by default often brings up overlays in software, which can cause issues when hosting.")) {
         MetadataCache::preferences.disableGuideButton = _disableGuideButton;
         MetadataCache::savePreferences();
         _hosting._disableGuideButton = _disableGuideButton;
     }
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("The guide button by default often brings up overlays in software, which can cause issues when hosting.");
-    AppStyle::pop();
 
-    AppStyle::pushInput();
-    if (ImGui::Checkbox("Disable Keyboards", &_disableKeyboard))
-    {
+    if (ImForm::InputCheckbox("Disable Keyboard", _disableKeyboard,
+        "Prevents users without gamepads playing with keyboard.")) {
         MetadataCache::preferences.disableKeyboard = _disableKeyboard;
         MetadataCache::savePreferences();
         _hosting._disableKeyboard = _disableKeyboard;
     }
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("Prevents users without gamepads playing with keyboard.");
-    AppStyle::pop();
-
-    AppStyle::pushInput();
-    if (ImGui::Checkbox("Enable Leaderboard", &_leaderboardEnabled)) {
-        MetadataCache::preferences.leaderboardEnabled = _leaderboardEnabled;
-        MetadataCache::savePreferences();
-    }
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("The tournament commands have a global leaderboard for your guests to keep track of wins.");
 
     AppStyle::pop();
     AppStyle::pushInput();
@@ -184,6 +153,13 @@ void SettingsWidget::renderGeneral() {
 void SettingsWidget::renderChatbot() {
 
     ImGui::Dummy(ImVec2(0, 10.0f));
+
+    if (ImForm::InputCheckbox("Disable !sfx & !bonk", _basicVersion,
+        "Prevents guests from using these commands in chat.")) {
+        MetadataCache::preferences.basicVersion = _basicVersion;
+        MetadataCache::savePreferences();
+        _hosting.getChatBot()->updateSettings();
+    }
 
     if (ImForm::InputText("CHATBOT NAME", _chatbot, 
         "Can give the ChatBot a silly name if you want!")) {
@@ -203,10 +179,18 @@ void SettingsWidget::renderChatbot() {
         MetadataCache::savePreferences();
     }
 
-    //if (ImForm::InputCheckbox("Auto Mute", _autoMute,
-    //    "Automatically mutes a guest if they send a lot of messages quickly")) {
-    //    MetadataCache::preferences.autoMute = _autoMute;
-    //    MetadataCache::savePreferences();
-    //}
+    /*
+    if (ImForm::InputCheckbox("Auto Mute", _autoMute,
+        "Automatically mutes a guest if they send a lot of messages quickly")) {
+        MetadataCache::preferences.autoMute = _autoMute;
+        MetadataCache::savePreferences();
+    }
+
+    if (ImForm::InputCheckbox("Save Log", _saveChat,
+        "Logs are stored in SmashSoda appdata folder")) {
+        MetadataCache::preferences.saveLog = _saveLog;
+        MetadataCache::savePreferences();
+    }
+    */
 
 }

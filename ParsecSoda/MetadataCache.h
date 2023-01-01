@@ -110,6 +110,7 @@ public:
 		string chatbotName = "";
 		unsigned int muteTime = 5;
 		bool autoMute = true;
+		bool saveLog = false;
 
 		bool leaderboardEnabled = true;
 
@@ -127,6 +128,7 @@ public:
 		vector<MutedGuest> mutedGuests;
 
 		int extraSpots = 0;
+		bool roomChanged = false;
 	
 	};
 

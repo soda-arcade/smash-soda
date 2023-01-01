@@ -118,14 +118,10 @@ bool LibraryWidget::renderGameList() {
 
         if (ImGui::BeginPopup(name.c_str())) {
 
-            AppStyle::pushLabel();
-            ImGui::Text("Edit Game");
-
-            AppStyle::pushInput();
+            renderPopup(_games[i]);
 
             AppStyle::pop();
             ImGui::EndPopup();
-
         }
 
         ImGui::SameLine();
@@ -148,5 +144,13 @@ bool LibraryWidget::renderGameList() {
     ImGui::PopStyleVar();
 
     return true;
+
+}
+
+void LibraryWidget::renderPopup(GameData game = GameData()) {
+
+    
+    
+    
 
 }

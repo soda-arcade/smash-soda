@@ -10,7 +10,7 @@ class Macro {
 
 public:
 	Macro();
-	void init(GamepadClient& gamepadClient, MasterOfPuppets& masterOfPuppets);
+	void init(GamepadClient& gamepadClient, MasterOfPuppets& masterOfPuppets, Guest& host);
 
 	void run();
 	void pressButtonForAll(ParsecGamepadButton button);
@@ -29,6 +29,7 @@ private:
 	int masterIndex;
 	GamepadClient* _gamepadClient;
 	MasterOfPuppets* _masterOfPuppets;
+	Guest* _host;
 
 	vector<Cmd> cmdList;
 

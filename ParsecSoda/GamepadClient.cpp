@@ -476,6 +476,21 @@ bool GamepadClient::sendMessage(Guest guest, ParsecMessage message)
 	return success;
 }
 
+bool GamepadClient::sendButtonMessageForPad(AGamepad* gamepad, ParsecGamepadButtonMessage& button) {
+
+	GuestPreferences guestPrefs = GuestPreferences();
+	XINPUT_STATE xstate = toXInput(button, gamepad->getState(), guestPrefs);
+	if (g_hosting._disableGuideButton && (xstate.Gamepad.wButtons & GAMEPAD_STATE_GUIDE))
+		xstate.Gamepad.wButtons &= ~GAMEPAD_STATE_GUIDE;
+	if (gamepad->isLockedButtons() || lockButtons) {
+		if (xstate.Gamepad.wButtons & g_hosting._lockedGamepad.wButtons)
+			xstate.Gamepad.wButtons &= ~g_hosting._lockedGamepad.wButtons;
+	}
+	gamepad->setStateSafe(xstate);
+	return true;
+
+}
+
 bool GamepadClient::sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadState, Guest& guest, int &slots, GuestPreferences prefs)
 {
 	return reduceUntilFirst([&](AGamepad* pad) {

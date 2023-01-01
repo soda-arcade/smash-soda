@@ -39,6 +39,7 @@
 #include "Helpers/Debouncer.h"
 #include "Modules/Tournament.h"
 #include "Modules/Macro.h"
+#include "Modules/Hotseat.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -172,6 +173,7 @@ private:
 	TierList _tierList;
 	Tournament _tournament;
 	Macro _macro;
+	Hotseat _hotseat;
 
 	bool _isRunning = false;
 	bool _isMediaThreadRunning = false;

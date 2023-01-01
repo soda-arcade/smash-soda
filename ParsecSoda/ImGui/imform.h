@@ -1,8 +1,10 @@
 #pragma once
+
 #include <string>
 #include "../globals/AppStyle.h"
 #include "imgui.h"
 #include "../Widgets/ToggleIconButtonWidget.h"
+#include "../Widgets/IntRangeWidget.h"
 
 /// <summary>
 /// Helper class for making form elements.

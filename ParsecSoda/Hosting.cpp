@@ -101,7 +101,8 @@ void Hosting::init()
 	_createGamepadsThread = thread([&]() {
 		_gamepadClient.createAllGamepads();
 		_createGamepadsThread.detach();
-		_macro.init(_gamepadClient, _masterOfPuppets);
+		_macro.init(_gamepadClient, _masterOfPuppets, _host);
+		_hotseat.init(_guestList, _gamepadClient);
 	});
 
 	audioOut.fetchDevices();
@@ -698,12 +699,8 @@ void Hosting::pollLatency()
 			if (MetadataCache::preferences.latencyLimitEnabled) {
 				for (size_t mi = 0; mi < guestCount; mi++) {
 					MyMetrics m = _guestList.getMetrics(guests[mi].id);
-					if (m.metrics.networkLatency > 0.1f && m.averageNetworkLatencySize <= 3) {
-						//_chatLog.logCommand(string("!") + guests[mi].name + " P:" + to_string(m.metrics.packetsSent) + " L:" + to_string(m.metrics.networkLatency));
-					}
-					if (m.averageNetworkLatencySize > 5 && m.averageNetworkLatency > _latencyLimitValue) {
+					if (m.averageNetworkLatencySize > 5 && m.averageNetworkLatency < _latencyLimitValue) {
 						ParsecHostKickGuest(_parsec, guests[mi].id);
-						//_chatLog.logCommand(string("!>") + to_string(_latencyLimitValue) + " \t\t " + guests[mi].name + " #" + to_string(guests[mi].userID));
 					}
 				}
 			}
@@ -777,8 +774,11 @@ void Hosting::pollSmashSoda() {
 		// Handles the hotseat cycling
 		Hosting::hotseat();
 
-		// Handles welcome messages for new guests
-		//Hosting::welcomeMessage();
+		// Updated room settings?
+		if (MetadataCache::preferences.roomChanged) {
+			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+			MetadataCache::preferences.roomChanged = false;
+		}
 
 	}
 	_isSmashSodaThreadRunning = false;
@@ -993,6 +993,15 @@ bool Hosting::hotseatModeTest() {
 		if (hotseatError != 4) {
 			_chatLog.logMessage("[HOTSEAT] Most single player games will only work with the first Xbox controller connected. The host needs to disconnect their controller.");
 			hotseatError = 4;
+		}
+		return false;
+	}
+
+	// Is everybody spectating?
+	if (MetadataCache::preferences.activeGuests.size() < 1) {
+		if (hotseatError != 5) {
+			_chatLog.logMessage("[HOTSEAT] Everybody is spectating!");
+			hotseatError = 5;
 		}
 		return false;
 	}

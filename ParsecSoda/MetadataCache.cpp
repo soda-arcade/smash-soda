@@ -263,12 +263,13 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (MTY_JSONObjGetString(json, "kioskParameters", kioskParameters, 256)) preferences.kioskParameters = kioskParameters;
             else preferences.kioskParameters = "";
 
-            // Chatbot
+            // Chat
             if (MTY_JSONObjGetString(json, "chatbot", chatbot, 128)) preferences.chatbot = chatbot;
             else preferences.chatbot = "ChatBot";
 
             if (!MTY_JSONObjGetUInt(json, "muteTime", &preferences.muteTime)) preferences.muteTime = 5;
             if (!MTY_JSONObjGetBool(json, "autoMute", &preferences.autoMute)) preferences.autoMute = true;
+            if (!MTY_JSONObjGetBool(json, "saveLog", &preferences.saveLog)) preferences.saveLog = false;
 
             preferences.chatbotName = "[" + preferences.chatbot + "]";
 
@@ -361,10 +362,11 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetString(json, "kioskApplication", preferences.kioskApplication.c_str());
         MTY_JSONObjSetString(json, "kioskParameters", preferences.kioskParameters.c_str());
 
-        // Chatbot
+        // Chat
         MTY_JSONObjSetString(json, "chatbot", preferences.chatbot.c_str());
         MTY_JSONObjSetUInt(json, "muteTime", preferences.muteTime);
         MTY_JSONObjSetBool(json, "autoMute", preferences.autoMute);
+        MTY_JSONObjSetBool(json, "saveLog", preferences.saveLog);
 
         // Tournament
         MTY_JSONObjSetBool(json, "leaderboardEnabled", preferences.leaderboardEnabled);

@@ -75,6 +75,7 @@ public:
 	bool clearOwner(int gamepadIndex);
 
 	bool sendMessage(Guest guest, ParsecMessage message);
+	bool sendButtonMessageForPad(AGamepad* gamepad, ParsecGamepadButtonMessage& button);
 	int onQuit(Guest &guest);
 	void setLimit(uint32_t guestUserId, uint8_t padLimit);
 	bool toggleMirror(uint32_t guestUserID);

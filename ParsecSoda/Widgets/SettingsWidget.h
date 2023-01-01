@@ -38,4 +38,5 @@ private:
 
 	int32_t _muteTime;
 	bool _autoMute;
+	bool _saveChat;
 };

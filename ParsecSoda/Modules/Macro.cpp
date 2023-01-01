@@ -12,9 +12,10 @@ Macro::Macro()
 /// Initializes Macro module.
 /// </summary>
 /// <param name="gamepadClient"></param>
-void Macro::init(GamepadClient& gamepadClient, MasterOfPuppets& masterOfPuppets) {
+void Macro::init(GamepadClient& gamepadClient, MasterOfPuppets& masterOfPuppets, Guest& host) {
     _gamepadClient = &gamepadClient;
 	_masterOfPuppets = &masterOfPuppets;
+	_host = &host;
 }
 
 /// <summary>
@@ -51,7 +52,7 @@ void Macro::run() {
 
 		// Disable puppets
 		_masterOfPuppets->setMasterIndex(-1);
-		std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin() + 1;
+		std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin();
 		for (; gi != _gamepadClient->gamepads.end(); ++gi) {
 			(*gi)->isPuppet = false;
 		}
@@ -92,17 +93,11 @@ void Macro::sendButtonForAll(ParsecGamepadButtonMessage button) {
 	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
 	message.gamepadButton = button;
 
-	// Mark first pad as master
-	_masterOfPuppets->setMasterIndex(0);
-
-	// Mark other gamepads as puppets
-	std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin() + 1;
+	// Press button for other pads
+	std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin();
 	for (; gi != _gamepadClient->gamepads.end(); ++gi) {
-		(*gi)->isPuppet = true;
+		_gamepadClient->sendButtonMessageForPad((*gi), button);
 	}
-
-	// Master puppet presses button for all
-	_gamepadClient->sendMessage(_gamepadClient->gamepads[0]->owner.guest, message);
 
 }
 

@@ -9,8 +9,8 @@ class CommandSpot : public ACommandIntegerArg
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::GUESTS; }
 
-	CommandSpot(const char* msg, ParsecDSO* parsec, ParsecHostConfig& config, const char* sessionId)
-		: ACommandIntegerArg(msg, internalPrefixes()), _config(config), _sessionId(sessionId)
+	CommandSpot(const char* msg, ParsecHostConfig& config)
+		: ACommandIntegerArg(msg, internalPrefixes()), _config(config)
 	{}
 
 	bool run() override
@@ -21,8 +21,8 @@ public:
 			return false;
 		}
 
-		_config.maxGuests = _config.maxGuests + 1;
-		ParsecHostSetConfig(_parsec, &_config, _sessionId);
+		_config.maxGuests += _intArg;
+		MetadataCache::preferences.roomChanged = true;
 		std::ostringstream reply;
 		reply << MetadataCache::preferences.chatbotName + " | Added " << _intArg << " guest slot(s)\0";
 		_replyMessage = reply.str();
@@ -41,7 +41,5 @@ protected:
 		return vector<const char*> { "!spot " };
 	}
 
-	ParsecDSO* _parsec;
 	ParsecHostConfig& _config;
-	const char* _sessionId;
 };

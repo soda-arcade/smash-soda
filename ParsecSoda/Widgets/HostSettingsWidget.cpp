@@ -240,9 +240,6 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::Text("LATENCY LIMITER");
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _latencyLimiter, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
         _latencyLimiter = !_latencyLimiter;
-        if (!_hosting.isRunning()) {
-            MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
-        }
     }
     if (_latencyLimiter)    TitleTooltipWidget::render("Latency Limit Off", "Anyone can join.");
     else                    TitleTooltipWidget::render("Latency Limit On", "Guests who's pings exceed the value on the right will be automatically kicked.");
@@ -251,9 +248,6 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     if (IntRangeWidget::render("latency limit", _latencyLimit, 0, 64, 0.025f)) {
         TitleTooltipWidget::render("Latency Limit", "The max ping allowed.");
-        if (!_hosting.isRunning()) {
-            MetadataCache::preferences.latencyLimitValue = _latencyLimit;
-        }
     }
     ImGui::EndChild();
 
@@ -294,6 +288,9 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         // Was clicked and is not running (must start)
         else
         {
+            MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
+            MetadataCache::preferences.latencyLimitValue = _latencyLimit;
+
             _hosting.setHostConfig(_roomName, _gameID, _maxGuests, _publicGame, _secret);
             _hosting.applyHostConfig();
             _hosting.startHosting();

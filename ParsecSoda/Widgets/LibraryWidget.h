@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../imgui/imgui.h"
+#include "../ImGui/imgui.h"
 #include "../Hosting.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppStyle.h"
@@ -16,6 +16,7 @@ public:
 	LibraryWidget(Hosting& hosting);
 	bool render();
 	bool renderGameList();
+	void renderPopup(GameData game);
 
 private:
 	
@@ -24,5 +25,10 @@ private:
 	GameDataList& _gameList;
 
 	char _filterText[256] = "";
+
+	char _editName[256] = "";
+	char _editPath[256] = "";
+	char _editParam[256] = "";
+	char _editThumb[256] = "";
 
 };
