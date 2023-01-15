@@ -33,7 +33,7 @@ MetadataCache::SessionCache MetadataCache::loadSessionCache()
             char originalText[256];
             MTY_AESGCM* ctx = MTY_AESGCMCreate(_key.c_str());
             char tag[16] = "ParsecSodaTag**";
-            
+
             MTY_AESGCMDecrypt(ctx, _nonce.c_str(), encryptedContent, size, tag, (void*)originalText);
             MTY_JSON* json = MTY_JSONParse(originalText);
             if (json != nullptr)
@@ -60,7 +60,7 @@ MetadataCache::SessionCache MetadataCache::loadSessionCache()
                     result.start = start;
                     result.expiry = expiry;
                 }
-                
+
                 MTY_JSONDestroy(&json);
             }
 
@@ -120,7 +120,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
 
         if (MTY_FileExists(filepath.c_str()))
         {
-            MTY_JSON *json = MTY_JSONReadFile(filepath.c_str());
+            MTY_JSON* json = MTY_JSONReadFile(filepath.c_str());
             char roomName[256] = "", gameID[72] = "", secret[32] = "";
             char websocketURI[50] = "";
             char websocketPassword[32] = "";
@@ -132,7 +132,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
             }
-            
+
             if (!MTY_JSONObjGetUInt(json, "audioOutputDevice", &preferences.audioOutputDevice)) {
                 preferences.audioOutputDevice = 0;
             }
@@ -144,7 +144,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetUInt(json, "micVolume", &preferences.micVolume)) {
                 preferences.micVolume = 80;
             }
-            
+
             if (!MTY_JSONObjGetBool(json, "micEnabled", &preferences.micEnabled)) {
                 preferences.micEnabled = true;
             }
@@ -168,7 +168,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetUInt(json, "adapter", &preferences.adapter)) {
                 preferences.adapter = 0;
             }
-            
+
             if (MTY_JSONObjGetString(json, "roomName", roomName, 256)) preferences.roomName = roomName;
             else preferences.roomName = "Let's have fun!";
 
@@ -218,10 +218,10 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetUInt(json, "ds4PuppetCount", &preferences.ds4PuppetCount)) {
                 preferences.ds4PuppetCount = 0;
             }
-            
+
             if (!MTY_JSONObjGetBool(json, "basicVersion", &preferences.basicVersion)) preferences.basicVersion = false;
             if (!MTY_JSONObjGetBool(json, "disableMicrophone", &preferences.disableMicrophone)) preferences.disableMicrophone = false;
-            if (!MTY_JSONObjGetBool(json, "disableGuideButton", &preferences.disableGuideButton)) preferences.disableGuideButton = false;
+            if (!MTY_JSONObjGetBool(json, "disableGuideButton", &preferences.disableGuideButton)) preferences.disableGuideButton = true;
             if (!MTY_JSONObjGetBool(json, "disableKeyboard", &preferences.disableKeyboard)) preferences.disableKeyboard = false;
 
             if (MTY_JSONObjGetString(json, "websocketURI", websocketURI, 50)) preferences.websocketURI = websocketURI;
@@ -269,6 +269,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
 
             if (!MTY_JSONObjGetUInt(json, "muteTime", &preferences.muteTime)) preferences.muteTime = 5;
             if (!MTY_JSONObjGetBool(json, "autoMute", &preferences.autoMute)) preferences.autoMute = true;
+            if (!MTY_JSONObjGetUInt(json, "autoMuteTime", &preferences.autoMuteTime)) preferences.autoMuteTime = 500;
             if (!MTY_JSONObjGetBool(json, "saveLog", &preferences.saveLog)) preferences.saveLog = false;
 
             preferences.chatbotName = "[" + preferences.chatbot + "]";
@@ -301,8 +302,8 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
     {
         string filepath = dirPath + "preferences.json";
 
-        MTY_JSON *json = MTY_JSONObjCreate();
-            
+        MTY_JSON* json = MTY_JSONObjCreate();
+
         MTY_JSONObjSetUInt(json, "audioInputDevice", preferences.audioInputDevice);
         MTY_JSONObjSetUInt(json, "audioOutputDevice", preferences.audioOutputDevice);
         MTY_JSONObjSetUInt(json, "micFrequency", preferences.micFrequency);
@@ -366,6 +367,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetString(json, "chatbot", preferences.chatbot.c_str());
         MTY_JSONObjSetUInt(json, "muteTime", preferences.muteTime);
         MTY_JSONObjSetBool(json, "autoMute", preferences.autoMute);
+        MTY_JSONObjSetUInt(json, "autoMuteTime", preferences.autoMuteTime);
         MTY_JSONObjSetBool(json, "saveLog", preferences.saveLog);
 
         // Tournament
@@ -377,7 +379,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
-            
+
         return true;
     }
 
@@ -407,8 +409,8 @@ vector<GuestData> MetadataCache::loadBannedUsers()
             for (size_t i = 0; i < size; i++)
             {
                 const MTY_JSON* guest = MTY_JSONArrayGetItem(json, (uint32_t)i);
-                
-                char name [128] = "";
+
+                char name[128] = "";
                 uint32_t userID = 0;
                 char reason[128] = "";
                 bool nameSuccess = MTY_JSONObjGetString(guest, "name", name, 128);
@@ -429,7 +431,7 @@ vector<GuestData> MetadataCache::loadBannedUsers()
 
             std::sort(result.begin(), result.end(), [](const GuestData a, const GuestData b) {
                 return a.userID < b.userID;
-            });
+                });
 
             MTY_JSONDestroy(&json);
         }
@@ -778,8 +780,8 @@ vector<Thumbnail> MetadataCache::loadThumbnails()
             const char* encryptedContent;
             encryptedContent = (char*)MTY_ReadFile(filepath.c_str(), &size);
 
-            char *originalText = new char[size + 100];
-            MTY_AESGCM *ctx = MTY_AESGCMCreate(_key.c_str());
+            char* originalText = new char[size + 100];
+            MTY_AESGCM* ctx = MTY_AESGCMCreate(_key.c_str());
             char tag[16] = "ParsecSodaTag**";
 
             MTY_AESGCMDecrypt(ctx, _nonce.c_str(), encryptedContent, size + 100, tag, (void*)originalText);
@@ -844,7 +846,7 @@ bool MetadataCache::saveThumbnails(vector<Thumbnail> thumbnails)
         }
 
         string jsonStr = MTY_JSONSerialize(json);
-        char *encryptedJson = new char[jsonStr.size() + 100];
+        char* encryptedJson = new char[jsonStr.size() + 100];
         char tag[16] = "ParsecSodaTag**";
         MTY_AESGCM* ctx = MTY_AESGCMCreate(_key.c_str());
         if (MTY_AESGCMEncrypt(ctx, _nonce.c_str(), jsonStr.c_str(), jsonStr.size() + 100, tag, encryptedJson))
@@ -885,9 +887,9 @@ string MetadataCache::getUserDir()
 {
     string dir = GetCurrentDirectory();
     string appDir = "\\SmashSoda\\";
-    if (MTY_FileExists( (dir+"\\portable.txt").c_str()  ))
+    if (MTY_FileExists((dir + "\\portable.txt").c_str()))
     {
-        string dirPath = dir+appDir;
+        string dirPath = dir + appDir;
         bool isDirOk = false;
         if (!MTY_FileExists(dirPath.c_str()))
         {

@@ -14,6 +14,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
 
     _muteTime = MetadataCache::preferences.muteTime;
     _autoMute = MetadataCache::preferences.autoMute;
+    _autoMuteTime = MetadataCache::preferences.autoMuteTime;
     _saveChat = MetadataCache::preferences.saveLog;
 
     try
@@ -161,7 +162,7 @@ void SettingsWidget::renderChatbot() {
         _hosting.getChatBot()->updateSettings();
     }
 
-    if (ImForm::InputText("CHATBOT NAME", _chatbot, 
+    if (ImForm::InputText("CHATBOT NAME", _chatbot,
         "Can give the ChatBot a silly name if you want!")) {
         MetadataCache::preferences.chatbot = _chatbot;
         MetadataCache::savePreferences();
@@ -179,13 +180,19 @@ void SettingsWidget::renderChatbot() {
         MetadataCache::savePreferences();
     }
 
-    /*
     if (ImForm::InputCheckbox("Auto Mute", _autoMute,
         "Automatically mutes a guest if they send a lot of messages quickly")) {
         MetadataCache::preferences.autoMute = _autoMute;
         MetadataCache::savePreferences();
     }
 
+    if (ImForm::InputNumber("AUTO MUTE TIME", _autoMuteTime, 5, 5000,
+        "Here you can set the the auto mute time between messages (in ms). Set this to a low value.")) {
+        MetadataCache::preferences.autoMuteTime = _autoMuteTime;
+        MetadataCache::savePreferences();
+    }
+
+    /*
     if (ImForm::InputCheckbox("Save Log", _saveChat,
         "Logs are stored in SmashSoda appdata folder")) {
         MetadataCache::preferences.saveLog = _saveLog;

@@ -411,13 +411,13 @@ void HostSettingsWidget::renderHotseat() {
     }
 
     if (ImForm::InputCheckbox("AFK Strip", _hotseatAFK,
-        "If the current hotseat guest goes AFK for a set period of time, they will automatically set to spectate.")) {
+        "If the current hotseat guest goes AFK for a set period of time, they will automatically be set to spectate.")) {
         MetadataCache::preferences.hotseatAFK = _hotseatAFK;
         MetadataCache::savePreferences();
     }
 
-    if (ImForm::InputNumber("AFK TIME", _hotseatTime, 5, 60,
-        "If AFK STRIP is enabled, if the hotseat guest is away for this amount of time they'll be moved to spectate.")) {
+    if (ImForm::InputNumber("AFK TIME", _hotseatAFKTime, 1, 60,
+        "If AFK STRIP is enabled, then if the hotseat guest is away for this amount of time they'll be moved to spectate.")) {
         MetadataCache::preferences.hotseatAFKTime = _hotseatAFKTime;
         MetadataCache::savePreferences();
     }

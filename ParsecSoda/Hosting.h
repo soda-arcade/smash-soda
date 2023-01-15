@@ -108,7 +108,12 @@ public:
 	LockedGamepadState _lockedGamepad;
 	void updateButtonLock(LockedGamepadState lockedGamepad);
 
+	int _lastMessageIndex;
+	vector<string> _lastMessageList;
+	Stopwatch _lastMessageTimer;
+
 	void handleMessage(const char* message, Guest& guest, bool isHost = false, bool isHidden = false, bool outside = false);
+	bool handleMuting(const char* message, Guest& guest);
 	void sendHostMessage(const char* message, bool isHidden = false);
 
 	AudioIn audioIn;
@@ -134,20 +139,10 @@ private:
 	bool isFilteredCommand(ACommand* command);
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
-	void autoGamepad();
 	void kioskMode();
-	bool hotseat();
 	void welcomeMessage();
 
-	void startHotseatTimer();
-	void stopHotseatTimer();
-	int findHotseatGuest();
-	void setHotseatGuest(int index);
-	bool hotseatModeTest();
 	bool isSpectator(int index);
-
-	int hotseatIndex = 0;
-	int hotseatError = -1;
 
 	// Attributes
 	AudioMix _audioMix;
@@ -186,7 +181,6 @@ private:
 
 	Stopwatch _mediaClock;
 	Stopwatch _welcomeClock;
-	Stopwatch _afkClock;
 
 	string _welcomeGuest;
 	bool _showWelcome = false;

@@ -75,7 +75,7 @@ public:
 		unsigned int ds4PuppetCount = 0;
 		bool basicVersion = false;
 		bool disableMicrophone = false;
-		bool disableGuideButton = false;
+		bool disableGuideButton = true;
 		bool disableKeyboard = false;
 		string websocketURI = "";
 		string websocketPassword = "";
@@ -110,6 +110,7 @@ public:
 		string chatbotName = "";
 		unsigned int muteTime = 5;
 		bool autoMute = true;
+		unsigned int autoMuteTime = 500;
 		bool saveLog = false;
 
 		bool leaderboardEnabled = true;
@@ -129,7 +130,7 @@ public:
 
 		int extraSpots = 0;
 		bool roomChanged = false;
-	
+
 	};
 
 	/// <summary>
@@ -252,7 +253,7 @@ public:
 
 private:
 	static string getUserDir();
-	
+
 	// This is not ideal, especially in an open source environment.
 	// I'm using these values just as placeholders until I find an
 	// actual solution. You should change them in your build.

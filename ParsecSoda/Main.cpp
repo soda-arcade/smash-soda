@@ -180,6 +180,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showWebSocket = MetadataCache::preferences.showWebSocket;
     bool showButtonLock = false;
     bool showLibrary = false;
+    bool showUpdate = false;
 
     ParsecSession& g_session = g_hosting.getSession();
     vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
@@ -228,8 +229,11 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
 
         VersionWidget::render();
 
-        if (showLogin)
-        {
+        if (showUpdate) {
+            VersionWidget::renderPopup();
+        }
+
+        if (showLogin) {
             loginWindow.render(showLogin);
         }
         else

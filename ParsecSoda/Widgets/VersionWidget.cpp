@@ -1,5 +1,7 @@
 #include "VersionWidget.h"
 
+std::string VersionWidget::version = "2.57";
+
 bool VersionWidget::render()
 {
 
@@ -22,7 +24,9 @@ bool VersionWidget::render()
     ImGui::Text("FPS: ");
     ImGui::SameLine();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
-    ImGui::Text("Smash Soda v. 2.57");
+
+    std::string versionString = "Smash Soda v. " + version;
+    ImGui::Text(versionString.c_str());
     AppStyle::pop();
     ImGui::End();
 
@@ -33,4 +37,42 @@ bool VersionWidget::render()
     ImGui::PopStyleVar();
 
     return true;
+}
+
+bool VersionWidget::renderPopup() {
+
+    AppStyle::pushTitle();
+
+    static ImVec2 res;
+    static ImVec2 size = ImVec2(400, 500);
+
+    res = ImGui::GetMainViewport()->Size;
+
+    ImGui::SetNextWindowPos(ImVec2(
+        (res.x - size.x) * 0.5f,
+        (res.y - size.y) * 0.5f
+    ));
+    ImGui::SetNextWindowSize(size);
+    ImGui::SetNextWindowFocus();
+    ImGui::Begin("Update###Update Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+    AppStyle::pushInput();
+
+    AppStyle::pop();
+    ImGui::End();
+    AppStyle::pop();
+
+    return true;
+
+}
+
+bool VersionWidget::checkForUpdate() {
+
+}
+
+bool VersionWidget::update() {
+
+}
+
+bool VersionWidget::downloadFile() {
+
 }

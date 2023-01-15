@@ -50,6 +50,12 @@ Hosting::Hosting()
 	vector<GameData> games = MetadataCache::loadGamesList();
 	_gamesList = GameDataList(games);
 
+	// Record last 3 messages for auto mute
+	_lastMessageIndex = 0;
+	_lastMessageList.push_back("");
+	_lastMessageList.push_back("");
+	_lastMessageList.push_back("");
+
 	_parsec = nullptr;
 
 	SDL_Init(SDL_INIT_JOYSTICK);
@@ -102,7 +108,7 @@ void Hosting::init()
 		_gamepadClient.createAllGamepads();
 		_createGamepadsThread.detach();
 		_macro.init(_gamepadClient, _masterOfPuppets, _host);
-		_hotseat.init(_guestList, _gamepadClient);
+		_hotseat.init(*_parsec, _guestList, _gamepadClient, _chatLog);
 	});
 
 	audioOut.fetchDevices();
@@ -392,7 +398,6 @@ void Hosting::stopHosting()
 {
 	_isRunning = false;
 	_guestList.clear();
-	hotseatError = false;
 
 	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
@@ -440,25 +445,8 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 
 void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside)
 {
-	// Has the guest been muted?
-	for (int i = 0; i < MetadataCache::preferences.mutedGuests.size(); i++) {
-		if (guest.userID == MetadataCache::preferences.mutedGuests[i].id) {
-
-			// Has their suffering gone on long enough?
-			if (MetadataCache::preferences.mutedGuests[i].stopwatch.isFinished()) {
-				MetadataCache::preferences.mutedGuests.erase(MetadataCache::preferences.mutedGuests.begin() + i);
-				MetadataCache::preferences.mutedGuests.shrink_to_fit();
-				break;
-			}
-			else {
-
-				// Shhhhhhhhh
-				return;
-
-			}
-
-		}
-	}
+	// Handle all the auto muting stuff
+	if (!handleMuting(message, guest)) return;
 
 	ACommand* command = _chatBot->identifyUserDataMessage(message, guest, isHost);
 	command->run();
@@ -521,6 +509,82 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	}
 
 	delete command;
+
+}
+
+/// <summary>
+/// This handles muted guests and auto mutes anybody spamming chat.
+/// </summary>
+/// <param name="message">The message sent.</param>
+/// <param name="guest">The guest who sent the message.</param>
+/// <returns>false if muted</returns>
+bool Hosting::handleMuting(const char* message, Guest& guest) {
+
+	// Has the guest been muted?
+	for (int i = 0; i < MetadataCache::preferences.mutedGuests.size(); i++) {
+		if (guest.userID == MetadataCache::preferences.mutedGuests[i].id) {
+
+			// Has their suffering gone on long enough?
+			if (MetadataCache::preferences.mutedGuests[i].stopwatch.isFinished()) {
+				MetadataCache::preferences.mutedGuests.erase(MetadataCache::preferences.mutedGuests.begin() + i);
+				MetadataCache::preferences.mutedGuests.shrink_to_fit();
+				return true;
+			}
+			else {
+
+				// Shhhhhhhhh
+				return false;
+
+			}
+
+		}
+	}
+
+	// Auto muting
+	if (MetadataCache::preferences.autoMute) {
+
+		// Record last message(s) for auto muting
+		if (_lastMessageTimer.isFinished()) {
+			_lastMessageIndex = 0;
+		}
+		_lastMessageList[_lastMessageIndex] = message;
+
+		// Check duration between last and current message
+		if (!_lastMessageTimer.isFinished() && _lastMessageIndex < 2) {
+			_lastMessageIndex++;
+			_lastMessageTimer.setDuration(_lastMessageTimer.getRemainingTime() + MetadataCache::preferences.autoMuteTime);
+		}
+		else {
+			_lastMessageIndex = 0;
+			_lastMessageTimer.stop();
+			_lastMessageTimer.setDuration(MetadataCache::preferences.autoMuteTime);
+			_lastMessageTimer.start();
+		}
+
+		// Is guest sending messages too quickly?
+		if (_lastMessageIndex > 1) {
+
+			// Mute guest temporarily
+			MetadataCache::Preferences::MutedGuest mutedGuest = MetadataCache::Preferences::MutedGuest();
+			mutedGuest.id = guest.userID;
+			mutedGuest.name = guest.name;
+			mutedGuest.stopwatch.setDuration(60000 * 2);
+			mutedGuest.stopwatch.start();
+			MetadataCache::preferences.mutedGuests.push_back(mutedGuest);
+
+			string message = MetadataCache::preferences.chatbotName + " " + guest.name +
+				" is sending messages too quickly and was muted for 2 minutes.";
+
+			broadcastChatMessage(message);
+			_chatLog.logMessage(message);
+
+			return false;
+
+		}
+
+	}
+
+	return true;
 
 }
 
@@ -695,11 +759,13 @@ void Hosting::pollLatency()
 		if (guestCount > 0) {
 			_guestList.updateMetrics(guests, guestCount);
 
-			// Test (v6 uncommented this...but seems to work...hmmmmmmm)
+			// Latency limiter
 			if (MetadataCache::preferences.latencyLimitEnabled) {
 				for (size_t mi = 0; mi < guestCount; mi++) {
 					MyMetrics m = _guestList.getMetrics(guests[mi].id);
-					if (m.averageNetworkLatencySize > 5 && m.averageNetworkLatency < _latencyLimitValue) {
+
+					if (m.averageNetworkLatencySize > 5 &&
+						m.averageNetworkLatency > MetadataCache::preferences.latencyLimitValue) {
 						ParsecHostKickGuest(_parsec, guests[mi].id);
 					}
 				}
@@ -772,7 +838,7 @@ void Hosting::pollSmashSoda() {
 		_macro.run();
 
 		// Handles the hotseat cycling
-		Hosting::hotseat();
+		_hotseat.run();
 
 		// Updated room settings?
 		if (MetadataCache::preferences.roomChanged) {
@@ -784,230 +850,6 @@ void Hosting::pollSmashSoda() {
 	_isSmashSodaThreadRunning = false;
 	_smashSodaMutex.unlock();
 	_smashSodaThread.detach();
-
-}
-
-/// <summary>
-/// Handles all the hotseat stuff.
-/// </summary>
-bool Hosting::hotseat() {
-
-	// Hotseat enabled and gamepad 1 connected?
-	if (MetadataCache::preferences.hotseat) {
-
-		// Need to do several checks to see if hotseat mode can be enabled
-		if (!hotseatModeTest()) return false;
-
-		// Start timer if it is not running
-		if (!MetadataCache::hotseat.hotseatClock.isRunning())
-			startHotseatTimer();
-
-		// Are there guests in the room?
-		if (_guestList.getGuests().size() > 0) {
-
-			// Hotseat guest is still here
-			if (MetadataCache::hotseat.guest.isValid()) {
-
-				// Get current hotseat guest index
-				hotseatIndex = findHotseatGuest();
-
-				// Remaining time
-				uint32_t time = round(MetadataCache::hotseat.hotseatClock.getRemainingTime() / 60000);
-
-				// Reminder in chat
-				if (MetadataCache::hotseat.reminderClock.isFinished()) {
-					broadcastChatMessage("[HOTSEAT] | " + _guestList.getGuests()[hotseatIndex].name + " has " + std::to_string(time) + " minutes left to play.\0");
-					MetadataCache::hotseat.reminderClock.reset();
-				}
-
-				// 10 second warning
-				if (MetadataCache::hotseat.isWarning && MetadataCache::hotseat.hotseatClock.getRemainingTime() < 10000) {
-					broadcastChatMessage("[HOTSEAT] | The gamepad is about to be swapped in 10 SECONDS!\0");
-					MetadataCache::hotseat.isWarning = false;
-				}
-
-				// Time is up. is spectating or gamepad been dropped?
-				if (!_gamepadClient.getGamepad(0)->isOwned() || isSpectator(hotseatIndex) || MetadataCache::hotseat.hotseatClock.isFinished()) {
-
-					// Find next hotseat guest
-					do {
-						if (hotseatIndex < _guestList.getGuests().size() - 1) {
-							hotseatIndex++;
-						} 
-						else {
-							hotseatIndex = 0;
-						}
-							
-					} while (isSpectator(hotseatIndex));
-
-					// Set new hotseat guest
-					setHotseatGuest(hotseatIndex);
-
-				}
-
-			}
-
-			// Hotseat guest left or something wrong
-			else setHotseatGuest(hotseatIndex);
-
-		}
-
-		// Nobody here, so we can't hotseat yet
-		else stopHotseatTimer();
-
-	}
-	else {
-
-		// Stop hotseat timers if running
-		if (MetadataCache::hotseat.hotseatClock.isRunning())
-			stopHotseatTimer();
-
-	}
-
-	return true;
-
-}
-
-/// <summary>
-/// Starts the hotseat and warning timers.
-/// </summary>
-void Hosting::startHotseatTimer() {
-	uint32_t minutes = MetadataCache::preferences.hotseatTime * 60000;
-
-	MetadataCache::hotseat.hotseatClock.reset(minutes);
-	MetadataCache::hotseat.reminderClock.reset(minutes / 4);
-
-	MetadataCache::hotseat.hotseatClock.start();
-	MetadataCache::hotseat.reminderClock.start();
-
-	MetadataCache::hotseat.isWarning = true;
-}
-
-/// <summary>
-/// Stops the hotseat and warning timers.
-/// </summary>
-void Hosting::stopHotseatTimer() {
-	MetadataCache::hotseat.hotseatClock.reset();
-	MetadataCache::hotseat.reminderClock.reset();
-
-	MetadataCache::hotseat.hotseatClock.stop();
-	MetadataCache::hotseat.reminderClock.stop();
-}
-
-/// <summary>
-/// Loops through guest list to find the next
-/// hotseat guest.
-/// </summary>
-int Hosting::findHotseatGuest() {
-
-	// Loop through guest list until we find current hotseat guest
-	for (int i = 0; i < _guestList.getGuests().size(); i++) {
-		if (_guestList.getGuests()[i].userID == MetadataCache::hotseat.guest.userID)
-			return i;
-	}
-
-	// Hotseat guest not valid or not chosen yet, put first guest in hotseat
-	return 0;
-
-}
-
-/// <summary>
-/// Puts a guest in the guest list in to the hotseat.
-/// </summary>
-/// <param name="index"></param>
-void Hosting::setHotseatGuest(int index) {
-
-	// Stop vibrating last guest
-	// I dungeddit :(
-	//ParsecHostSubmitRumble(_gamepadClient.getGamepad(0)->parsec, MetadataCache::hotseat.guest.id,_gamepadClient.getGamepad(0)->owner.deviceID, 0, 0);
-
-	// Set new hotseat guest
-	MetadataCache::hotseat.guest = _guestList.getGuests()[index];
-
-	// Set gamepad
-	_gamepadClient.getGamepad(0)->setOwner(MetadataCache::hotseat.guest, 0, false);
-
-	// Press pause for new player
-	if (MetadataCache::preferences.hotseatPause)
-		MetadataCache::autoGamepad.buttonList.push_back(ParsecGamepadButton::GAMEPAD_BUTTON_START);
-
-	// Chatbot
-	broadcastChatMessage("[ChatBot] | " + MetadataCache::hotseat.guest.name + " now has control of the gamepad!\0");
-
-	// Reset timers
-	startHotseatTimer();
-
-	// Start AFK timer
-	if (MetadataCache::preferences.hotseatAFK) {
-		_afkClock.reset(MetadataCache::preferences.hotseatAFKTime * 60000);
-	}
-
-}
-
-/// <summary>
-/// Checks to see if hotseat mode can be started.
-/// Messing with gamepads is BSOD territory, so here we want
-/// to make absolutely sure we can go in to hotseat mode.
-/// </summary>
-/// <returns>boolean</returns>
-bool Hosting::hotseatModeTest() {
-
-	// Are there people in the room?
-	if (_guestList.getGuests().size() < 1) {
-		if (hotseatError != 1) {
-			_chatLog.logMessage("[HOTSEAT] There needs to be at least one guest in the room.");
-			hotseatError = 1;
-		}
-		return false;
-	}
-
-	// Ensure at least one gamepad has been enabled
-	if (_gamepadClient.gamepads.size() < 1) {
-		if (hotseatError != 1) {
-			_chatLog.logMessage("[HOTSEAT] Please enable at least one Xbox gamepad.");
-			hotseatError = 1;
-		}
-		return false;
-	}
-
-	// Ensure gamepad 1 is attached and connected
-	if (!_gamepadClient.getGamepad(0)->isAttached()) {
-		if (hotseatError != 2) {
-			_chatLog.logMessage("[HOTSEAT] Please enable the first gamepad.");
-			hotseatError = 2;
-		}
-		return false;
-	}
-
-	// Xbox controller only
-	if (_gamepadClient.getGamepad(0)->type() != AGamepad::Type::XBOX) {
-		if (hotseatError != 3) {
-			_chatLog.logMessage("[HOTSEAT] Make sure the first gamepad is an Xbox gamepad (not Playstation controller).");
-			hotseatError = 3;
-		}
-		return false;
-	}
-
-	// Xbox index 1?
-	if (_gamepadClient.getGamepad(0)->getIndex() != 0) {
-		if (hotseatError != 4) {
-			_chatLog.logMessage("[HOTSEAT] Most single player games will only work with the first Xbox controller connected. The host needs to disconnect their controller.");
-			hotseatError = 4;
-		}
-		return false;
-	}
-
-	// Is everybody spectating?
-	if (MetadataCache::preferences.activeGuests.size() < 1) {
-		if (hotseatError != 5) {
-			_chatLog.logMessage("[HOTSEAT] Everybody is spectating!");
-			hotseatError = 5;
-		}
-		return false;
-	}
-
-	hotseatError = -1;
-	return true;
 
 }
 
@@ -1097,28 +939,6 @@ void Hosting::pollInputs()
 			if (!_gamepadClient.lock)
 			{
 					_gamepadClient.sendMessage(inputGuest, inputGuestMsg);
-			}
-
-			// Hotseat AFK Timer
-			if (MetadataCache::preferences.hotseat && MetadataCache::preferences.hotseatAFK) {
-				_afkClock.reset(MetadataCache::preferences.hotseatAFKTime * 60000);
-			}
-
-		}
-		else {
-
-			// Hotseat enabled
-			if (MetadataCache::preferences.hotseat) {
-
-				// Guest has been afk for a minute 
-				if (MetadataCache::preferences.hotseatAFK && _afkClock.isFinished()) {
-					if (_guestList.getGuests().size() > 0 && MetadataCache::hotseat.guest.isValid()) {
-						broadcastChatMessage(MetadataCache::hotseat.guest.name + "  was AFK and has now been set to !spectate");
-						MetadataCache::hotseat.spectators.push_back(MetadataCache::hotseat.guest.userID);
-					}
-					_afkClock.reset(MetadataCache::preferences.hotseatAFKTime * 60000);
-				}
-
 			}
 
 		}
