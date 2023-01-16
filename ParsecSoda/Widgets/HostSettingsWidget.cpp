@@ -218,7 +218,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::BeginChild("##Guest slot child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("GUEST SLOTS");
     if (IntRangeWidget::render("guest count", _maxGuests, 0, 64, 0.025f)) {
-        TitleTooltipWidget::render("Room Slots", "How many guests do you want in this room?");
+        
     }
     ImGui::EndChild();
 
@@ -230,8 +230,6 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _publicGame, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
         _publicGame = !_publicGame;
     }
-    if (_publicGame)    TitleTooltipWidget::render("Public Game", "Anyone can enter this room.");
-    else                TitleTooltipWidget::render("Private Game", "All guests must use the secret link to enter this room.");
     ImGui::EndChild();
 
     ImGui::SameLine();
@@ -241,13 +239,9 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _latencyLimiter, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
         _latencyLimiter = !_latencyLimiter;
     }
-    if (_latencyLimiter)    TitleTooltipWidget::render("Latency Limit Off", "Anyone can join.");
-    else                    TitleTooltipWidget::render("Latency Limit On", "Guests who's pings exceed the value on the right will be automatically kicked.");
-
     ImGui::SameLine();
 
     if (IntRangeWidget::render("latency limit", _latencyLimit, 0, 64, 0.025f)) {
-        TitleTooltipWidget::render("Latency Limit", "The max ping allowed.");
     }
     ImGui::EndChild();
 
