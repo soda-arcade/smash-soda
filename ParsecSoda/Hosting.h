@@ -34,12 +34,13 @@
 #include "CompilerDirectives.h"
 #include "Helpers/Stopwatch.h"
 #include "MasterOfPuppets.h"
-#include "WebSocket.h"
 #include "ButtonLock.h"
 #include "Helpers/Debouncer.h"
 #include "Modules/Tournament.h"
 #include "Modules/Macro.h"
 #include "Modules/Hotseat.h"
+#include "Modules/WebSocket.h"
+#include "Modules/Overlay.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -97,11 +98,6 @@ public:
 	void stopHosting();
 	void stripGamepad(int index);
 	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
-	WebSocket& getWebSocket();
-	void webSocketStart(string uri, string password);
-	void webSocketRun(string uri, string password);
-	void webSocketStop();
-	bool webSocketRunning();
 
 	bool removeGame(string name);
 
@@ -157,7 +153,6 @@ private:
 	GamepadClient _gamepadClient;
 	GuestList _guestList;
 	MasterOfPuppets _masterOfPuppets;
-	WebSocket _webSocket;
 
 	ParsecDSO* _parsec;
 	ParsecHostConfig _hostConfig;
@@ -169,6 +164,8 @@ private:
 	Tournament _tournament;
 	Macro _macro;
 	Hotseat _hotseat;
+	WebSocket _webSocket;
+	Overlay _overlay;
 
 	bool _isRunning = false;
 	bool _isMediaThreadRunning = false;
@@ -177,7 +174,6 @@ private:
 	bool _isLatencyThreadRunning = false;
 	bool _isSmashSodaThreadRunning = false;
 	bool _isGamepadThreadRunning = false;
-	bool _isWebSocketThreadRunning = false;
 
 	Stopwatch _mediaClock;
 	Stopwatch _welcomeClock;
@@ -192,7 +188,6 @@ private:
 	thread _latencyThread;
 	thread _smashSodaThread;
 	thread _gamepadThread;
-	thread _webSocketThread;
 	thread _createGamepadsThread;
 	thread _connectGamepadsThread;
 
@@ -202,5 +197,4 @@ private:
 	mutex _latencyMutex;
 	mutex _smashSodaMutex;
 	mutex _gamepadMutex;
-	mutex _webSocketMutex;
 };

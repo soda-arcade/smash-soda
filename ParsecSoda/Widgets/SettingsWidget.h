@@ -35,6 +35,7 @@ private:
 	unsigned int _theme = 0;
 	char _discord[HOST_NAME_LEN] = "";
 	char _chatbot[HOST_NAME_LEN] = "";
+	char _welcomeMessage[256] = "";
 
 	int32_t _muteTime;
 	bool _autoMute;

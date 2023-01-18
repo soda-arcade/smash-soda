@@ -1,6 +1,6 @@
 #include "VersionWidget.h"
 
-std::string VersionWidget::version = "2.57";
+std::string VersionWidget::version = "2.58";
 
 bool VersionWidget::render()
 {
@@ -39,7 +39,7 @@ bool VersionWidget::render()
     return true;
 }
 
-bool VersionWidget::renderPopup() {
+bool VersionWidget::renderUpdateWindow() {
 
     AppStyle::pushTitle();
 
@@ -62,17 +62,5 @@ bool VersionWidget::renderPopup() {
     AppStyle::pop();
 
     return true;
-
-}
-
-bool VersionWidget::checkForUpdate() {
-
-}
-
-bool VersionWidget::update() {
-
-}
-
-bool VersionWidget::downloadFile() {
 
 }

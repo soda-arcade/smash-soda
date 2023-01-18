@@ -151,7 +151,6 @@ bool GamepadsWidget::render()
         padIndex = xboxIndex + 1;
         static bool isIndexSuccess = false;
         isIndexSuccess = gi->isConnected() && padIndex > 0 && padIndex <= 4;
-        WebSocket& ws = g_hosting.getWebSocket();
 
         ImGui::BeginGroup();
         {
@@ -294,29 +293,8 @@ bool GamepadsWidget::render()
                 if (payload->DataSize == sizeof(int))
                 {
                     int guestIndex = *(const int*)payload->Data;
-                    if (guestIndex >= 0 && guestIndex < _hosting.getGuestList().size())
-                    {
-                        MTY_JSON* jmsg = MTY_JSONObjCreate();
-                        bool wsConnected = ws.connected();
-                        if (wsConnected)
-                        {
-                            MTY_JSONObjSetString(jmsg, "type", "gamepadassign");
-                            MTY_JSONObjSetUInt(jmsg, "fromid", gi->owner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "fromuserid", gi->owner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "fromusername", gi->owner.guest.name.c_str());
-                            MTY_JSONObjSetUInt(jmsg, "index", i);
-                        }
+                    if (guestIndex >= 0 && guestIndex < _hosting.getGuestList().size()) {
                         gi->owner.guest.copy(_hosting.getGuestList()[guestIndex]);
-                        if (wsConnected)
-                        {
-                            MTY_JSONObjSetUInt(jmsg, "toid", gi->owner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "touserid", gi->owner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "tousername", gi->owner.guest.name.c_str());
-                            char* finmsg = MTY_JSONSerialize(jmsg);
-                            ws.handle_message(finmsg);
-                            MTY_JSONDestroy(&jmsg);
-                            MTY_Free(finmsg);
-                        }
                     }
                 }
             }
@@ -334,23 +312,6 @@ bool GamepadsWidget::render()
                         _gamepads[sourceIndex]->owner.copy(backupOwner);
                         _gamepads[i]->clearState();
                         _gamepads[sourceIndex]->clearState();
-                        if (ws.connected())
-                        {
-                            MTY_JSON* jmsg = MTY_JSONObjCreate();
-                            MTY_JSONObjSetString(jmsg, "type", "gamepadmove");
-                            MTY_JSONObjSetUInt(jmsg, "fromid", backupOwner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "fromuserid", backupOwner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "fromusername", backupOwner.guest.name.c_str());
-                            MTY_JSONObjSetUInt(jmsg, "toid", _gamepads[i]->owner.guest.id);
-                            MTY_JSONObjSetUInt(jmsg, "touserid", _gamepads[i]->owner.guest.userID);
-                            MTY_JSONObjSetString(jmsg, "tousername", _gamepads[i]->owner.guest.name.c_str());
-                            MTY_JSONObjSetUInt(jmsg, "fromindex", sourceIndex);
-                            MTY_JSONObjSetUInt(jmsg, "toindex", i);
-                            char* finmsg = MTY_JSONSerialize(jmsg);
-                            ws.handle_message(finmsg);
-                            MTY_JSONDestroy(&jmsg);
-                            MTY_Free(finmsg);
-                        }
                     }
                 }
             }
@@ -366,19 +327,6 @@ bool GamepadsWidget::render()
 
         if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
         {
-            if (gi->isOwned() && ws.connected())
-            {
-                MTY_JSON* jmsg = MTY_JSONObjCreate();
-                MTY_JSONObjSetString(jmsg, "type", "gamepadstrip");
-                MTY_JSONObjSetUInt(jmsg, "id", gi->owner.guest.id);
-                MTY_JSONObjSetUInt(jmsg, "userid", gi->owner.guest.userID);
-                MTY_JSONObjSetString(jmsg, "username", gi->owner.guest.name.c_str());
-                MTY_JSONObjSetUInt(jmsg, "index", i);
-                char* finmsg = MTY_JSONSerialize(jmsg);
-                ws.handle_message(finmsg);
-                MTY_JSONDestroy(&jmsg);
-                MTY_Free(finmsg);
-            }
             gi->clearOwner();
         }
         TitleTooltipWidget::render("Strip gamepad", "Unlink current user from this gamepad.");

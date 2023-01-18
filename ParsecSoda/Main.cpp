@@ -36,7 +36,6 @@
 #include "Widgets/ThumbnailsWidget.h"
 #include "Widgets/MasterOfPuppetsWidget.h"
 #include "Widgets/SettingsWidget.h"
-#include "Widgets/WebSocketWidget.h"
 #include "Widgets/ButtonLockWidget.h"
 #include "Widgets/LibraryWidget.h"
 
@@ -137,7 +136,6 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     HostInfoWidget hostInfoWidget(g_hosting);
     MasterOfPuppetsWidget masterOfPuppets(g_hosting);
     SettingsWidget settingsWidget(g_hosting);
-    WebSocketWidget webSocketWidget(g_hosting);
     ButtonLockWidget buttonLockWidget(g_hosting);
     LibraryWidget libraryWidget(g_hosting);
 
@@ -177,7 +175,6 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showLogin = true;
     bool showThumbs = MetadataCache::preferences.showThumbs;
     bool showSettings = false;
-    bool showWebSocket = MetadataCache::preferences.showWebSocket;
     bool showButtonLock = false;
     bool showLibrary = false;
     bool showUpdate = false;
@@ -191,6 +188,12 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         showLogin = !g_hosting.getSession().isValid();
         t.detach();
     });
+
+    // =====================================================================
+    //  Register Hotkeys
+    // =====================================================================
+    RegisterHotKey(NULL, 1, MOD_CONTROL, 0x42); // !bb command
+    RegisterHotKey(NULL, 2, MOD_CONTROL, 0x4C); // !lockall command
 
     // =====================================================================
 
@@ -210,6 +213,22 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             ::DispatchMessage(&msg);
             if (msg.message == WM_QUIT)
                 done = true;
+
+            // Hotkeys
+            if (msg.message == WM_HOTKEY) {
+                switch (msg.wParam) {
+
+                case 1: // !bb command
+                    g_hosting.sendHostMessage("!bb");
+                    break;
+
+                case 2: // !lockall command
+                    g_hosting.sendHostMessage("!lockall");
+                    break;
+
+                }
+            }
+
         }
         if (done)
             break;
@@ -230,7 +249,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         VersionWidget::render();
 
         if (showUpdate) {
-            VersionWidget::renderPopup();
+            VersionWidget::renderUpdateWindow();
         }
 
         if (showLogin) {
@@ -249,13 +268,12 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showInfo)               InfoWidget::render();
             if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
             if (showSettings)           settingsWidget.render();
-            if (showWebSocket)          webSocketWidget.render();
             if (showButtonLock)         buttonLockWidget.render();
             if (showLibrary)            libraryWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showWebSocket, showButtonLock, showLibrary
+                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showButtonLock, showLibrary
             );
             hostInfoWidget.render();
         }

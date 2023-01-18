@@ -252,12 +252,6 @@
     <ClCompile Include="Widgets\VirtualGamepadWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Widgets\WebSocketWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WebSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DualshockGamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -295,6 +289,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Modules\Macro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Overlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\WebSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -668,12 +668,6 @@
     <ClInclude Include="Widgets\VirtualGamepadWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Widgets\WebSocketWidget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WebSocket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DualshockGamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -780,6 +774,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Modules\Macro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandLock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandLockAll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandAddXbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandRC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandAddPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Overlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\WebSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

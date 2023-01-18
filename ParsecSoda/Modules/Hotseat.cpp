@@ -35,12 +35,12 @@ void Hotseat::run() {
 		int index = getActiveIndex();
 
 		// Find next guest
-		index++;
+		int nextIndex = index++;
 		if (index > _guestList->getGuests().size() - 1)
 			index = 0;
-		Guest guest = _guestList->getGuests()[index];
 
 		// Is next guest valid?
+		Guest guest = _guestList->getGuests()[nextIndex];
 		if (guest.isValid() && !MetadataCache::isSpectating(guest)) {
 
 			// Set new guest
@@ -69,6 +69,7 @@ void Hotseat::run() {
 
 
 		// Strip pad if AFK
+		/*
 		if (MetadataCache::preferences.hotseatAFK) {
 
 			ParsecGuest inputGuest;
@@ -83,6 +84,7 @@ void Hotseat::run() {
 			}
 
 		}
+		*/
 
 	}
 
@@ -106,6 +108,7 @@ bool Hotseat::canRun() {
 			_chatLog->logMessage("[HOTSEAT] There needs to be at least one guest in the room.");
 			errorCode = 1;
 		}
+		_gamepadClient->clearOwner(0);
 		return false;
 	}
 
@@ -115,6 +118,7 @@ bool Hotseat::canRun() {
 			_chatLog->logMessage("[HOTSEAT] Please enable at least one Xbox gamepad.");
 			errorCode = 1;
 		}
+		_gamepadClient->clearOwner(0);
 		return false;
 	}
 
@@ -124,6 +128,7 @@ bool Hotseat::canRun() {
 			_chatLog->logMessage("[HOTSEAT] Please enable the first gamepad.");
 			errorCode = 2;
 		}
+		_gamepadClient->clearOwner(0);
 		return false;
 	}
 
@@ -133,6 +138,7 @@ bool Hotseat::canRun() {
 			_chatLog->logMessage("[HOTSEAT] Make sure the first gamepad is an Xbox gamepad (not Playstation controller).");
 			errorCode = 3;
 		}
+		_gamepadClient->clearOwner(0);
 		return false;
 	}
 
@@ -142,6 +148,7 @@ bool Hotseat::canRun() {
 			_chatLog->logMessage("[HOTSEAT] Most single player games will only work with the first Xbox controller connected. The host needs to disconnect their controller.");
 			errorCode = 4;
 		}
+		_gamepadClient->clearOwner(0);
 		return false;
 	}
 
@@ -151,6 +158,7 @@ bool Hotseat::canRun() {
 			_chatLog->logMessage("[HOTSEAT] Everybody is spectating!");
 			errorCode = 5;
 		}
+		_gamepadClient->clearOwner(0);
 		return false;
 	}
 

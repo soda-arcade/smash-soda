@@ -128,6 +128,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             char kioskApplication[256] = "";
             char kioskParameters[256] = "";
             char chatbot[128] = "ChatBot";
+            char welcomeMessage[256] = "";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -234,7 +235,6 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetBool(json, "showAudio", &preferences.showAudio)) preferences.showAudio = false;
             if (!MTY_JSONObjGetBool(json, "showVideo", &preferences.showVideo)) preferences.showVideo = false;
             if (!MTY_JSONObjGetBool(json, "showThumbs", &preferences.showThumbs)) preferences.showThumbs = false;
-            if (!MTY_JSONObjGetBool(json, "showWebSocket", &preferences.showWebSocket)) preferences.showWebSocket = false;
             if (!MTY_JSONObjGetBool(json, "latencyLimitEnabled", &preferences.latencyLimitEnabled)) preferences.latencyLimitEnabled = false;
             if (!MTY_JSONObjGetUInt(json, "latencyLimitValue", &preferences.latencyLimitValue)) preferences.latencyLimitValue = 200;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadLeftTrigger", &preferences.lockedGamepadLeftTrigger)) preferences.lockedGamepadLeftTrigger = false;
@@ -271,6 +271,9 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (!MTY_JSONObjGetBool(json, "autoMute", &preferences.autoMute)) preferences.autoMute = true;
             if (!MTY_JSONObjGetUInt(json, "autoMuteTime", &preferences.autoMuteTime)) preferences.autoMuteTime = 500;
             if (!MTY_JSONObjGetBool(json, "saveLog", &preferences.saveLog)) preferences.saveLog = false;
+
+            if (MTY_JSONObjGetString(json, "welcomeMessage", welcomeMessage, 256)) preferences.welcomeMessage = welcomeMessage;
+            else preferences.welcomeMessage = "";
 
             preferences.chatbotName = "[" + preferences.chatbot + "]";
 
@@ -338,7 +341,6 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "showAudio", preferences.showAudio);
         MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
         MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
-        MTY_JSONObjSetBool(json, "showWebSocket", preferences.showWebSocket);
         MTY_JSONObjSetBool(json, "latencyLimitEnabled", preferences.latencyLimitEnabled);
         MTY_JSONObjSetUInt(json, "latencyLimitValue", preferences.latencyLimitValue);
         MTY_JSONObjSetBool(json, "lockedGamepadLeftTrigger", preferences.lockedGamepadLeftTrigger);
@@ -369,6 +371,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "autoMute", preferences.autoMute);
         MTY_JSONObjSetUInt(json, "autoMuteTime", preferences.autoMuteTime);
         MTY_JSONObjSetBool(json, "saveLog", preferences.saveLog);
+        MTY_JSONObjSetString(json, "welcomeMessage", preferences.welcomeMessage.c_str());
 
         // Tournament
         MTY_JSONObjSetBool(json, "leaderboardEnabled", preferences.leaderboardEnabled);

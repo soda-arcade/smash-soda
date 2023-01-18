@@ -82,6 +82,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\SDK\cplusplus\asio-1.24.0\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -182,7 +183,9 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="GamepadState.cpp" />
     <ClCompile Include="Modules\Hotseat.cpp" />
     <ClCompile Include="Modules\Macro.cpp" />
+    <ClCompile Include="Modules\Overlay.cpp" />
     <ClCompile Include="Modules\Tournament.cpp" />
+    <ClCompile Include="Modules\WebSocket.cpp" />
     <ClCompile Include="VIPList.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
     <ClCompile Include="Widgets\LibraryWidget.cpp" />
@@ -192,9 +195,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="MasterOfPuppets.cpp" />
     <ClCompile Include="SDLGamepad.cpp" />
     <ClCompile Include="SDLGamepadReader.cpp" />
-    <ClCompile Include="WebSocket.cpp" />
     <ClCompile Include="Widgets\VirtualGamepadWidget.cpp" />
-    <ClCompile Include="Widgets\WebSocketWidget.cpp" />
     <ClCompile Include="XInputReader.cpp" />
     <ClCompile Include="Thumbnail.cpp" />
     <ClCompile Include="Widgets\MasterOfPuppetsWidget.cpp" />
@@ -274,15 +275,20 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\Command1v1.h" />
     <ClInclude Include="Commands\Command2v2.h" />
     <ClInclude Include="Commands\Command8Ball.h" />
+    <ClInclude Include="Commands\CommandAddPS.h" />
+    <ClInclude Include="Commands\CommandAddXbox.h" />
     <ClInclude Include="Commands\CommandBB.h" />
     <ClInclude Include="Commands\CommandDecrease.h" />
     <ClInclude Include="Commands\CommandDiscord.h" />
     <ClInclude Include="Commands\CommandExtend.h" />
     <ClInclude Include="Commands\CommandFortune.h" />
     <ClInclude Include="Commands\CommandHotseat.h" />
+    <ClInclude Include="Commands\CommandLock.h" />
+    <ClInclude Include="Commands\CommandLockAll.h" />
     <ClInclude Include="Commands\CommandMod.h" />
     <ClInclude Include="Commands\CommandMute.h" />
     <ClInclude Include="Commands\CommandPing.h" />
+    <ClInclude Include="Commands\CommandRC.h" />
     <ClInclude Include="Commands\CommandRequest.h" />
     <ClInclude Include="Commands\CommandRestart.h" />
     <ClInclude Include="Commands\CommandSpectate.h" />
@@ -296,11 +302,13 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="ImGui\imform.h" />
     <ClInclude Include="Modules\Hotseat.h" />
     <ClInclude Include="Modules\Macro.h" />
+    <ClInclude Include="Modules\Overlay.h" />
     <ClInclude Include="Modules\Tournament.h" />
     <ClInclude Include="Helpers\TimeT.h" />
     <ClInclude Include="ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
+    <ClInclude Include="Modules\WebSocket.h" />
     <ClInclude Include="VIPList.h" />
     <ClInclude Include="Widgets\ButtonLockWidget.h" />
     <ClInclude Include="Widgets\LibraryWidget.h" />
@@ -310,9 +318,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="MasterOfPuppets.h" />
     <ClInclude Include="SDLGamepad.h" />
     <ClInclude Include="SDLGamepadReader.h" />
-    <ClInclude Include="WebSocket.h" />
     <ClInclude Include="Widgets\VirtualGamepadWidget.h" />
-    <ClInclude Include="Widgets\WebSocketWidget.h" />
     <ClInclude Include="XInputReader.h" />
     <ClInclude Include="IGamepadReader.h" />
     <ClInclude Include="Widgets\MasterOfPuppetsWidget.h" />

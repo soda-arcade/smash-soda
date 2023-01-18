@@ -14,7 +14,6 @@ void NavBar::render(
 	bool& showVideo,
 	bool& showInfo,
 	bool& showSettings,
-	bool& showWebSocket,
 	bool& showButtonLock,
 	bool& showLibrary
 )
@@ -84,12 +83,6 @@ void NavBar::render(
 		MetadataCache::preferences.showVideo = showVideo;
 	}
 	renderNavtooltip("Video", showVideo);
-
-	if (ToggleIconButtonWidget::render(AppIcons::websocket, AppIcons::websocket, showWebSocket, iconSize)) {
-		showWebSocket = !showWebSocket;
-		MetadataCache::preferences.showWebSocket = showWebSocket;
-	}
-	renderNavtooltip("WebSocket", showWebSocket);
 
 	if (ToggleIconButtonWidget::render(AppIcons::settings, AppIcons::settings, showSettings, iconSize)) showSettings = !showSettings;
 	renderNavtooltip("Settings", showSettings);

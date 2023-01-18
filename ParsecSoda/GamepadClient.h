@@ -71,6 +71,7 @@ public:
 	AGamepad* getGamepad(int index);
 	int clearAFK(GuestList &guests);
 
+	bool connect(int gamepadIndex);
 	bool disconnect(int gamepadIndex);
 	bool clearOwner(int gamepadIndex);
 

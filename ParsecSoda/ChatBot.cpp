@@ -39,6 +39,8 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	// Admin & Moderator commands
 	if (tier >= Tier::ADMIN || isHost)
 	{
+		if (msgStartsWith(msg, CommandAddXbox::prefixes()))		return new CommandAddXbox(_gamepadClient);
+		if (msgStartsWith(msg, CommandAddPS::prefixes()))		return new CommandAddPS(_gamepadClient);
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
 		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
@@ -46,8 +48,11 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
+		//if (msgStartsWith(msg, CommandLock::prefixes()))		return new CommandLock(msg, sender, _gamepadClient);
+		if (msgStartsWith(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
+		if (msgStartsWith(msg, CommandRC::prefixes()))			return new CommandRC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
 		if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient);

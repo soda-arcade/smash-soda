@@ -1,5 +1,4 @@
 #include "Hosting.h"
-#include "WebSocket.h"
 
 using namespace std;
 
@@ -109,6 +108,7 @@ void Hosting::init()
 		_createGamepadsThread.detach();
 		_macro.init(_gamepadClient, _masterOfPuppets, _host);
 		_hotseat.init(*_parsec, _guestList, _gamepadClient, _chatLog);
+		_webSocket.init(_chatLog);
 	});
 
 	audioOut.fetchDevices();
@@ -383,7 +383,8 @@ void Hosting::startHosting()
 					kioskMode();
 
 				// Init overlay
-				
+				if (MetadataCache::preferences.overlayShow)
+					_overlay.start();
 
 			}
 		}
@@ -399,12 +400,18 @@ void Hosting::stopHosting()
 	_isRunning = false;
 	_guestList.clear();
 
+	/*
 	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
 		_gamepadClient.gamepads[i]->clearOwner();
 		if (MetadataCache::preferences.hotseat) {
 			_gamepadClient.gamepads[i]->disconnect();
 		}
 	}
+	*/
+
+	// Disable overlay
+	_overlay.stop();
+
 }
 
 void Hosting::kioskMode() {
@@ -456,21 +463,6 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	{
 		Tier tier = _tierList.getTier(guest.userID);
 
-		if (_webSocket.connected() && !outside)
-		{
-			MTY_JSON* jmsg = MTY_JSONObjCreate();
-			MTY_JSONObjSetString(jmsg, "type", "chat");
-			MTY_JSONObjSetUInt(jmsg, "id", guest.id);
-			MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
-			MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
-			MTY_JSONObjSetString(jmsg, "content", message);
-			char* finmsg = MTY_JSONSerialize(jmsg);
-			_webSocket.handle_message(finmsg);
-			MTY_JSONDestroy(&jmsg);
-			MTY_Free(finmsg);
-
-		}
-
 		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier);
 		defaultMessage.run();
 		_chatBot->setLastUserId(guest.userID);
@@ -488,20 +480,6 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	// Chatbot's command reply
 	if (!command->replyMessage().empty() && command->type() != COMMAND_TYPE::DEFAULT_MESSAGE)
 	{
-
-		if (_webSocket.connected())
-		{
-			MTY_JSON* jmsg = MTY_JSONObjCreate();
-			MTY_JSONObjSetString(jmsg, "type", "command");
-			MTY_JSONObjSetUInt(jmsg, "id", guest.id);
-			MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
-			MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
-			MTY_JSONObjSetString(jmsg, "content", command->replyMessage().c_str());
-			char* finmsg = MTY_JSONSerialize(jmsg);
-			_webSocket.handle_message(finmsg);
-			MTY_JSONDestroy(&jmsg);
-			MTY_Free(finmsg);
-		}
 
 		broadcastChatMessage(command->replyMessage());
 		_chatLog.logCommand(command->replyMessage());
@@ -541,7 +519,7 @@ bool Hosting::handleMuting(const char* message, Guest& guest) {
 	}
 
 	// Auto muting
-	if (MetadataCache::preferences.autoMute) {
+	if (MetadataCache::preferences.autoMute && guest.userID != _host.userID) {
 
 		// Record last message(s) for auto muting
 		if (_lastMessageTimer.isFinished()) {
@@ -772,52 +750,7 @@ void Hosting::pollLatency()
 			}
 
 		}
-		if (_webSocket.connected())
-		{
-			// submit guests/metrics
-			MTY_JSON* jmsg = MTY_JSONObjCreate();
-			MTY_JSON* jdata = MTY_JSONArrayCreate();
-			for (size_t mi = 0; mi < guestCount; mi++)
-			{
-				MTY_JSON* jmetric = MTY_JSONObjCreate();
-				MTY_JSONObjSetUInt(jmetric, "id", guests[mi].id);
-				MTY_JSONObjSetUInt(jmetric, "userid", guests[mi].userID);
-				MTY_JSONObjSetString(jmetric, "username", guests[mi].name);
-				MTY_JSONObjSetBool(jmetric, "banned", _banList.isBanned(guests[mi].userID));
-				MTY_JSONObjSetFloat(jmetric, "networkLatency", guests[mi].metrics[0].networkLatency);
-				MTY_JSONObjSetUInt(jmetric, "fastRTs", guests[mi].metrics[0].fastRTs);
-				MTY_JSONObjSetUInt(jmetric, "slowRTs", guests[mi].metrics[0].slowRTs);
-				MTY_JSONArrayAppendItem(jdata, jmetric);
-			}
-			MTY_JSONObjSetString(jmsg, "type", "metrics");
-			MTY_JSONObjSetItem(jmsg, "content", jdata);
-			char* finmsg = MTY_JSONSerialize(jmsg);
-			_webSocket.handle_message(finmsg);
-			MTY_JSONDestroy(&jmsg);
-			MTY_Free(finmsg);
-
-			// submit all gamepads
-			MTY_JSON* jmsg2 = MTY_JSONObjCreate();
-			MTY_JSON* jdata2 = MTY_JSONArrayCreate();
-			for (size_t gi = 0; gi < _gamepadClient.gamepads.size(); ++gi)
-			{
-				MTY_JSON* jmetric = MTY_JSONObjCreate();
-				MTY_JSONObjSetUInt(jmetric, "index", gi);
-				if (_gamepadClient.gamepads[gi]->isOwned())
-				{
-					MTY_JSONObjSetUInt(jmetric, "id", _gamepadClient.gamepads[gi]->owner.guest.id);
-					MTY_JSONObjSetUInt(jmetric, "userid", _gamepadClient.gamepads[gi]->owner.guest.userID);
-					MTY_JSONObjSetString(jmetric, "username", _gamepadClient.gamepads[gi]->owner.guest.name.c_str());
-				}
-				MTY_JSONArrayAppendItem(jdata2, jmetric);
-			}
-			MTY_JSONObjSetString(jmsg2, "type", "gamepadall");
-			MTY_JSONObjSetItem(jmsg2, "content", jdata2);
-			char* finmsg2 = MTY_JSONSerialize(jmsg2);
-			_webSocket.handle_message(finmsg2);
-			MTY_JSONDestroy(&jmsg2);
-			MTY_Free(finmsg2);
-		}
+		
 	}
 	_isLatencyThreadRunning = false;
 	_latencyMutex.unlock();
@@ -839,6 +772,9 @@ void Hosting::pollSmashSoda() {
 
 		// Handles the hotseat cycling
 		_hotseat.run();
+
+		// Handle overlay communication
+		_overlay.run();
 
 		// Updated room settings?
 		if (MetadataCache::preferences.roomChanged) {
@@ -887,32 +823,6 @@ void Hosting::pollGamepad()
 	while (_isRunning)
 	{
 		Sleep(33);
-		if (_gamepadClient.gamepads.size() > 0 && _webSocket.connected())
-		{
-			MTY_JSON* jmsg3 = MTY_JSONObjCreate();
-			MTY_JSON* jdata3 = MTY_JSONArrayCreate();
-			for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++)
-			{
-				if (!_gamepadClient.gamepads[i]->isConnected()) continue;
-				XINPUT_STATE test = _gamepadClient.gamepads[i]->getState();
-				MTY_JSON* jmetric = MTY_JSONObjCreate();
-				MTY_JSONObjSetUInt(jmetric, "i", i);
-				MTY_JSONObjSetInt(jmetric, "lt", test.Gamepad.bLeftTrigger);
-				MTY_JSONObjSetInt(jmetric, "rt", test.Gamepad.bRightTrigger);
-				MTY_JSONObjSetInt(jmetric, "lx", test.Gamepad.sThumbLX);
-				MTY_JSONObjSetInt(jmetric, "ly", test.Gamepad.sThumbLY);
-				MTY_JSONObjSetInt(jmetric, "rx", test.Gamepad.sThumbRX);
-				MTY_JSONObjSetInt(jmetric, "ry", test.Gamepad.sThumbRY);
-				MTY_JSONObjSetInt(jmetric, "b", test.Gamepad.wButtons);
-				MTY_JSONArrayAppendItem(jdata3, jmetric);
-			}
-			MTY_JSONObjSetString(jmsg3, "type", "gamepadstate");
-			MTY_JSONObjSetItem(jmsg3, "content", jdata3);
-			char* finmsg3 = MTY_JSONSerialize(jmsg3);
-			_webSocket.handle_message(finmsg3);
-			MTY_JSONDestroy(&jmsg3);
-			MTY_Free(finmsg3);
-		}
 	}
 	_isGamepadThreadRunning = false;
 	_gamepadMutex.unlock();
@@ -947,44 +857,6 @@ void Hosting::pollInputs()
 	_isInputThreadRunning = false;
 	_inputMutex.unlock();
 	_inputThread.detach();
-}
-
-void Hosting::webSocketStart(string uri, string password)
-{
-	if (!_isWebSocketThreadRunning)
-	{
-		_webSocketThread = thread([this,uri,password]() {webSocketRun(uri,password); });
-	}
-}
-
-void Hosting::webSocketStop()
-{
-	if (_webSocket.connected())
-	{
-		_webSocket.close();
-	}
-}
-
-WebSocket& Hosting::getWebSocket()
-{
-	return _webSocket;
-}
-
-void Hosting::webSocketRun(string uri, string password)
-{
-	_webSocketMutex.lock();
-	_isWebSocketThreadRunning = true;
-
-	_webSocket.start(uri, password);
-
-	_isWebSocketThreadRunning = false;
-	_webSocketMutex.unlock();
-	_webSocketThread.detach();
-}
-
-bool Hosting::webSocketRunning()
-{
-	return _isWebSocketThreadRunning;
 }
 
 void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
@@ -1044,22 +916,6 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			catch (const std::exception&) {}
 		}
 	});
-
-	if (_webSocket.connected())
-	{
-		MTY_JSON* jmsg = MTY_JSONObjCreate();
-		MTY_JSONObjSetString(jmsg, "type", "gueststate");
-		MTY_JSONObjSetUInt(jmsg, "id", guest.id);
-		MTY_JSONObjSetUInt(jmsg, "userid", guest.userID);
-		MTY_JSONObjSetString(jmsg, "username", guest.name.c_str());
-		MTY_JSONObjSetUInt(jmsg, "state", state);
-		MTY_JSONObjSetInt(jmsg, "status", status);
-		MTY_JSONObjSetBool(jmsg, "banned", _banList.isBanned(guest.userID));
-		char* finmsg = MTY_JSONSerialize(jmsg);
-		_webSocket.handle_message(finmsg);
-		MTY_JSONDestroy(&jmsg);
-		MTY_Free(finmsg);
-	}
 
 	// Is the connecting guest the host?
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && (_host.userID == guest.userID))

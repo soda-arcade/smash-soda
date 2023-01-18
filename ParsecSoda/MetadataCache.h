@@ -83,7 +83,6 @@ public:
 		bool showAudio = false;
 		bool showVideo = false;
 		bool showThumbs = false;
-		bool showWebSocket = false;
 		bool latencyLimitEnabled = false;
 		unsigned int latencyLimitValue = 0;
 		bool lockedGamepadLeftTrigger = false;
@@ -112,11 +111,14 @@ public:
 		bool autoMute = true;
 		unsigned int autoMuteTime = 500;
 		bool saveLog = false;
+		string welcomeMessage = "";
 
 		bool leaderboardEnabled = true;
 
 		bool overlayShow = false;
 		bool overlayHotseat = false;
+
+		bool lockedPads = false;
 
 		vector<Guest> activeGuests;
 

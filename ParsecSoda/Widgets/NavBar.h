@@ -28,7 +28,6 @@ public:
         bool& showVideo,
         bool& showInfo,
         bool& showSettings,
-        bool& showWebSocket,
         bool& showButtonLock,
         bool& showLibrary
     );
