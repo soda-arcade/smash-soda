@@ -2,7 +2,6 @@
 
 using namespace std;
 
-boolean allowGame = false;
 #if defined(_WIN32)
 	#if !defined(BITS)
 		#define BITS 64
@@ -996,17 +995,16 @@ void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
 bool Hosting::parsecArcadeStart()
 {
 	if (isReady()) {
-		if (MetadataCache::preferences.firstStartup)
-		{
+		if (MetadataCache::preferences.firstStartup) {
 			ParsecStatus status = ParsecHostStart(_parsec, HOST_DESKTOP, &_hostConfig, _parsecSession.sessionId.c_str());
-			Sleep(500);
-			ParsecHostStop(_parsec);
-			Sleep(500);
-			if (status == PARSEC_OK) {
+			if (status == PARSEC_OK)
+			{
 				allowGame = true;
 				MetadataCache::preferences.firstStartup = false;
 				MetadataCache::savePreferences();
-			} else {
+			}
+			else
+			{
 				return false;
 			}
 		}

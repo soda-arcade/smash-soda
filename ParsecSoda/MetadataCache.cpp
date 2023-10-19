@@ -184,9 +184,9 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
                 preferences.guestCount = 1;
             }
 
-            if (!MTY_JSONObjGetBool(json, "publicRoom", &preferences.publicRoom)) {
-                preferences.publicRoom = false;
-            }
+            /*if (!MTY_JSONObjGetBool(json, "publicRoom", &preferences.publicRoom)) {
+                preferences.publicRoom = true;
+            }*/
 
             static int LIMIT_POS = 4096 * 2;
             if (!MTY_JSONObjGetInt(json, "windowX", &preferences.windowX) || preferences.windowX < -LIMIT_POS || preferences.windowX > LIMIT_POS) {
@@ -346,7 +346,7 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetString(json, "gameID", preferences.gameID.c_str());
         MTY_JSONObjSetString(json, "secret", preferences.secret.c_str());
         MTY_JSONObjSetUInt(json, "guestCount", preferences.guestCount);
-        MTY_JSONObjSetBool(json, "publicRoom", preferences.publicRoom);
+        //MTY_JSONObjSetBool(json, "publicRoom", preferences.publicRoom);
         MTY_JSONObjSetInt(json, "windowX", preferences.windowX);
         MTY_JSONObjSetInt(json, "windowY", preferences.windowY);
         MTY_JSONObjSetUInt(json, "windowW", preferences.windowW);

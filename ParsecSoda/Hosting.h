@@ -67,6 +67,7 @@ public:
 	bool isGamepadRunning();
 	bool& isGamepadLock();
 	bool& isGamepadLockButtons();
+	bool allowGame = false;
 	Guest& getHost();
 	ParsecSession& getSession();
 	void fetchAccountData(bool sync = false);

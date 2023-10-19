@@ -65,7 +65,7 @@ public:
 		string gameID = "";
 		string secret = "";
 		unsigned int guestCount = 1;
-		bool publicRoom = false;
+		bool publicRoom = true;
 		bool isValid = false;
 		int windowX = 0;
 		int windowY = 0;
