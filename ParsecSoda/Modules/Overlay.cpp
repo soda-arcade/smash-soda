@@ -82,7 +82,7 @@ void Overlay::stop() {
 	// Only if it had been started successfully
 	if (isActive) {
 
-		_processMan->kill(_pid);
+		//_processMan->kill(_pid);
 
 		// Stop loop
 		isActive = false;
