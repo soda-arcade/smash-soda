@@ -1,6 +1,6 @@
 #pragma once
 #include "../GamepadClient.h"
-#include "../MasterOfPuppets.h"
+#include "../GuestList.h"
 #include "../Helpers/Stopwatch.h"
 
 /// <summary>
@@ -10,34 +10,31 @@ class Macro {
 
 public:
 	Macro();
-	void init(GamepadClient& gamepadClient, MasterOfPuppets& masterOfPuppets, Guest& host);
+	void init(GamepadClient& gamepadClient, GuestList& guestList);
 
 	void run();
 	void pressButtonForAll(ParsecGamepadButton button);
-	//void pressButtonForPad(int padIndex, ParsecGamepadButton button);
-	//void pressButtonForGuest(Guest guest, ParsecGamepadButton button);
+	void pressButtonForPad(int padIndex, ParsecGamepadButton button);
+	void pressButtonForGuest(int guestId, ParsecGamepadButton button);
 
 private:
 
 	class Cmd {
 	public:
 		int padIndex = -1;
+		int guestId = -1;
 		ParsecGamepadButton button;
 		bool pressed = false;
 	};
 
-	int masterIndex;
 	GamepadClient* _gamepadClient;
-	MasterOfPuppets* _masterOfPuppets;
-	Guest* _host;
+	GuestList* _guestList;
 
 	vector<Cmd> cmdList;
 
-	bool isWaiting = false;
-	Stopwatch waitTimer;
-
 	void sendButtonForAll(ParsecGamepadButtonMessage button);
 	ParsecGamepadButtonMessage createButtonMessage(ParsecGamepadButton button, bool in);
-	//void sendButtonForPad(int padIndex, ParsecGamepadButtonMessage button);
+	void sendButtonForPad(int padIndex, ParsecGamepadButtonMessage button);
+	void sendButtonForGuest(int guestId, ParsecGamepadButtonMessage button);
 
 };

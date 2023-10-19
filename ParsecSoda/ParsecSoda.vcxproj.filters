@@ -219,15 +219,6 @@
     <ClCompile Include="Helpers\Timespan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ThumbnailList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Widgets\ThumbnailsWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Thumbnail.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Commands\CommandBonk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -279,9 +270,6 @@
     <ClCompile Include="GameDataList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Modules\Tournament.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VIPList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -295,6 +283,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Modules\WebSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\OverlayWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\ProcessMan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\HotseatWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\TournamentWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Tournament.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Models\Seat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Mailman.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -635,15 +644,6 @@
     <ClInclude Include="Helpers\Timespan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Thumbnail.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThumbnailList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Widgets\ThumbnailsWidget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Widgets\MasterOfPuppetsWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -719,9 +719,6 @@
     <ClInclude Include="Commands\CommandTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\Command2v2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Commands\CommandExtend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -750,12 +747,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameDataList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\Tournament.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands\Command1v1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VIPList.h">
@@ -795,6 +786,42 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Modules\WebSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandTriangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\OverlayWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\ProcessMan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\HotseatWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\TournamentWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Tournament.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\Command1v1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\Command2v2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandKOTH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandWin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\Seat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Mailman.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

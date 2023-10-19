@@ -12,6 +12,7 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <regex>
 #include "parsec-dso.h"
 #include "ParsecSession.h"
 #include "DX11.h"
@@ -36,11 +37,13 @@
 #include "MasterOfPuppets.h"
 #include "ButtonLock.h"
 #include "Helpers/Debouncer.h"
-#include "Modules/Tournament.h"
 #include "Modules/Macro.h"
 #include "Modules/Hotseat.h"
 #include "Modules/WebSocket.h"
+#include "Modules/ProcessMan.h"
 #include "Modules/Overlay.h"
+#include "Modules/Tournament.h"
+#include "Modules/Mailman.h"
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -72,7 +75,14 @@ public:
 	ChatBot* getChatBot();
 	vector<string>& getMessageLog();
 	vector<string>& getCommandLog();
-	vector<Guest>& getGuestList();
+	vector<Guest>& getGuests();
+	GuestList& getGuestList();
+	vector<Guest>& getPlayingGuests();
+	vector<Guest>& getRandomGuests();
+	Guest& getGuest(uint32_t id);
+	int getGuestIndex(uint32_t id);
+	bool guestExists(uint32_t id);
+	vector<Guest>& getGuestsAfterGuest(uint32_t targetGuestID, int count, bool ignoreSpectators);
 	vector<GuestData>& getGuestHistory();
 	MyMetrics getMetrics(uint32_t id);
 	BanList& getBanList();
@@ -83,6 +93,10 @@ public:
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
 	Macro& getMacro();
+	Overlay& getOverlay();
+	Hotseat& getHotseat();
+	ProcessMan& getProcessMan();
+
 	const char** getGuestNames();
 	void toggleGamepadLock();
 	void toggleGamepadLockButtons();
@@ -98,6 +112,7 @@ public:
 	void stopHosting();
 	void stripGamepad(int index);
 	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
+	void logMessage(string message);
 
 	bool removeGame(string name);
 
@@ -112,6 +127,11 @@ public:
 	bool handleMuting(const char* message, Guest& guest);
 	void sendHostMessage(const char* message, bool isHidden = false);
 
+	void addFakeGuests(int count);
+
+	bool isHotseatEnabled();
+	void startKioskMode();
+
 	AudioIn audioIn;
 	AudioOut audioOut;
 	HWND mainWindow;
@@ -122,6 +142,9 @@ public:
 	bool _disableKeyboard = false;
 
 private:
+
+	bool _kioskModeEnabled = false;
+
 	void initAllModules();
 	void submitSilence();
 	void liveStreamMedia();
@@ -135,10 +158,11 @@ private:
 	bool isFilteredCommand(ACommand* command);
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
-	void kioskMode();
-	void welcomeMessage();
+	void addNewGuest(Guest guest);
+	void handleNewGuests();
 
 	bool isSpectator(int index);
+	string randomString(const int len);
 
 	// Attributes
 	AudioMix _audioMix;
@@ -161,13 +185,16 @@ private:
 	Guest _host;
 	SFXList _sfxList;
 	TierList _tierList;
-	Tournament _tournament;
 	Macro _macro;
 	Hotseat _hotseat;
 	WebSocket _webSocket;
 	Overlay _overlay;
+	ProcessMan _processMan;
+	Tournament _tournament;
+	Mailman _mailman;
 
 	bool _isRunning = false;
+	bool _isTestMode = false;
 	bool _isMediaThreadRunning = false;
 	bool _isInputThreadRunning = false;
 	bool _isEventThreadRunning = false;
@@ -180,6 +207,13 @@ private:
 
 	string _welcomeGuest;
 	bool _showWelcome = false;
+
+	class NewGuest {
+	public:
+		Guest guest;
+		Stopwatch timer;
+	};
+	vector<NewGuest> newGuestList;
 
 	thread _mainLoopControlThread;
 	thread _mediaThread;

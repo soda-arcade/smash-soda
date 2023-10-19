@@ -11,9 +11,11 @@
 #include "Models/GuestData.h"
 #include "GameData.h"
 #include "GuestTier.h"
-#include "Thumbnail.h"
 #include "Helpers/Stringer.h"
 #include "Helpers/Stopwatch.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 using namespace std;
 
@@ -79,6 +81,15 @@ public:
 		bool disableKeyboard = false;
 		string websocketURI = "";
 		string websocketPassword = "";
+		bool showHostSettings = true;
+		bool showGuests = true;
+		bool showGamepads = true;
+		bool showChat = true;
+		bool showLog = false;
+		bool showSettings = false;
+		bool showButtonLock = false;
+		bool showLibrary = false;
+		bool showHotseat = false;
 		bool showMasterOfPuppets = false;
 		bool showAudio = false;
 		bool showVideo = false;
@@ -95,7 +106,15 @@ public:
 		unsigned int theme = 0;
 		string discord = "";
 
+		string prependRegion = "";
+		bool prependPingLimit = true;
+
+		bool vipBB = true;
+		bool vipTournament = true;
+
 		bool hotseat = false;
+		unsigned int hotseatSeats = 1;
+		bool hotseatSlotMatch = true;
 		unsigned int hotseatTime = 15;
 		bool hotseatAFK = false;
 		unsigned int hotseatAFKTime = 5;
@@ -120,7 +139,9 @@ public:
 
 		bool lockedPads = false;
 
-		vector<Guest> activeGuests;
+		bool firstStartup = true;
+
+		vector<GuestData> activeGuests;
 
 		class MutedGuest {
 		public:
@@ -132,6 +153,8 @@ public:
 
 		int extraSpots = 0;
 		bool roomChanged = false;
+
+		unsigned int selectedGame = 0;
 
 	};
 
@@ -237,12 +260,9 @@ public:
 	static vector<GuestTier> loadGuestTiers();
 	static bool saveGuestTiers(vector<GuestTier> guestTiers);
 
-	static vector<Thumbnail> loadThumbnails();
-	static bool saveThumbnails(vector<Thumbnail> thumbnails);
-
 	static bool saveTheme(int theme);
 
-	static bool isSpectating(Guest guest);
+	static bool isSpectating(uint32_t guestID);
 
 	static bool addActiveGuest(Guest guest);
 	static bool removeActiveGuest(Guest guest);

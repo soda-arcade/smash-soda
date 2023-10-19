@@ -29,6 +29,8 @@ public:
 	static void pushPositive();
 	static void pushNegative();
 	static void pushWarning();
+	static void pushButton();
+	static void pushButtonSolid();
 
 	static ImVec4 title;
 	static ImVec4 label;

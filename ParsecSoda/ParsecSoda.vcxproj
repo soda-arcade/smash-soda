@@ -157,6 +157,9 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x86\SDL2.dll" "$(TargetDir)SDL2.dll"
       <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -178,29 +181,32 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Commands\CommandBonk.cpp" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="GameDataList.cpp" />
+    <ClCompile Include="Models\Seat.cpp" />
     <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
     <ClCompile Include="GamepadState.cpp" />
     <ClCompile Include="Modules\Hotseat.cpp" />
     <ClCompile Include="Modules\Macro.cpp" />
+    <ClCompile Include="Modules\Mailman.cpp" />
     <ClCompile Include="Modules\Overlay.cpp" />
+    <ClCompile Include="Modules\ProcessMan.cpp" />
     <ClCompile Include="Modules\Tournament.cpp" />
     <ClCompile Include="Modules\WebSocket.cpp" />
     <ClCompile Include="VIPList.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
+    <ClCompile Include="Widgets\HotseatWidget.cpp" />
     <ClCompile Include="Widgets\LibraryWidget.cpp" />
+    <ClCompile Include="Widgets\OverlayWidget.cpp" />
     <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
     <ClCompile Include="Widgets\SettingsWidget.cpp" />
+    <ClCompile Include="Widgets\TournamentWidget.cpp" />
     <ClCompile Include="XBoxGamepad.cpp" />
     <ClCompile Include="MasterOfPuppets.cpp" />
     <ClCompile Include="SDLGamepad.cpp" />
     <ClCompile Include="SDLGamepadReader.cpp" />
     <ClCompile Include="Widgets\VirtualGamepadWidget.cpp" />
     <ClCompile Include="XInputReader.cpp" />
-    <ClCompile Include="Thumbnail.cpp" />
     <ClCompile Include="Widgets\MasterOfPuppetsWidget.cpp" />
-    <ClCompile Include="Widgets\ThumbnailsWidget.cpp" />
-    <ClCompile Include="ThumbnailList.cpp" />
     <ClCompile Include="Helpers\Clock.cpp" />
     <ClCompile Include="Helpers\Debouncer.cpp" />
     <ClCompile Include="Helpers\Stopwatch.cpp" />
@@ -283,6 +289,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\CommandExtend.h" />
     <ClInclude Include="Commands\CommandFortune.h" />
     <ClInclude Include="Commands\CommandHotseat.h" />
+    <ClInclude Include="Commands\CommandKOTH.h" />
     <ClInclude Include="Commands\CommandLock.h" />
     <ClInclude Include="Commands\CommandLockAll.h" />
     <ClInclude Include="Commands\CommandMod.h" />
@@ -294,26 +301,34 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\CommandSpectate.h" />
     <ClInclude Include="Commands\CommandSpot.h" />
     <ClInclude Include="Commands\CommandTimer.h" />
+    <ClInclude Include="Commands\CommandTriangle.h" />
     <ClInclude Include="Commands\CommandUnmod.h" />
     <ClInclude Include="Commands\CommandUnVIP.h" />
     <ClInclude Include="Commands\CommandVIP.h" />
+    <ClInclude Include="Commands\CommandWin.h" />
     <ClInclude Include="GameData.h" />
     <ClInclude Include="GameDataList.h" />
     <ClInclude Include="ImGui\imform.h" />
+    <ClInclude Include="Models\Seat.h" />
     <ClInclude Include="Modules\Hotseat.h" />
     <ClInclude Include="Modules\Macro.h" />
+    <ClInclude Include="Modules\Mailman.h" />
     <ClInclude Include="Modules\Overlay.h" />
-    <ClInclude Include="Modules\Tournament.h" />
     <ClInclude Include="Helpers\TimeT.h" />
     <ClInclude Include="ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
+    <ClInclude Include="Modules\ProcessMan.h" />
+    <ClInclude Include="Modules\Tournament.h" />
     <ClInclude Include="Modules\WebSocket.h" />
     <ClInclude Include="VIPList.h" />
     <ClInclude Include="Widgets\ButtonLockWidget.h" />
+    <ClInclude Include="Widgets\HotseatWidget.h" />
     <ClInclude Include="Widgets\LibraryWidget.h" />
+    <ClInclude Include="Widgets\OverlayWidget.h" />
     <ClInclude Include="Widgets\PopupWidgetEdit.h" />
     <ClInclude Include="Widgets\SettingsWidget.h" />
+    <ClInclude Include="Widgets\TournamentWidget.h" />
     <ClInclude Include="XBoxGamepad.h" />
     <ClInclude Include="MasterOfPuppets.h" />
     <ClInclude Include="SDLGamepad.h" />
@@ -322,9 +337,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="XInputReader.h" />
     <ClInclude Include="IGamepadReader.h" />
     <ClInclude Include="Widgets\MasterOfPuppetsWidget.h" />
-    <ClInclude Include="Widgets\ThumbnailsWidget.h" />
-    <ClInclude Include="Thumbnail.h" />
-    <ClInclude Include="ThumbnailList.h" />
     <ClInclude Include="AudioTools.h" />
     <ClInclude Include="Helpers\Clock.h" />
     <ClInclude Include="Commands\CommandSFX.h" />

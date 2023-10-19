@@ -46,7 +46,7 @@ public:
 		{
 			std::ostringstream reply;
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << " has revoked VIP permissions:\n"
+				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << " has revoked VIP permissions for: \n"
 				<< "\t\t" << unmoddedGuest.name << "\t(#" << unmoddedGuest.userID << ")\0";
 			_replyMessage = reply.str();
 			_guestHistory.add(unmoddedGuest);

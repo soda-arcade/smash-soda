@@ -129,6 +129,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             char kioskParameters[256] = "";
             char chatbot[128] = "ChatBot";
             char welcomeMessage[256] = "";
+			char region[128] = "";
 
             if (!MTY_JSONObjGetUInt(json, "audioInputDevice", &preferences.audioInputDevice)) {
                 preferences.audioInputDevice = 0;
@@ -231,10 +232,18 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             if (MTY_JSONObjGetString(json, "websocketPassword", websocketPassword, 32)) preferences.websocketPassword = websocketPassword;
             else preferences.websocketPassword = "";
 
+			if (!MTY_JSONObjGetBool(json, "showHostSettings", &preferences.showHostSettings)) preferences.showHostSettings = true;
+			if (!MTY_JSONObjGetBool(json, "showChat", &preferences.showChat)) preferences.showChat = true;
+			if (!MTY_JSONObjGetBool(json, "showLog", &preferences.showLog)) preferences.showLog = false;
+			if (!MTY_JSONObjGetBool(json, "showGuests", &preferences.showGuests)) preferences.showGuests = false;
+			if (!MTY_JSONObjGetBool(json, "showGamepads", &preferences.showGamepads)) preferences.showGamepads = true;
             if (!MTY_JSONObjGetBool(json, "showMasterOfPuppets", &preferences.showMasterOfPuppets)) preferences.showMasterOfPuppets = false;
             if (!MTY_JSONObjGetBool(json, "showAudio", &preferences.showAudio)) preferences.showAudio = false;
             if (!MTY_JSONObjGetBool(json, "showVideo", &preferences.showVideo)) preferences.showVideo = false;
-            if (!MTY_JSONObjGetBool(json, "showThumbs", &preferences.showThumbs)) preferences.showThumbs = false;
+			if (!MTY_JSONObjGetBool(json, "showSettings", &preferences.showSettings)) preferences.showSettings = false;
+			if (!MTY_JSONObjGetBool(json, "showButtonLock", &preferences.showButtonLock)) preferences.showButtonLock = false;
+			if (!MTY_JSONObjGetBool(json, "showLibrary", &preferences.showLibrary)) preferences.showLibrary = false;
+			if (!MTY_JSONObjGetBool(json, "showHotseat", &preferences.showHotseat)) preferences.showHotseat = false;
             if (!MTY_JSONObjGetBool(json, "latencyLimitEnabled", &preferences.latencyLimitEnabled)) preferences.latencyLimitEnabled = false;
             if (!MTY_JSONObjGetUInt(json, "latencyLimitValue", &preferences.latencyLimitValue)) preferences.latencyLimitValue = 200;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadLeftTrigger", &preferences.lockedGamepadLeftTrigger)) preferences.lockedGamepadLeftTrigger = false;
@@ -251,6 +260,8 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
 
             // HOTSEAT
             if (!MTY_JSONObjGetBool(json, "hotseat", &preferences.hotseat)) preferences.latencyLimitEnabled = false;
+            if (!MTY_JSONObjGetBool(json, "hotseatSlotMatch", &preferences.hotseatSlotMatch)) preferences.hotseatSlotMatch = true;
+            if (!MTY_JSONObjGetUInt(json, "hotseatSeats", &preferences.hotseatSeats)) preferences.hotseatSeats = 1;
             if (!MTY_JSONObjGetUInt(json, "hotseatTime", &preferences.hotseatTime)) preferences.hotseatTime = 15;
             if (!MTY_JSONObjGetBool(json, "hotseatAFK", &preferences.hotseatAFK)) preferences.hotseatAFK = false;
             if (!MTY_JSONObjGetUInt(json, "hotseatAFKTime", &preferences.hotseatAFKTime)) preferences.hotseatAFKTime = 5;
@@ -268,7 +279,7 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             else preferences.chatbot = "ChatBot";
 
             if (!MTY_JSONObjGetUInt(json, "muteTime", &preferences.muteTime)) preferences.muteTime = 5;
-            if (!MTY_JSONObjGetBool(json, "autoMute", &preferences.autoMute)) preferences.autoMute = true;
+            if (!MTY_JSONObjGetBool(json, "autoMute", &preferences.autoMute)) preferences.autoMute = false;
             if (!MTY_JSONObjGetUInt(json, "autoMuteTime", &preferences.autoMuteTime)) preferences.autoMuteTime = 500;
             if (!MTY_JSONObjGetBool(json, "saveLog", &preferences.saveLog)) preferences.saveLog = false;
 
@@ -283,6 +294,21 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             // Overlay
             if (!MTY_JSONObjGetBool(json, "overlayShow", &preferences.overlayShow)) preferences.overlayShow = false;
             if (!MTY_JSONObjGetBool(json, "overlayHotseat", &preferences.overlayHotseat)) preferences.overlayHotseat = false;
+
+            // VIP
+            if (!MTY_JSONObjGetBool(json, "vipBB", &preferences.vipBB)) preferences.vipBB = true;
+            if (!MTY_JSONObjGetBool(json, "vipTournament", &preferences.vipTournament)) preferences.vipTournament = true;
+
+            // Hosting
+            if (!MTY_JSONObjGetUInt(json, "selectedGame", &preferences.selectedGame)) preferences.selectedGame = 0;
+            if (MTY_JSONObjGetString(json, "prependRegion", region, 128)) preferences.prependRegion = region;
+            else preferences.prependRegion = "";
+
+            if (!MTY_JSONObjGetBool(json, "prependPingLimit", &preferences.prependPingLimit)) preferences.prependPingLimit = true;
+
+            if (!MTY_JSONObjGetBool(json, "firstStartup", &preferences.firstStartup)) {
+                preferences.firstStartup = true;
+            }
 
             preferences.isValid = true;
 
@@ -337,7 +363,16 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "disableKeyboard", preferences.disableKeyboard);
         MTY_JSONObjSetString(json, "websocketURI", preferences.websocketURI.c_str());
         MTY_JSONObjSetString(json, "websocketPassword", preferences.websocketPassword.c_str());
+		MTY_JSONObjSetBool(json, "showHostSettings", preferences.showHostSettings);
+		MTY_JSONObjSetBool(json, "showChat", preferences.showChat);
+        MTY_JSONObjSetBool(json, "showGuests", preferences.showGuests);
+		MTY_JSONObjSetBool(json, "showLog", preferences.showLog);
+        MTY_JSONObjSetBool(json, "showGamepads", preferences.showGamepads);
         MTY_JSONObjSetBool(json, "showMasterOfPuppets", preferences.showMasterOfPuppets);
+		MTY_JSONObjSetBool(json, "showSettings", preferences.showSettings);
+		MTY_JSONObjSetBool(json, "showButtonLock", preferences.showButtonLock);
+		MTY_JSONObjSetBool(json, "showLibrary", preferences.showLibrary);
+		MTY_JSONObjSetBool(json, "showHotseat", preferences.showHotseat);
         MTY_JSONObjSetBool(json, "showAudio", preferences.showAudio);
         MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
         MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
@@ -355,6 +390,8 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
 
         // Hotseat
         MTY_JSONObjSetBool(json, "hotseat", preferences.hotseat);
+        MTY_JSONObjSetBool(json, "hotseatSlotMatch", preferences.hotseatSlotMatch);
+        MTY_JSONObjSetUInt(json, "hotseatSeats", preferences.hotseatSeats);
         MTY_JSONObjSetUInt(json, "hotseatTime", preferences.hotseatTime);
         MTY_JSONObjSetBool(json, "kioskMode", preferences.kioskMode);
         MTY_JSONObjSetBool(json, "hotseatAFK", preferences.hotseatAFK);
@@ -379,6 +416,17 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         // Overlay
         MTY_JSONObjSetBool(json, "overlayShow", preferences.overlayShow);
         MTY_JSONObjSetBool(json, "overlayHotseat", preferences.overlayHotseat);
+
+        // VIP
+		MTY_JSONObjSetBool(json, "vipBB", preferences.vipBB);
+		MTY_JSONObjSetBool(json, "vipTournament", preferences.vipTournament);
+
+        // Hosting
+        MTY_JSONObjSetUInt(json, "selectedGame", preferences.selectedGame);
+        MTY_JSONObjSetString(json, "prependRegion", preferences.prependRegion.c_str());
+        MTY_JSONObjSetBool(json, "prependPingLimit", preferences.prependPingLimit);
+
+        MTY_JSONObjSetBool(json, "firstStartup", preferences.firstStartup);
 
         MTY_JSONWriteFile(filepath.c_str(), json);
         MTY_JSONDestroy(&json);
@@ -633,21 +681,30 @@ vector<GameData> MetadataCache::loadGamesList() {
             {
                 const MTY_JSON* game = MTY_JSONArrayGetItem(json, (uint32_t)i);
 
+                uint32_t itemID = 0;
                 char name[128] = "";
                 char path[256] = "";
                 char parameters[256] = "";
                 char thumbnailPath[256] = "";
-                uint32_t gameID = 0;
+                char gameID[256] = "";
+				bool kiosk = false;
+				bool hotseat = false;
+				uint32_t seats = 0;
 
+				bool itemIDSuccess = MTY_JSONObjGetUInt(game, "itemID", &itemID);
                 bool nameSuccess = MTY_JSONObjGetString(game, "name", name, 128);
                 bool pathSuccess = MTY_JSONObjGetString(game, "path", path, 256);
                 bool paramSuccess = MTY_JSONObjGetString(game, "parameters", parameters, 256);
                 bool thumbSuccess = MTY_JSONObjGetString(game, "thumbnailPath", thumbnailPath, 256);
-                bool gameIDSuccess = MTY_JSONObjGetUInt(game, "gameID", &gameID);
+                bool gameIDSuccess = MTY_JSONObjGetString(game, "gameID", gameID, 256);
+				bool kioskSuccess = MTY_JSONObjGetBool(game, "kiosk", &kiosk);
+				bool hotseatSuccess = MTY_JSONObjGetBool(game, "hotseat", &hotseat);
+				bool seatsSuccess = MTY_JSONObjGetUInt(game, "seats", &seats);
 
-                if (nameSuccess && pathSuccess && paramSuccess && thumbSuccess && gameIDSuccess)
+				if (itemIDSuccess && nameSuccess && pathSuccess && paramSuccess && thumbSuccess && 
+                    gameIDSuccess && kioskSuccess && hotseatSuccess && seatsSuccess)
                 {
-                    result.push_back(GameData(name, path, parameters, thumbnailPath, gameID));
+                    result.push_back(GameData(itemID, name, path, parameters, thumbnailPath, gameID, kiosk, hotseat, seats));
                 }
             }
 
@@ -679,11 +736,15 @@ bool MetadataCache::saveGamesList(vector<GameData> games)
         {
             MTY_JSON* game = MTY_JSONObjCreate();
 
+			MTY_JSONObjSetUInt(game, "itemID", (*gi).itemID);
             MTY_JSONObjSetString(game, "name", (*gi).name.c_str());
             MTY_JSONObjSetString(game, "path", (*gi).path.c_str());
             MTY_JSONObjSetString(game, "parameters", (*gi).parameters.c_str());
             MTY_JSONObjSetString(game, "thumbnailPath", (*gi).thumbnailPath.c_str());
-            MTY_JSONObjSetUInt(game, "gameID", (*gi).gameID);
+            MTY_JSONObjSetString(game, "gameID", (*gi).gameID.c_str());
+            MTY_JSONObjSetBool(game, "kiosk", (*gi).kiosk);
+			MTY_JSONObjSetBool(game, "hotseat", (*gi).hotseat);
+            MTY_JSONObjSetUInt(game, "seats", (*gi).seats);
 
             MTY_JSONArrayAppendItem(json, game);
         }
@@ -766,109 +827,6 @@ bool MetadataCache::saveGuestTiers(vector<GuestTier> guestTiers)
     return false;
 }
 
-vector<Thumbnail> MetadataCache::loadThumbnails()
-{
-    _mutex.lock();
-
-    vector<Thumbnail> result;
-
-    string dirPath = getUserDir();
-    if (!dirPath.empty())
-    {
-        string filepath = dirPath + "thumbnails.json";
-
-        if (MTY_FileExists(filepath.c_str()))
-        {
-            size_t size;
-            const char* encryptedContent;
-            encryptedContent = (char*)MTY_ReadFile(filepath.c_str(), &size);
-
-            char* originalText = new char[size + 100];
-            MTY_AESGCM* ctx = MTY_AESGCMCreate(_key.c_str());
-            char tag[16] = "ParsecSodaTag**";
-
-            MTY_AESGCMDecrypt(ctx, _nonce.c_str(), encryptedContent, size + 100, tag, (void*)originalText);
-            MTY_JSON* json = MTY_JSONParse(originalText);
-            uint32_t thumbnailCount = MTY_JSONGetLength(json);
-
-            for (size_t i = 0; i < thumbnailCount; i++)
-            {
-                const MTY_JSON* guest = MTY_JSONArrayGetItem(json, (uint32_t)i);
-
-                char name[256] = "", gameId[64] = "";
-
-                bool success =
-                    MTY_JSONObjGetString(guest, "gameId", gameId, 64) &&
-                    MTY_JSONObjGetString(guest, "name", name, 256);
-
-                if (success)
-                {
-                    result.push_back(Thumbnail(gameId, name, true));
-                }
-            }
-            delete[] originalText;
-
-            //std::sort(result.begin(), result.end(), [](const Thumbnail a, const Thumbnail b) {
-            //    int compare = Stringer::toLower(a.name).compare(Stringer::toLower(b.name));
-            //    return compare;
-            //});
-
-            MTY_JSONDestroy(&json);
-            MTY_AESGCMDestroy(&ctx);
-        }
-    }
-
-    _mutex.unlock();
-    return result;
-}
-
-bool MetadataCache::saveThumbnails(vector<Thumbnail> thumbnails)
-{
-    _mutex.lock();
-
-    bool result = false;
-    string dirPath = getUserDir();
-
-    if (!dirPath.empty())
-    {
-        string filepath = dirPath + "thumbnails.json";
-
-        MTY_JSON* json = MTY_JSONArrayCreate();
-
-        vector<Thumbnail>::iterator it = thumbnails.begin();
-        for (; it != thumbnails.end(); ++it)
-        {
-            if ((*it).saved)
-            {
-                MTY_JSON* thumb = MTY_JSONObjCreate();
-
-                MTY_JSONObjSetString(thumb, "gameId", (*it).gameId.c_str());
-                MTY_JSONObjSetString(thumb, "name", (*it).name.c_str());
-                MTY_JSONArrayAppendItem(json, thumb);
-            }
-        }
-
-        string jsonStr = MTY_JSONSerialize(json);
-        char* encryptedJson = new char[jsonStr.size() + 100];
-        char tag[16] = "ParsecSodaTag**";
-        MTY_AESGCM* ctx = MTY_AESGCMCreate(_key.c_str());
-        if (MTY_AESGCMEncrypt(ctx, _nonce.c_str(), jsonStr.c_str(), jsonStr.size() + 100, tag, encryptedJson))
-        {
-            if (MTY_WriteFile(filepath.c_str(), encryptedJson, jsonStr.size()))
-            {
-                result = true;
-            }
-        }
-        delete[] encryptedJson;
-
-        MTY_JSONDestroy(&json);
-        MTY_AESGCMDestroy(&ctx);
-    }
-
-    _mutex.unlock();
-    return result;
-}
-
 bool MetadataCache::saveTheme(int theme) {
 
     preferences.theme = theme;
@@ -889,7 +847,7 @@ std::string GetCurrentDirectory()
 string MetadataCache::getUserDir()
 {
     string dir = GetCurrentDirectory();
-    string appDir = "\\SmashSoda\\";
+    string appDir = "\\SmashSodaTwo\\";
     if (MTY_FileExists((dir + "\\portable.txt").c_str()))
     {
         string dirPath = dir + appDir;
@@ -943,10 +901,10 @@ string MetadataCache::getUserDir()
     return string();
 }
 
-bool MetadataCache::isSpectating(Guest guest) {
+bool MetadataCache::isSpectating(uint32_t guestID) {
     if (MetadataCache::preferences.activeGuests.empty() == false) {
         for (int i = MetadataCache::preferences.activeGuests.size() - 1; i >= 0; i--) {
-            if (MetadataCache::preferences.activeGuests.at(i).userID == guest.userID) {
+            if (MetadataCache::preferences.activeGuests.at(i).userID == guestID) {
                 return false;
             }
         }
@@ -956,7 +914,7 @@ bool MetadataCache::isSpectating(Guest guest) {
 
 bool MetadataCache::addActiveGuest(Guest guest) {
 
-    preferences.activeGuests.push_back(guest);
+	preferences.activeGuests.push_back(GuestData(guest.name, guest.userID));
 
     return true;
 

@@ -11,7 +11,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
 	if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
 	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
-	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient, _hotseat);
 	if (msgIsEqual(msg, Command8Ball::prefixes()))		return new Command8Ball(sender);
 	if (msgIsEqual(msg, CommandFortune::prefixes()))	return new CommandFortune(sender);
 	if (msgIsEqual(msg, CommandHelp::prefixes()))		return new CommandHelp(sender, _tierList);
@@ -20,10 +20,15 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandMirror::prefixes()))		return new CommandMirror(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandOne::prefixes()))		return new CommandOne(sender, _gamepadClient);
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
-	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList);
+	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList, _gamepadClient, _hotseat);
 	if (msgStartsWith(msg, CommandRequest::prefixes()))	return new CommandRequest(msg);
-	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
-	//if (msgStartsWith(msg, CommandTeams::prefixes()))	return new CommandTeams(msg, sender, _guests, _gamepadClient, _tierList);
+	//if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandTriangle::prefixes()))	return new CommandTriangle(sender, _gamepadClient, _macro);
+	
+	// Tournaments
+	if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _tierList, _tournament);
+	if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _tierList, _tournament);
+	if (msgStartsWith(msg, CommandKOTH::prefixes()))	return new CommandKOTH(msg, _tierList, _tournament);
 
 //#if !BASIC_VERSION
 	if (!_basicVersion)
@@ -42,10 +47,10 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandAddXbox::prefixes()))		return new CommandAddXbox(_gamepadClient);
 		if (msgStartsWith(msg, CommandAddPS::prefixes()))		return new CommandAddPS(_gamepadClient);
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
-		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender);
+		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender, _hotseat);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
-		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg);
-		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg);
+		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg, _hotseat);
+		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg, _hotseat);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
 		//if (msgStartsWith(msg, CommandLock::prefixes()))		return new CommandLock(msg, sender, _gamepadClient);
@@ -54,14 +59,11 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRC::prefixes()))			return new CommandRC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
-		if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
-		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient);
+		//if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
+		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient, _hotseat);
 		if (msgStartsWith(msg, CommandTimer::prefixes()))		return new CommandTimer(msg);
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
 
-		// Tournaments
-		//if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _guests, _gamepadClient, _tournament);
-		//if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _guests, _gamepadClient, _tournament);
 	}
 
 	// God commands
@@ -84,7 +86,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	}
 
 	this->setLastUserId(previous);
-	return new CommandDefaultMessage(msg, sender, _lastUserId, tier, isHost);
+	return new CommandDefaultMessage(msg, sender, _lastUserId, tier, _vip, isHost);
 }
 
 const uint32_t ChatBot::getLastUserId() const

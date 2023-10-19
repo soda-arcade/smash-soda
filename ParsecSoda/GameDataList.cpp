@@ -11,7 +11,7 @@ GameDataList::GameDataList(const std::vector<GameData> games)
 
 bool GameDataList::add(GameData game)
 {
-	bool found = find(game.gameID);
+	bool found = find(game.itemID);
 	if (!found)
 	{
 		_games.push_back(game);
@@ -21,9 +21,9 @@ bool GameDataList::add(GameData game)
 	return false;
 }
 
-bool GameDataList::find(uint32_t gameID, function<void(GameData& game)> callback)
+bool GameDataList::find(uint32_t itemID, function<void(GameData& game)> callback)
 {
-	bool found = findIterator(gameID, [&](vector<GameData>::iterator gi) {
+	bool found = findIterator(itemID, [&](vector<GameData>::iterator gi) {
 		if (callback != nullptr)
 		{
 			callback(*gi);
@@ -45,9 +45,9 @@ bool GameDataList::find(string name, function<void(GameData& game)> callback)
 	return found;
 }
 
-bool GameDataList::pop(uint32_t gameID, function<void(GameData& game)> callback)
+bool GameDataList::pop(uint32_t itemID, function<void(GameData& game)> callback)
 {
-	bool found = findIterator(gameID, [&](vector<GameData>::iterator gi) {
+	bool found = findIterator(itemID, [&](vector<GameData>::iterator gi) {
 		if (callback != nullptr)
 		{
 			callback(*gi);
@@ -71,9 +71,9 @@ bool GameDataList::pop(string name, function<void(GameData& game)> callback)
 	return found;
 }
 
-const bool GameDataList::remove(const uint32_t gameID, function<void(GameData&)> callback)
+const bool GameDataList::remove(const uint32_t itemID, function<void(GameData&)> callback)
 {
-	bool found = GameDataList::pop(gameID, callback);
+	bool found = GameDataList::pop(itemID, callback);
 	if (found)
 	{
 		MetadataCache::saveGamesList(_games);
@@ -102,13 +102,13 @@ vector<GameData>& GameDataList::getGames()
 //  Private
 //
 // =============================================================
-bool GameDataList::findIterator(uint32_t gameID, function<void(vector<GameData>::iterator game)> callback)
+bool GameDataList::findIterator(uint32_t itemID, function<void(vector<GameData>::iterator game)> callback)
 {
 	vector<GameData>::iterator it = _games.begin();
 
 	for (; it != _games.end(); ++it)
 	{
-		if (gameID == (*it).gameID)
+		if (itemID == (*it).itemID)
 		{
 			if (callback != nullptr)
 			{

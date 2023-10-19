@@ -17,6 +17,8 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _autoMuteTime = MetadataCache::preferences.autoMuteTime;
     _saveChat = MetadataCache::preferences.saveLog;
 
+	_prependPingLimit = MetadataCache::preferences.prependPingLimit;
+
     try
     {
         strcpy_s(_discord, MetadataCache::preferences.discord.c_str());
@@ -37,6 +39,28 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
         try
         {
             strcpy_s(_chatbot, "");
+        }
+        catch (const std::exception&) {}
+    }
+
+    try {
+        strcpy_s(_welcomeMessage, MetadataCache::preferences.welcomeMessage.c_str());
+    }
+    catch (const std::exception&) {
+        try
+        {
+            strcpy_s(_welcomeMessage, "");
+        }
+        catch (const std::exception&) {}
+    }
+
+    try {
+        strcpy_s(_prependRegion, MetadataCache::preferences.prependRegion.c_str());
+    }
+    catch (const std::exception&) {
+        try
+        {
+            strcpy_s(_prependRegion, "");
         }
         catch (const std::exception&) {}
     }
@@ -73,6 +97,11 @@ bool SettingsWidget::render()
             renderChatbot();
             ImGui::EndTabItem();
         }
+        /*AppColors::pushTitle();
+        if (ImGui::BeginTabItem("Log")) {
+            renderLog();
+            ImGui::EndTabItem();
+        }*/
         AppColors::pop();
         AppFonts::pop();
         ImGui::EndTabBar();
@@ -122,6 +151,17 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
+    /*if (ImForm::InputText("PREPEND REGION", _prependRegion,
+		"This will automatically put a region abbreviation in front of your room name. For example, if you set this to \"US\", your room name will be \"[US]My Room\".")) {
+        MetadataCache::preferences.prependRegion = _prependRegion;
+        MetadataCache::savePreferences();
+    }
+
+    if (ImForm::InputCheckbox("Prepend Ping Limit", _prependPingLimit,
+		"This will automatically put the room's ping limit in front of your room name. For example, if ping limit is 50ms, it would be \"[<50ms]My Room\".")) {
+        MetadataCache::preferences.prependPingLimit = _prependPingLimit;
+    }*/
+
     if (ImForm::InputCheckbox("Disable Microphone", _disableMicrophone,
         "When enabled, the microphone cause audio issues in some games.")) {
         MetadataCache::preferences.disableMicrophone = _disableMicrophone;
@@ -168,13 +208,19 @@ void SettingsWidget::renderChatbot() {
         MetadataCache::savePreferences();
     }
 
+    if (ImForm::InputTextArea("WELCOME MESSAGE", _welcomeMessage,
+        "Joining guests will see this message. Type _PLAYER_ to insert the guest's name in the message.")) {
+        MetadataCache::preferences.welcomeMessage = _welcomeMessage;
+        MetadataCache::savePreferences();
+    }
+
     if (ImForm::InputText("DISCORD INVITE LINK", _discord,
         "Automatically print invite link in chat with !discord")) {
         MetadataCache::preferences.discord = _discord;
         MetadataCache::savePreferences();
     }
 
-    if (ImForm::InputNumber("MUTE TIME", _muteTime, 5, 60,
+    /*if (ImForm::InputNumber("MUTE TIME", _muteTime, 5, 60,
         "How long a person stays gagged with the !mute command")) {
         MetadataCache::preferences.muteTime = _muteTime;
         MetadataCache::savePreferences();
@@ -186,18 +232,17 @@ void SettingsWidget::renderChatbot() {
         MetadataCache::savePreferences();
     }
 
-    if (ImForm::InputNumber("AUTO MUTE TIME", _autoMuteTime, 5, 5000,
+    if (ImForm::InputNumber("AUTO MUTE INTERVAL", _autoMuteTime, 5, 5000,
         "Here you can set the the auto mute time between messages (in ms). Set this to a low value.")) {
         MetadataCache::preferences.autoMuteTime = _autoMuteTime;
         MetadataCache::savePreferences();
-    }
+    }*/
 
-    /*
-    if (ImForm::InputCheckbox("Save Log", _saveChat,
-        "Logs are stored in SmashSoda appdata folder")) {
-        MetadataCache::preferences.saveLog = _saveLog;
-        MetadataCache::savePreferences();
-    }
-    */
+}
 
+/// <summary>
+/// Render log settings.
+/// </summary>
+void SettingsWidget::renderLog() {
+	// TODO: Add log settings
 }

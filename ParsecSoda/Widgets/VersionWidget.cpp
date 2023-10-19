@@ -1,6 +1,6 @@
 #include "VersionWidget.h"
 
-std::string VersionWidget::version = "2.58";
+std::string VersionWidget::version = "2.99";
 
 bool VersionWidget::render()
 {
@@ -23,13 +23,23 @@ bool VersionWidget::render()
     AppStyle::pushInput();
     ImGui::Text("FPS: ");
     ImGui::SameLine();
+    AppStyle::pushPositive();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
 
-    std::string versionString = "Smash Soda v. " + version;
+    AppStyle::pushInput();
+    std::string versionString = "Smash Soda v. ";
     ImGui::Text(versionString.c_str());
+
+    ImGui::SameLine();
+    AppStyle::pushPositive();
+	ImGui::Text(version.c_str());
+    
     AppStyle::pop();
     ImGui::End();
 
+    ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();

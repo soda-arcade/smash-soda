@@ -1,7 +1,7 @@
 #include "GuestListWidget.h"
 
 GuestListWidget::GuestListWidget(Hosting& hosting)
-    : _hosting(hosting), _guests(hosting.getGuestList()), _modList(_hosting.getModList()),
+    : _hosting(hosting), _guests(hosting.getGuests()), _modList(_hosting.getModList()),
     _banList(_hosting.getBanList()), _vipList(hosting.getVIPList()), _guestHistory(_hosting.getGuestHistory())
 {
 }
@@ -95,6 +95,9 @@ void GuestListWidget::renderOnlineGuests()
     static string banPopupTitle = "";
     static string filterTextStr;
     static bool filterSuccess = false;
+
+	ImGui::Dummy(ImVec2(0, 10));
+    
     for (size_t i = 0; i < _guests.size(); ++i)
     {
         name = _guests[i].name;
@@ -116,73 +119,23 @@ void GuestListWidget::renderOnlineGuests()
             }
         }
 
-        IconButton::render(AppIcons::kick, AppColors::primary, ImVec2(24, 24));
-        if (ImGui::IsItemActive())
-        {
-            showKickPopup = true;
-            kickPopupTitle = string("Kick##Popup");
-            popupIndex = i;
-            ImGui::OpenPopup(kickPopupTitle.c_str());
-        }
-        TitleTooltipWidget::render(
-            "Kick user",
-            (string("Press to kick ") + name + "").c_str()
-        );
-
-        ImGui::SameLine();
-
-        IconButton::render(AppIcons::block, AppColors::primary, ImVec2(24, 24));
-        if (ImGui::IsItemActive())
-        {
-            showBanPopup = true;
-            banPopupTitle = string("Ban##Popup");
-            popupIndex = i;
-            ImGui::OpenPopup(banPopupTitle.c_str());
-        }
-        TitleTooltipWidget::render(
-            "Ban user",
-            (string("Press to ban ") + name + "").c_str()
-        );
-
-        if (i == popupIndex)
-        {
-            if (ConfirmPopupWidget::render(
-                kickPopupTitle.c_str(),
-                showKickPopup,
-                ("Kick\n#" + to_string(userID) + "\n" + name).c_str()
-            ))
-            {
-                _hosting.sendHostMessage((
-                    string("!kick ") + to_string(userID)
-                ).c_str(), true);
-            }
-
-            if (ConfirmPopupWidget::render(
-                banPopupTitle.c_str(),
-                showBanPopup,
-                ("Ban\n#" + to_string(userID) + "\n" + name).c_str()
-            ))
-            {
-                _hosting.sendHostMessage((
-                    string("!ban ") + to_string(userID)
-                ).c_str(), true);
-            }
-        }
-
-        ImGui::SameLine();
-
         cursor = ImGui::GetCursorPos();
+        
         ImGui::BeginGroup();
 
         AppStyle::pushInput();
+        ImGui::Indent(5);
         ImGui::Text("%s", name.c_str());
+		ImGui::Unindent(5);
         
-        ImGui::SameLine();
-        ImGui::Indent(85);
+        //ImGui::SameLine();
+        ImGui::Indent(5);
+        AppStyle::pushPositive();
         ImGui::Text("#%d", userID);
         AppStyle::pop();
-        ImGui::Unindent(85);
+        ImGui::Unindent(5);
         AppFonts::pushInput();
+        ImGui::SameLine();
         if (m.congested == 2)
         {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
@@ -197,25 +150,98 @@ void GuestListWidget::renderOnlineGuests()
         }
         if (m.metrics.packetsSent < 1)
         {
-            ImGui::Text("-");
+            ImGui::Text("  -");
         }
         else
         {
-            ImGui::Text("%.0fms  B:%.1f  D:%u/%.1f  E:%.1f  N:%u/%u",
-                m.metrics.networkLatency,
-                m.metrics.bitrate,
-                m.metrics.queuedFrames,
-                m.metrics.decodeLatency,
-                m.metrics.encodeLatency,
-                m.metrics.slowRTs,
-                m.metrics.fastRTs
+            ImGui::Text("  %.0fms",
+                m.metrics.networkLatency
+                //m.metrics.bitrate,
+                //m.metrics.queuedFrames,
+                //m.metrics.decodeLatency,
+                //m.metrics.encodeLatency,
+                //m.metrics.slowRTs,
+                //m.metrics.fastRTs
             );
         }
+
+        // Status icons
+		ImGui::SameLine();
+        
+		if (_modList.isModded(userID) || _hosting.getHost().userID == userID) {
+            ImGui::Dummy(ImVec2(10, 0));
+            ImGui::SameLine();
+			ImGui::Image(AppIcons::crown, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.75f, 0.75f, 0.0f, 1.00f));
+        }
+        ImGui::SameLine();
+        if (_vipList.isVIP(userID)) {
+            ImGui::Dummy(ImVec2(10, 0));
+            ImGui::SameLine();
+			ImGui::Image(AppIcons::star, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.73f, 0.73f, 0.73f, 1.00f));
+        }
+		ImGui::SameLine();
+        if (MetadataCache::isSpectating(userID)) {
+			ImGui::Dummy(ImVec2(10, 0));
+            ImGui::SameLine();
+			ImGui::Image(AppIcons::eye, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.70f, 0.41f, 0.80f, 1.00f));
+        }
+        
         AppStyle::pop();
+        AppFonts::pushInput();
+        AppColors::pushTitle();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();
         ImGui::SetCursorPos(cursor);
+
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.1f));
+        
         ImGui::Button((string("##") + to_string(i + 1)).c_str(), ImVec2(size.x - 45, 40));
+
+		ImGui::PopStyleColor();
+
+        // Right click context menu for group
+		if (ImGui::BeginPopupContextItem())
+		{
+            AppStyle::pushInput();
+			ImGui::Text("%s", name.c_str());
+
+            ImGui::Dummy(ImVec2(0.0f, 10.0f));
+            
+            AppStyle::pushPositive();
+
+            if (ImGui::Selectable("Make VIP")) {
+                _hosting.sendHostMessage((
+                    string("!vip ") + to_string(userID)
+                    ).c_str(), true);
+            }
+
+            ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+            if (ImGui::Selectable("Make spectator")) {
+                _hosting.sendHostMessage((
+                    string("!spectate ") + to_string(userID)
+                    ).c_str(), true);
+            }
+
+            ImGui::Dummy(ImVec2(0.0f, 2.0f));
+            
+            if (ImGui::Selectable("Kick Guest")) {
+                _hosting.sendHostMessage((
+                string("!kick ") + to_string(userID)
+                ).c_str(), true);
+			}
+
+			ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+			if (ImGui::Selectable("Ban Guest")) {
+                _hosting.sendHostMessage((
+                    string("!ban ") + to_string(userID)
+                    ).c_str(), true);
+			}
+			ImGui::EndPopup();
+            AppFonts::pushInput();
+            AppColors::pushTitle();
+		}
 
         if (ImGui::BeginDragDropSource())
         {

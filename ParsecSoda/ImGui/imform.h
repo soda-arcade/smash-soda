@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include "../globals/AppStyle.h"
 #include "imgui.h"
 #include "../Widgets/ToggleIconButtonWidget.h"
@@ -36,6 +35,7 @@ public:
             response = false;
         }
         AppStyle::pushLabel();
+        ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
         AppStyle::pop();
 
@@ -46,7 +46,7 @@ public:
 	}
 
     /// <summary>
-    /// Creates a text input field.
+    /// Creates a multiline text input field.
     /// </summary>
     /// <param name="label">Label</param>
     /// <param name="buffer">Buffer for value</param>
@@ -62,13 +62,14 @@ public:
         ImGui::Text(label.c_str());
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x - 20);
-        if (ImGui::InputText(inputLabel.c_str(), buffer, 256)) {
+        if (ImGui::InputTextMultiline(inputLabel.c_str(), buffer, 256)) {
             response = true;
         }
         else {
             response = false;
         }
         AppStyle::pushLabel();
+        ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
         AppStyle::pop();
 
@@ -103,6 +104,7 @@ public:
             response = false;
         }
         AppStyle::pushLabel();
+        ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
         AppStyle::pop();
 
@@ -133,6 +135,7 @@ public:
             response = true;
         }
         AppStyle::pushLabel();
+        ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
         AppStyle::pop();
 
@@ -160,6 +163,7 @@ public:
             response = true;
         }
         AppStyle::pushLabel();
+        ImGui::SetNextItemWidth(size.x - 40);
         ImGui::TextWrapped(description.c_str());
         AppStyle::pop();
 

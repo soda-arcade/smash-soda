@@ -4,38 +4,55 @@
 #include <algorithm>
 #include "parsec-dso.h"
 #include "ACommandIntegerArg.h"
+#include "../Modules/Hotseat.h"
 
-class CommandDecrease : public ACommandIntegerArg
+class CommandDecrease : public ACommandStringArg
 {
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::BOT_MESSAGE; }
 
-	CommandDecrease(const char* msg)
-		: ACommandIntegerArg(msg, internalPrefixes())
+	CommandDecrease(const char* msg, Hotseat& hotseat)
+		: ACommandStringArg(msg, internalPrefixes()), _hotseat(hotseat)
 	{}
 
 	bool run() override {
 
 		if (!MetadataCache::preferences.hotseat) return false;
 
-		if (!ACommandIntegerArg::run()) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !decrease 5 7\0";
+		if (!ACommandStringArg::run()) {
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !decrease <minutes> <seat (optional)>\0";
 			return false;
 		}
 
-		// Add time to timer
-		uint32_t minutes = MetadataCache::hotseat.hotseatClock.getDuration();
-		uint32_t decreaseBy = _intArg * 60000;
+		// Split _strArg by spaces
+		std::istringstream iss(_stringArg);
+		std::vector<std::string> results(std::istream_iterator<std::string>{iss},
+			std::istream_iterator<std::string>());
 
-		if ((minutes - decreaseBy) > 0) {
+		// Convert first value to int
+		int _intArg = 0;
+		try {
+			_intArg = std::stoi(results[0]);
+		}
+		catch (std::invalid_argument) {
+			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !decrease <minutes> <seat (optional)>\0";
+			return false;
+		}
 
-			MetadataCache::hotseat.hotseatClock.setDuration(minutes - decreaseBy);
-
+		if (results.size() != 2) {
+			_hotseat.decreaseTime(_intArg);
 		}
 		else {
-
-			MetadataCache::hotseat.hotseatClock.setDuration(0);
-
+			// Convert second value to int
+			int _seat = -1;
+			try {
+				_seat = std::stoi(results[1]);
+			}
+			catch (std::invalid_argument) {
+				_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !extend <minutes> <seat (optional)>\0";
+				return false;
+			}
+			_hotseat.decreaseTime(_intArg, _seat);
 		}
 
 		std::ostringstream reply;
@@ -51,6 +68,8 @@ public:
 	}
 
 protected:
+	Hotseat& _hotseat;
+	
 	static vector<const char*> internalPrefixes() {
 		return vector<const char*> { "!decrease " };
 	}

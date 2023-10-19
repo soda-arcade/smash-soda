@@ -165,3 +165,123 @@ void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
 		}
 	}
 }
+
+/// <summary>
+/// Gets a list of all the guests that are playing.
+/// </summary>
+/// <returns></returns>
+vector<Guest>& GuestList::getPlayingGuests() {
+
+	// Get all the guests not spectating
+	vector<Guest> playingGuests;
+	for (int i = 0; i < _guests.size(); i++) {
+		if (!_guests[i].spectator) {
+			playingGuests.push_back(_guests[i]);
+		}
+	}
+
+	return playingGuests;
+	
+}
+
+/// <summary>
+/// Gets a vector of random guests
+/// </summary>
+/// <param name="count">Number of guests to get</param>
+/// <param name="ignoreSpectators">Whether specators should not be included</param>
+/// <returns>Vector of guests</returns>
+vector<Guest>& GuestList::getRandomGuests(int count, bool ignoreSpectators) {
+	vector<Guest> randomGuests;
+	vector<Guest> guests = _guests;
+	return guests;
+	
+	// Shuffle the guests
+	random_shuffle(guests.begin(), guests.end());
+
+	// Get the first count guests
+	// Attempt to select guests that are not already in the list
+	for (int i = 0; i < guests.size() && randomGuests.size() < count; i++) {
+		
+		if (ignoreSpectators && guests[i].spectator)
+			continue;
+		
+		if (_guests.size() >= count) {
+
+			// Loop through randomGuests and check if the guest is already in the list
+			bool found = false;
+			for (int j = 0; j < randomGuests.size(); j++) {
+				if (randomGuests[j].id == guests[i].id) {
+					found = true;
+					break;
+				}
+			}
+			
+		} else {
+			randomGuests.push_back(guests[i]);
+		}
+		
+	}
+	
+	return randomGuests;
+}
+
+/// <summary>
+/// Gets a vector of guests after a certain guest (by their ID)
+/// </summary>
+vector<Guest>& GuestList::getGuestsAfterGuest(uint32_t targetGuestID, int count, bool ignoreSpectators) {
+
+	vector<Guest> selectedGuests;
+	vector<Guest> guests = _guests;
+
+	// Find the guest index by their ID
+	int targetIndex = findIndex(targetGuestID);
+	
+	// If the guest was not found, return an empty vector
+	if (targetIndex == -1)
+		return selectedGuests;
+
+	// Get the guests after the target guest
+	for (int i = targetIndex + 1; i < guests.size(); i++) {
+
+		if (ignoreSpectators && guests[i].spectator)
+			continue;
+
+		if (_guests.size() >= count) {
+
+			// If the guest is not already in the list
+			// Loop through randomGuests and check if the guest is already in the list
+			bool found = false;
+			for (int j = 0; j < selectedGuests.size(); j++) {
+				if (selectedGuests[j].id == guests[i].id) {
+					found = true;
+					break;
+				}
+			}
+
+			// If we've not selected enough guests yet, loop back around
+			if (i == guests.size() - 1)
+				i = 0;
+
+		}
+		else {
+			selectedGuests.push_back(guests[i]);
+		}
+
+		// If we have enough guests, break out of the loop
+		if (selectedGuests.size() >= count)
+			break;
+
+	}
+	
+}
+
+/// <summary>
+/// Toggles a guest's spectator status
+/// </summary>
+/// <param name="id"></param>
+void GuestList::toggleSpectator(uint32_t id) {
+	auto it = find_if(_guests.begin(), _guests.end(), [id](Guest& guest) { return guest.id == id; });
+	if (it != _guests.end()) {
+		it->spectator = !it->spectator;
+	}
+}

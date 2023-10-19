@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "../TierList.h"
 #include "../CompilerDirectives.h"
+#include "../Modules/Hotseat.h"
 
 using namespace std;
 
@@ -13,8 +14,8 @@ class CommandSpectate : public ACommandSearchUser
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::KICK; }
 
-	CommandSpectate(const char* msg, Guest& sender, GuestList& guests, TierList& tierList)
-		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _tierList(tierList)
+	CommandSpectate(const char* msg, Guest& sender, GuestList& guests, TierList& tierList, GamepadClient& gamepadClient, Hotseat& hotseat)
+		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _tierList(tierList), _gamepadClient(gamepadClient), _hotseat(hotseat)
 	{}
 
 	bool run() override {
@@ -50,16 +51,23 @@ public:
 
 	bool addGuestToSpectators(Guest guest) {
 
-		if (MetadataCache::isSpectating(guest)) {
+		GuestData guestData = GuestData(guest.name, guest.userID);
+
+		if (MetadataCache::isSpectating(guest.userID)) {
 
 			MetadataCache::addActiveGuest(guest);
+			_hotseat.enqueue(guestData);
+			GuestData guestData = GuestData(guest.name, guest.userID);
+			_hotseat.seatGuest(guestData);
 			_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is no longer spectating.\0";
-
+			
 		}
 		else {
 
 			MetadataCache::removeActiveGuest(guest);
+			_hotseat.dequeue(guestData);
 			_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is now spectating.\0";
+			_gamepadClient.onQuit(guest);
 
 		}
 
@@ -80,4 +88,6 @@ protected:
 
 	Guest& _sender;
 	TierList& _tierList;
+	GamepadClient& _gamepadClient;
+	Hotseat& _hotseat;
 };

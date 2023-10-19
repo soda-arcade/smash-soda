@@ -12,12 +12,12 @@ D3D_FEATURE_LEVEL gFeatureLevels[] = {
 	D3D_FEATURE_LEVEL_9_1,
 };
 UINT gNumFeatureLevels = 6;
-ID3D11Device *_lDevice;
-ID3D11DeviceContext *_lImmediateContext;
-IDXGIOutputDuplication *_lDeskDupl;
+ID3D11Device* _lDevice;
+ID3D11DeviceContext* _lImmediateContext;
+IDXGIOutputDuplication* _lDeskDupl;
 DXGI_OUTPUT_DESC _lOutputDesc;
 DXGI_OUTDUPL_DESC _lOutputDuplDesc;
-ID3D11Texture2D *_lAcquiredDesktopImage;
+ID3D11Texture2D* _lAcquiredDesktopImage;
 D3D11_MAPPED_SUBRESOURCE _resource;
 
 
@@ -32,7 +32,7 @@ bool DX11::recover()
 	HRESULT hr;
 
 	// Get DXGI device
-	IDXGIDevice *lDxgiDevice = 0;
+	IDXGIDevice* lDxgiDevice = 0;
 	hr = _lDevice->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&lDxgiDevice));
 
 	if (FAILED(hr))
@@ -42,7 +42,7 @@ bool DX11::recover()
 	}
 
 	// Get DXGI adapter
-	IDXGIAdapter * lDxgiAdapter;
+	IDXGIAdapter* lDxgiAdapter;
 	hr = lDxgiDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&lDxgiAdapter));
 
 	if (FAILED(hr))
@@ -57,7 +57,7 @@ bool DX11::recover()
 	lDxgiDevice->Release();
 
 	// Get output
-	IDXGIOutput *lDxgiOutput;
+	IDXGIOutput* lDxgiOutput;
 	hr = lDxgiAdapter->EnumOutputs(_currentScreen, &lDxgiOutput);
 
 	if (FAILED(hr))
@@ -76,7 +76,7 @@ bool DX11::recover()
 	}
 
 	// QI for Output 1
-	IDXGIOutput1 *lDxgiOutput1;
+	IDXGIOutput1* lDxgiOutput1;
 	hr = lDxgiOutput->QueryInterface(__uuidof(IDXGIOutput1), (void**)&lDxgiOutput1);
 
 	if (FAILED(hr))
@@ -129,7 +129,7 @@ bool DX11::recover2()
 	IDXGIOutput* dxgiOutput = nullptr;
 	IDXGIOutput1* dxgiOutput1 = nullptr;
 	IDXGIDevice* dxgiDevice = nullptr;
-	
+
 	hr = D3D11CreateDevice(
 		dxgiAdapter,
 		D3D_DRIVER_TYPE_UNKNOWN,
@@ -152,7 +152,7 @@ bool DX11::recover2()
 
 	dxgiOutput1->DuplicateOutput(dxgiDevice, &_lDeskDupl);
 	CLEAN_ON_FAIL(hr);
-	
+
 	if (_lDeskDupl != nullptr)
 	{
 		_lDeskDupl->GetDesc(&_lOutputDuplDesc);
@@ -229,7 +229,7 @@ void DX11::enumGPUS()
 		_gpus.push_back(GPU(dxgiAdapter, desc));
 
 		std::string wname = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(desc.Description);
-		_gpuNames.push_back("[" + to_string(i) + "] "+ wname);
+		_gpuNames.push_back("[" + to_string(i) + "] " + wname);
 	}
 
 	if (_currentGPU >= _gpus.size())
@@ -278,7 +278,7 @@ bool DX11::init()
 	fetchScreenList();
 
 	// Get DXGI device
-	IDXGIDevice *lDxgiDevice;
+	IDXGIDevice* lDxgiDevice;
 	hr = _lDevice->QueryInterface(__uuidof(IDXGIAdapter), (void**)&lDxgiDevice);
 
 	if (FAILED(hr))
@@ -288,7 +288,7 @@ bool DX11::init()
 	}
 
 	// Get DXGI adapter
-	IDXGIAdapter *lDxgiAdapter;
+	IDXGIAdapter* lDxgiAdapter;
 	hr = lDxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&lDxgiAdapter);
 
 	if (FAILED(hr))
@@ -300,7 +300,7 @@ bool DX11::init()
 	lDxgiDevice->Release();
 
 	// Get output
-	IDXGIOutput *lDxgiOutput;
+	IDXGIOutput* lDxgiOutput;
 	hr = lDxgiAdapter->EnumOutputs(_currentScreen, &lDxgiOutput);
 
 	if (FAILED(hr))
@@ -317,7 +317,7 @@ bool DX11::init()
 		return false;
 
 	// QI for Output 1
-	IDXGIOutput1 *lDxgiOutput1;
+	IDXGIOutput1* lDxgiOutput1;
 	hr = lDxgiOutput->QueryInterface(__uuidof(IDXGIOutput1), (void**)&lDxgiOutput1);
 
 	if (FAILED(hr))
@@ -352,12 +352,12 @@ bool DX11::init()
 	_desc.MipLevels = 1;
 	_desc.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_READ;
 	_desc.Usage = D3D11_USAGE::D3D11_USAGE_STAGING;
-	
+
 	return true;
 }
 
 
-bool DX11::captureScreen(ParsecDSO *ps)
+bool DX11::captureScreen(ParsecDSO* ps)
 {
 	static ID3D11Texture2D* lastFramePointer;
 
@@ -368,14 +368,14 @@ bool DX11::captureScreen(ParsecDSO *ps)
 			return false;
 		}
 	}
-	
+
 	_mutex.lock();
 
 	HRESULT hr(E_FAIL), hr0(E_FAIL);
-	IDXGIResource *lDesktopResource = nullptr;
+	IDXGIResource* lDesktopResource = nullptr;
 	DXGI_OUTDUPL_FRAME_INFO lFrameInfo;
 	ID3D11Texture2D* currTexture = NULL;
-	
+
 	hr = _lDeskDupl->AcquireNextFrame(4, &lFrameInfo, &lDesktopResource);
 	if (FAILED(hr)) {
 		_lDeskDupl->ReleaseFrame();
@@ -399,9 +399,9 @@ bool DX11::captureScreen(ParsecDSO *ps)
 	//////////////////////////////////////// 
 	ParsecHostD3D11SubmitFrame(ps, 0, _lDevice, _lImmediateContext, _lAcquiredDesktopImage);
 	lastFramePointer = _lAcquiredDesktopImage;
-	
+
 	_lDeskDupl->ReleaseFrame();
-	
+
 	_mutex.unlock();
 	return true;
 }
@@ -496,7 +496,7 @@ void DX11::fetchScreenList()
 		std::string name = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(_lOutputDesc.DeviceName);
 		int width = _lOutputDesc.DesktopCoordinates.right - _lOutputDesc.DesktopCoordinates.left;
 		int height = _lOutputDesc.DesktopCoordinates.bottom - _lOutputDesc.DesktopCoordinates.top;
-		_screens.push_back("["+ to_string(screen) +"] "+ name +" ("+ to_string(width) +"x"+ to_string(height) +")");
+		_screens.push_back("[" + to_string(screen) + "] " + name + " (" + to_string(width) + "x" + to_string(height) + ")");
 
 		lDxgiOutput->Release();
 

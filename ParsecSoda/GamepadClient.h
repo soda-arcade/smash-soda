@@ -57,8 +57,10 @@ public:
 	bool init();
 	AGamepad* createGamepad(AGamepad::Type type = AGamepad::Type::XBOX);
 	void createAllGamepads();
+	void createGamepads(int xboxPadCount, int dsPadCount);
 	void connectAllGamepads();
 	void disconnectAllGamepads();
+	void releaseGamepads();
 	void sortGamepads();
 	void resize(size_t xboxCount, size_t dualshockCount);
 	void resetAll(bool& resetting);
@@ -92,17 +94,17 @@ public:
 	bool lock = false;
 	bool lockButtons = false;
 	bool isPuppetMaster = false;
+	bool isSlave = false;
 
+	bool canDrop = true;
 
 private:
-	bool _isBusy = false;
 
 	bool sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadState, Guest& guest, int& slots, GuestPreferences prefs = GuestPreferences());
 	bool sendGamepadAxisMessage(ParsecGamepadAxisMessage& gamepadAxis, Guest& guest, int& slots, GuestPreferences prefs = GuestPreferences());
 	bool sendGamepadButtonMessage(ParsecGamepadButtonMessage& gamepadButton, Guest& guest, int& slots, GuestPreferences prefs = GuestPreferences());
 	bool sendKeyboardMessage(ParsecKeyboardMessage& keyboard, Guest& guest, int& slots, GuestPreferences prefs = GuestPreferences());
 
-	void releaseGamepads();
 	void setMirror(uint32_t guestUserID, bool mirror);
 	void setIgnoreDeviceID(uint32_t guestUserID, bool ignoreDeviceID);
 	bool tryAssignGamepad(Guest guest, uint32_t padId, int currentSlots, bool isKeyboard, GuestPreferences prefs = GuestPreferences());
@@ -123,6 +125,12 @@ private:
 	ParsecDSO* _parsec;
 
 	thread _resetAllThread;
+	thread _createGamepadsThread;
 
 	KeyboardMap _keyboardMap;
+
+	bool _isBusy = false;
+
+	int _xboxCount;
+	int _dsCount;
 };

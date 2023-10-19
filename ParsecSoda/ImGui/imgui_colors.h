@@ -199,7 +199,7 @@ namespace ImGui
 		AppColors::label = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		AppColors::input = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
 		AppColors::positive = ImVec4(0.18f, 0.59f, 1.00f, 1.00f);
-		AppColors::negative = ImVec4(0.83f, 0.82f, 0.84f, 1.00f);
+		AppColors::negative = ImVec4(0.83f, 0.82f, 0.84f, .2f);
 		AppColors::warning = ImVec4(0.83f, 0.35f, 0.03f, 1.00f);
 
 		AppColors::white = ImVec4(0.83f, 0.82f, 0.84f, 1.00f);
@@ -225,7 +225,7 @@ namespace ImGui
 		colors[ImGuiCol_FrameBg] = ImVec4(0.08f, 0.07f, 0.07f, 1.00f);
 		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.08f, 0.07f, 0.07f, 1.00f);
 		colors[ImGuiCol_FrameBgActive] = ImVec4(0.08f, 0.07f, 0.07f, 1.00f);
-		colors[ImGuiCol_TitleBg] = AppColors::negative;
+		colors[ImGuiCol_TitleBg] = ImVec4(0.83f, 0.82f, 0.84f, 1.00f);
 		colors[ImGuiCol_TitleBgActive] = AppColors::positive;
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.32f, 0.39f, 1.00f);
 		colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.08f, 0.07f, 1.00f);

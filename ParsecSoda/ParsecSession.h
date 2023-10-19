@@ -9,7 +9,6 @@
 #include "GuestList.h"
 #include "MetadataCache.h"
 #include "Helpers/Clock.h"
-#include "ThumbnailList.h"
 
 #define SESSION_LIFETIME (uint32_t)(HOURS(1) + MINUTES(25))
 
@@ -77,9 +76,6 @@ public:
 	const int getSessionStatus();
 	const uint32_t getRemainingTime();
 	const uint32_t getLifespan();
-	vector<Thumbnail>& getThumbnails();
-	void loadThumbnails();
-	void saveThumbnails();
 
 	string hostPeerId;
 	string sessionId;
@@ -96,6 +92,4 @@ private:
 	bool _isUpdating = false;
 	int _sessionStatus = 0;
 	string _sessionError = "";
-
-	ThumbnailList _thumbnailList;
 };

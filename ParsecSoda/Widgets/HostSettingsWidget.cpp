@@ -2,8 +2,7 @@
 #include "../ImGui/imform.h"
 
 HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback)
-    : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut),
-    _thumbnails(_hosting.getSession().getThumbnails()), _onHostRunningStatusCallback(onHostRunningStatusCallback)
+    : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut), _onHostRunningStatusCallback(onHostRunningStatusCallback)
 {
     ParsecHostConfig cfg = hosting.getHostConfig();
     try
@@ -41,21 +40,14 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     _latencyLimit = MetadataCache::preferences.latencyLimitValue;
 
     _hotseat = MetadataCache::preferences.hotseat;
+    _hotseatSeats = MetadataCache::preferences.hotseatSeats;
+    _hotseatSlotMatch = MetadataCache::preferences.hotseatSlotMatch;
     _hotseatTime = MetadataCache::preferences.hotseatTime;
     _hotseatAFK = MetadataCache::preferences.hotseatAFK;
     _hotseatAFKTime = MetadataCache::preferences.hotseatAFKTime;
     _hotseatPause = MetadataCache::preferences.hotseatPause;
 
     _kioskMode = MetadataCache::preferences.kioskMode;
-
-    vector<Thumbnail>::iterator it;
-    for (it = _thumbnails.begin(); it != _thumbnails.end(); ++it)
-    {
-        if ((*it).gameId.compare(_gameID) == 0)
-        {
-            _thumbnailName = (*it).name;
-        }
-    }
 
     if (strlen(_secret) == 0) {
         try { strcpy_s(_secret, "play-now"); }
@@ -91,36 +83,8 @@ bool HostSettingsWidget::render(HWND& hwnd) {
     AppStyle::pushLabel();
     AppStyle::pop();
     ImGui::SetNextItemWidth(size.x - 10);
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(0, 5));
 
-    if (ImGui::BeginTabBar("Hosting Tabs", ImGuiTabBarFlags_None))
-    {
-        AppFonts::pushInput();
-        AppColors::pushTitle();
-        if (ImGui::BeginTabItem("Start"))
-        {
-            renderGeneral(hwnd);
-            ImGui::EndTabItem();
-        }
-        AppFonts::pushInput();
-        AppColors::pushTitle();
-        if (ImGui::BeginTabItem("Hotseat"))
-        {
-            renderHotseat();
-            ImGui::EndTabItem();
-        }
-        AppFonts::pushInput();
-        AppColors::pushTitle();
-        if (ImGui::BeginTabItem("Kiosk"))
-        {
-            renderKiosk();
-            ImGui::EndTabItem();
-        }
-        AppColors::pop();
-        AppFonts::pop();
-        ImGui::EndTabBar();
-    }
+    renderGeneral(hwnd);
 
     ImGui::EndChild();
 
@@ -138,7 +102,7 @@ bool HostSettingsWidget::render(HWND& hwnd) {
 void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     static float indentSize = 0;
-    static ImVec2 dummySize = ImVec2(0.0f, 3.0f);
+    static ImVec2 dummySize = ImVec2(0.0f, 10.0f);
     static ImVec2 cursor;
     static ImVec2 size;
     static ImVec2 pos;
@@ -146,70 +110,81 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     size = ImGui::GetContentRegionAvail();
     pos = ImGui::GetWindowPos();
 
-    ImGui::Dummy(ImVec2(0.0f, 10.0f));
-
+    // Vector of themes
     AppStyle::pushLabel();
-    ImGui::Text("ROOM NAME");
-    if (strlen(_roomName) <= 28)
-        AppStyle::pushPositive();
-    else
-        AppStyle::pushInput();
-    ImGui::SetNextItemWidth(size.x - 10);
-    ImGui::InputText(" ", _roomName, 44);
-    TitleTooltipWidget::render("Room Title", "The text displayed below thumbnails in Arcade list.");
-    AppStyle::pop();
-
-    ImGui::Dummy(dummySize);
-
-    ImGui::Text("THUMBNAIL");
-    ImGui::SetNextItemWidth(size.x - 10);
+    ImGui::Text("GAME");
     AppStyle::pushInput();
-    if (ImGui::BeginCombo("### Thumbnail picker combo", _thumbnailName.c_str(), ImGuiComboFlags_HeightLarge))
-    {
-        for (size_t i = 0; i < _thumbnails.size(); ++i)
-        {
-            bool isSelected = (_thumbnails[i].gameId.compare(_gameID) == 0);
-            if (ImGui::Selectable(_thumbnails[i].name.c_str(), isSelected))
-            {
-                _thumbnailName = _thumbnails[i].name;
-                try
-                {
-                    strcpy_s(_gameID, GAME_ID_LEN, _thumbnails[i].gameId.c_str());
-                }
+    ImGui::SetNextItemWidth(size.x);
+    vector<GameData> games = _hosting.getGameList().getGames();
+	string defaultValue = "Add games you own in the library widget.";
+
+    int libraryID = MetadataCache::preferences.selectedGame;
+    if (ImGui::BeginCombo("### Game picker combo", (
+        games.size() == 0 || libraryID == 0 || libraryID > games.size() ? defaultValue.c_str() : games[libraryID - 1].name.c_str()
+        ), ImGuiComboFlags_HeightLarge)) {
+        // Game data list inumerator
+		for (int i = 0; i < games.size(); ++i) {
+			bool isSelected = (i == libraryID-1);
+			if (ImGui::Selectable(games[i].name.c_str(), isSelected)) {
+                MetadataCache::preferences.selectedGame = games[i].itemID;
+
+                // Set room name
+                string prepend = (MetadataCache::preferences.prependRegion != "" ? "[" + MetadataCache::preferences.prependRegion + "] " : "")
+                    + (MetadataCache::preferences.prependPingLimit && _latencyLimiter
+                        ? "[<" + to_string(_latencyLimit) + "ms] " : "")
+                    + games[i].name;
+
+                try { strcpy_s(_roomName, prepend.c_str()); }
                 catch (const std::exception&) {}
+
+                // Set game ID
+                try { strcpy_s(_gameID, games[i].gameID.c_str()); }
+                catch (const std::exception&) {}
+
+                // Set hotseat
+                MetadataCache::preferences.hotseat = games[i].hotseat;
+
+                // Set hotseat seats
+                MetadataCache::preferences.hotseatSeats = games[i].seats;
+
+                // Kiosk mode
+                MetadataCache::preferences.kioskMode = games[i].kiosk;
+                
+			}
+            
+            if (isSelected) {
+				ImGui::SetItemDefaultFocus();
             }
-            if (isSelected)
-            {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
+            
+		}
         ImGui::EndCombo();
     }
-    TitleTooltipWidget::render("Thumbnail Picker", "To find new thumbnails, go to the Arcade Thumbnails window.");
+    AppStyle::pushLabel();
+	ImGui::TextWrapped("Automatically configure settings for a specific game in your library.");
     AppStyle::pop();
-
+    
     ImGui::Dummy(dummySize);
+    
+    if (ImForm::InputText("ROOM NAME", _roomName, "The text displayed below thumbnails in Arcade list.")) {
+        string prepend = (MetadataCache::preferences.prependRegion != "" ? "[" + MetadataCache::preferences.prependRegion + "]" : "")
+			+ (MetadataCache::preferences.prependPingLimit && _latencyLimiter
+                ? "[<" + to_string(_latencyLimit) + "ms]" : "")
+            + _roomName;
 
-    ImGui::Text("ROOM SECRET");
-    ImGui::SetNextItemWidth(size.x - 10);
-    AppStyle::pushInput();
-    if (strlen(_secret) < LINK_COMPATIBLE_SECRET_SIZE - 1) AppColors::pushNegative();
-    else AppColors::pushPositive();
-    if (ImGui::InputText("##Secret input", _secret, LINK_COMPATIBLE_SECRET_SIZE))
-    {
-        updateSecretLink();
+        try { strcpy_s(_roomName, prepend.c_str()); }
+        catch (const std::exception&) {}
     }
-    AppColors::pop();
-    TitleTooltipWidget::render("Room Secret", "Generates the share link that lets people\njoin your room anytime.\nMust have 8 characters.");
-    AppStyle::pop();
 
-    ImGui::Dummy(dummySize);
-
+    AppStyle::pushLabel();
     ImGui::Text("SHARE LINK");
     ImGui::SetNextItemWidth(size.x - 10);
     AppStyle::pushInput();
     ImGui::InputText("##Secret link", _secretLink, 128, ImGuiInputTextFlags_ReadOnly);
+    AppStyle::pushLabel();
+    ImGui::TextWrapped("Users can join your room directly with this link.");
+    AppStyle::pop();
 
+    ImGui::Dummy(dummySize);
     ImGui::Dummy(dummySize);
     cursor = ImGui::GetCursorPos();
 
@@ -242,6 +217,62 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::SameLine();
 
     if (IntRangeWidget::render("latency limit", _latencyLimit, 0, 64, 0.025f)) {
+    }
+    ImGui::EndChild();
+
+    ImGui::Dummy(dummySize);
+    cursor = ImGui::GetCursorPos();
+	ImGui::Indent(0);
+
+    ImGui::BeginChild("##Hotseat child", ImVec2(size.x / 3, 50.0f));
+    ImGui::Text("HOTSEAT");
+    ImGui::Indent(8);
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, MetadataCache::preferences.hotseat, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        MetadataCache::preferences.hotseat = !MetadataCache::preferences.hotseat;
+        if (_hosting.isRunning()) {
+			if (MetadataCache::preferences.hotseat) {
+                _hosting.getHotseat().start();
+			}
+			else {
+				_hosting.getHotseat().stop();
+			}
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("##Kiosk child", ImVec2(size.x / 3, 50.0f));
+    ImGui::Text("KIOSK MODE");
+    ImGui::Indent(15);
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, MetadataCache::preferences.kioskMode, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        MetadataCache::preferences.kioskMode = !MetadataCache::preferences.kioskMode;
+        if (_hosting.isRunning()) {
+            if (MetadataCache::preferences.kioskMode) {
+                _hosting.startKioskMode();
+            }
+            else {
+                _hosting.getProcessMan().stop();
+            }
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("##Overlay child", ImVec2(size.x / 3, 50.0f));
+    ImGui::Indent(20);
+    ImGui::Text("OVERLAY");
+    ImGui::Indent(8);
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, MetadataCache::preferences.overlayShow, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        MetadataCache::preferences.overlayShow = !MetadataCache::preferences.overlayShow;
+        if (_hosting.isRunning()) {
+            if (_hosting.getOverlay().isActive) {
+                _hosting.getOverlay().stop();
+			} else {
+				_hosting.getOverlay().start();
+			}
+        }
     }
     ImGui::EndChild();
 
@@ -392,9 +423,23 @@ void HostSettingsWidget::renderHotseat() {
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
+    _hotseat = MetadataCache::preferences.hotseat;
     if (ImForm::InputToggle("HOTSEAT", _hotseat,
         "When hotseat mode is enabled, the active gamepad(s) will be swapped between your guests.")) {
         MetadataCache::preferences.hotseat = _hotseat;
+        MetadataCache::savePreferences();
+    }
+
+    if (ImForm::InputNumber("SEATS", _hotseatSeats, 1, 8,
+        "The number of guests that can be put in to hotseat(s).")) {
+        MetadataCache::preferences.hotseatSeats = _hotseatSeats;
+        MetadataCache::savePreferences();
+    }
+
+    _hotseatSlotMatch = MetadataCache::preferences.hotseatSlotMatch;
+    if (ImForm::InputCheckbox("Xinput slots must match?", _hotseatSlotMatch,
+        "Most games require player 1 to use xinput slot 1, player 2 in slot 2 etc. The host should have their controller disconnected before enabling this.")) {
+        MetadataCache::preferences.hotseatSlotMatch = _hotseatSlotMatch;
         MetadataCache::savePreferences();
     }
 

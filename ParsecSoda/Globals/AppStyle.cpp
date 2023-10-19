@@ -42,6 +42,11 @@ void AppStyle::pushNegative()
 	AppColors::pushNegative();
 }
 
+void AppStyle::pushButton() {
+	AppFonts::pushInput();
+	AppColors::pushButton();
+}
+
 void AppStyle::pop()
 {
 	AppFonts::pop();

@@ -80,6 +80,14 @@ public:
 	static ID3D11ShaderResourceView* buttonLock;
 
 	static ID3D11ShaderResourceView* library;
+	static ID3D11ShaderResourceView* overlay;
+
+	static ID3D11ShaderResourceView* hotseat;
+	static ID3D11ShaderResourceView* tournament;
+
+	static ID3D11ShaderResourceView* crown;
+	static ID3D11ShaderResourceView* star;
+	static ID3D11ShaderResourceView* eye;
 
 private:
 	static Texture _play;
@@ -153,5 +161,14 @@ private:
 	static Texture _buttonLock;
 
 	static Texture _library;
+	static Texture _overlay;
+
+	static Texture _hotseat;
+	static Texture _tournament;
+
+	static Texture _crown;
+	static Texture _star;
+	static Texture _eye;
+
 };
 

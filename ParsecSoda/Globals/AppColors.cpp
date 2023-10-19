@@ -24,7 +24,7 @@ void AppColors::init()
 	label = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 	input = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
 	positive = ImVec4(0.00f, 0.67f, 0.41f, 1.00f);
-	negative = ImVec4(0.75f, 0.16f, 0.28f, 1.00f);
+	negative = ImVec4(0.85f, 0.26f, 0.38f, 1.00f);
 	warning = ImVec4(0.83f, 0.35f, 0.03f, 1.00f);
 
 	white = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -92,6 +92,20 @@ void AppColors::pushPositive()
 void AppColors::pushNegative()
 {
 	pushColor(negative);
+}
+
+void AppColors::pushButton() {
+	pushColor(white);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.00f, 1.00f, 1.00f, 0.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.00f, 1.00f, 1.00f, 0.08f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.00f, 1.00f, 1.00f, 0.08f));
+}
+
+void AppColors::pushButtonSolid() {
+	pushColor(black);
+	ImGui::PushStyleColor(ImGuiCol_Button, positive);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, positive);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, primary);
 }
 
 void AppColors::pushWarning()

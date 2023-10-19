@@ -22,14 +22,16 @@ public:
         bool& showMasterOfPuppets,
         bool& showChat,
         bool& showGuests,
-        bool& showThumbnails,
         bool& showLog,
         bool& showAudio,
         bool& showVideo,
         bool& showInfo,
         bool& showSettings,
         bool& showButtonLock,
-        bool& showLibrary
+        bool& showLibrary,
+        bool& showOverlay,
+        bool& showHotseat,
+		bool& showTournament
     );
 
 private:

@@ -298,11 +298,6 @@ void ParsecSession::fetchArcadeRoomListSync()
 					MTY_JSONObjGetString(room, "name", name, 256)
 					&& MTY_JSONObjGetString(room, "game_id", gameId, 64)
 					;
-
-				if (success)
-				{
-					_thumbnailList.add(Thumbnail(gameId, name));
-				}
 			}
 
 			MTY_JSONDestroy(&json);
@@ -440,22 +435,6 @@ const uint32_t ParsecSession::getRemainingTime()
 const uint32_t ParsecSession::getLifespan()
 {
 	return _expiry - _start;
-}
-
-vector<Thumbnail>& ParsecSession::getThumbnails()
-{
-	return _thumbnailList.getThumbnails();
-}
-
-void ParsecSession::loadThumbnails()
-{
-	_thumbnailList.load();
-	_thumbnailList.add(Thumbnail("1wdoHfhhZH5lPuZCwGBete0HIAj", "Parsec Soda"));
-}
-
-void ParsecSession::saveThumbnails()
-{
-	_thumbnailList.save();
 }
 
 const void ParsecSession::extendSessionTime()

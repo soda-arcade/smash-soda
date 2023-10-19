@@ -6,6 +6,7 @@
 #include "Guest.h"
 #include "Helpers/Stringer.h"
 #include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -24,6 +25,12 @@ class GuestList
 public:
 	void setGuests(ParsecGuest* guests, int guestCount);
 	vector<Guest> &getGuests();
+	vector<Guest> &getPlayingGuests();
+	vector<Guest> &getRandomGuests(int count = 1, bool ignoreSpectators = true);
+	vector<Guest> &getGuestsAfterGuest(uint32_t targetGuestID, int count = 1, bool ignoreSpectators = true);
+	
+	void toggleSpectator(uint32_t targetGuestID);
+
 	void clear();
 	const bool find(uint32_t targetGuestID, Guest *result);
 	const bool find(const char* targetName, Guest* result);

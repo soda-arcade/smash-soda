@@ -85,6 +85,66 @@ void GamepadClient::createAllGamepads()
 	Sleep(200);
 }
 
+
+void GamepadClient::createGamepads(int xboxPadCount, int dsPadCount) {
+
+	_isBusy = true;
+
+	_xboxCount = xboxPadCount;
+	_dsCount = dsPadCount;
+
+	MetadataCache::preferences.xboxPuppetCount = 0;
+	MetadataCache::preferences.ds4PuppetCount = 0;
+
+	_createGamepadsThread = thread([&]() {
+
+		releaseGamepads();
+		Sleep(1000);
+
+		_isBusy = true;
+
+		for (uint16_t i = 0; i < _xboxCount; i++) {
+			this->createGamepad(AGamepad::Type::XBOX);
+			Sleep(100);
+		}
+
+		for (uint16_t i = 0; i < _dsCount; i++) {
+			this->createGamepad(AGamepad::Type::DUALSHOCK);
+			Sleep(100);
+		}
+
+		//sortGamepads();
+		Sleep(1000);
+
+		std::vector<AGamepad*>::iterator gi = gamepads.begin();
+		for (; gi != gamepads.end(); ++gi) {
+
+			(*gi)->connect();
+			Sleep(1000);
+
+		}
+
+		Sleep(1000);
+		gi = gamepads.begin();
+		for (; gi != gamepads.end(); ++gi) {
+
+			(*gi)->refreshIndex();
+
+			//ostringstream test;
+			//test << (*gi)->getIndex();
+			//g_hosting.sendHostMessage(test.str().c_str());
+			
+			Sleep(1000);
+
+		}
+
+		_isBusy = false;
+		_createGamepadsThread.detach();
+
+	});
+
+}
+
 void GamepadClient::connectAllGamepads()
 {
 	reduce([](AGamepad* pad) {
@@ -254,9 +314,10 @@ bool GamepadClient::connect(int gamepadIndex)
 
 bool GamepadClient::clearOwner(int gamepadIndex)
 {
-	if (gamepadIndex >= 0 || gamepadIndex < gamepads.size())
-	{
+	if (gamepadIndex >= 0 || gamepadIndex < gamepads.size()) {
+
 		gamepads[gamepadIndex]->clearOwner();
+		
 		return true;
 	}
 	return false;
@@ -306,10 +367,10 @@ int GamepadClient::clearAFK(GuestList &guests)
 int GamepadClient::onQuit(Guest& guest)
 {
 	int result = 0;
+	bool hotseatCheck = false;
 
 	reduce([&](AGamepad* gamepad) {
-		if (gamepad->owner.guest.userID == guest.userID)
-		{
+		if (gamepad->owner.guest.userID == guest.userID) {
 			gamepad->clearOwner();
 			result++;
 		}
@@ -626,8 +687,11 @@ bool GamepadClient::sendKeyboardMessage(ParsecKeyboardMessage& keyboard, Guest& 
 
 bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int currentSlots, bool isKeyboard, GuestPreferences prefs)
 {
-	if (currentSlots >= prefs.padLimit)
-	{
+	if (isSlave) {
+		return false;
+	}
+	
+	if (currentSlots >= prefs.padLimit) {
 		return false;
 	}
 	

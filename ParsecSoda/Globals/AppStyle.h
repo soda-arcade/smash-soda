@@ -13,6 +13,7 @@ public:
 	static void pushInputArrow();
 	static void pushPositive();
 	static void pushNegative();
+	static void pushButton();
 	static void pop();
 };
 

@@ -4,7 +4,7 @@
 /// Constructor
 /// </summary>
 Macro::Macro()
-    : _gamepadClient(nullptr), _masterOfPuppets(nullptr), masterIndex(-1)
+    : _gamepadClient(nullptr), _guestList(nullptr)
 {
 }
 
@@ -12,10 +12,9 @@ Macro::Macro()
 /// Initializes Macro module.
 /// </summary>
 /// <param name="gamepadClient"></param>
-void Macro::init(GamepadClient& gamepadClient, MasterOfPuppets& masterOfPuppets, Guest& host) {
+void Macro::init(GamepadClient& gamepadClient, GuestList& guestList) {
     _gamepadClient = &gamepadClient;
-	_masterOfPuppets = &masterOfPuppets;
-	_host = &host;
+	_guestList = &guestList;
 }
 
 /// <summary>
@@ -30,7 +29,18 @@ void Macro::run() {
 		if (!cmdList.front().pressed) {
 
 			ParsecGamepadButtonMessage btn = createButtonMessage(cmdList.front().button, true);
-			sendButtonForAll(btn);
+
+			if (cmdList.front().padIndex != -1) {
+				sendButtonForPad(cmdList.front().padIndex, btn);
+			} else 
+
+				if (cmdList.front().guestId != -1) {
+					sendButtonForGuest(cmdList.front().guestId, btn);
+				}
+				else {
+					sendButtonForAll(btn);
+				}
+
 			cmdList.front().pressed = true;
 
 		}
@@ -38,26 +48,23 @@ void Macro::run() {
 
 			// Depress
 			ParsecGamepadButtonMessage btn = createButtonMessage(cmdList.front().button, false);
-			sendButtonForAll(btn);
+
+			if (cmdList.front().padIndex != -1) {
+				sendButtonForPad(cmdList.front().padIndex, btn);
+			}
+			else
+
+				if (cmdList.front().guestId != -1) {
+					sendButtonForGuest(cmdList.front().guestId, btn);
+				}
+				else {
+					sendButtonForAll(btn);
+				}
 
 			// Remove from queue
 			cmdList.erase(cmdList.begin());
 
 		}
-
-	}
-
-	// Waiting for button queue to clear?
-	if (isWaiting && waitTimer.isFinished()) {
-
-		// Disable puppets
-		_masterOfPuppets->setMasterIndex(-1);
-		std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin();
-		for (; gi != _gamepadClient->gamepads.end(); ++gi) {
-			(*gi)->isPuppet = false;
-		}
-
-		isWaiting = false;
 
 	}
 
@@ -69,13 +76,40 @@ void Macro::run() {
 /// <param name="button"></param>
 void Macro::pressButtonForAll(ParsecGamepadButton button) {
 
-	// Start a stopwatch to disable puppets
-	waitTimer.reset(1000 * cmdList.size());
-	waitTimer.start();
-	isWaiting = true;
+	// Create new command
+	Macro::Cmd cmd = Macro::Cmd();
+	cmd.button = button;
+
+	// Enqueue
+	cmdList.push_back(cmd);
+
+}
+
+/// <summary>
+/// Enqueues a button press for a specified gamepad.
+/// </summary>
+/// <param name="button"></param>
+void Macro::pressButtonForPad(int padIndex, ParsecGamepadButton button) {
 
 	// Create new command
 	Macro::Cmd cmd = Macro::Cmd();
+	cmd.padIndex = padIndex;
+	cmd.button = button;
+
+	// Enqueue
+	cmdList.push_back(cmd);
+
+}
+
+/// <summary>
+/// Enqueues a button press for everyone.
+/// </summary>
+/// <param name="button"></param>
+void Macro::pressButtonForGuest(int guestIndex, ParsecGamepadButton button) {
+
+	// Create new command
+	Macro::Cmd cmd = Macro::Cmd();
+	cmd.guestId = guestIndex;
 	cmd.button = button;
 
 	// Enqueue
@@ -97,6 +131,42 @@ void Macro::sendButtonForAll(ParsecGamepadButtonMessage button) {
 	std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin();
 	for (; gi != _gamepadClient->gamepads.end(); ++gi) {
 		_gamepadClient->sendButtonMessageForPad((*gi), button);
+	}
+
+}
+
+/// <summary>
+/// Press a button for specified pad.
+/// </summary>
+/// <param name="button">The button to press.</param>
+void Macro::sendButtonForPad(int padIndex, ParsecGamepadButtonMessage button) {
+
+	ParsecMessage message = {};
+	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
+	message.gamepadButton = button;
+
+	// Press button for other pad
+	_gamepadClient->sendButtonMessageForPad(_gamepadClient->getGamepad(padIndex), button);
+
+}
+
+/// <summary>
+/// Press a button for guest's pad.
+/// </summary>
+/// <param name="button">The button to press.</param>
+void Macro::sendButtonForGuest(int guestId, ParsecGamepadButtonMessage button) {
+
+	ParsecMessage message = {};
+	message.type = ParsecMessageType::MESSAGE_GAMEPAD_BUTTON;
+	message.gamepadButton = button;
+
+	// Press button for other pad
+	std::vector<AGamepad*>::iterator gi = _gamepadClient->gamepads.begin();
+	for (; gi != _gamepadClient->gamepads.end(); ++gi) {
+		if ((*gi)->owner.guest.userID == guestId) {
+			_gamepadClient->sendButtonMessageForPad((*gi), button);
+			return;
+		}
 	}
 
 }

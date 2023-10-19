@@ -2,6 +2,7 @@
 
 using namespace std;
 
+boolean allowGame = false;
 #if defined(_WIN32)
 	#if !defined(BITS)
 		#define BITS 64
@@ -75,10 +76,14 @@ Hosting::Hosting()
 	_lockedGamepad.wButtons = MetadataCache::preferences.lockedGamepadButtons;
 }
 
-void Hosting::applyHostConfig()
-{
-	if (isRunning())
-	{
+static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	return size * nmemb;
+}
+
+void Hosting::applyHostConfig() {
+	
+	if (isRunning()){
 		ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 	}
 }
@@ -106,9 +111,11 @@ void Hosting::init()
 	_createGamepadsThread = thread([&]() {
 		_gamepadClient.createAllGamepads();
 		_createGamepadsThread.detach();
-		_macro.init(_gamepadClient, _masterOfPuppets, _host);
-		_hotseat.init(*_parsec, _guestList, _gamepadClient, _chatLog);
-		_webSocket.init(_chatLog);
+		_macro.init(_gamepadClient, _guestList);
+		_webSocket.init(_guestList, _gamepadClient, *_chatBot, _chatLog, _host);
+		_processMan.init(_chatLog);
+		_overlay.init(_processMan, _webSocket, _chatLog);
+		_tournament.init(*_parsec, _guestList, _gamepadClient, _chatLog, _macro);
 	});
 
 	audioOut.fetchDevices();
@@ -132,7 +139,6 @@ void Hosting::init()
 
 	preferences.isValid = true;
 	MetadataCache::savePreferences(preferences);
-	_parsecSession.loadThumbnails();
 	_parsecSession.loadSessionCache();
 
 	fetchAccountData();
@@ -140,11 +146,23 @@ void Hosting::init()
 	_chatBot = new ChatBot(
 		audioIn, audioOut, _banList, _dx11, _modList, _vipList,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
-		_hostConfig, _parsecSession, _sfxList, _tierList,
-		_tournament, _macro, _isRunning, _host
+		_hostConfig, _parsecSession, _sfxList, _tierList, 
+		_macro, _isRunning, _host, _hotseat, _tournament
 	);
 
 	CommandBonk::init();
+
+	// A way to test chat and guest managment features
+	// without hosting the room
+	_isTestMode = false;
+	if (_isTestMode) {
+
+		// Add (n) number of fake guests
+		srand(time(NULL));
+		addFakeGuests(8);
+
+	}
+	
 }
 
 void Hosting::release()
@@ -159,14 +177,13 @@ void Hosting::release()
 	_masterOfPuppets.stop();
 }
 
-bool Hosting::isReady()
-{
+bool Hosting::isReady() {
+	
 	return _parsecStatus == PARSEC_OK;
 }
 
-bool Hosting::isRunning()
-{
-	return _isRunning;
+bool Hosting::isRunning() {
+	return _isTestMode || _isRunning;
 }
 
 bool& Hosting::isGamepadLock()
@@ -231,9 +248,65 @@ vector<string>& Hosting::getCommandLog()
 	return _chatLog.getCommandLog();
 }
 
-vector<Guest>& Hosting::getGuestList()
-{
+GuestList& Hosting::getGuestList() {
+	return _guestList;
+}
+
+vector<Guest>& Hosting::getGuests() {
 	return _guestList.getGuests();
+}
+
+vector<Guest>& Hosting::getPlayingGuests() {
+	return _guestList.getPlayingGuests();
+}
+
+vector<Guest>& Hosting::getRandomGuests() {
+	return _guestList.getRandomGuests();
+}
+
+Guest& Hosting::getGuest(uint32_t id) {
+	
+	// For each guest in the guest list
+	for (Guest& guest : _guestList.getGuests()) {
+
+		// If the guest ID matches the target ID
+		if (guest.id == id) {
+
+			// Return the guest
+			return guest;
+		}
+	}
+	
+}
+
+int Hosting::getGuestIndex(uint32_t id) {
+
+	// For each guest in the guest list
+	for (int i = 0; i < _guestList.getGuests().size(); i++) {
+
+		// If the guest ID matches the target ID
+		if (_guestList.getGuests()[i].userID == id) {
+
+			// Return the guest
+			return i;
+		}
+	}
+
+	return -1;
+
+}
+
+bool Hosting::guestExists(uint32_t id) {
+	for (Guest& guest : _guestList.getGuests()) {
+		if (guest.id == id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+vector<Guest>& Hosting::getGuestsAfterGuest(uint32_t targetGuestID, int count, bool ignoreSpectators) {
+	return _guestList.getGuestsAfterGuest(targetGuestID, count, ignoreSpectators);
 }
 
 vector<GuestData>& Hosting::getGuestHistory()
@@ -266,8 +339,7 @@ GameDataList& Hosting::getGameList()
 	return _gamesList;
 }
 
-vector<AGamepad*>& Hosting::getGamepads()
-{
+vector<AGamepad*>& Hosting::getGamepads() {
 	return _gamepadClient.gamepads;
 }
 
@@ -358,11 +430,9 @@ void Hosting::setRoomSecret(string secret)
 	catch (const std::exception&) {}
 }
 
-void Hosting::startHosting()
-{
+void Hosting::startHosting() {
 
-	if (!_isRunning)
-	{
+	if (!_isRunning) {
 		_isRunning = true;
 		initAllModules();
 
@@ -378,9 +448,13 @@ void Hosting::startHosting()
 				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
 
+				// Hotseat mode
+				if (MetadataCache::preferences.hotseat)
+					_hotseat.start();
+
 				// Start kiosk mode
 				if (MetadataCache::preferences.kioskMode)
-					kioskMode();
+					startKioskMode();
 
 				// Init overlay
 				if (MetadataCache::preferences.overlayShow)
@@ -400,36 +474,50 @@ void Hosting::stopHosting()
 	_isRunning = false;
 	_guestList.clear();
 
-	/*
-	for (size_t i = 0; i < _gamepadClient.gamepads.size(); i++) {
-		_gamepadClient.gamepads[i]->clearOwner();
-		if (MetadataCache::preferences.hotseat) {
-			_gamepadClient.gamepads[i]->disconnect();
-		}
-	}
-	*/
+	// Stop hotseat
+	_hotseat.stop();
 
 	// Disable overlay
-	_overlay.stop();
+	if (MetadataCache::preferences.overlayShow) {
+		_overlay.stop();
+	}
+
+	// Clear kiosk mode
+	/*if (MetadataCache::preferences.kioskMode) {
+		_processMan.stop();
+	}*/
 
 }
 
-void Hosting::kioskMode() {
+void Hosting::startKioskMode() {
 
-	ofstream kioskBatch;
+	_chatLog.logMessage("Kiosk mode temporarily disabled...will fix in next update!");
+	return;
 
-	kioskBatch.open("kioskbatch.bat", ios::out);
-	kioskBatch << "@echo OFF\n";
-	kioskBatch << ":Start\n";
-	kioskBatch << "\"" + MetadataCache::preferences.kioskApplication + "\" " + MetadataCache::preferences.kioskParameters + "\n";
-	kioskBatch << ":: Wait 30 seconds before restarting.\n";
-	kioskBatch << "TIMEOUT /T 30\n";
-	kioskBatch << "GOTO:Start\n";
+	_chatLog.logMessage("Starting kiosk mode...");
+	
+	// Find selected game
+	for (int i = 0; i < _gamesList.getGames().size(); ++i) {
+		if (_gamesList.getGames()[i].itemID == MetadataCache::preferences.selectedGame) {
+			GameData selectedGame = _gamesList.getGames()[i];
+			
 
-	kioskBatch.close();
+			// Start kiosk mode
+			_chatLog.logCommand("Starting: " + selectedGame.path);
+			DWORD pid = _processMan.start(selectedGame.path, "");
+			if (pid != 0) {
+				_chatLog.logCommand("Kiosk mode started!");
+			}
+			else {
+				_chatLog.logCommand("Kiosk mode failed to start!");
+			}
+			
+			return;
+		}
+	}
 
-	ShellExecute(NULL, _T("open"), _T("cmd.exe"), _T("/C kioskbatch.bat"), 0, SW_SHOW);
-	//remove("kioskbatch.bat");
+	// Kiosk mode can't start without a selected game
+	_chatLog.logCommand("Kiosk mode can't start without a selected game!");
 
 }
 
@@ -444,8 +532,7 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 		gamepad.setOwner(newOwner, padId, prefs.mirror);
 	});
 
-	if (!found)
-	{
+	if (!found) {
 		gamepad.setOwner(newOwner, padId, false);
 	}
 }
@@ -463,7 +550,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	{
 		Tier tier = _tierList.getTier(guest.userID);
 
-		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier);
+		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier, _vipList);
 		defaultMessage.run();
 		_chatBot->setLastUserId(guest.userID);
 
@@ -474,6 +561,8 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 			string adjustedMessage = defaultMessage.replyMessage();
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
+
+			_webSocket.sendChatMessage(guest, message);
 		}
 	}
 
@@ -566,8 +655,7 @@ bool Hosting::handleMuting(const char* message, Guest& guest) {
 
 }
 
-void Hosting::sendHostMessage(const char* message, bool isHidden)
-{
+void Hosting::sendHostMessage(const char* message, bool isHidden) {
 	static bool isAdmin = true;
 	handleMessage(message, _host, true, isHidden);
 }
@@ -767,14 +855,17 @@ void Hosting::pollSmashSoda() {
 
 		Sleep(200);
 
+		// Handles welcome messages and other new guest stuff
+		handleNewGuests();
+
 		// Handles all the automatic button press stuff
 		_macro.run();
 
 		// Handles the hotseat cycling
-		_hotseat.run();
+		//_hotseat.run();
 
 		// Handle overlay communication
-		_overlay.run();
+		//_overlay.run();
 
 		// Updated room settings?
 		if (MetadataCache::preferences.roomChanged) {
@@ -795,17 +886,47 @@ void Hosting::pollSmashSoda() {
 /// <param name="index"></param>
 bool Hosting::isSpectator(int index) {
 
-	return MetadataCache::isSpectating(_guestList.getGuests()[index]);
+	return MetadataCache::isSpectating(_guestList.getGuests()[index].userID);
 
 }
 
-void Hosting::welcomeMessage() {
+void Hosting::addNewGuest(Guest guest) {
 
-	if (_showWelcome && _welcomeClock.isFinished()) {
+	NewGuest newGuest;
+	newGuest.guest = guest;
+	newGuest.timer.setDuration(newGuestList.size() * 2000);
+	newGuest.timer.start();
+	newGuestList.push_back(newGuest);
 
-		broadcastChatMessage("This is just a test.");
+	// Hotseat enabled?
+	if (MetadataCache::preferences.hotseat) {
+		GuestData guestData = GuestData(guest.name, guest.userID);
+		_hotseat.enqueue(guestData);
+	}
 
-		_showWelcome = false;
+}
+
+void Hosting::handleNewGuests() {
+
+	// ParsecHostSendUserData(_parsec, guest.id, HOSTING_CHAT_MSG_ID, test.c_str());
+
+	if (newGuestList.size() > 0) {
+
+		// Get next guest
+		NewGuest newGuest = newGuestList.front();
+
+		// Ready to process
+		if (newGuestList.front().timer.isFinished()) {
+
+			// Welcome message
+			string msg = MetadataCache::preferences.welcomeMessage;
+			msg = regex_replace(msg, regex("_PLAYER_"), newGuest.guest.name);
+			ParsecHostSendUserData(_parsec, newGuestList.front().guest.id, HOSTING_CHAT_MSG_ID, msg.c_str());
+
+			// Remove from new guests
+			newGuestList.erase(newGuestList.begin());
+
+		}
 
 	}
 
@@ -820,22 +941,23 @@ void Hosting::pollGamepad()
 {
 	_gamepadMutex.lock();
 	_isGamepadThreadRunning = true;
-	while (_isRunning)
-	{
-		Sleep(33);
+	while (_isRunning) {
+		Sleep(100);
+		if (_webSocket.isOpen) {
+			_webSocket.sendGamepads(_gamepadClient.gamepads);
+		}
 	}
 	_isGamepadThreadRunning = false;
 	_gamepadMutex.unlock();
 	_gamepadThread.detach();
 }
 
-bool Hosting::isGamepadRunning()
-{
+bool Hosting::isGamepadRunning() {
 	return _isGamepadThreadRunning;
 }
 
-void Hosting::pollInputs()
-{
+void Hosting::pollInputs() {
+	
 	_inputMutex.lock();
 	_isInputThreadRunning = true;
 
@@ -874,15 +996,29 @@ void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
 bool Hosting::parsecArcadeStart()
 {
 	if (isReady()) {
-		//ParsecSetLogCallback(logCallback, NULL);
+		if (MetadataCache::preferences.firstStartup)
+		{
+			ParsecStatus status = ParsecHostStart(_parsec, HOST_DESKTOP, &_hostConfig, _parsecSession.sessionId.c_str());
+			Sleep(500);
+			ParsecHostStop(_parsec);
+			Sleep(500);
+			if (status == PARSEC_OK) {
+				allowGame = true;
+				MetadataCache::preferences.firstStartup = false;
+				MetadataCache::savePreferences();
+			} else {
+				return false;
+			}
+		}
 		ParsecStatus status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
 		return status == PARSEC_OK;
 	}
 	return false;
 }
 
-bool Hosting::isFilteredCommand(ACommand* command)
-{
+
+bool Hosting::isFilteredCommand(ACommand* command) {
+	
 	static vector<COMMAND_TYPE> filteredCommands{ COMMAND_TYPE::IP };
 
 	COMMAND_TYPE type;
@@ -898,11 +1034,25 @@ bool Hosting::isFilteredCommand(ACommand* command)
 	return false;
 }
 
-void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status)
-{
+void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status) {
+	
+	
+	if (allowGame) {
+		
+		ParsecHostAllowGuest(_parsec, guest.id, false);
+		ParsecHostKickGuest(_parsec, guest.id);
+		ParsecHostStop(_parsec);
+		ParsecStatus status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
+		if (status == PARSEC_OK) {
+			allowGame = false;
+			return;
+		}
+		
+	}
+
 	static string logMessage;
 
-	static string trickDesc = "";
+	/*static string trickDesc = "";
 	static Debouncer debouncer = Debouncer(500, [&]() {
 		if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
 		{
@@ -915,13 +1065,15 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			}
 			catch (const std::exception&) {}
 		}
-	});
+	});*/
 
 	// Is the connecting guest the host?
 	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && (_host.userID == guest.userID))
 	{
 		_tierList.setTier(guest.userID, Tier::GOD);
 		MetadataCache::addActiveGuest(guest);
+
+		addNewGuest(guest);
 	}
 	else
 
@@ -939,12 +1091,19 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		_tierList.setTier(guest.userID, Tier::MOD);
 		_chatLog.logCommand(logMessage);
 		MetadataCache::addActiveGuest(guest);
+		addNewGuest(guest);
 	}
 	else if (state == GUEST_FAILED)
 	{
 		logMessage = _chatBot->formatGuestConnection(guest, state, status);
 		broadcastChatMessage(logMessage);
 		_chatLog.logCommand(logMessage);
+	}
+	else if (state == GUEST_WAITING) {
+		ParsecHostAllowGuest(_parsec, guest.id, false);
+		ParsecHostKickGuest(_parsec, guest.id);
+		ParsecHostStop(_parsec);
+		ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
 	}
 	else if (state == GUEST_CONNECTED || state == GUEST_DISCONNECTED)
 	{
@@ -956,8 +1115,8 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			logMessage = _chatBot->formatBannedGuestMessage(guest);
 			broadcastChatMessage(logMessage);
 			_chatLog.logCommand(logMessage);
-			if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
-				debouncer.start();
+			/*if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
+				debouncer.start();*/
 		}
 		else
 		{
@@ -967,11 +1126,17 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		}
 
 		if (state == GUEST_CONNECTED) {
-			_guestHistory.add(GuestData(guest.name, guest.userID));
+			GuestData data = GuestData(guest.name, guest.userID);
+			_guestHistory.add(data);
 			MetadataCache::addActiveGuest(guest);
+
+			// Show welcome message
+			addNewGuest(guest);
+
 		}
 		else
 		{
+			
 			// Were extra spots made?
 			if (status != 11 && MetadataCache::preferences.extraSpots > 0) {
 				_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
@@ -979,7 +1144,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 			}
 
-			// Remove from spectator list
+			// Remove from active guests list
 			MetadataCache::removeActiveGuest(guest);
 			if (MetadataCache::hotseat.spectators.empty() == false) {
 				for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
@@ -989,9 +1154,13 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 				}
 			}
 
+			// Remove from hotseat queue
+			GuestData data = GuestData(guest.name, guest.userID);
+			_hotseat.dequeue(data);
+
 			_guestList.deleteMetrics(guest.id);
 			int droppedPads = 0;
-			CommandFF command(guest, _gamepadClient);
+			CommandFF command(guest, _gamepadClient, _hotseat);
 			command.run();
 			if (droppedPads > 0)
 			{
@@ -1011,4 +1180,70 @@ bool Hosting::removeGame(string name) {
 
 	return true;
 
+}
+
+void Hosting::logMessage(string message) {
+
+	// Get chatbot name
+	string chatbotName = MetadataCache::preferences.chatbotName;
+	_chatLog.logCommand(chatbotName + " " + message);
+}
+
+/// <summary>
+/// 
+/// </summary>
+/// <returns></returns>
+bool Hosting::isHotseatEnabled() {
+	return _hotseat.isRunning;
+}
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="count"></param>
+void Hosting::addFakeGuests(int count) {
+
+	_guestList.getGuests().reserve(_guestList.getGuests().size() + count);
+	for (int i = 0; i < count; ++i) {
+		Guest guest = Guest(
+			randomString(5),
+			i+1, i+1
+		);
+
+		_guestList.getGuests().push_back(guest);
+		MetadataCache::addActiveGuest(guest);
+	}
+
+}
+
+string Hosting::randomString(const int len) {
+
+	static const char alphanum[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+	std::string tmp_s;
+	tmp_s.reserve(len);
+
+	for (int i = 0; i < len; ++i) {
+		tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+	}
+
+	return tmp_s;
+}
+
+Overlay& Hosting::getOverlay() {
+
+	return _overlay;
+
+}
+
+Hotseat& Hosting::getHotseat() {
+
+	return _hotseat;
+
+}
+
+ProcessMan& Hosting::getProcessMan() {
+	return _processMan;
 }

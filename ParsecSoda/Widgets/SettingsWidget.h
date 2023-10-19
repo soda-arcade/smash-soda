@@ -19,6 +19,7 @@ public:
 	bool render();
 	void renderGeneral();
 	void renderChatbot();
+	void renderLog();
 
 private:
 	// Dependency injection
@@ -31,11 +32,14 @@ private:
 	bool _disableKeyboard = false;
 	bool _latencyLimitEnabled = false;
 	bool _leaderboardEnabled = false;
+	bool _prependPingLimit = false;
 	unsigned int _latencyLimitValue = 0;
 	unsigned int _theme = 0;
 	char _discord[HOST_NAME_LEN] = "";
 	char _chatbot[HOST_NAME_LEN] = "";
 	char _welcomeMessage[256] = "";
+
+	char _prependRegion[128] = "";
 
 	int32_t _muteTime;
 	bool _autoMute;

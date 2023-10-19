@@ -70,17 +70,43 @@ private:
 	{
 		bool result = false;
 
-		_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + target.name + " was made a VIP!\0";
+		if (!_vip.isVIP(target.userID)) {
 
-		if (_vip.VIP(target))
-		{
+			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + target.name + " was made a VIP!\0";
+
+			if (_vip.VIP(target)) {
+
+				try {
+					PlaySound(TEXT("./SFX/vip.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				}
+				catch (const std::exception&) {}
+
+				result = true;
+			}
+
+		}
+		else {
+
+			GuestData unmoddedGuest;
+			bool found = false;
 
 			try {
-				PlaySound(TEXT("./SFX/vip.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+				found = _vip.unVIP(target.name, [&unmoddedGuest](GuestData& guest) {
+					unmoddedGuest = guest;
+					});
 			}
-			catch (const std::exception&) {}
+			catch (const std::exception&) { found = false; }
 
-			result = true;
+			if (found) {
+				std::ostringstream reply;
+				reply
+					<< MetadataCache::preferences.chatbotName + " " << _sender.name << " has revoked VIP permissions for:\n"
+					<< "\t\t" << unmoddedGuest.name << "\t(#" << unmoddedGuest.userID << ")\0";
+				_replyMessage = reply.str();
+				_guestHistory.add(unmoddedGuest);
+				return true;
+			}
+
 		}
 
 		return result;

@@ -72,6 +72,14 @@ ID3D11ShaderResourceView* AppIcons::editReason;
 ID3D11ShaderResourceView* AppIcons::buttonLock;
 
 ID3D11ShaderResourceView* AppIcons::library;
+ID3D11ShaderResourceView* AppIcons::overlay;
+
+ID3D11ShaderResourceView* AppIcons::hotseat;
+ID3D11ShaderResourceView* AppIcons::tournament;
+
+ID3D11ShaderResourceView* AppIcons::crown;
+ID3D11ShaderResourceView* AppIcons::star;
+ID3D11ShaderResourceView* AppIcons::eye;
 
 Texture AppIcons::_play;
 Texture AppIcons::_stop;
@@ -144,6 +152,14 @@ Texture AppIcons::_editReason;
 Texture AppIcons::_buttonLock;
 
 Texture AppIcons::_library;
+Texture AppIcons::_overlay;
+
+Texture AppIcons::_hotseat;
+Texture AppIcons::_tournament;
+
+Texture AppIcons::_crown;
+Texture AppIcons::_star;
+Texture AppIcons::_eye;
 
 void AppIcons::init(ID3D11Device* pd3dDevice)
 {
@@ -218,6 +234,14 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _buttonLock.loadFromFile(pd3dDevice, "./Icons/buttonlock.png");
 
     _library.loadFromFile(pd3dDevice, "./Icons/library.png");
+    _overlay.loadFromFile(pd3dDevice, "./Icons/overlay.png");
+
+    _hotseat.loadFromFile(pd3dDevice, "./Icons/hotseat.png");
+    _tournament.loadFromFile(pd3dDevice, "./Icons/tournament.png");
+
+	_crown.loadFromFile(pd3dDevice, "./Icons/crown.png");
+	_star.loadFromFile(pd3dDevice, "./Icons/star.png");
+	_eye.loadFromFile(pd3dDevice, "./Icons/eye.png");
 
     play = _play.texture;
     stop = _stop.texture;
@@ -290,4 +314,12 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     buttonLock = _buttonLock.texture;
 
     library = _library.texture;
+    overlay = _overlay.texture;
+
+    hotseat = _hotseat.texture;
+    tournament = _tournament.texture;
+
+	crown = _crown.texture;
+	star = _star.texture;
+	eye = _eye.texture;
 }

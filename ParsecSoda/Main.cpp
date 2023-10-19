@@ -33,11 +33,13 @@
 #include "Widgets/VideoWidget.h"
 #include "Widgets/InfoWidget.h"
 #include "Widgets/VersionWidget.h"
-#include "Widgets/ThumbnailsWidget.h"
 #include "Widgets/MasterOfPuppetsWidget.h"
 #include "Widgets/SettingsWidget.h"
 #include "Widgets/ButtonLockWidget.h"
 #include "Widgets/LibraryWidget.h"
+#include "Widgets/OverlayWidget.h"
+#include "Widgets/HotseatWidget.h"
+#include "Widgets/TournamentWidget.h"
 
 using namespace std;
 
@@ -138,6 +140,9 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     SettingsWidget settingsWidget(g_hosting);
     ButtonLockWidget buttonLockWidget(g_hosting);
     LibraryWidget libraryWidget(g_hosting);
+    OverlayWidget overlayWidget(g_hosting);
+	HotseatWidget hotseatWidget(g_hosting);
+	TournamentWidget tournamentWidget(g_hosting);
 
     ChatWidget chatWindow(g_hosting);
     //FLASHWINFO fi;
@@ -162,25 +167,26 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     ImVec4 clear_color = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
     ImGui::loadStyle(MetadataCache::preferences.theme);
 
-    bool showHostSettings = true;
-    bool showChat = true;
-    bool showLog = true;
-    bool showGuests = true;
-    bool showGamepads = true;
+    bool showHostSettings = MetadataCache::preferences.showHostSettings;
+    bool showChat = MetadataCache::preferences.showChat;
+    bool showLog = MetadataCache::preferences.showLog;
+    bool showGuests = MetadataCache::preferences.showGuests;
+    bool showGamepads = MetadataCache::preferences.showGamepads;
     bool showMasterOfPuppets = MetadataCache::preferences.showMasterOfPuppets;
     bool showAudio = MetadataCache::preferences.showAudio;
     bool showVideo = MetadataCache::preferences.showVideo;
     bool showStyles = true;
     bool showInfo = false;
     bool showLogin = true;
-    bool showThumbs = MetadataCache::preferences.showThumbs;
-    bool showSettings = false;
-    bool showButtonLock = false;
-    bool showLibrary = false;
+    bool showSettings = MetadataCache::preferences.showSettings;
+    bool showButtonLock = MetadataCache::preferences.showButtonLock;
+    bool showLibrary = MetadataCache::preferences.showLibrary;
     bool showUpdate = false;
+    bool showOverlay = false;
+    bool showHotseat = MetadataCache::preferences.showHotseat;
+    bool showTournament = false;
 
     ParsecSession& g_session = g_hosting.getSession();
-    vector<Thumbnail>& g_thumbnails = g_session.getThumbnails();
 
     thread t;
     t = thread([&]() {
@@ -266,14 +272,17 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showAudio)              audioSettingswidget.render();
             if (showVideo)              videoWidget.render();
             if (showInfo)               InfoWidget::render();
-            if (showThumbs)             ThumbnailsWidget::render(g_session, g_thumbnails);
             if (showSettings)           settingsWidget.render();
             if (showButtonLock)         buttonLockWidget.render();
             if (showLibrary)            libraryWidget.render();
+            if (showOverlay)            overlayWidget.render();
+			if (showHotseat)            hotseatWidget.render();
+			if (showTournament)         tournamentWidget.render();
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showThumbs, showLog, showAudio, showVideo, showInfo, showSettings, showButtonLock, showLibrary
+                showGuests, showLog, showAudio, showVideo, showInfo, showSettings, 
+				showButtonLock, showLibrary, showOverlay, showHotseat, showTournament
             );
             hostInfoWidget.render();
         }
@@ -307,6 +316,9 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    // Make sure all pads completely removed
+    g_hosting.getGamepadClient().disconnectAllGamepads();
 
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);

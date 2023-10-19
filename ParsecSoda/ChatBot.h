@@ -36,6 +36,7 @@
 #include "Commands/CommandIpFilter.h"
 #include "Commands/CommandJoin.h"
 #include "Commands/CommandKick.h"
+#include "Commands/CommandKOTH.h"
 #include "Commands/CommandMic.h"
 #include "Commands/CommandMirror.h"
 #include "Commands/CommandMod.h"
@@ -61,15 +62,18 @@
 #include "Commands/CommandStrip.h"
 #include "Commands/CommandSwap.h"
 #include "Commands/CommandTimer.h"
+#include "Commands/CommandTriangle.h"
 #include "Commands/CommandUnban.h"
 #include "Commands/CommandUnmod.h"
 #include "Commands/CommandUnVIP.h"
 #include "Commands/CommandVideoFix.h"
 #include "Commands/CommandVIP.h"
+#include "Commands/CommandWin.h"
 #include "CompilerDirectives.h"
 #include "MetadataCache.h"
-#include "Modules/Tournament.h"
 #include "Modules/Macro.h"
+#include "Modules/Hotseat.h"
+#include "Modules/Tournament.h"
 #include "VIPList.h"
 
 #define BOT_GUESTID 0
@@ -81,11 +85,13 @@ public:
 	ChatBot(
 		AudioIn& audioIn, AudioOut& audioOut, BanList& ban, DX11& dx11, ModList& mod, VIPList& vip,
 		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
-		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, Tournament& tournament, Macro& macro, bool& hostingLoopController, Guest& host
+		ParsecSession& parsecSession, SFXList& sfxList, TierList& _tierList, Macro& macro, bool& hostingLoopController, Guest& host,
+		Hotseat& hotseat, Tournament& tournament
 	)
 		: _audioIn(audioIn), _audioOut(audioOut), _ban(ban), _dx11(dx11), _mod(mod), _vip(vip),
 		_gamepadClient(gamepadClient), _guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), 
-		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _tournament(tournament), _macro(macro), _hostingLoopController(hostingLoopController), _host(host)
+		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _macro(macro), _hostingLoopController(hostingLoopController), _host(host),
+		_hotseat(hotseat), _tournament(tournament)
 	{
 		_basicVersion = MetadataCache::preferences.basicVersion;
 	}
@@ -124,8 +130,9 @@ private:
 	ParsecSession &_parsecSession;
 	SFXList& _sfxList;
 	TierList& _tierList;
-	Tournament& _tournament;
 	Macro& _macro;
+	Hotseat& _hotseat;
+	Tournament& _tournament;
 	bool &_hostingLoopController;
 	Guest& _host;
 	bool _basicVersion = false;
