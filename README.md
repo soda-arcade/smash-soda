@@ -1,3 +1,8 @@
+<b>
+Alas, Parsec have shut down their arcade service and third party application support, so the good times are over! Archiving this project for now, but I have heard murmurs of
+Parsec having internal discussions for ongoing support for Parsec Soda. Fingers crossed!
+</b>
+
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
