@@ -35,7 +35,7 @@ Hosting::Hosting()
 		MetadataCache::preferences.roomName,
 		MetadataCache::preferences.gameID,
 		MetadataCache::preferences.guestCount,
-		MetadataCache::preferences.publicRoom,
+		true,
 		secret
 	);
 	setHostVideoConfig(MetadataCache::preferences.fps, MetadataCache::preferences.bandwidth);
@@ -426,6 +426,7 @@ void Hosting::setRoomName(string roomName)
 
 void Hosting::setRoomSecret(string secret)
 {
+
 	try
 	{
 		strcpy_s(_hostConfig.secret, secret.c_str());
