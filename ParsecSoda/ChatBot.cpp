@@ -9,7 +9,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 
 	// Pleb commands
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
-	if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
+	//if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
 	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
 	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient, _hotseat);
 	if (msgIsEqual(msg, Command8Ball::prefixes()))		return new Command8Ball(sender);
@@ -23,12 +23,12 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList, _gamepadClient, _hotseat);
 	if (msgStartsWith(msg, CommandRequest::prefixes()))	return new CommandRequest(msg);
 	//if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
-	if (msgIsEqual(msg, CommandTriangle::prefixes()))	return new CommandTriangle(sender, _gamepadClient, _macro);
+	//if (msgIsEqual(msg, CommandTriangle::prefixes()))	return new CommandTriangle(sender, _gamepadClient, _macro);
 	
 	// Tournaments
-	if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _tierList, _tournament);
-	if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _tierList, _tournament);
-	if (msgStartsWith(msg, CommandKOTH::prefixes()))	return new CommandKOTH(msg, _tierList, _tournament);
+	//if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _tierList, _tournament);
+	//if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _tierList, _tournament);
+	//if (msgStartsWith(msg, CommandKOTH::prefixes()))	return new CommandKOTH(msg, _tierList, _tournament);
 
 //#if !BASIC_VERSION
 	if (!_basicVersion)
