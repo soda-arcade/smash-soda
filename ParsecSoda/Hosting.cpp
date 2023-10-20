@@ -21,6 +21,14 @@ using namespace std;
 
 Hosting::Hosting()
 {
+	
+	// Create a random 8 character string
+	srand(time(NULL));
+	string secret = "";
+	for (int i = 0; i < 8; i++) {
+		secret += (char)(rand() % 26 + 97);
+	}
+	
 	_hostConfig = EMPTY_HOST_CONFIG;
 	MetadataCache::loadPreferences();
 	setHostConfig(
@@ -28,7 +36,7 @@ Hosting::Hosting()
 		MetadataCache::preferences.gameID,
 		MetadataCache::preferences.guestCount,
 		MetadataCache::preferences.publicRoom,
-		MetadataCache::preferences.secret
+		secret
 	);
 	setHostVideoConfig(MetadataCache::preferences.fps, MetadataCache::preferences.bandwidth);
 
