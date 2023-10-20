@@ -28,6 +28,7 @@ Hosting::Hosting()
 	for (int i = 0; i < 8; i++) {
 		secret += (char)(rand() % 26 + 97);
 	}
+	MetadataCache::preferences.secret = secret;
 	
 	_hostConfig = EMPTY_HOST_CONFIG;
 	MetadataCache::loadPreferences();
