@@ -188,7 +188,6 @@ private:
 	TierList _tierList;
 	Macro _macro;
 	Hotseat _hotseat;
-	WebSocket _webSocket;
 	Overlay _overlay;
 	ProcessMan _processMan;
 	Tournament _tournament;

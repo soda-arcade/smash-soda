@@ -24,7 +24,7 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
             strcpy_s(_kioskParam, "");
         } catch (const std::exception&) {}
     }
-    _publicGame = cfg.publicGame;
+    _publicGame = false; // should be false
     _maxGuests = cfg.maxGuests;
     
     _micVolume = MetadataCache::preferences.micVolume;
@@ -113,6 +113,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     // Vector of themes
     AppStyle::pushLabel();
     ImGui::Text("GAME");
+    AppStyle::pop();
     AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     vector<GameData> games = _hosting.getGameList().getGames();
@@ -159,6 +160,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 		}
         ImGui::EndCombo();
     }
+    AppStyle::pop();
     AppStyle::pushLabel();
 	ImGui::TextWrapped("Automatically configure settings for a specific game in your library.");
     AppStyle::pop();
@@ -177,9 +179,11 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     AppStyle::pushLabel();
     ImGui::Text("SHARE LINK");
+    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x - 10);
     AppStyle::pushInput();
     ImGui::InputText("##Secret link", _secretLink, 128, ImGuiInputTextFlags_ReadOnly);
+    AppStyle::pop();
     AppStyle::pushLabel();
     ImGui::TextWrapped("Users can join your room directly with this link.");
     AppStyle::pop();
@@ -276,6 +280,8 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     }
     ImGui::EndChild();
 
+    AppStyle::pop();
+
     ImGui::Dummy(dummySize);
 
     static bool showPopup = false;
@@ -338,7 +344,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
             savePreferences();
         }
         TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");
-
+        ImGui::PopStyleColor();
         AppStyle::pop();
 
     }

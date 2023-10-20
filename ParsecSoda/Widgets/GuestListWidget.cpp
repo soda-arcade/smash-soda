@@ -127,6 +127,7 @@ void GuestListWidget::renderOnlineGuests()
         ImGui::Indent(5);
         ImGui::Text("%s", name.c_str());
 		ImGui::Unindent(5);
+        AppStyle::pop();
         
         //ImGui::SameLine();
         ImGui::Indent(5);
@@ -204,6 +205,7 @@ void GuestListWidget::renderOnlineGuests()
 		{
             AppStyle::pushInput();
 			ImGui::Text("%s", name.c_str());
+            AppStyle::pop();
 
             ImGui::Dummy(ImVec2(0.0f, 10.0f));
             
@@ -238,10 +240,13 @@ void GuestListWidget::renderOnlineGuests()
                     string("!ban ") + to_string(userID)
                     ).c_str(), true);
 			}
+
+            AppStyle::pop();
 			ImGui::EndPopup();
-            AppFonts::pushInput();
-            AppColors::pushTitle();
+            //AppFonts::pushInput();
+            //AppColors::pushTitle();
 		}
+        AppStyle::pop();
 
         if (ImGui::BeginDragDropSource())
         {
@@ -541,8 +546,8 @@ void GuestListWidget::renderModdedGuests() {
     ImGui::EndChild();
     ImGui::PopStyleVar();
 
-    AppFonts::pushInput();
-    AppColors::pushTitle();
+    //AppFonts::pushInput();
+    //AppColors::pushTitle();
 }
 
 void GuestListWidget::renderVIPGuests() {
@@ -636,6 +641,6 @@ void GuestListWidget::renderVIPGuests() {
     ImGui::EndChild();
     ImGui::PopStyleVar();
 
-    AppFonts::pushInput();
-    AppColors::pushTitle();
+    //AppFonts::pushInput();
+    //AppColors::pushTitle();
 }

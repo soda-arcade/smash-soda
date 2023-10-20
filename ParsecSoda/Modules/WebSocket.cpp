@@ -25,60 +25,61 @@ void WebSocket::init(GuestList& guestList, GamepadClient& gamepadClient, ChatBot
 /// <returns>True if successful</returns>
 bool WebSocket::createConnection() {
 
-	_createConnectionThread = thread([&] {
+    // Server address
+    std::string uri = "ws://localhost:9002";
 
-        // Server address
-        std::string uri = "ws://localhost:9002";
+    try {
 
-        try {
+        // set logging policy if needed
+        _client.clear_access_channels(websocketpp::log::alevel::frame_header);
+        _client.clear_access_channels(websocketpp::log::alevel::frame_payload);
+        //c.set_error_channels(websocketpp::log::elevel::none);
 
-            // set logging policy if needed
-            _client.clear_access_channels(websocketpp::log::alevel::frame_header);
-            _client.clear_access_channels(websocketpp::log::alevel::frame_payload);
-            //c.set_error_channels(websocketpp::log::elevel::none);
+        // Initialize ASIO
+        _client.init_asio();
 
-            // Initialize ASIO
-            _client.init_asio();
+        // Register our handlers
+        _client.set_open_handler(bind(&WebSocket::_onOpen, this, &_client, ::_1));
+        _client.set_fail_handler(bind(&WebSocket::_onFail, this, &_client, ::_1));
+        _client.set_message_handler(bind(&WebSocket::_onMessage, this, &_client, ::_1, ::_2));
+        _client.set_close_handler(bind(&WebSocket::_onClose, this, &_client, ::_1));
 
-            // Register our handlers
-            _client.set_open_handler(bind(&WebSocket::_onOpen, this, &_client, ::_1));
-            _client.set_fail_handler(bind(&WebSocket::_onFail, this, &_client, ::_1));
-            _client.set_message_handler(bind(&WebSocket::_onMessage, this, &_client, ::_1, ::_2));
-            _client.set_close_handler(bind(&WebSocket::_onClose, this, &_client, ::_1));
+        // Create a connection to the given URI and queue it for connection once
+        // the event loop starts
+        websocketpp::lib::error_code ec;
+        client::connection_ptr con = _client.get_connection(uri, ec);
+        _client.connect(con);
 
-            // Create a connection to the given URI and queue it for connection once
-            // the event loop starts
-            websocketpp::lib::error_code ec;
-            client::connection_ptr con = _client.get_connection(uri, ec);
-            _client.connect(con);
+        // Store the connection handle
+        _handle = con->get_handle();
 
-            // Start the ASIO io_service run loop
-            _client.run();
-        }
-        catch (const std::exception& e) {
-            ostringstream out;
-            out << e.what();
-            _log(out.str());
-            return false;
-        }
-        catch (websocketpp::lib::error_code e) {
-            ostringstream out;
-            out << e.message();
-            _log(out.str());
-            return false;
-        }
-        catch (...) {
-            ostringstream out;
-            out << "other exception";
-            _log(out.str());
-            return false;
-        }
+        // Start the ASIO io_service run loop
+        _client.run();
+    }
+    catch (const std::exception& e) {
+        ostringstream out;
+        out << e.what();
+        _log(out.str());
+        return false;
+    }
+    catch (websocketpp::lib::error_code e) {
+        ostringstream out;
+        out << e.message();
+        _log(out.str());
+        return false;
+    }
+    catch (...) {
+        ostringstream out;
+        out << "other exception";
+        _log(out.str());
+        return false;
+    }
 
-        //_createConnectionThread.detach();
-        return true;
+	return true;
+}
 
-	});
-
+void WebSocket::closeConnection() {
+    _client.close(_handle, websocketpp::close::status::normal, "Closing connection");
 }
 
 /// <summary>

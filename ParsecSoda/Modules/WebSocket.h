@@ -36,6 +36,7 @@ public:
 	void init(GuestList& guestList, GamepadClient& gamepadClient, ChatBot& chatBot, ChatLog& chatLog, Guest& _host);
 
 	bool createConnection();
+	void closeConnection();
 
 	void sendChatMessage(Guest guest, string message);
 	void sendLogMessage(string message);

@@ -22,13 +22,16 @@ bool VersionWidget::render()
     ImGui::Begin("##Version", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
     AppStyle::pushInput();
     ImGui::Text("FPS: ");
+    AppStyle::pop();
     ImGui::SameLine();
     AppStyle::pushPositive();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
+    AppStyle::pop();
 
     AppStyle::pushInput();
     std::string versionString = "Smash Soda v. ";
     ImGui::Text(versionString.c_str());
+    AppStyle::pop();
 
     ImGui::SameLine();
     AppStyle::pushPositive();
@@ -37,9 +40,9 @@ bool VersionWidget::render()
     AppStyle::pop();
     ImGui::End();
 
-    ImGui::PopStyleColor();
-    ImGui::PopStyleColor();
-    ImGui::PopStyleColor();
+    //ImGui::PopStyleColor();
+    //ImGui::PopStyleColor();
+    //ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();

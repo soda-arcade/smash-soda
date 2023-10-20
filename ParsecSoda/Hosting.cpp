@@ -111,9 +111,8 @@ void Hosting::init()
 		_gamepadClient.createAllGamepads();
 		_createGamepadsThread.detach();
 		_macro.init(_gamepadClient, _guestList);
-		_webSocket.init(_guestList, _gamepadClient, *_chatBot, _chatLog, _host);
 		_processMan.init(_chatLog);
-		_overlay.init(_processMan, _webSocket, _chatLog);
+		_overlay.init(_processMan, _chatLog);
 		_tournament.init(*_parsec, _guestList, _gamepadClient, _chatLog, _macro);
 	});
 
@@ -209,14 +208,11 @@ void Hosting::fetchAccountData(bool sync)
 {
 	_host.name = "Host";
 	_host.status = Guest::Status::INVALID;
-	if (isReady())
-	{
-		if (sync)
-		{
+	if (isReady()) {
+		if (sync) {
 			_parsecSession.fetchAccountDataSync(&_host);
 		}
-		else
-		{
+		else {
 			_parsecSession.fetchAccountData(&_host);
 		}
 	}
@@ -455,10 +451,6 @@ void Hosting::startHosting() {
 				if (MetadataCache::preferences.kioskMode)
 					startKioskMode();
 
-				// Init overlay
-				if (MetadataCache::preferences.overlayShow)
-					_overlay.start();
-
 			}
 		}
 		catch (const exception&)
@@ -561,7 +553,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
 
-			_webSocket.sendChatMessage(guest, message);
+			_overlay.sendChatMessage(guest, message);
 		}
 	}
 
@@ -873,6 +865,7 @@ void Hosting::pollSmashSoda() {
 		}
 
 	}
+	
 	_isSmashSodaThreadRunning = false;
 	_smashSodaMutex.unlock();
 	_smashSodaThread.detach();
@@ -888,6 +881,7 @@ bool Hosting::isSpectator(int index) {
 	return MetadataCache::isSpectating(_guestList.getGuests()[index].userID);
 
 }
+
 
 void Hosting::addNewGuest(Guest guest) {
 
@@ -942,8 +936,8 @@ void Hosting::pollGamepad()
 	_isGamepadThreadRunning = true;
 	while (_isRunning) {
 		Sleep(100);
-		if (_webSocket.isOpen) {
-			_webSocket.sendGamepads(_gamepadClient.gamepads);
+		if (_overlay.isActive) {
+			_overlay.sendGamepads(_gamepadClient.gamepads);
 		}
 	}
 	_isGamepadThreadRunning = false;
@@ -995,20 +989,16 @@ void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
 bool Hosting::parsecArcadeStart()
 {
 	if (isReady()) {
-		if (MetadataCache::preferences.firstStartup) {
-			ParsecStatus status = ParsecHostStart(_parsec, HOST_DESKTOP, &_hostConfig, _parsecSession.sessionId.c_str());
-			if (status == PARSEC_OK)
-			{
-				allowGame = true;
-				MetadataCache::preferences.firstStartup = false;
-				MetadataCache::savePreferences();
-			}
-			else
-			{
-				return false;
-			}
-		}
-		ParsecStatus status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
+		ParsecStatus status = ParsecHostStart(_parsec, HOST_DESKTOP, &_hostConfig, _parsecSession.sessionId.c_str());
+		Sleep(2000);
+		ParsecHostStop(_parsec);
+		Sleep(1000);
+		status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
+
+		// Init overlay
+		if (MetadataCache::preferences.overlayShow)
+			_overlay.start();
+		
 		return status == PARSEC_OK;
 	}
 	return false;
@@ -1033,20 +1023,6 @@ bool Hosting::isFilteredCommand(ACommand* command) {
 }
 
 void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status) {
-	
-	
-	if (allowGame) {
-		
-		ParsecHostAllowGuest(_parsec, guest.id, false);
-		ParsecHostKickGuest(_parsec, guest.id);
-		ParsecHostStop(_parsec);
-		ParsecStatus status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
-		if (status == PARSEC_OK) {
-			allowGame = false;
-			return;
-		}
-		
-	}
 
 	static string logMessage;
 
@@ -1096,12 +1072,6 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		logMessage = _chatBot->formatGuestConnection(guest, state, status);
 		broadcastChatMessage(logMessage);
 		_chatLog.logCommand(logMessage);
-	}
-	else if (state == GUEST_WAITING) {
-		ParsecHostAllowGuest(_parsec, guest.id, false);
-		ParsecHostKickGuest(_parsec, guest.id);
-		ParsecHostStop(_parsec);
-		ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
 	}
 	else if (state == GUEST_CONNECTED || state == GUEST_DISCONNECTED)
 	{

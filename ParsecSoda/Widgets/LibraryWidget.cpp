@@ -12,6 +12,7 @@ bool LibraryWidget::render() {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
     ImGui::Begin("Library", (bool*)0);
+    AppStyle::pop();
 
     AppStyle::pushInput();
     ImVec2 size = ImGui::GetContentRegionAvail();
@@ -23,6 +24,9 @@ bool LibraryWidget::render() {
 		renderForm(popupEditIndex);
     }
 
+    AppStyle::pop();
+
+    ImGui::End();
     return true;
 
 }
@@ -47,7 +51,7 @@ bool LibraryWidget::renderGameList() {
 
     ImGui::BeginChild("Library List", ImVec2(size.x, size.y));
 
-    AppColors::pushInput();
+    //AppColors::pushInput();
     AppStyle::pushLabel();
     ImGui::Text("FILTER GAMES");
     AppStyle::pop();
@@ -72,9 +76,12 @@ bool LibraryWidget::renderGameList() {
 			_editSeats = 1;
 			showEditForm = true;
         }
-        AppColors::pushButton();
+        ImGui::PopStyleColor(4);
+        //AppColors::pushButton();
 	    ImGui::Unindent(10);
 	ImGui::EndGroup();
+
+
 
     ImGui::Dummy(ImVec2(0, 10));
     ImGui::Separator();
@@ -139,8 +146,10 @@ bool LibraryWidget::renderGameList() {
 			    ImGui::Indent(10);
                 AppStyle::pushInput();
                 ImGui::Text("%s", name.c_str());
+                AppStyle::pop();
 				AppStyle::pushLabel();
 				ImGui::Text("%s", path.c_str());
+                AppStyle::pop();
 				ImGui::Unindent(10);
             ImGui::EndGroup();
 
@@ -149,10 +158,11 @@ bool LibraryWidget::renderGameList() {
         }
 
     ImGui::EndChild();
+    ImGui::EndChild(); // is it supposed to be here. i had to guess
 
     // Widget bottom
     AppStyle::pop();
-    ImGui::End();
+    //ImGui::End();
 
     return true;
 
@@ -219,6 +229,7 @@ bool LibraryWidget::renderForm(int index) {
 		showEditForm = false;
         
 	}
+    AppStyle::pop();
 
 	ImGui::SameLine();
 
@@ -227,6 +238,7 @@ bool LibraryWidget::renderForm(int index) {
 	if (ImGui::Button("Cancel")) {
 		showEditForm = false;
 	}
+    AppStyle::pop();
 
     return true;
     

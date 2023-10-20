@@ -26,6 +26,7 @@ public:
 
         AppStyle::pushLabel();
         ImGui::Text(label.c_str());
+        AppStyle::pop();
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x - 20);
         if (ImGui::InputText(inputLabel.c_str(), buffer, 256)) {
@@ -34,6 +35,7 @@ public:
         else {
             response = false;
         }
+        AppStyle::pop();
         AppStyle::pushLabel();
         ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
@@ -60,6 +62,7 @@ public:
 
         AppStyle::pushLabel();
         ImGui::Text(label.c_str());
+        AppStyle::pop();
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x - 20);
         if (ImGui::InputTextMultiline(inputLabel.c_str(), buffer, 256)) {
@@ -68,6 +71,7 @@ public:
         else {
             response = false;
         }
+        AppStyle::pop();
         AppStyle::pushLabel();
         ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
@@ -95,6 +99,7 @@ public:
 
         AppStyle::pushLabel();
         ImGui::Text(label.c_str());
+        AppStyle::pop();
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x - 20);
         if (IntRangeWidget::render(label.c_str(), value, from, to, 0.025f)) {
@@ -103,6 +108,7 @@ public:
         else {
             response = false;
         }
+        AppStyle::pop();
         AppStyle::pushLabel();
         ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
@@ -128,12 +134,14 @@ public:
 
         AppStyle::pushLabel();
         ImGui::Text(label.c_str());
+        AppStyle::pop();
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x - 20);
         if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, isOn, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
             isOn = !isOn;
             response = true;
         }
+        AppStyle::pop();
         AppStyle::pushLabel();
         ImGui::SetNextItemWidth(size.x - 20);
         ImGui::TextWrapped(description.c_str());
@@ -162,6 +170,7 @@ public:
         if (ImGui::Checkbox(label.c_str(), &isOn)) {
             response = true;
         }
+        AppStyle::pop();
         AppStyle::pushLabel();
         ImGui::SetNextItemWidth(size.x - 40);
         ImGui::TextWrapped(description.c_str());
