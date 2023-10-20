@@ -236,6 +236,10 @@ void Overlay::_onClose(client* c, websocketpp::connection_hdl hdl) {
 /// <param name="message"></param>
 void Overlay::sendChatMessage(Guest guest, string message) {
 
+	if (!isActive) {
+		return;
+	}
+
 	json j;
 	j["id"] = -1;
 	j["type"] = "chat";

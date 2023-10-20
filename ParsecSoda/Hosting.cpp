@@ -540,7 +540,7 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside)
 {
 	// Handle all the auto muting stuff
-	if (!handleMuting(message, guest)) return;
+	//if (!handleMuting(message, guest)) return;
 
 	ACommand* command = _chatBot->identifyUserDataMessage(message, guest, isHost);
 	command->run();
