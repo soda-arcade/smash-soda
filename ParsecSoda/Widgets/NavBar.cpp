@@ -17,8 +17,9 @@ void NavBar::render(
 	bool& showLibrary,
 	bool& showOverlay,
 	bool& showHotseat,
-	bool& showTournament
-)
+	bool& showTournament,
+	bool& showKeyMap
+)//-- CodeSomnia Moidified -- showKeyMap Added
 {
 	static ImVec2 iconSize = ImVec2(24, 24);
 	static ImVec2 windowSize = ImVec2(32+4, 16*30+4);
@@ -64,6 +65,14 @@ void NavBar::render(
 		MetadataCache::preferences.showMasterOfPuppets = showMasterOfPuppets;
 	}
 	renderNavtooltip("Master of Puppets", showMasterOfPuppets);
+
+	//-- CodeSomnia Add Start --
+
+	if (ToggleIconButtonWidget::render(AppIcons::keymap, AppIcons::keymap, showKeyMap, iconSize))
+		showKeyMap = !showKeyMap;
+	renderNavtooltip("KeyboardMap", showKeyMap);
+
+	//-- CodeSomnia Add End --
 
 	if (ToggleIconButtonWidget::render(AppIcons::chat, AppIcons::chat, showChat, iconSize)) {
 		showChat = !showChat;

@@ -98,6 +98,8 @@ public:
 
 	bool canDrop = true;
 
+	KeyboardMap& getKeyMap() { return this->_keyboardMap; }// -- CodeSomnia Add --
+
 private:
 
 	bool sendGamepadStateMessage(ParsecGamepadStateMessage& gamepadState, Guest& guest, int& slots, GuestPreferences prefs = GuestPreferences());
