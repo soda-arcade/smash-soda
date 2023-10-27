@@ -181,6 +181,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Commands\CommandBonk.cpp" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="GameDataList.cpp" />
+    <ClCompile Include="KeyboardMapsUtil.cpp" />
     <ClCompile Include="Models\Seat.cpp" />
     <ClCompile Include="ModList.cpp" />
     <ClCompile Include="DualshockGamepad.cpp" />
@@ -195,6 +196,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="VIPList.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
     <ClCompile Include="Widgets\HotseatWidget.cpp" />
+    <ClCompile Include="Widgets\KeyboardMapWidget.cpp" />
     <ClCompile Include="Widgets\LibraryWidget.cpp" />
     <ClCompile Include="Widgets\OverlayWidget.cpp" />
     <ClCompile Include="Widgets\PopupWidgetEdit.cpp" />
@@ -309,6 +311,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="GameData.h" />
     <ClInclude Include="GameDataList.h" />
     <ClInclude Include="ImGui\imform.h" />
+    <ClInclude Include="KeyboardMapsUtil.h" />
     <ClInclude Include="Models\Seat.h" />
     <ClInclude Include="Modules\Hotseat.h" />
     <ClInclude Include="Modules\Macro.h" />
@@ -324,6 +327,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="VIPList.h" />
     <ClInclude Include="Widgets\ButtonLockWidget.h" />
     <ClInclude Include="Widgets\HotseatWidget.h" />
+    <ClInclude Include="Widgets\KeyboardMapWidget.h" />
     <ClInclude Include="Widgets\LibraryWidget.h" />
     <ClInclude Include="Widgets\OverlayWidget.h" />
     <ClInclude Include="Widgets\PopupWidgetEdit.h" />

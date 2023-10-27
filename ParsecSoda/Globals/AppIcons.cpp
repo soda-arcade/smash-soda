@@ -45,6 +45,7 @@ ID3D11ShaderResourceView* AppIcons::block;
 ID3D11ShaderResourceView* AppIcons::kick;
 
 ID3D11ShaderResourceView* AppIcons::info;
+ID3D11ShaderResourceView* AppIcons::keymap; //-- CodeSomnia Add--
 ID3D11ShaderResourceView* AppIcons::logo;
 
 ID3D11ShaderResourceView* AppIcons::puppet;
@@ -124,6 +125,7 @@ Texture AppIcons::_userOff;
 Texture AppIcons::_block;
 Texture AppIcons::_kick;
 
+Texture AppIcons::_keymap;//-- CodeSomnia Add--
 Texture AppIcons::_info;
 Texture AppIcons::_logo;
 
@@ -207,6 +209,7 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     _kick.loadFromFile(pd3dDevice, "./Icons/kick.png");
 
     _info.loadFromFile(pd3dDevice, "./Icons/info.png");
+    _keymap.loadFromFile(pd3dDevice, "./icons/keymap.png");//-- CodeSomnia Add--
     _logo.loadFromFile(pd3dDevice, "./Icons/logo.png");
 
     _puppet.loadFromFile(pd3dDevice, "./Icons/puppet.png");
@@ -287,6 +290,7 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
     userOff = _userOff.texture;
 
     info = _info.texture;
+    keymap = _keymap.texture;//-- CodeSomnia Add--
     logo = _logo.texture;
 
     puppet = _puppet.texture;

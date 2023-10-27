@@ -40,6 +40,8 @@
 #include "Widgets/OverlayWidget.h"
 #include "Widgets/HotseatWidget.h"
 #include "Widgets/TournamentWidget.h"
+#include "Widgets/KeyboardMapWidget.h"
+// CodeSomnia : Widgets/KeyboardMapWidget.h Added
 
 #include "Modules/Mailman.h"
 
@@ -148,6 +150,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     VersionWidget versionWidget;
 
     ChatWidget chatWindow(g_hosting);
+    KeyboardMapWidget keyMapWidget(g_hosting); //-- CodeSomnia Add Start--
     //FLASHWINFO fi;
     //fi.cbSize = sizeof(FLASHWINFO);
     //fi.hwnd = hwnd;
@@ -187,6 +190,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showOverlay = false;
     bool showHotseat = MetadataCache::preferences.showHotseat;
     bool showTournament = false;
+    bool showKeyMap = true; //-- CodeSomnia Add --
 
     ParsecSession& g_session = g_hosting.getSession();
 
@@ -297,12 +301,22 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showOverlay)            overlayWidget.render();
 			if (showHotseat)            hotseatWidget.render();
 			if (showTournament)         tournamentWidget.render();
+
+            //-- CodeSomnia Add Start--
+            if (showKeyMap)
+                keyMapWidget.render();
+            //-- CodeSomnia Add End--
+            // 
+            //-- CodeSomnia Moidified Start--
+
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
                 showGuests, showLog, showAudio, showVideo, showInfo, showSettings, 
-				showButtonLock, showLibrary, showOverlay, showHotseat, showTournament
+				showButtonLock, showLibrary, showOverlay, showHotseat, showTournament, showKeyMap
             );
+
+            //-- CodeSomnia Moidified End--
             hostInfoWidget.render();
         }
 

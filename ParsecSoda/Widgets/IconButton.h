@@ -11,5 +11,8 @@ class IconButton
 {
 public:
 	static bool render(Icon icon, ImVec4 tint = AppColors::positive, ImVec2 size = ICONBUTTON_SIZE);
+
+	//-- CodeSomnia Add--
+	static bool renderWithLabel(const char* label, Icon icon, ImVec4 tint = AppColors::positive, ImVec2 size = ICONBUTTON_SIZE);
 };
 

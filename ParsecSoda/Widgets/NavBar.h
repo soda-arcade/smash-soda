@@ -31,8 +31,10 @@ public:
         bool& showLibrary,
         bool& showOverlay,
         bool& showHotseat,
-		bool& showTournament
-    );
+		bool& showTournament,
+        bool& showKeyMap
+    );//-- CodeSomnia Moidified --
+      // CodeSomnia : showKeyMap Added
 
 private:
     static void renderNavtooltip(const char* title, bool& show);

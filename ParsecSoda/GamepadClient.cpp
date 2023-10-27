@@ -759,12 +759,15 @@ bool GamepadClient::isRequestButton(ParsecMessage message)
 
 bool GamepadClient::isRequestKeyboard(ParsecMessage message)
 {
+	//-- CodeSomnia Modified Start--
 	return message.keyboard.pressed && (
-		message.keyboard.code == _keyboardMap.A ||
-		message.keyboard.code == _keyboardMap.B ||
-		message.keyboard.code == _keyboardMap.X ||
-		message.keyboard.code == _keyboardMap.Y
-	);
+		_keyboardMap.isA(message.keyboard.code) ||
+		_keyboardMap.isB(message.keyboard.code) ||
+		_keyboardMap.isX(message.keyboard.code) ||
+		_keyboardMap.isY(message.keyboard.code)
+		);
+
+	//-- CodeSomnia Modified End --
 }
 
 void GamepadClient::reduce(function<void(AGamepad*)> func)
@@ -956,10 +959,11 @@ XINPUT_STATE GamepadClient::toXInput(ParsecGamepadAxisMessage& axis, XINPUT_STAT
 
 XINPUT_STATE GamepadClient::toXInput(ParsecKeyboardMessage& key, AGamepad::Keyboard& keyboard, XINPUT_STATE previousState, GuestPreferences& prefs)
 {
+	//-- CodeSomnia Modified Start--
 	XINPUT_STATE result = previousState;
 
 	// Left Stick
-	if (key.code == _keyboardMap.LLeft)
+	if (_keyboardMap.isLLeft(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbLX = GAMEPAD_SHORT_MIN;
 		else result.Gamepad.sThumbLX = keyboard.LRight ? GAMEPAD_SHORT_MAX : 0;
@@ -967,7 +971,7 @@ XINPUT_STATE GamepadClient::toXInput(ParsecKeyboardMessage& key, AGamepad::Keybo
 		keyboard.LLeft = key.pressed;
 	}
 
-	if (key.code == _keyboardMap.LRight)
+	if (_keyboardMap.isLRight(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbLX = GAMEPAD_SHORT_MAX;
 		else result.Gamepad.sThumbLX = keyboard.LLeft ? GAMEPAD_SHORT_MIN : 0;
@@ -975,7 +979,7 @@ XINPUT_STATE GamepadClient::toXInput(ParsecKeyboardMessage& key, AGamepad::Keybo
 		keyboard.LRight = key.pressed;
 	}
 
-	if (key.code == _keyboardMap.LUp)
+	if (_keyboardMap.isLUp(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbLY = GAMEPAD_SHORT_MAX;
 		else result.Gamepad.sThumbLY = keyboard.LDown ? GAMEPAD_SHORT_MIN : 0;
@@ -983,7 +987,7 @@ XINPUT_STATE GamepadClient::toXInput(ParsecKeyboardMessage& key, AGamepad::Keybo
 		keyboard.LUp = key.pressed;
 	}
 
-	if (key.code == _keyboardMap.LDown)
+	if (_keyboardMap.isLDown(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbLY = GAMEPAD_SHORT_MIN;
 		else result.Gamepad.sThumbLY = keyboard.LUp ? GAMEPAD_SHORT_MAX : 0;
@@ -992,28 +996,28 @@ XINPUT_STATE GamepadClient::toXInput(ParsecKeyboardMessage& key, AGamepad::Keybo
 	}
 
 	// Right Stick
-	if (key.code == _keyboardMap.RLeft)
+	if (_keyboardMap.isRLeft(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbRX = GAMEPAD_SHORT_MIN;
 		else result.Gamepad.sThumbRX = keyboard.RRight ? GAMEPAD_SHORT_MAX : 0;
 		keyboard.RLeft = key.pressed;
 	}
 
-	if (key.code == _keyboardMap.RRight)
+	if (_keyboardMap.isRRight(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbRX = GAMEPAD_SHORT_MAX;
 		else result.Gamepad.sThumbRX = keyboard.RLeft ? GAMEPAD_SHORT_MIN : 0;
 		keyboard.RRight = key.pressed;
 	}
 
-	if (key.code == _keyboardMap.RUp)
+	if (_keyboardMap.isRUp(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbRY = GAMEPAD_SHORT_MAX;
 		else result.Gamepad.sThumbRY = keyboard.RDown ? GAMEPAD_SHORT_MIN : 0;
 		keyboard.RUp = key.pressed;
 	}
 
-	if (key.code == _keyboardMap.RDown)
+	if (_keyboardMap.isRDown(key.code))
 	{
 		if (key.pressed) result.Gamepad.sThumbRY = GAMEPAD_SHORT_MIN;
 		else result.Gamepad.sThumbRY = keyboard.RUp ? GAMEPAD_SHORT_MAX : 0;
@@ -1021,32 +1025,33 @@ XINPUT_STATE GamepadClient::toXInput(ParsecKeyboardMessage& key, AGamepad::Keybo
 	}
 
 	// DPad
-	if (key.code == _keyboardMap.DLeft)  Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_LEFT, key.pressed);
-	if (key.code == _keyboardMap.DRight) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_RIGHT, key.pressed);
-	if (key.code == _keyboardMap.DUp)    Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_UP, key.pressed);
-	if (key.code == _keyboardMap.DDown)  Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_DOWN, key.pressed);
+	if (_keyboardMap.isDLeft(key.code))  Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_LEFT, key.pressed);
+	if (_keyboardMap.isDRight(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_RIGHT, key.pressed);
+	if (_keyboardMap.isDUp(key.code))    Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_UP, key.pressed);
+	if (_keyboardMap.isDDown(key.code))  Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_DPAD_DOWN, key.pressed);
 
 	// Face buttons
-	if (key.code == _keyboardMap.A) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_A, key.pressed);
-	if (key.code == _keyboardMap.B) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_B, key.pressed);
-	if (key.code == _keyboardMap.X) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_X, key.pressed);
-	if (key.code == _keyboardMap.Y) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_Y, key.pressed);
+	if (_keyboardMap.isA(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_A, key.pressed);
+	if (_keyboardMap.isB(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_B, key.pressed);
+	if (_keyboardMap.isX(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_X, key.pressed);
+	if (_keyboardMap.isY(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_Y, key.pressed);
 
 	// Center
-	if (key.code == _keyboardMap.Back)  Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_BACK, key.pressed);
-	if (key.code == _keyboardMap.Start) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_START, key.pressed);
+	if (_keyboardMap.isBack(key.code))  Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_BACK, key.pressed);
+	if (_keyboardMap.isStart(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_START, key.pressed);
 
 	// Shoulders
-	if (key.code == _keyboardMap.LB) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_LEFT_SHOULDER, key.pressed);
-	if (key.code == _keyboardMap.RB) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_RIGHT_SHOULDER, key.pressed);
+	if (_keyboardMap.isLB(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_LEFT_SHOULDER, key.pressed);
+	if (_keyboardMap.isRB(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_RIGHT_SHOULDER, key.pressed);
 
 	// Triggers
-	if (key.code == _keyboardMap.LT) result.Gamepad.bLeftTrigger = (key.pressed ? GAMEPAD_SHORT_MAX : GAMEPAD_SHORT_MIN);
-	if (key.code == _keyboardMap.RT) result.Gamepad.bRightTrigger = (key.pressed ? GAMEPAD_SHORT_MAX : GAMEPAD_SHORT_MIN);
+	if (_keyboardMap.isLT(key.code)) result.Gamepad.bLeftTrigger = (key.pressed ? GAMEPAD_SHORT_MAX : GAMEPAD_SHORT_MIN);
+	if (_keyboardMap.isRT(key.code)) result.Gamepad.bRightTrigger = (key.pressed ? GAMEPAD_SHORT_MAX : GAMEPAD_SHORT_MIN);
 
 	// Thumbs
-	if (key.code == _keyboardMap.LThumb) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_LEFT_THUMB, key.pressed);
-	if (key.code == _keyboardMap.RThumb) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_RIGHT_THUMB, key.pressed);
+	if (_keyboardMap.isLThumb(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_LEFT_THUMB, key.pressed);
+	if (_keyboardMap.isRThumb(key.code)) Bitwise::setValue(&result.Gamepad.wButtons, XUSB_GAMEPAD_RIGHT_THUMB, key.pressed);
 
+	//-- CodeSomnia Modified End--
 	return result;
 }

@@ -306,6 +306,12 @@
     <ClCompile Include="Modules\Mailman.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KeyboardMapsUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\KeyboardMapWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioIn.h">
@@ -822,6 +828,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Modules\Mailman.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\KeyboardMapWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyboardMapsUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
