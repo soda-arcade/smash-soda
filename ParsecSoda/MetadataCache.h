@@ -153,8 +153,11 @@ public:
 
 		int extraSpots = 0;
 		bool roomChanged = false;
-
+		
+		string gameName = "";
 		unsigned int selectedGame = 0;
+
+		string description = "";
 
 	};
 

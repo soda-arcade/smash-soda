@@ -54,6 +54,8 @@ private:
 	// Attributes
 	char _roomName[HOST_NAME_LEN];
 	char _gameID[GAME_ID_LEN];
+	char _gameName[256];
+	char _description[140];
 	char _secret[HOST_SECRET_LEN];
 	char _secretLink[128];
 	bool _kioskMode;

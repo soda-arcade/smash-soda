@@ -12,6 +12,9 @@ Hotseat::Hotseat() {}
 /// </summary>
 void Hotseat::start() {
 
+	MetadataCache::preferences.xboxPuppetCount = 0;
+	MetadataCache::preferences.ds4PuppetCount = 0;
+
 	_startThread = thread([&]() {
 
 		// Get gamepad client
@@ -468,6 +471,7 @@ void Hotseat::seatGuest(GuestData guestData, int seatIndex) {
 		g_hosting.getGamepadClient().getGamepad(seatIndex)->setOwner(guest, 0, false);
 		
 		g_hosting.logMessage(guestData.name + " has been put in seat " + to_string(seatIndex + 1) + ".");
+
 	}
 	else {
 		

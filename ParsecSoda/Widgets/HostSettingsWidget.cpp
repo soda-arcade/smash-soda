@@ -9,6 +9,8 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     {
         strcpy_s(_roomName, cfg.name);
         strcpy_s(_gameID, cfg.gameID);
+        strcpy_s(_gameName, MetadataCache::preferences.gameName.c_str());
+		strcpy_s(_description, MetadataCache::preferences.description.c_str());
         strcpy_s(_secret, cfg.secret);
         strcpy_s(_kioskApplication, "");
         strcpy_s(_kioskParam, "");
@@ -19,12 +21,14 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
         {
             strcpy_s(_roomName, "");
             strcpy_s(_gameID, "");
+			strcpy_s(_gameName, "");
+			strcpy_s(_description, "");
             strcpy_s(_secret, "");
             strcpy_s(_kioskApplication, "");
             strcpy_s(_kioskParam, "");
         } catch (const std::exception&) {}
     }
-    _publicGame = false; // should be false
+	_publicGame = MetadataCache::preferences.publicRoom;
     _maxGuests = cfg.maxGuests;
     
     _micVolume = MetadataCache::preferences.micVolume;
@@ -142,6 +146,11 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
                 try { strcpy_s(_gameID, games[i].gameID.c_str()); }
                 catch (const std::exception&) {}
 
+                // Set game name
+				MetadataCache::preferences.gameName = games[i].name;
+                try { strcpy_s(_gameName, games[i].name.c_str()); }
+                catch (const std::exception&) {}
+
                 // Set hotseat
                 MetadataCache::preferences.hotseat = games[i].hotseat;
 
@@ -167,7 +176,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     
     ImGui::Dummy(dummySize);
     
-    if (ImForm::InputText("ROOM NAME", _roomName, "The text displayed below thumbnails in Arcade list.")) {
+    if (ImForm::InputText("ROOM NAME", _roomName, "The text displayed below thumbnails on the Arcade. No profanity please.")) {
         string prepend = (MetadataCache::preferences.prependRegion != "" ? "[" + MetadataCache::preferences.prependRegion + "]" : "")
 			+ (MetadataCache::preferences.prependPingLimit && _latencyLimiter
                 ? "[<" + to_string(_latencyLimit) + "ms]" : "")
@@ -175,6 +184,18 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
         try { strcpy_s(_roomName, prepend.c_str()); }
         catch (const std::exception&) {}
+    }
+
+    if (ImForm::InputText("GAME NAME", _gameName, "Used for assigning correct box art on the Arcade.")) {
+		// Process text here?
+    }
+
+	if (ImForm::InputText("DESCRIPTION", _description, 
+        "A short description for your room displayed when hovering over your room on the Arcade. Max 140 characters. No profanity please.")) {
+        // Limit to 140 characters
+		if (strlen(_description) > 140) {
+			_description[140] = '\0';
+		}
     }
 
     AppStyle::pushLabel();
@@ -203,13 +224,14 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     ImGui::SameLine();
 
-    /*ImGui::BeginChild("##Public room child", ImVec2(size.x / 3, 50.0f));
+    ImGui::BeginChild("##Public room child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("PUBLIC ROOM");
     ImGui::Indent(20);
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _publicGame, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
         _publicGame = !_publicGame;
+		MetadataCache::preferences.publicRoom = _publicGame;
     }
-    ImGui::EndChild();*/
+    ImGui::EndChild();
 
     ImGui::SameLine();
 
@@ -322,7 +344,10 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
             MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
             MetadataCache::preferences.latencyLimitValue = _latencyLimit;
 
-            _hosting.setHostConfig(_roomName, _gameID, _maxGuests, _publicGame, _secret);
+            MetadataCache::preferences.gameName = _gameName;
+            MetadataCache::preferences.description = _description;
+
+            _hosting.setHostConfig(_roomName, _gameID, _maxGuests, false, _secret);
             _hosting.applyHostConfig();
             _hosting.startHosting();
             if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(true);
@@ -339,8 +364,11 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         AppFonts::pushTitle();
         ImGui::PushStyleColor(ImGuiCol_Button, AppColors::primary);
         if (ImGui::Button("Update Settings")) {
+			MetadataCache::preferences.gameName = _gameName;
+            MetadataCache::preferences.description = _description;
             _hosting.setHostConfig(_roomName, _gameID, _maxGuests, _publicGame, _secret);
             _hosting.applyHostConfig();
+            _hosting.parsecArcadeUpdate();
             savePreferences();
         }
         TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");

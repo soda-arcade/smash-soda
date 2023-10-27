@@ -41,6 +41,8 @@
 #include "Widgets/HotseatWidget.h"
 #include "Widgets/TournamentWidget.h"
 
+#include "Modules/Mailman.h"
+
 using namespace std;
 
 // Data
@@ -143,6 +145,7 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     OverlayWidget overlayWidget(g_hosting);
 	HotseatWidget hotseatWidget(g_hosting);
 	TournamentWidget tournamentWidget(g_hosting);
+    VersionWidget versionWidget;
 
     ChatWidget chatWindow(g_hosting);
     //FLASHWINFO fi;
@@ -181,7 +184,6 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     bool showSettings = MetadataCache::preferences.showSettings;
     bool showButtonLock = MetadataCache::preferences.showButtonLock;
     bool showLibrary = MetadataCache::preferences.showLibrary;
-    bool showUpdate = false;
     bool showOverlay = false;
     bool showHotseat = MetadataCache::preferences.showHotseat;
     bool showTournament = false;
@@ -194,6 +196,24 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         showLogin = !g_hosting.getSession().isValid();
         t.detach();
     });
+
+    // =====================================================================
+    //  Check for updates
+    // =====================================================================
+    Mailman _mailman;
+    std::future<string> fut = _mailman.GET("https://mickeyuk.com/api/version/smash_soda");
+	std::thread resultThread([&]() {
+
+        // Get string response from fut
+        string result = fut.get();
+		
+        // If string not blank
+		if (!result.empty()) {
+            versionWidget.update(result);
+		}
+        
+    });
+    resultThread.join();
 
     // =====================================================================
     //  Register Hotkeys
@@ -252,10 +272,9 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         // =====================================================================
         ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 
-        VersionWidget::render();
-
-        if (showUpdate) {
-            VersionWidget::renderUpdateWindow();
+        versionWidget.render();
+        if (versionWidget.showUpdate) {
+            versionWidget.renderUpdateWindow();
         }
 
         if (showLogin) {

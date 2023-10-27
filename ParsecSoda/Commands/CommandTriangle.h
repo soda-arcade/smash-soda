@@ -29,9 +29,9 @@ public:
 		reply << randomNumber;
 		reply << " times!";
 
-		for (int i = 0; i < randomNumber; i++) {
+		/*for (int i = 0; i < randomNumber; i++) {
 			_macro.pressButtonForGuest(_sender.userID, ParsecGamepadButton::GAMEPAD_BUTTON_Y);
-		}
+		}*/
 
 		_replyMessage = reply.str();
 

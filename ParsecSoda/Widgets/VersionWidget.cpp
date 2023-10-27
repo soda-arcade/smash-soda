@@ -1,6 +1,33 @@
 #include "VersionWidget.h"
 
-std::string VersionWidget::version = "2.99";
+// Constructor
+VersionWidget::VersionWidget() {
+	version = "3.0.0";
+	latestVersion = "";
+	changeLog = "";
+}
+
+// Update the version
+void VersionWidget::update(std::string jsonString) {
+
+	thread parseThread = thread([this, jsonString]() {
+
+		// Parse JSON
+		json j = json::parse(jsonString);
+        
+        j.at("version").get_to(latestVersion);
+        j.at("content").get_to(changeLog);
+
+		// Check if update is available
+		if (version != latestVersion) {
+			showUpdate = true;
+		}
+
+	});
+    
+	parseThread.detach();
+    
+}
 
 bool VersionWidget::render()
 {
@@ -67,9 +94,37 @@ bool VersionWidget::renderUpdateWindow() {
     ));
     ImGui::SetNextWindowSize(size);
     ImGui::SetNextWindowFocus();
-    ImGui::Begin("Update###Update Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Update Available###Update Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+    
+	AppStyle::pushPositive();
+	ImGui::Text("Version: ");
+    ImGui::SameLine();
+    ImGui::Text(latestVersion.c_str());
+    
+    AppStyle::pushSmall();
+	
+    // Text with wrap
+	ImGui::TextWrapped("A new version of Smash Soda is available. Please close this, pull the latest commit and rebuild!");
+    
+    ImGui::Spacing();
+	ImGui::Separator();
+    ImGui::Spacing();
+    
     AppStyle::pushInput();
+    ImGui::Markdown(changeLog.c_str(), changeLog.length(), mdConfig);
 
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    
+	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 50);
+    AppStyle::pushButton();
+    AppColors::pushButtonSolid();
+	if (ImGui::Button("Close")) {
+		showUpdate = false;
+	}
+
+    AppColors::pop();
     AppStyle::pop();
     ImGui::End();
     AppStyle::pop();

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <future>
+#include <iostream>
 #include "matoya.h"
 
 using namespace std;
@@ -9,13 +11,7 @@ class Mailman {
 public:
 	Mailman() {}
 	
-	void createRoom(
-		string title,
-		string host,
-		int guests,
-		string link,
-		int expires_at,
-		string room_token,
-		string version
-	);
+	future<string> GET(string url);
+	future<string> POST(string url, string data);
+	
 };

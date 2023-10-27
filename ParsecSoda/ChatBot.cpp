@@ -9,7 +9,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 
 	// Pleb commands
 	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
-	//if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
+	if (msgStartsWith(msg, CommandBB::prefixes()))		return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
 	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
 	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient, _hotseat);
 	if (msgIsEqual(msg, Command8Ball::prefixes()))		return new Command8Ball(sender);
@@ -22,8 +22,8 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
 	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList, _gamepadClient, _hotseat);
 	if (msgStartsWith(msg, CommandRequest::prefixes()))	return new CommandRequest(msg);
-	//if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
-	//if (msgIsEqual(msg, CommandTriangle::prefixes()))	return new CommandTriangle(sender, _gamepadClient, _macro);
+	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandTriangle::prefixes()))	return new CommandTriangle(sender, _gamepadClient, _macro);
 	
 	// Tournaments
 	//if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _tierList, _tournament);
@@ -86,7 +86,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	}
 
 	this->setLastUserId(previous);
-	return new CommandDefaultMessage(msg, sender, _lastUserId, tier, _vip, isHost);
+	return new CommandDefaultMessage(msg, sender, _lastUserId, tier, isHost);
 }
 
 const uint32_t ChatBot::getLastUserId() const
@@ -111,35 +111,35 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 	{
 		switch (status)
 		{
-			case 5:
-				reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
-				break;
-			case 11:
-			
-				// VIP Spots
-				if (_vip.isVIP(guest.userID)) {
-					_hostConfig.maxGuests = _hostConfig.maxGuests + 1;
-					MetadataCache::preferences.extraSpots++;
-					ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+		case 5:
+			reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
+			break;
+		case 11:
 
-					reply << "!full \t\t but made extra spot for " << guest.name << " #" << guest.userID << "\0";
-				}
-				else {
+			// VIP Spots
+			if (_vip.isVIP(guest.userID)) {
+				_hostConfig.maxGuests = _hostConfig.maxGuests + 1;
+				MetadataCache::preferences.extraSpots++;
+				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 
-					reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+				reply << "!full \t\t but made extra spot for " << guest.name << " #" << guest.userID << "\0";
+			}
+			else {
 
-				}
+				reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
 
-				break;
-			case -12007:
-				reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
-				break;
-			case -13014:
-				reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
-				break;
-			default:
-				reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
-				break;
+			}
+
+			break;
+		case -12007:
+			reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
+			break;
+		case -13014:
+			reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
+			break;
+		default:
+			reply << "!" << status << " \t\t " << guest.name << " #" << guest.userID << "\0";
+			break;
 		}
 	}
 
@@ -174,7 +174,7 @@ CommandBotMessage ChatBot::sendBotMessage(const char* msg)
 	return message;
 }
 
-bool ChatBot::msgStartsWith(const char* msg, const char * pattern)
+bool ChatBot::msgStartsWith(const char* msg, const char* pattern)
 {
 	return Stringer::startsWithPattern(msg, pattern);
 }
@@ -192,7 +192,7 @@ bool ChatBot::msgStartsWith(const char* msg, vector<const char*> patterns)
 	return false;
 }
 
-bool ChatBot::msgIsEqual(const char * msg, const char * pattern)
+bool ChatBot::msgIsEqual(const char* msg, const char* pattern)
 {
 	return (strcmp(msg, pattern) == 0);
 }

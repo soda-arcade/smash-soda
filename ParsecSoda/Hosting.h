@@ -13,6 +13,7 @@
 #include <chrono>
 #include <mutex>
 #include <regex>
+#include <future>
 #include "parsec-dso.h"
 #include "ParsecSession.h"
 #include "DX11.h"
@@ -44,6 +45,10 @@
 #include "Modules/Overlay.h"
 #include "Modules/Tournament.h"
 #include "Modules/Mailman.h"
+
+#include <nlohmann/json.hpp>
+using namespace std;
+using json = nlohmann::json;
 
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
@@ -111,6 +116,7 @@ public:
 	void setRoomSecret(string secret);
 	void startHosting();
 	void stopHosting();
+	void parsecArcadeUpdate();
 	void stripGamepad(int index);
 	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
 	void logMessage(string message);
@@ -231,4 +237,6 @@ private:
 	mutex _latencyMutex;
 	mutex _smashSodaMutex;
 	mutex _gamepadMutex;
+
+	string _roomToken;
 };

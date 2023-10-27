@@ -29,17 +29,7 @@ void Macro::run() {
 		if (!cmdList.front().pressed) {
 
 			ParsecGamepadButtonMessage btn = createButtonMessage(cmdList.front().button, true);
-
-			if (cmdList.front().padIndex != -1) {
-				sendButtonForPad(cmdList.front().padIndex, btn);
-			} else 
-
-				if (cmdList.front().guestId != -1) {
-					sendButtonForGuest(cmdList.front().guestId, btn);
-				}
-				else {
-					sendButtonForAll(btn);
-				}
+			sendButtonForAll(btn);
 
 			cmdList.front().pressed = true;
 

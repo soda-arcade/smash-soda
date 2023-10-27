@@ -29,6 +29,7 @@ Hosting::Hosting()
 		secret += (char)(rand() % 26 + 97);
 	}
 	MetadataCache::preferences.secret = secret;
+	_roomToken = "";
 	
 	_hostConfig = EMPTY_HOST_CONFIG;
 	MetadataCache::loadPreferences();
@@ -36,7 +37,7 @@ Hosting::Hosting()
 		MetadataCache::preferences.roomName,
 		MetadataCache::preferences.gameID,
 		MetadataCache::preferences.guestCount,
-		true,
+		MetadataCache::preferences.publicRoom,
 		secret
 	);
 	setHostVideoConfig(MetadataCache::preferences.fps, MetadataCache::preferences.bandwidth);
@@ -57,12 +58,6 @@ Hosting::Hosting()
 
 	vector<GameData> games = MetadataCache::loadGamesList();
 	_gamesList = GameDataList(games);
-
-	// Record last 3 messages for auto mute
-	_lastMessageIndex = 0;
-	_lastMessageList.push_back("");
-	_lastMessageList.push_back("");
-	_lastMessageList.push_back("");
 
 	_parsec = nullptr;
 
@@ -165,15 +160,14 @@ void Hosting::init()
 	if (_isTestMode) {
 
 		// Add (n) number of fake guests
-		srand(time(NULL));
-		addFakeGuests(8);
-
+		//srand(time(NULL));
+		//addFakeGuests(8);
+		
 	}
 	
 }
 
-void Hosting::release()
-{
+void Hosting::release() {
 	stopHosting();
 	while (_isRunning)
 	{
@@ -484,9 +478,23 @@ void Hosting::stopHosting()
 	}
 
 	// Clear kiosk mode
-	/*if (MetadataCache::preferences.kioskMode) {
+	if (MetadataCache::preferences.kioskMode) {
 		_processMan.stop();
-	}*/
+	}
+
+	// Stop hosting on Arcade
+	if (_roomToken != "") {
+	
+		json j;
+		j["token"] = _roomToken;
+
+		std::future<string> fut = _mailman.POST("https://mickeyuk.com/api/arcade/soda/close", j.dump());
+		std::thread resultThread([&]() {
+			logMessage("Room removed from mickeyuk.com/arcade");
+		});
+		resultThread.detach();
+		
+	}
 
 }
 
@@ -538,8 +546,8 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 	}
 }
 
-void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside)
-{
+void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside) {
+	
 	// Handle all the auto muting stuff
 	//if (!handleMuting(message, guest)) return;
 
@@ -551,18 +559,16 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	{
 		Tier tier = _tierList.getTier(guest.userID);
 
-		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier, _vipList);
+		CommandDefaultMessage defaultMessage(message, guest, _chatBot->getLastUserId(), tier, isHost);
 		defaultMessage.run();
 		_chatBot->setLastUserId(guest.userID);
 
-		if (!defaultMessage.replyMessage().empty() && !isHidden)
-		{
+		if (!defaultMessage.replyMessage().empty() && !isHidden) {
 			broadcastChatMessage(defaultMessage.replyMessage());
 			
 			string adjustedMessage = defaultMessage.replyMessage();
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
-
 			_overlay.sendChatMessage(guest, message);
 		}
 	}
@@ -588,69 +594,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 /// <returns>false if muted</returns>
 bool Hosting::handleMuting(const char* message, Guest& guest) {
 
-	// Has the guest been muted?
-	for (int i = 0; i < MetadataCache::preferences.mutedGuests.size(); i++) {
-		if (guest.userID == MetadataCache::preferences.mutedGuests[i].id) {
-
-			// Has their suffering gone on long enough?
-			if (MetadataCache::preferences.mutedGuests[i].stopwatch.isFinished()) {
-				MetadataCache::preferences.mutedGuests.erase(MetadataCache::preferences.mutedGuests.begin() + i);
-				MetadataCache::preferences.mutedGuests.shrink_to_fit();
-				return true;
-			}
-			else {
-
-				// Shhhhhhhhh
-				return false;
-
-			}
-
-		}
-	}
-
-	// Auto muting
-	if (MetadataCache::preferences.autoMute && guest.userID != _host.userID) {
-
-		// Record last message(s) for auto muting
-		if (_lastMessageTimer.isFinished()) {
-			_lastMessageIndex = 0;
-		}
-		_lastMessageList[_lastMessageIndex] = message;
-
-		// Check duration between last and current message
-		if (!_lastMessageTimer.isFinished() && _lastMessageIndex < 2) {
-			_lastMessageIndex++;
-			_lastMessageTimer.setDuration(_lastMessageTimer.getRemainingTime() + MetadataCache::preferences.autoMuteTime);
-		}
-		else {
-			_lastMessageIndex = 0;
-			_lastMessageTimer.stop();
-			_lastMessageTimer.setDuration(MetadataCache::preferences.autoMuteTime);
-			_lastMessageTimer.start();
-		}
-
-		// Is guest sending messages too quickly?
-		if (_lastMessageIndex > 1) {
-
-			// Mute guest temporarily
-			MetadataCache::Preferences::MutedGuest mutedGuest = MetadataCache::Preferences::MutedGuest();
-			mutedGuest.id = guest.userID;
-			mutedGuest.name = guest.name;
-			mutedGuest.stopwatch.setDuration(60000 * 2);
-			mutedGuest.stopwatch.start();
-			MetadataCache::preferences.mutedGuests.push_back(mutedGuest);
-
-			string message = MetadataCache::preferences.chatbotName + " " + guest.name +
-				" is sending messages too quickly and was muted for 2 minutes.";
-
-			broadcastChatMessage(message);
-			_chatLog.logMessage(message);
-
-			return false;
-
-		}
-
-	}
+	
 
 	return true;
 
@@ -907,6 +851,11 @@ void Hosting::addNewGuest(Guest guest) {
 		_hotseat.enqueue(guestData);
 	}
 
+	try {
+		PlaySound(TEXT("./SFX/new_guest.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+	}
+	catch (const std::exception&) {}
+
 }
 
 void Hosting::handleNewGuests() {
@@ -996,8 +945,8 @@ void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
 	MetadataCache::preferences.lockedGamepadButtons = _lockedGamepad.wButtons;
 }
 
-bool Hosting::parsecArcadeStart()
-{
+bool Hosting::parsecArcadeStart() {
+	
 	if (isReady()) {
 		ParsecStatus status = ParsecHostStart(_parsec, HOST_DESKTOP, &_hostConfig, _parsecSession.sessionId.c_str());
 		Sleep(2000);
@@ -1006,12 +955,125 @@ bool Hosting::parsecArcadeStart()
 		status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
 
 		// Init overlay
-		if (MetadataCache::preferences.overlayShow)
+		if (MetadataCache::preferences.overlayShow) {
 			_overlay.start();
+		}
+
+		// Post to Arcade service
+		if (MetadataCache::preferences.publicRoom) {
+
+			logMessage("...sending room listing to mickeyuk.com/arcade");
+
+			string link = (string("https://parsec.gg/g/") + getSession().hostPeerId + "/" + MetadataCache::preferences.secret + "/").c_str();
+
+			json j;
+			j["title"] = _hostConfig.name;
+			j["host"] = _host.name;
+			j["link"] = link.c_str();
+
+			// If game name set
+			char _gameName[256];
+			char _description[140];
+			try {
+				strcpy_s(_gameName, MetadataCache::preferences.gameName.c_str());
+				strcpy_s(_description, MetadataCache::preferences.description.c_str());
+			}
+			catch (const std::exception&) {
+				try {
+					strcpy_s(_gameName, "");
+					strcpy_s(_description, "");
+				}
+				catch (const std::exception&) {}
+			}
+			
+			j["game_name"] = _gameName;
+			j["description"] = _description;
+			j["guests_max"] = _hostConfig.maxGuests;
+
+			std::future<string> fut = _mailman.POST("https://mickeyuk.com/api/arcade/soda/create", j.dump());
+			std::thread resultThread([&]() {
+
+				// Get response
+				string result = fut.get();
+
+				// Parse response
+				json j = json::parse(result);
+
+				if (j["status"] == 200) {
+					_roomToken = j["token"];
+					logMessage("Your room is now listed at mickeyuk.com/arcade");
+				}
+				else {
+					logMessage("There was something with your room and it couldn't be listed");
+				}
+
+			});
+			resultThread.detach();
+		}
 		
 		return status == PARSEC_OK;
+
 	}
 	return false;
+}
+
+/// <summary>
+/// Updates the listing on the Parsec Arcade.
+/// </summary>
+void Hosting::parsecArcadeUpdate() {
+
+	if (MetadataCache::preferences.publicRoom) {
+
+		logMessage("...sending room listing to mickeyuk.com/arcade");
+
+		string link = (string("https://parsec.gg/g/") + getSession().hostPeerId + "/" + MetadataCache::preferences.secret + "/").c_str();
+
+		json j;
+		j["title"] = _hostConfig.name;
+		j["host"] = _host.name;
+		j["link"] = link.c_str();
+
+		// If game name set
+		char _gameName[256];
+		char _description[140];
+		try {
+			strcpy_s(_gameName, MetadataCache::preferences.gameName.c_str());
+			strcpy_s(_description, MetadataCache::preferences.description.c_str());
+		}
+		catch (const std::exception&) {
+			try {
+				strcpy_s(_gameName, "");
+				strcpy_s(_description, "");
+			}
+			catch (const std::exception&) {}
+		}
+
+		j["game_name"] = _gameName;
+		j["description"] = _description;
+		j["guests_max"] = _hostConfig.maxGuests;
+		j["token"] = _roomToken;
+
+		std::future<string> fut = _mailman.POST("https://mickeyuk.com/api/arcade/soda/update", j.dump());
+		std::thread resultThread([&]() {
+
+			// Get response
+			string result = fut.get();
+
+			// Parse response
+			json j = json::parse(result);
+
+			if (j["status"] == 200) {
+				logMessage("Your room is now listed at mickeyuk.com/arcade");
+			}
+			else {
+				logMessage("There was something with your room and it couldn't be listed");
+			}
+
+		});
+		resultThread.detach();
+
+	}
+	
 }
 
 
@@ -1112,8 +1174,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			addNewGuest(guest);
 
 		}
-		else
-		{
+		else {
 			
 			// Were extra spots made?
 			if (status != 11 && MetadataCache::preferences.extraSpots > 0) {
@@ -1140,12 +1201,17 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			int droppedPads = 0;
 			CommandFF command(guest, _gamepadClient, _hotseat);
 			command.run();
-			if (droppedPads > 0)
-			{
+			if (droppedPads > 0) {
 				logMessage = command.replyMessage();
 				broadcastChatMessage(logMessage);
 				_chatLog.logCommand(logMessage);
 			}
+
+			try {
+				PlaySound(TEXT("./SFX/guest_leave.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+			}
+			catch (const std::exception&) {}
+			
 		}
 	}
 }
