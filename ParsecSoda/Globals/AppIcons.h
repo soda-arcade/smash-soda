@@ -54,6 +54,7 @@ public:
 
 	static ID3D11ShaderResourceView* info;
 	static ID3D11ShaderResourceView* logo;
+	static ID3D11ShaderResourceView* keymap;//-- CodeSomnia Add--
 
 	static ID3D11ShaderResourceView* puppet;
 	static ID3D11ShaderResourceView* xinput;
@@ -134,6 +135,7 @@ private:
 	static Texture _kick;
 
 	static Texture _info;
+	static Texture _keymap; //-- CodeSomnia Add--
 	static Texture _logo;
 
 	static Texture _puppet;
