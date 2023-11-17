@@ -157,7 +157,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x86\SDL2.dll" "$(TargetDir)SDL2.dll"
       <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
