@@ -1,10 +1,5 @@
 #pragma once
 
-#include <cstdlib>
-#include <iostream>
-#include <string>
-#include <tchar.h>
-
 #include <iostream>
 #include <WinSock2.h>
 #include <Windows.h>
@@ -17,11 +12,13 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 #include <nlohmann/json.hpp>
+#include "../Core/Config.h"
 #include "../ChatBot.h"
 #include "../GamepadClient.h"
 
-#include "ProcessMan.h"
 #include "../ChatLog.h"
+#include "../GuestList.h"
+#include "../ImGui/imgui.h"
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
@@ -32,47 +29,57 @@ using websocketpp::lib::bind;
 using json = nlohmann::json;
 
 class Overlay {
+
 public:
+
 	Overlay();
-	void init(ProcessMan& processMan, ChatLog& chatLog);
+	void init(Guest& _host);
 
 	void start();
-	void run();
 	void stop();
+
+	bool createConnection();
+	void closeConnection();
 
 	void sendChatMessage(Guest guest, string message);
 	void sendLogMessage(string message);
-	void sendGuests();
-	void sendGamepads(vector<AGamepad*> gamepads);
-	void sendSectionAdd(string barId, string sectionName);
-	void sendSectionRemove(string barId, string sectionName);
-	void sendValueAdd(string sectionId, string valueId, string valueLabel, string value);
-	void sendValueModify(string valueId, string value);
-	void sendValueRemove(string valueId, string sectionId);
-	void sendCustomCommand(string command);
 
-	bool isActive = false;
-	bool isOpen = false;
+	void addGuest(string userID, string name);
+	void removeGuest(string userID);
+	void guestPoll();
+
+	void padAssign(uint32_t userID, string userName, int padID);
+	void padUnassign(uint32_t userID);
+	void padPoll();
+
+	void updateSettings();
 
 private:
-	ProcessMan* _processMan;
-	ChatLog* _chatLog;
+	bool isRunning = false;
+	bool isConnected = false;
+	DWORD processId = 0;
+	thread processThread;
+	int connectionAttempts = 0;
 
-	thread _startOverlayThread;
-
-	DWORD _pid;
+	int messageID = 0;
 
 	websocketpp::client<websocketpp::config::asio_client> _client;
 	websocketpp::connection_hdl _handle;
 
-	void _launchOverlay();
-	void _openSocket();
+	thread _createConnectionThread;
+
+	string _json = "";
+
+	// Stick to float
+	ImVec2 stickShortToFloat(SHORT lx, SHORT ly, float& distance);
+
+	bool _isOverlayRunning();
 
 	void _onOpen(client* c, websocketpp::connection_hdl hdl);
 	void _onFail(client* c, websocketpp::connection_hdl hdl);
 	void _sendMessage(string message);
 	void _onMessage(client* c, websocketpp::connection_hdl hdl, message_ptr msg);
 	void _onClose(client* c, websocketpp::connection_hdl hdl);
-	
 	void _log(string message);
+
 };

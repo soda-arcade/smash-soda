@@ -26,7 +26,7 @@ public:
 		{
 		case SEARCH_USER_RESULT::NOT_FOUND:
 			if (_tierList.getTier(_sender.userID) != Tier::PLEB) {
-				_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + ", I cannot find the user you want to set to spectator.\0";
+				_replyMessage = std::string() + Config::cfg.chatbotName + _sender.name + ", I cannot find the user you want to set to spectator.\0";
 			}
 			break;
 
@@ -56,17 +56,14 @@ public:
 		if (MetadataCache::isSpectating(guest.userID)) {
 
 			MetadataCache::addActiveGuest(guest);
-			_hotseat.enqueue(guestData);
 			GuestData guestData = GuestData(guest.name, guest.userID);
-			_hotseat.seatGuest(guestData);
-			_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is no longer spectating.\0";
+			_replyMessage = Config::cfg.chatbotName + guest.name + " is no longer spectating.\0";
 			
 		}
 		else {
 
 			MetadataCache::removeActiveGuest(guest);
-			_hotseat.dequeue(guestData);
-			_replyMessage = MetadataCache::preferences.chatbotName + " | " + guest.name + " is now spectating.\0";
+			_replyMessage = Config::cfg.chatbotName + guest.name + " is now spectating.\0";
 			_gamepadClient.onQuit(guest);
 
 		}
@@ -75,9 +72,8 @@ public:
 
 	}
 
-	static vector<const char*> prefixes()
-	{
-		return vector<const char*> { "!spectate" };
+	static vector<const char*> prefixes() {
+		return vector<const char*> { "!spectate", "!afk", "!lurk" };
 	}
 
 protected:

@@ -23,11 +23,8 @@ public:
 private:
 
 	// Hotseat
-	int32_t _hotseatSeats;
-	int32_t _hotseatTime;
-	bool _hotseatAFK;
-	int32_t _hotseatAFKTime;
-	bool _hotseatPause;
+	int _playTime = 0;
+	int _resetTime = 0;
 
 	// Dependency injection
 	Hosting& _hosting;

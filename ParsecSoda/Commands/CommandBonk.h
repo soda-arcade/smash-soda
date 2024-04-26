@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Core/Config.h"
 #include "ACommandSearchUser.h"
 #include <Windows.h>
 #include <mmsystem.h>
@@ -18,8 +19,14 @@ public:
 		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _host(host)
 	{}
 
-	bool run() override
-	{
+	bool run() override {
+
+		// Bonk enabled?
+		if (Config::cfg.chat.bonkEnabled == false) {
+			_replyMessage = Config::cfg.chatbotName + "Bonk command is disabled.";
+			return false;
+		}
+
 		if (!_stopwatch.isFinished())
 		{
 			_replyMessage = std::string() +
@@ -38,6 +45,28 @@ public:
 				{
 					_targetGuest = _host;
 					_searchResult = SEARCH_USER_RESULT::FOUND;
+					if (Config::cfg.chat.hostBonkProof) {
+						
+						srand(time(NULL));
+						int random = rand() % 3;
+
+						switch (random) {
+							case 0:
+								_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " tried to bonk the host, but the host laughs at your puny efforts.\0";
+								break;
+							case 1:
+								_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " tried to bonk the host, but the host's power level is 9000!!!!\0";
+								break;
+							case 2:
+								_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " tried to bonk the host, but the host is just too good for you, so don't even try.\0";
+								break;
+						}
+
+						try {
+							PlaySound(TEXT("./SFX/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+						}
+						catch (const std::exception&) {}
+					}
 				}
 			}
 			catch (const std::exception&) {}

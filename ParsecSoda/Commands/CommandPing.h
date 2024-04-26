@@ -44,7 +44,7 @@ public:
 		switch (_searchResult) {
 		case SEARCH_USER_RESULT::NOT_FOUND:
 
-			_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + " just missed the guest they tried to ping check.\0";
+			_replyMessage = std::string() + Config::cfg.chatbotName + " | " + _sender.name + " just missed the guest they tried to ping check.\0";
 
 			break;
 
@@ -54,13 +54,13 @@ public:
 			metrics = _guests.getMetrics(_targetGuest.id).metrics;
 			ping << trunc(metrics.networkLatency);
 
-			_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _targetGuest.name + ": [" + ping.str() + "ms]\0";
+			_replyMessage = std::string() + Config::cfg.chatbotName + _targetGuest.name + ": [" + ping.str() + "ms]\0";
 
 			break;
 
 		case SEARCH_USER_RESULT::FAILED:
 		default:
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !ping <username>\nExample: !ping bigboi83\0";
+			_replyMessage = Config::cfg.chatbotName + " | Usage: !ping <username>\nExample: !ping bigboi83\0";
 			break;
 		}
 

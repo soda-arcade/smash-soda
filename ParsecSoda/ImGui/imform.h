@@ -48,6 +48,42 @@ public:
 	}
 
     /// <summary>
+    /// Creates a text input field.
+    /// </summary>
+    /// <param name="label">Label</param>
+    /// <param name="buffer">Buffer for value</param>
+    /// <param name="description">A description for the field</param>
+    /// <returns>bool</returns>
+    static bool InputPassword(std::string label, char* buffer, std::string description = "") {
+
+		bool response;
+		string inputLabel = "##" + label;
+		ImVec2 size = ImGui::GetContentRegionAvail();
+
+		AppStyle::pushLabel();
+		ImGui::Text(label.c_str());
+		AppStyle::pop();
+		AppStyle::pushInput();
+		ImGui::SetNextItemWidth(size.x - 20);
+		if (ImGui::InputText(inputLabel.c_str(), buffer, 256, ImGuiInputTextFlags_Password)) {
+			response = true;
+		}
+		else {
+			response = false;
+		}
+		AppStyle::pop();
+		AppStyle::pushLabel();
+		ImGui::SetNextItemWidth(size.x - 20);
+		ImGui::TextWrapped(description.c_str());
+		AppStyle::pop();
+
+		ImGui::Dummy(ImVec2(0, 10.0f));
+
+		return response;
+        
+    }
+
+    /// <summary>
     /// Creates a multiline text input field.
     /// </summary>
     /// <param name="label">Label</param>
@@ -176,7 +212,9 @@ public:
         ImGui::TextWrapped(description.c_str());
         AppStyle::pop();
 
-        ImGui::Dummy(ImVec2(0, 10.0f));
+		if (description != "") {
+			ImGui::Dummy(ImVec2(0, 10.0f));
+		}
 
         return response;
 

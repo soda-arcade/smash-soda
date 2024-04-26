@@ -32,8 +32,8 @@ void AudioIn::setFrequency(Frequency frequency)
 {
 	_frequency = (uint32_t) frequency;
 	_wfx.nSamplesPerSec = _frequency;
-	MetadataCache::preferences.micFrequency = _frequency;
-	MetadataCache::savePreferences();
+	Config::cfg.audio.micFrequency = _frequency;
+	Config::cfg.Save();
 }
 
 Frequency AudioIn::getFrequency()

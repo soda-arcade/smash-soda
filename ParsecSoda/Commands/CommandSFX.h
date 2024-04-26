@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Core/Config.h"
 #include "parsec-dso.h"
 #include "ACommandStringArg.h"
 #include "../SFXList.h"
@@ -13,19 +14,24 @@ public:
 		: ACommandStringArg(msg, internalPrefixes()), _sfxList(sfxList)
 	{}
 
-	bool run() override
-	{
-		if (_sfxList.size() <= 0)
-		{
-			_replyMessage = MetadataCache::preferences.chatbotName + " | No sound effects available.\0";
+	bool run() override {
+
+		// SFX enabled?
+		if (Config::cfg.audio.sfxEnabled == false) {
+			_replyMessage = Config::cfg.chatbotName + "Sound effects are disabled.\0";
+			return false;
+		}
+
+		if (_sfxList.size() <= 0) {
+			_replyMessage = Config::cfg.chatbotName + "No sound effects available.\0";
 			return false;
 		}
 
 		if ( !ACommandStringArg::run() )
 		{
 			_replyMessage =
-				MetadataCache::preferences.chatbotName +
-				string(" | Usage: !sfx <sound name> | Example: !sfx bruh\n") +
+				Config::cfg.chatbotName +
+				string("Usage: !sfx <sound name> | Example: !sfx bruh\n") +
 				string("List of available sound names:\n") +
 				_sfxList.loadedTags() +
 				string("\0");
@@ -38,14 +44,14 @@ public:
 		{
 		case SFXList::SFXPlayResult::COOLDOWN:
 			_replyMessage =
-				MetadataCache::preferences.chatbotName +
+				Config::cfg.chatbotName +
 				string(" | Command !sfx is on cooldown: ") +
 				to_string(_sfxList.getRemainingCooldown()) +
 				string(" seconds left.");
 			break;
 		case SFXList::SFXPlayResult::NOT_FOUND:
 			_replyMessage =
-				MetadataCache::preferences.chatbotName +
+				Config::cfg.chatbotName +
 				string(" | This sound does not exist.\n") +
 				string("List of available sound effects:\n") +
 				_sfxList.loadedTags() +

@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include "Core/Config.h"
 #include "MetadataCache.h"
 #include <locale>
 #include <codecvt>

@@ -1,0 +1,275 @@
+#pragma once
+
+#include <string>
+#include <direct.h>
+#include <iostream>
+#include <windows.h>
+#include <shlobj.h>
+#include "matoya.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
+using namespace std;
+
+class Config {
+	
+public:
+	class General {
+	public:
+		unsigned int theme = 4;
+		bool saveLog = false;
+		bool flashWindow = true;
+	};
+	
+	class Audio {
+	public:
+		unsigned int inputDevice = 0;
+		unsigned int outputDevice = 0;
+		unsigned int micFrequency = 44100;
+		unsigned int micVolume = 80;
+		bool micEnabled = false;
+		unsigned int speakersFrequency = 44100;
+		unsigned int speakersVolume = 30;
+		bool speakersEnabled = true;
+		bool sfxEnabled = true;
+	};
+
+	class Video {
+	public:
+		unsigned int monitor = 0;
+		unsigned int adapter = 0;
+		int windowX = 0;
+		int windowY = 0;
+		int windowW = 1280;
+		int windowH = 720;
+		unsigned int fps = 60;
+		unsigned int bandwidth = 20;
+	};
+
+	class Input {
+	public:
+		bool autoIndex = false;
+		bool disableKeyboard = false;
+		bool disableGuideButton = true;
+		unsigned int xboxPuppetCount = 4;
+		unsigned int ds4PuppetCount = 0;
+		bool lockedPads = false;
+		bool lockedGamepadLeftTrigger = false;
+		bool lockedGamepadRightTrigger = false;
+		bool lockedGamepadLX = false;
+		bool lockedGamepadLY = false;
+		bool lockedGamepadRX = false;
+		bool lockedGamepadRY = false;
+		unsigned int lockedGamepadButtons = 0;
+	};
+
+	class Room {
+	public:
+		string title = "";
+		string details = "";
+		string theme = "default";
+		string game = "";
+		bool privateRoom = false;
+		unsigned int guestLimit = 1;
+		int artworkID = -1;
+		bool isValid = false;
+		string secret = "";
+		bool latencyLimit = false;
+		unsigned int latencyLimitThreshold = 0;
+	};
+	
+	class Chat {
+	public:
+		string discord = "";
+		string chatbot = "ChatBot";
+		string chatbotName = "";
+		unsigned int muteTime = 5;
+		bool autoMute = true;
+		unsigned int autoMuteTime = 500;
+		string welcomeMessage = "";
+		bool bonkEnabled = true;
+		bool hostBonkProof = false;
+	};
+
+	class Widgets {
+	public:
+		bool host = true;
+		bool guests = true;
+		bool gamepads = true;
+		bool chat = true;
+		bool log = false;
+		bool settings = false;
+		bool buttonLock = false;
+		bool library = false;
+		bool hotseat = false;
+		bool masterOfPuppets = false;
+		bool audio = false;
+		bool video = false;
+		bool overlay = false;
+		bool keyMapper = false;
+	};
+
+	class Hotseat {
+	public:
+		bool enabled = false;
+		int playTime = 15;
+		int resetTime = 30;
+	};
+	
+	class KioskMode {
+	public:
+		bool enabled = false;
+	};
+
+	class Overlay {
+	public:
+		class Chat {
+		public:
+			bool active = true;
+			string position = "top left";
+			bool showHistory = true;
+		};
+		
+		class Gamepads {
+		public:
+			bool active = true;
+			bool showHotseatDuration = true;
+			string position = "bottom center";
+		};
+
+		class Guests {
+		public:
+			bool active = true;
+			bool showLatency = true;
+			string position = "top right";
+		};
+		
+		string port = "9002";
+		bool update = true;
+		bool enabled = false;
+		float opacity = 0.9f;
+		
+		Chat chat;
+		Gamepads gamepads;
+		Guests guests;
+	};
+
+	class Permissions {
+	public:
+		class PermissionGroup {
+		public:
+			bool useBB = false;
+			bool useSFX = false;
+			bool changeControls = false;
+
+			PermissionGroup(bool useBB, bool useSFX, bool changeControls) {
+				this->useBB = useBB;
+				this->useSFX = useSFX;
+				this->changeControls = useBB;
+			};
+		};
+
+		PermissionGroup guest = PermissionGroup(false, false, true);
+		PermissionGroup vip = PermissionGroup(true, true, true);
+		PermissionGroup moderator = PermissionGroup(true, true, true);
+	};
+
+	class Arcade {
+	public:
+		string token = "";
+		string username = "";
+		bool showLogin = true;
+	};
+
+	General general;
+	Audio audio;
+	Video video;
+	Input input;
+	Room room;
+	Chat chat;
+	Widgets widgets;
+	Hotseat hotseat;
+	KioskMode kioskMode;
+	Overlay overlay;
+	Permissions permissions;
+	Arcade arcade;
+
+	// Soda Arcade models
+	class ArcadePost {
+	public:
+		string link = "";
+		string peer_id = "";
+		string secret = "";
+		string slug = "";
+		string game = "";
+		string details = "";
+		bool privateRoom = false;
+		bool latencyLimit = 0;
+		unsigned int guestLimit = 1;
+		string theme = 0;
+		int artwork = -1;
+	};
+
+	class Artwork {
+	public:
+		int id = 0;
+		string title = "";
+	};
+
+	vector<Artwork> artwork = vector<Artwork>();
+
+	// Singleton config
+	static Config cfg;
+	bool loaded = false;
+
+	// Handles refreshing of room details on Parsec and Soda Arcade
+	bool roomChanged = false;
+
+	// Formats the custom chatbot name
+	string chatbotName = "[ChatBot] ";
+
+	// Constructor
+	Config() {
+
+		// Generate a random secret for the room and post
+		srand(time(NULL));
+		string secret = "";
+		for (int i = 0; i < 8; i++) {
+			secret += (char)(rand() % 26 + 97);
+		}
+		cfg.room.secret = secret;
+
+		// Initialize the chatbot name
+		chatbotName = "[" + cfg.chat.chatbot + "] ";
+
+		// Add a "None" option to the artwork list
+		Artwork none;
+		none.id = -1;
+		none.title = "None";
+		artwork.push_back(none);
+
+	}
+
+	void static Load();
+	void Save();
+
+	// Helper function to set a value in the config object
+	template <typename T>
+	static T setValue(const T& originalValue, const json& newValue) {
+		if (!newValue.is_null()) {
+			try {
+				return newValue.get<T>();
+			}
+			catch (const json::type_error& e) {
+				std::cerr << "Error: Type mismatch when setting config property" << std::endl;
+			}
+		}
+		return originalValue;
+	}
+	
+	private:
+		static string GetConfigPath();
+		static string GetCurrentPath();
+		static string GetAppDataPath();
+};

@@ -18,7 +18,7 @@ public:
 	{
 		if (!ACommandIntegerArg::run())
 		{
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !swap <integer in range [1, 4]>\nExample: !swap 4\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !swap <integer in range [1, 4]>\nExample: !swap 4\0";
 			return false;
 		}
 
@@ -31,43 +31,43 @@ public:
 		{
 		case GamepadClient::PICK_REQUEST::OK:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " was given to " << _sender.name << "\t(#" << _sender.userID << ")\n"
+				<< Config::cfg.chatbotName + "Gamepad " << _intArg << " was given to " << _sender.name << "\t(#" << _sender.userID << ")\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			rv = true;
 			break;
 		case GamepadClient::PICK_REQUEST::DISCONNECTED:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", gamepad " << _intArg << " is offline.\n"
+				<< Config::cfg.chatbotName << _sender.name << ", gamepad " << _intArg << " is offline.\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			break;
 		case GamepadClient::PICK_REQUEST::SAME_USER:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", you have that gamepad already.\n"
+				<< Config::cfg.chatbotName << _sender.name << ", you have that gamepad already.\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			break;
 		case GamepadClient::PICK_REQUEST::TAKEN:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", the gamepad you tried to pick is already taken.\n"
+				<< Config::cfg.chatbotName << _sender.name << ", the gamepad you tried to pick is already taken.\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			break;
 		case GamepadClient::PICK_REQUEST::EMPTY_HANDS:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", you must be holding a gamepad to use !swap command.\n"
+				<< Config::cfg.chatbotName << _sender.name << ", you must be holding a gamepad to use !swap command.\n"
 				<< "\t\tPress any face button (A, B, X, Y) to receive a random gamepad (if available).\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			break;
 		case GamepadClient::PICK_REQUEST::LIMIT_BLOCK:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", your current gamepad limit is set to 0.\0";
+				<< Config::cfg.chatbotName << _sender.name << ", your current gamepad limit is set to 0.\0";
 			break;
 		case GamepadClient::PICK_REQUEST::OUT_OF_RANGE:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", your gamepad index is wrong (valid range is [1, 4]).\n"
+				<< Config::cfg.chatbotName << _sender.name << ", your gamepad index is wrong (valid range is [1, 4]).\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			break;
 		case GamepadClient::PICK_REQUEST::PUPPET:
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << ", puppet master is handling that gamepad.\n"
+				<< Config::cfg.chatbotName << _sender.name << ", puppet master is handling that gamepad.\n"
 				<< "\t\tType !pads to see the gamepad list.\0";
 			break;
 		default:

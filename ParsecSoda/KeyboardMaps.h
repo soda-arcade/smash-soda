@@ -6,15 +6,358 @@
 #include "matoya.h"
 #include <vector>
 #include <map>
-
+#include <nlohmann/json.hpp>
 
 typedef vector<uint16_t> MappingKeyList_t;
 typedef vector<KeyMapInfo> KeySet_t;
+
+using namespace std;
+using json = nlohmann::json;
+
+class KeyboardProfile {
+public:
+	string name;
+	uint32_t userID;
+	vector<uint16_t> keyMap;
+};
 
 class KeyboardMap
 {
 
 public:
+
+	vector<KeyboardProfile> profiles;
+
+	// Default keymap
+	vector<uint16_t> defaultKeyMap = {
+		KEY_A,
+		KEY_D,
+		KEY_W,
+		KEY_S,
+		KEY_LEFT,
+		KEY_RIGHT,
+		KEY_UP,
+		KEY_DOWN,
+		KEY_KP_4,
+		KEY_KP_6,
+		KEY_KP_8,
+		KEY_KP_5,
+		KEY_L,
+		KEY_O,
+		KEY_K,
+		KEY_I,
+		KEY_Q,
+		KEY_P,
+		KEY_F,
+		KEY_J,
+		KEY_BACKSPACE,
+		KEY_ENTER,
+		KEY_C,
+		KEY_M
+	};
+
+	// List of button names
+	vector<string> buttonNames = {
+		"LLeft",
+		"LRight",
+		"LUp",
+		"LDown",
+		"RLeft",
+		"RRight",
+		"RUp",
+		"RDown",
+		"DLeft",
+		"DRight",
+		"DUp",
+		"DDown",
+		"A",
+		"B",
+		"X",
+		"Y",
+		"LB",
+		"RB",
+		"LT",
+		"RT",
+		"Back",
+		"Start",
+		"LThumb",
+		"RThumb"
+	};
+
+	// Button names lowercase
+	vector<string> buttonNamesLower = {
+		"lleft",
+		"lright",
+		"lup",
+		"ldown",
+		"rleft",
+		"rright",
+		"rup",
+		"rdown",
+		"dleft",
+		"dright",
+		"dup",
+		"ddown",
+		"a",
+		"b",
+		"x",
+		"y",
+		"lb",
+		"rb",
+		"lt",
+		"rt",
+		"back",
+		"start",
+		"lthumb",
+		"rthumb"
+	};
+
+	/// <summary>
+	/// Constructor
+	/// </summary>
+	KeyboardMap() {
+	
+		loadProfiles();
+	
+	};
+
+	/// <summary>
+	/// Load profiles from file
+	/// </summary>
+	void loadProfiles() {
+		string dirPath = KeyboardMapsUtil::getKeyMapSavePath();
+		bool needInitialSet = true;
+
+		if (!dirPath.empty()) {
+			string filePath = dirPath + "profiles.json";
+
+			if (MTY_FileExists(filePath.c_str())) {
+
+				try {
+
+					// Parse the json
+					size_t size;
+					void* data = MTY_ReadFile(filePath.c_str(), &size);
+
+					json j = json::parse((char*)data);
+
+					// Load profiles
+					if (j.find("profiles") != j.end()) {
+						for (json profile : j["profiles"]) {
+							KeyboardProfile newProfile;
+							newProfile.name = profile["name"];
+							newProfile.userID = profile["userID"];
+
+							for (json key : profile["keyMap"]) {
+								newProfile.keyMap.push_back(key);
+							}
+
+							profiles.push_back(newProfile);
+						}
+
+					}
+
+				} catch (const json::parse_error& e) {
+					std::cerr << "Error: Failed to parse profiles json" << std::endl;
+				}
+
+			
+			} else {
+
+				// Default Profile
+				KeyboardProfile defaultProfile;
+				defaultProfile.name = "Default";
+
+				defaultProfile.keyMap = defaultKeyMap;
+
+				profiles.push_back(defaultProfile);
+				saveProfiles();
+
+			}
+
+		}
+
+	};
+
+	// Save profiles to file
+	void saveProfiles() {
+		string dirPath = KeyboardMapsUtil::getKeyMapSavePath();
+
+		if (!dirPath.empty()) {
+			string filePath = dirPath + "\\profiles.json";
+
+			json j;
+			for (KeyboardProfile profile : profiles) {
+				json newProfile;
+				newProfile["name"] = profile.name;
+				newProfile["userID"] = profile.userID;
+
+				json keyMap;
+
+				for (uint16_t key : profile.keyMap) {
+					keyMap.push_back(key);
+				}
+
+				newProfile["keyMap"] = keyMap;
+
+				j["profiles"].push_back(newProfile);
+			}
+
+			string profileString = j.dump(4);
+			bool success = MTY_WriteTextFile(filePath.c_str(), "%s", profileString.c_str());
+
+		}
+
+	};
+
+	/// <summary>
+	/// Find a profile by name
+	/// </summary>
+	/// <param name="name"></param>
+	/// <returns></returns>
+	KeyboardProfile* findProfile(uint32_t userID) {
+		for (KeyboardProfile& profile : profiles) {
+			if (profile.userID == userID) {
+				return &profile;
+			}
+		}
+
+		return nullptr;
+	};
+
+	// Create a new profile
+	bool createProfile(string name, uint32_t userID) {
+		if (findProfile(userID) == nullptr) {
+			KeyboardProfile newProfile;
+			newProfile.name = name;
+			newProfile.userID = userID;
+			
+			// Select first profile in vector as default
+			KeyboardProfile* defaultProfile = &profiles[0];
+			if (defaultProfile != nullptr) {
+				newProfile.keyMap = defaultProfile->keyMap;
+			}
+
+			profiles.push_back(newProfile);
+			return true;
+		}
+
+		return false;
+	};
+
+	/// <summary>
+	/// Delete a profile by userID
+	/// </summary>
+	/// <param name="userID"></param>
+	/// <returns></returns>
+	bool deleteProfile(uint32_t userID) {
+		for (int i = 0; i < profiles.size(); i++) {
+			if (profiles[i].userID == userID) {
+				profiles.erase(profiles.begin() + i);
+				return true;
+			}
+		}
+
+		saveProfiles();
+
+		return false;
+	};
+
+	// Reset a profile to default
+	bool resetProfile(uint32_t userID) {
+		KeyboardProfile* profile = findProfile(userID);
+
+		if (profile != nullptr) {
+			profile->keyMap = defaultKeyMap;
+			return true;
+		}
+
+		return false;
+	};
+
+	/// <summary>
+	/// Map a button to a key
+	/// </summary>
+	/// <param name="profileName"></param>
+	/// <param name="buttonName"></param>
+	/// <param name="key"></param>
+	/// <returns></returns>
+	bool mapButton(string userName, uint32_t userID, string buttonName, uint16_t key) {
+		KeyboardProfile* profile = findProfile(userID);
+
+		// Create a new profile if it doesn't exist
+		if (profile == nullptr) {
+			createProfile(userName, userID);
+			profile = findProfile(userID);
+			saveProfiles();
+		}
+
+		if (isValidButtonName(buttonName)) {
+			int index = find(buttonNamesLower.begin(), buttonNamesLower.end(), buttonName) - buttonNamesLower.begin();
+			profile->keyMap[index] = key;
+			return true;
+		}
+
+		return false;
+	};
+
+	bool setButton(string buttonName, uint16_t key) {
+		KeyboardProfile* profile = findProfile(_curPresetID);
+
+		if (profile != nullptr) {
+			int index = find(buttonNames.begin(), buttonNames.end(), buttonName) - buttonNames.begin();
+			profile->keyMap[index] = key;
+			return true;
+		}
+
+		return false;
+	};
+
+	/// <summary>
+	/// Check if button name is valid
+	/// </summary>
+	/// <param name="name"></param>
+	/// <returns></returns>
+	bool isValidButtonName(string name) {
+		return find(buttonNamesLower.begin(), buttonNamesLower.end(), name) != buttonNamesLower.end();
+	};
+
+	bool isKeySetForButton(string buttonName, uint16_t key) {
+		KeyboardProfile* profile = findProfile(_curPresetID);
+
+		if (profile != nullptr) {
+			int index = find(buttonNames.begin(), buttonNames.end(), buttonName) - buttonNames.begin();
+			return profile->keyMap[index] == key;
+		}
+
+		return false;
+	};
+
+	uint16_t getKeyForButton(string buttonName) {
+		KeyboardProfile* profile = findProfile(_curPresetID);
+
+		if (profile != nullptr) {
+			int index = find(buttonNames.begin(), buttonNames.end(), buttonName) - buttonNames.begin();
+			return profile->keyMap[index];
+		}
+
+		return 0;
+	};
+
+	// Helper function to set a value in the config object
+	template <typename T>
+	static T setValue(const T& originalValue, const json& newValue) {
+		if (!newValue.is_null()) {
+			try {
+				return newValue.get<T>();
+			}
+			catch (const json::type_error& e) {
+				std::cerr << "Error: Type mismatch when setting config property" << std::endl;
+			}
+		}
+		return originalValue;
+	}
+
 	static KeyboardMap defaultMap() {
 		KeyboardMap keyMap = KeyboardMap();
 		keyMap.loadKeyMaps();
@@ -269,437 +612,223 @@ public:
 			SetInitialKey("Default");
 	};
 
-	// 각 키값들이 매칭되는지 확인을 위한 함수들.
-	bool isLLeft(uint16_t val)
-	{
-		if (LLeft.size() <= 0)
-			return false;
+	bool isLLeft(uint32_t userID, uint16_t val){
+		
+		// Find the profile
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[0] == val;
+		} else {
+			return profiles[0].keyMap[0] == val;
+		};
 
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LLeft.begin(); itr < LLeft.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
 	};
 
-	bool isLRight(uint16_t val) {
-
-		if (LRight.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LRight.begin(); itr < LRight.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isLRight(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[1] == val;
+		} else {
+			return profiles[0].keyMap[1] == val;
+		};
 	};
 
-	bool isLUp(uint16_t val) {
-
-		if (LUp.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LUp.begin(); itr < LUp.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isLUp(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[2] == val;
+		} else {
+			return profiles[0].keyMap[2] == val;
+		};
 	};
 
-	bool isLDown(uint16_t val) {
-
-		if (LDown.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LDown.begin(); itr < LDown.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isLDown(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[3] == val;
+		} else {
+			return profiles[0].keyMap[3] == val;
+		};
 	};
 
-	bool isRLeft(uint16_t val) {
-
-		if (RLeft.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RLeft.begin(); itr < RLeft.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRLeft(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[4] == val;
+		} else {
+			return profiles[0].keyMap[4] == val;
+		};
 	};
 
-	bool isRRight(uint16_t val) {
-
-		if (RRight.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RRight.begin(); itr < RRight.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRRight(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[5] == val;
+		} else {
+			return profiles[0].keyMap[5] == val;
+		};
 	};
 
-	bool isRUp(uint16_t val) {
-
-		if (RUp.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RUp.begin(); itr < RUp.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRUp(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[6] == val;
+		} else {
+			return profiles[0].keyMap[6] == val;
+		};
 	};
 
-	bool isRDown(uint16_t val) {
-
-		if (RDown.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RDown.begin(); itr < RDown.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRDown(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[7] == val;
+		} else {
+			return profiles[0].keyMap[7] == val;
+		};
 	};
 
-	bool isDLeft(uint16_t val) {
-
-		if (DLeft.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = DLeft.begin(); itr < DLeft.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isDLeft(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[8] == val;
+		} else {
+			return profiles[0].keyMap[8] == val;
+		};
 	};
 
-	bool isDRight(uint16_t val) {
-
-		if (DRight.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = DRight.begin(); itr < DRight.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isDRight(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[9] == val;
+		} else {
+			return profiles[0].keyMap[9] == val;
+		};
 	};
 
-	bool isDUp(uint16_t val) {
-
-		if (DUp.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = DUp.begin(); itr < DUp.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isDUp(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[10] == val;
+		} else {
+			return profiles[0].keyMap[10] == val;
+		};
 	};
 
-	bool isDDown(uint16_t val) {
-
-		if (DDown.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = DDown.begin(); itr < DDown.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isDDown(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[11] == val;
+		} else {
+			return profiles[0].keyMap[11] == val;
+		};
 	};
 
-	bool isA(uint16_t val) {
-
-		if (A.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = A.begin(); itr < A.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isA(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[12] == val;
+		} else {
+			return profiles[0].keyMap[12] == val;
+		};
 	};
 
-	bool isB(uint16_t val) {
-
-		if (B.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = B.begin(); itr < B.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isB(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[13] == val;
+		} else {
+			return profiles[0].keyMap[13] == val;
+		};
 	};
 
-	bool isX(uint16_t val) {
-
-		if (X.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = X.begin(); itr < X.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isX(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[14] == val;
+		} else {
+			return profiles[0].keyMap[14] == val;
+		};
 	};
 
-	bool isY(uint16_t val) {
-
-		if (Y.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = Y.begin(); itr < Y.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isY(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[15] == val;
+		} else {
+			return profiles[0].keyMap[15] == val;
+		};
 	};
 
-	bool isLB(uint16_t val) {
-
-		if (LB.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LB.begin(); itr < LB.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isLB(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[16] == val;
+		} else {
+			return profiles[0].keyMap[16] == val;
+		};
 	};
 
-	bool isRB(uint16_t val) {
-
-		if (RB.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RB.begin(); itr < RB.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRB(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[17] == val;
+		} else {
+			return profiles[0].keyMap[17] == val;
+		};
 	};
 
-	bool isLT(uint16_t val) {
-
-		if (LT.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LT.begin(); itr < LT.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isLT(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[18] == val;
+		} else {
+			return profiles[0].keyMap[18] == val;
+		};
 	};
 
-	bool isRT(uint16_t val) {
-
-		if (RT.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RT.begin(); itr < RT.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRT(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[19] == val;
+		} else {
+			return profiles[0].keyMap[19] == val;
+		};
 	};
 
-	bool isBack(uint16_t val) {
-
-		if (Back.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = Back.begin(); itr < Back.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isBack(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[20] == val;
+		} else {
+			return profiles[0].keyMap[20] == val;
+		};
 	};
 
-	bool isStart(uint16_t val) {
-
-		if (Start.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = Start.begin(); itr < Start.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isStart(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[21] == val;
+		} else {
+			return profiles[0].keyMap[21] == val;
+		};
 	};
 
-	bool isLThumb(uint16_t val) {
-
-		if (LThumb.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = LThumb.begin(); itr < LThumb.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isLThumb(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[22] == val;
+		} else {
+			return profiles[0].keyMap[22] == val;
+		};
 	};
 
-	bool isRThumb(uint16_t val) {
-
-		if (RThumb.size() <= 0)
-			return false;
-
-		bool isConfirmed = false;
-
-		for (MappingKeyList_t::iterator itr = RThumb.begin(); itr < RThumb.end(); itr++)
-		{
-			isConfirmed |= *itr == val;
-
-			if (isConfirmed)
-				break;
-		}
-
-		return isConfirmed;
+	bool isRThumb(uint32_t userID, uint16_t val) {
+		KeyboardProfile* profile = findProfile(userID);
+		if (profile != nullptr) {
+			return profile->keyMap[23] == val;
+		} else {
+			return profiles[0].keyMap[23] == val;
+		};
 	};
 
 	inline uint16_t getDefaultLLeft() { return LLeft.size() > 0 ? LLeft[0] : KEY_A; };
@@ -809,6 +938,7 @@ public:
 	vector<KeyMapInfo> _customKeyList;
 
 	string _curPresetName;
+	uint32_t _curPresetID = 0;
 
 	map<string, KeySet_t> _keyTable;
 	//설정한 키매핑 정보를 모두 소유한 테이블.

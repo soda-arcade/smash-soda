@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <string>
+#include <filesystem>
 #include "../ImGui/imgui.h"
 #include "../Hosting.h"
 #include "../globals/AppIcons.h"
@@ -19,6 +22,8 @@ public:
 	bool renderForm(int index);
 
 private:
+
+	std::string openFileDialog();
 	
 	// Dependency injection
 	Hosting& _hosting;

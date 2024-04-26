@@ -1,132 +1,121 @@
+#include "../Hosting.h"
+extern Hosting g_hosting;
 #include "ProcessMan.h"
+
+ProcessMan ProcessMan::instance = ProcessMan::ProcessMan();
 
 /// <summary>
 /// Constructor
 /// </summary>
-ProcessMan::ProcessMan() : _chatLog(nullptr) {}
+ProcessMan::ProcessMan() {
 
-/// <summary>
-/// Initialization
-/// </summary>
-void ProcessMan::init(ChatLog& chatLog) {
-	_chatLog = &chatLog;
 }
 
 /// <summary>
-/// Starts watching for a process
+/// Launches an application.
 /// </summary>
 /// <param name="path"></param>
 /// <param name="args"></param>
-/// <returns></returns>
-DWORD ProcessMan::start(std::string path, std::string args) {
+void ProcessMan::start(string path, string args) {
 
-    // Convert path and args to LPCWSTR
-    std::wstring wpath(path.begin(), path.end());
-    std::wstring wargs(args.begin(), args.end());
-    LPCWSTR path_cstr = wpath.c_str();
-    LPCWSTR args_cstr = wargs.c_str();
+    // If already running, stop the process
+	if (isRunning) {
+		stop(true);
+	}
 
-    // Start an application
-    pid = launch(path_cstr, args_cstr);
+	// Convert path and args to LPCWSTR
+	std::wstring wpath(path.begin(), path.end());
+	std::wstring wargs(args.begin(), args.end());
+    filePath = wpath.c_str();
+    fileArgs = wargs.c_str();
 
-	// Start thread to always check if the process is running
-    if (pid != 0) {
-		_isRunning = true;
-		_thread = thread([this, path_cstr, args_cstr]() {
-            while (_isRunning) {
-                if (!isProcessRunning(pid)) {
-                    // Relaunch
-					pid = launch(path_cstr, args_cstr);
-                }
-                this_thread::sleep_for(chrono::milliseconds(3000));
-            }
-        });
-		_thread.detach();
-    }
-    
-    return pid;
-    
+	// Launch the process
+	launch();
+
+	// Start the process thread anonymous lambda function
+	isRunning = true;
+	processThread = thread([this]() {
+		while (isRunning) {
+			HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processId);
+			if (hProcess == NULL) {
+				// Log error or handle invalid process ID
+				break;
+			}
+
+			DWORD exitCode;
+			if (!GetExitCodeProcess(hProcess, &exitCode)) {
+				// Log error
+				CloseHandle(hProcess);
+				break;
+			}
+			CloseHandle(hProcess);
+
+			if (exitCode != STILL_ACTIVE) {
+				launch();
+			}
+			this_thread::sleep_for(chrono::seconds(5));
+		}
+	});
+	processThread.detach();
+
 }
 
 /// <summary>
-/// Stops watching for a process
+/// Stops the application.
 /// </summary>
-void ProcessMan::stop() {
-    // Signal the monitoring thread to stop
-    _isRunning = false;
-
-    // Reset pid
-    pid = 0;
+void ProcessMan::stop(bool kill) {
+	isRunning = false;
+	// Terminate the process
+	if (kill) {
+		TerminateProcess(OpenProcess(PROCESS_TERMINATE, FALSE, processId), 0);
+		// Stop the process thread
+		if (processThread.joinable()) {
+			processThread.join();
+		}
+	}
 }
 
 /// <summary>
-/// Launches a process
+/// Launches the process.
 /// </summary>
-/// <param name="path_cstr"></param>
-/// <param name="args_cstr"></param>
-/// <returns></returns>
-DWORD ProcessMan::launch(LPCWSTR path_cstr, LPCWSTR args_cstr) {
+void ProcessMan::launch() {
+	// Create the process
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
 
-    // Start an application
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
 
-    // Start the process and return the process ID
-    if (CreateProcess(path_cstr, (LPWSTR)args_cstr, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-        DWORD pid = pi.dwProcessId;
+	// Start the child process. 
+	if (!CreateProcess(filePath,	// No module name (use command line)
+		(LPWSTR)fileArgs,			// Command line
+		NULL,						// Process handle not inheritable
+		NULL,						// Thread handle not inheritable
+		FALSE,						// Set handle inheritance to FALSE
+		0,							// No creation flags
+		NULL,						// Use parent's environment block
+		NULL,						// Use parent's starting directory 
+		&si,						// Pointer to STARTUPINFO structure
+		&pi)						// Pointer to PROCESS_INFORMATION structure
+		) {
+		
+		g_hosting.logMessage("Kiosk Mode failed to start! Please check the path and arguments.");
+		isRunning = false;
+		Config::cfg.kioskMode.enabled = false;
 
-        // Close process and thread handles
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
+		return;
+	}
 
-        return pid;
-    }
-    else {
-        return 0; // Return 0 if the process could not be created
-    }
+	// Save the process ID
+	processId = pi.dwProcessId;
+
 }
 
 /// <summary>
-/// Kills a process
+/// Restarts the application.
 /// </summary>
-/// <param name="pid"></param>
-/// <returns></returns>
-bool ProcessMan::kill(DWORD pid) {
-
-    // Kill a process
-    HANDLE process = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
-    if (process != NULL) {
-        BOOL result = TerminateProcess(process, 0);
-        CloseHandle(process);
-        return result != 0;
-    }
-    else {
-        return false;
-    }
-}
-
-/// <summary>
-/// Checks if a process is running
-/// </summary>
-/// <param name="pid"></param>
-/// <returns></returns>
-bool ProcessMan::isProcessRunning(DWORD pid) {
-    HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, pid);
-    DWORD exitCode;
-
-    if (process == NULL) {
-        // Failed to open the process, assume it's not running
-        return false;
-    }
-
-    if (!GetExitCodeProcess(process, &exitCode)) {
-        // Failed to get the exit code, assume the process is running
-        CloseHandle(process);
-        return true;
-    }
-
-    CloseHandle(process);
-    return exitCode == STILL_ACTIVE;
+void ProcessMan::restart() {
+	stop(true);
+	launch();
 }

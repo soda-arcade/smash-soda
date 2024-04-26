@@ -12,8 +12,6 @@
 #include "TierList.h"
 
 #include "Commands/ACommand.h"
-#include "Commands/Command1v1.h"
-#include "Commands/Command2v2.h"
 #include "Commands/Command8ball.h"
 #include "Commands/CommandAddXbox.h"
 #include "Commands/CommandAddPS.h"
@@ -29,14 +27,12 @@
 #include "Commands/CommandExtend.h"
 #include "Commands/CommandFF.h"
 #include "Commands/CommandFortune.h"
-#include "Commands/CommandGameId.h"
 #include "Commands/CommandGuests.h"
 #include "Commands/CommandHelp.h"
 #include "Commands/CommandHotseat.h"
 #include "Commands/CommandIpFilter.h"
-#include "Commands/CommandJoin.h"
+#include "Commands/CommandKeyboard.h"
 #include "Commands/CommandKick.h"
-#include "Commands/CommandKOTH.h"
 #include "Commands/CommandMic.h"
 #include "Commands/CommandMirror.h"
 #include "Commands/CommandMod.h"
@@ -54,17 +50,21 @@
 #include "Commands/CommandRC.h"
 #include "Commands/CommandRestart.h"
 #include "Commands/CommandRequest.h"
+#include "Commands/CommandRollCall.h"
+#include "Commands/CommandRPG.h"
 #include "Commands/CommandSetConfig.h"
 #include "Commands/CommandSFX.h"
 #include "Commands/CommandSpeakers.h"
 #include "Commands/CommandSpectate.h"
 #include "Commands/CommandSpot.h"
 #include "Commands/CommandStrip.h"
+#include "Commands/CommandStripAll.h"
 #include "Commands/CommandSwap.h"
 #include "Commands/CommandTimer.h"
 #include "Commands/CommandTriangle.h"
 #include "Commands/CommandUnban.h"
 #include "Commands/CommandUnmod.h"
+#include "Commands/CommandUnmute.h"
 #include "Commands/CommandUnVIP.h"
 #include "Commands/CommandVideoFix.h"
 #include "Commands/CommandVIP.h"
@@ -93,7 +93,7 @@ public:
 		_parsecSession(parsecSession), _sfxList(sfxList), _tierList(_tierList), _macro(macro), _hostingLoopController(hostingLoopController), _host(host),
 		_hotseat(hotseat), _tournament(tournament)
 	{
-		_basicVersion = MetadataCache::preferences.basicVersion;
+		//_basicVersion = Config::cfg.general.basicVersion;
 	}
 
 	ACommand * identifyUserDataMessage(const char* msg, Guest& sender, bool isHost = false);

@@ -4,24 +4,28 @@
 SettingsWidget::SettingsWidget(Hosting& hosting)
     : _hosting(hosting)
 {
-    _basicVersion = MetadataCache::preferences.basicVersion;
-    _disableMicrophone = MetadataCache::preferences.disableMicrophone;
-    _disableGuideButton = MetadataCache::preferences.disableGuideButton;
-    _disableKeyboard = MetadataCache::preferences.disableKeyboard;
-    _latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
-    _latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
-    _leaderboardEnabled = MetadataCache::preferences.leaderboardEnabled;
+    _disableGuideButton = Config::cfg.input.disableGuideButton;
+    _disableKeyboard = Config::cfg.input.disableKeyboard;
+    _latencyLimitEnabled = Config::cfg.room.latencyLimit;
+    _latencyLimitThreshold = Config::cfg.room.latencyLimitThreshold;
+    _leaderboardEnabled = false;
+    _autoIndex = Config::cfg.input.autoIndex;
+    _flashWindow = Config::cfg.general.flashWindow;
+    _sfxEnabled = Config::cfg.audio.sfxEnabled;
+    _bonkEnabled = Config::cfg.chat.bonkEnabled;
+    _hostBonkProof = Config::cfg.chat.hostBonkProof;
+    _microphoneEnabled = Config::cfg.audio.micEnabled;
 
-    _muteTime = MetadataCache::preferences.muteTime;
-    _autoMute = MetadataCache::preferences.autoMute;
-    _autoMuteTime = MetadataCache::preferences.autoMuteTime;
-    _saveChat = MetadataCache::preferences.saveLog;
+    _muteTime = Config::cfg.chat.muteTime;
+    _autoMute = Config::cfg.chat.autoMute;
+    _autoMuteTime = Config::cfg.chat.autoMuteTime;
+    _saveChat = false;
 
-	_prependPingLimit = MetadataCache::preferences.prependPingLimit;
+    _prependPingLimit = false;
 
     try
     {
-        strcpy_s(_discord, MetadataCache::preferences.discord.c_str());
+        strcpy_s(_discord, Config::cfg.chat.discord.c_str());
     }
     catch (const std::exception&)
     {
@@ -33,7 +37,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     }
 
     try {
-        strcpy_s(_chatbot, MetadataCache::preferences.chatbot.c_str());
+        strcpy_s(_chatbot, Config::cfg.chat.chatbot.c_str());
     }
     catch (const std::exception&) {
         try
@@ -44,7 +48,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     }
 
     try {
-        strcpy_s(_welcomeMessage, MetadataCache::preferences.welcomeMessage.c_str());
+        strcpy_s(_welcomeMessage, Config::cfg.chat.welcomeMessage.c_str());
     }
     catch (const std::exception&) {
         try
@@ -53,23 +57,12 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
         }
         catch (const std::exception&) {}
     }
-
-    try {
-        strcpy_s(_prependRegion, MetadataCache::preferences.prependRegion.c_str());
-    }
-    catch (const std::exception&) {
-        try
-        {
-            strcpy_s(_prependRegion, "");
-        }
-        catch (const std::exception&) {}
-    }
 }
 
 bool SettingsWidget::render()
 {
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Settings", (bool*)0);
     AppStyle::pushInput();
 
@@ -95,6 +88,11 @@ bool SettingsWidget::render()
         AppColors::pushTitle();
         if (ImGui::BeginTabItem("Chat")) {
             renderChatbot();
+            ImGui::EndTabItem();
+        }
+        AppColors::pushTitle();
+        if (ImGui::BeginTabItem("Permissions")) {
+            renderPermissions();
             ImGui::EndTabItem();
         }
         /*AppColors::pushTitle();
@@ -131,13 +129,13 @@ void SettingsWidget::renderGeneral() {
     AppStyle::pushLabel();
     ImGui::Text("THEME");
     AppStyle::pushInput();
-    string themes[4] = { "Midnight", "Parsec Soda", "Parsec Soda V", "Mini" };
     ImGui::SetNextItemWidth(size.x);
-    if (ImGui::BeginCombo("### Thumbnail picker combo", themes[MetadataCache::preferences.theme].c_str(), ImGuiComboFlags_HeightLarge)) {
-        for (size_t i = 0; i < 4; ++i) {
-            bool isSelected = (i == MetadataCache::preferences.theme);
+    if (ImGui::BeginCombo("### Thumbnail picker combo", themes[Config::cfg.general.theme].c_str(), ImGuiComboFlags_HeightLarge)) {
+        for (size_t i = 0; i < 5; ++i) {
+            bool isSelected = (i == Config::cfg.general.theme);
             if (ImGui::Selectable(themes[i].c_str(), isSelected)) {
-                MetadataCache::saveTheme(i);
+				Config::cfg.general.theme = i;
+				Config::cfg.Save();
             }
             if (isSelected) {
                 ImGui::SetItemDefaultFocus();
@@ -151,36 +149,30 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
-    /*if (ImForm::InputText("PREPEND REGION", _prependRegion,
-		"This will automatically put a region abbreviation in front of your room name. For example, if you set this to \"US\", your room name will be \"[US]My Room\".")) {
-        MetadataCache::preferences.prependRegion = _prependRegion;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputCheckbox("Prepend Ping Limit", _prependPingLimit,
-		"This will automatically put the room's ping limit in front of your room name. For example, if ping limit is 50ms, it would be \"[<50ms]My Room\".")) {
-        MetadataCache::preferences.prependPingLimit = _prependPingLimit;
-    }*/
-
-    if (ImForm::InputCheckbox("Disable Microphone", _disableMicrophone,
+    if (ImForm::InputCheckbox("Disable Microphone", _microphoneEnabled,
         "When enabled, the microphone cause audio issues in some games.")) {
-        MetadataCache::preferences.disableMicrophone = _disableMicrophone;
-        MetadataCache::savePreferences();
-        _hosting._disableMicrophone = _disableMicrophone;
+        Config::cfg.audio.micEnabled = _microphoneEnabled;
+		Config::cfg.Save();
     }
 
     if (ImForm::InputCheckbox("Disable Guide Button", _disableGuideButton,
         "The guide button by default often brings up overlays in software, which can cause issues when hosting.")) {
-        MetadataCache::preferences.disableGuideButton = _disableGuideButton;
-        MetadataCache::savePreferences();
+        Config::cfg.input.disableGuideButton = _disableGuideButton;
+        Config::cfg.Save();
         _hosting._disableGuideButton = _disableGuideButton;
     }
 
     if (ImForm::InputCheckbox("Disable Keyboard", _disableKeyboard,
         "Prevents users without gamepads playing with keyboard.")) {
-        MetadataCache::preferences.disableKeyboard = _disableKeyboard;
-        MetadataCache::savePreferences();
+        Config::cfg.input.disableKeyboard = _disableKeyboard;
+        Config::cfg.Save();
         _hosting._disableKeyboard = _disableKeyboard;
+    }
+
+    if (ImForm::InputCheckbox("Auto Index Gamepads", _autoIndex,
+        "XInput indices will be identified automatically. Beware, this may cause BSOD crashes for some users!")) {
+        Config::cfg.input.autoIndex = _autoIndex;
+        Config::cfg.Save();
     }
 
     AppStyle::pop();
@@ -195,47 +187,47 @@ void SettingsWidget::renderChatbot() {
 
     ImGui::Dummy(ImVec2(0, 10.0f));
 
-    if (ImForm::InputCheckbox("Disable !sfx & !bonk", _basicVersion,
+    if (ImForm::InputCheckbox("Disable !sfx", _sfxEnabled,
         "Prevents guests from using these commands in chat.")) {
-        MetadataCache::preferences.basicVersion = _basicVersion;
-        MetadataCache::savePreferences();
-        _hosting.getChatBot()->updateSettings();
+        Config::cfg.audio.sfxEnabled = _sfxEnabled;
+        Config::cfg.Save();
     }
 
     if (ImForm::InputText("CHATBOT NAME", _chatbot,
         "Can give the ChatBot a silly name if you want!")) {
-        MetadataCache::preferences.chatbot = _chatbot;
-        MetadataCache::savePreferences();
+        Config::cfg.chat.chatbot = _chatbot;
+        Config::cfg.Save();
+        Config::cfg.chatbotName = "[" + Config::cfg.chat.chatbot + "] ";
     }
 
     if (ImForm::InputTextArea("WELCOME MESSAGE", _welcomeMessage,
         "Joining guests will see this message. Type _PLAYER_ to insert the guest's name in the message.")) {
-        MetadataCache::preferences.welcomeMessage = _welcomeMessage;
-        MetadataCache::savePreferences();
+        Config::cfg.chat.welcomeMessage = _welcomeMessage;
+        Config::cfg.Save();
     }
 
     if (ImForm::InputText("DISCORD INVITE LINK", _discord,
         "Automatically print invite link in chat with !discord")) {
-        MetadataCache::preferences.discord = _discord;
-        MetadataCache::savePreferences();
+        Config::cfg.chat.discord = _discord;
+        Config::cfg.Save();
     }
 
-    /*if (ImForm::InputNumber("MUTE TIME", _muteTime, 5, 60,
-        "How long a person stays gagged with the !mute command")) {
-        MetadataCache::preferences.muteTime = _muteTime;
-        MetadataCache::savePreferences();
+    if (ImForm::InputCheckbox("Flash Window on Message", _flashWindow,
+        "The window will flash when a message is received, when not focused.")) {
+        Config::cfg.general.flashWindow = _flashWindow;
+        Config::cfg.Save();
     }
 
-    if (ImForm::InputCheckbox("Auto Mute", _autoMute,
-        "Automatically mutes a guest if they send a lot of messages quickly")) {
-        MetadataCache::preferences.autoMute = _autoMute;
-        MetadataCache::savePreferences();
+    if (ImForm::InputCheckbox("Disable !bonk", _bonkEnabled,
+        "Funny at first, but can quickly turn annoying.")) {
+        Config::cfg.chat.bonkEnabled = _bonkEnabled;
+        Config::cfg.Save();
     }
 
-    if (ImForm::InputNumber("AUTO MUTE INTERVAL", _autoMuteTime, 5, 5000,
-        "Here you can set the the auto mute time between messages (in ms). Set this to a low value.")) {
-        MetadataCache::preferences.autoMuteTime = _autoMuteTime;
-        MetadataCache::savePreferences();
+    /*if (ImForm::InputCheckbox("Host can't be bonked", _hostBonkProof,
+        "You DARE bonk the host!?")) {
+        Config::cfg.chat.hostBonkProof = _hostBonkProof;
+        Config::cfg.Save();
     }*/
 
 }
@@ -245,4 +237,47 @@ void SettingsWidget::renderChatbot() {
 /// </summary>
 void SettingsWidget::renderLog() {
 	// TODO: Add log settings
+}
+
+/// <summary>
+/// Renders the chatbot options tab.
+/// </summary>
+void SettingsWidget::renderPermissions() {
+
+    ImGui::Dummy(ImVec2(0, 10.0f));
+
+    AppStyle::pushTitle();
+    ImGui::Text("Regular Guest");
+
+    if (ImForm::InputCheckbox("Can use !sfx command", _guestSFX)) {
+        Config::cfg.permissions.guest.useSFX = _guestSFX;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("Can use !bb command", _guestBB)) {
+        Config::cfg.permissions.guest.useBB = _guestBB;
+        Config::cfg.Save();
+    }
+
+    AppStyle::pushTitle();
+    ImGui::Text("VIPs");
+
+    if (ImForm::InputCheckbox("Can use !bb command", _vipBB)) {
+        Config::cfg.permissions.vip.useBB = _vipBB;
+        Config::cfg.Save();
+    }
+
+    AppStyle::pushTitle();
+    ImGui::Text("Moderators");
+
+    if (ImForm::InputCheckbox("Can use !sfx command", _modSFX)) {
+        Config::cfg.permissions.moderator.useSFX = _modSFX;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("Can use !bb command", _modBB)) {
+        Config::cfg.permissions.moderator.useBB = _modBB;
+        Config::cfg.Save();
+    }
+
 }

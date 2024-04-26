@@ -17,14 +17,14 @@ public:
 	{
 		if (!ACommandIntegerArg::run())
 		{
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !spot <number>\nExample: !spot 1\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !spot <number>\nExample: !spot 1\0";
 			return false;
 		}
 
 		_config.maxGuests += _intArg;
-		MetadataCache::preferences.roomChanged = true;
+		Config::cfg.roomChanged = true;
 		std::ostringstream reply;
-		reply << MetadataCache::preferences.chatbotName + " | Added " << _intArg << " guest slot(s)\0";
+		reply << Config::cfg.chatbotName + "Added " << _intArg << " guest slot(s)\0";
 		_replyMessage = reply.str();
 
 		return true;

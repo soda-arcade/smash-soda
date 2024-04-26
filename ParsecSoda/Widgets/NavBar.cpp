@@ -43,26 +43,26 @@ void NavBar::render(
 	
 	if (ToggleIconButtonWidget::render(AppIcons::play, AppIcons::play, showHostSettings, iconSize)) {
 		showHostSettings = !showHostSettings;
-		MetadataCache::preferences.showHostSettings = showHostSettings;
+		Config::cfg.widgets.host = showHostSettings;
 	}
 	renderNavtooltip("Host settings", showHostSettings);
 
 	if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOn, showGamepads, iconSize)) {
 		showGamepads = !showGamepads;
-		MetadataCache::preferences.showGamepads = showGamepads;
+		Config::cfg.widgets.gamepads = showGamepads;
 	}
 	renderNavtooltip("Gamepads", showGamepads);
 
 	if (ToggleIconButtonWidget::render(AppIcons::buttonLock, AppIcons::buttonLock, showButtonLock, iconSize)) {
 		showButtonLock = !showButtonLock;
-		MetadataCache::preferences.showButtonLock = showButtonLock;
+		Config::cfg.widgets.buttonLock = showButtonLock;
 	}
 	renderNavtooltip("Button Lock", showButtonLock);
 
 	if (ToggleIconButtonWidget::render(AppIcons::puppet, AppIcons::puppet, showMasterOfPuppets, iconSize))
 	{
 		showMasterOfPuppets = !showMasterOfPuppets;
-		MetadataCache::preferences.showMasterOfPuppets = showMasterOfPuppets;
+		Config::cfg.widgets.masterOfPuppets = showMasterOfPuppets;
 	}
 	renderNavtooltip("Master of Puppets", showMasterOfPuppets);
 
@@ -76,28 +76,28 @@ void NavBar::render(
 
 	if (ToggleIconButtonWidget::render(AppIcons::chat, AppIcons::chat, showChat, iconSize)) {
 		showChat = !showChat;
-		MetadataCache::preferences.showChat = showChat;
+		Config::cfg.widgets.chat = showChat;
 	}
 	renderNavtooltip("Chat", showChat);
 
 	if (ToggleIconButtonWidget::render(AppIcons::users, AppIcons::users, showGuests, iconSize)) {
 		showGuests = !showGuests;
-		MetadataCache::preferences.showGuests = showGuests;
+		Config::cfg.widgets.guests = showGuests;
 	}
 	renderNavtooltip("Guests", showGuests);
 
 	if (ToggleIconButtonWidget::render(AppIcons::library, AppIcons::library, showLibrary, iconSize)) {
 		showLibrary = !showLibrary;
-		MetadataCache::preferences.showLibrary = showLibrary;
+		Config::cfg.widgets.library = showLibrary;
 	}
 	renderNavtooltip("Library", showLibrary);
 
-	/*if (ToggleIconButtonWidget::render(AppIcons::overlay, AppIcons::overlay, showOverlay, iconSize))	showOverlay = !showOverlay;
-	renderNavtooltip("Overlay", showOverlay);*/
+	if (ToggleIconButtonWidget::render(AppIcons::overlay, AppIcons::overlay, showOverlay, iconSize))	showOverlay = !showOverlay;
+	renderNavtooltip("Overlay", showOverlay);
 
 	if (ToggleIconButtonWidget::render(AppIcons::hotseat, AppIcons::hotseat, showHotseat, iconSize)) {
 		showHotseat = !showHotseat;
-		MetadataCache::preferences.showHotseat = showHotseat;
+		Config::cfg.widgets.hotseat = showHotseat;
 	}
 	renderNavtooltip("Hotseat", showHotseat);
 
@@ -109,19 +109,19 @@ void NavBar::render(
 
 	if (ToggleIconButtonWidget::render(AppIcons::speakersOn, AppIcons::speakersOn, showAudio, iconSize)) {
 		showAudio = !showAudio;
-		MetadataCache::preferences.showAudio = showAudio;
+		Config::cfg.widgets.audio = showAudio;
 	}
 	renderNavtooltip("Audio", showAudio);
 
 	if (ToggleIconButtonWidget::render(AppIcons::video, AppIcons::video, showVideo, iconSize)) {
 		showVideo = !showVideo;
-		MetadataCache::preferences.showVideo = showVideo;
+		Config::cfg.widgets.video = showVideo;
 	}
 	renderNavtooltip("Video", showVideo);
 
 	if (ToggleIconButtonWidget::render(AppIcons::settings, AppIcons::settings, showSettings, iconSize)) {
 		showSettings = !showSettings;
-		MetadataCache::preferences.showSettings = showSettings;
+		Config::cfg.widgets.settings = showSettings;
 	}
 	renderNavtooltip("Settings", showSettings);
 

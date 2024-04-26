@@ -208,12 +208,15 @@ bool KeyboardMapWidget::render()
     KeyboardMap& hostingKeyMap = _hosting.getGamepadClient().getKeyMap();
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(100, 50), ImVec2(3840, 2160));
-    ImGui::Begin("KeyboardMap");
+    ImGui::Begin("Keyboard Mapper");
     AppStyle::pushLabel();
 
     static ImVec2 size;
     size = ImGui::GetContentRegionAvail();
     drawPresetList(hostingKeyMap._curPresetName);
+
+    ImGui::Dummy(ImVec2(0, 10));
+
     lLeftSetRender();
     lRightSetRender();
     lUpSetRender();
@@ -245,40 +248,49 @@ bool KeyboardMapWidget::render()
     LThumbSetRender();
     RThumbSetRender();
 
-    int totalSize = hostingKeyMap._customKeyList.size();
-    //추가된 커스텀키 항목을 설정할 수 있도록 그린다.
-    for (int idx = 0; idx < hostingKeyMap._customKeyList.size();)
-    {
-        if (drawCustomKey(hostingKeyMap._customKeyList[idx].gamePadKeyType,
-            hostingKeyMap._customKeyList[idx].keyVal, idx))
-        {
-            auto it = hostingKeyMap._customKeyList.begin();
-            std::advance(it, idx);
-            hostingKeyMap._customKeyList.erase(it);
-        }
-        else
-            idx++;
-    }
+    ImGui::Dummy(ImVec2(0, 10));
 
-    // 파일을 저장하고 키매핑 설정이 적용 될 수 있도록 버튼을 추가한다
-    if (ImGui::Button("Apply", ImVec2(100, 50))) {
-        ApplyKeyMap();
-        SaveKeyFile();
+    AppStyle::pushButton();
+    AppColors::pushButtonSolid();
+    if (ImGui::Button("Reset to Default")) {
+        hostingKeyMap.resetProfile(hostingKeyMap._curPresetID);
     }
+    ImGui::PopStyleColor(4);
 
-    ImGui::SameLine();
+    // Hiding custom key stuff for now because makes things too complicated
+    //int totalSize = hostingKeyMap._customKeyList.size();
+    ////추가된 커스텀키 항목을 설정할 수 있도록 그린다.
+    //for (int idx = 0; idx < hostingKeyMap._customKeyList.size();)
+    //{
+    //    if (drawCustomKey(hostingKeyMap._customKeyList[idx].gamePadKeyType,
+    //        hostingKeyMap._customKeyList[idx].keyVal, idx))
+    //    {
+    //        auto it = hostingKeyMap._customKeyList.begin();
+    //        std::advance(it, idx);
+    //        hostingKeyMap._customKeyList.erase(it);
+    //    }
+    //    else
+    //        idx++;
+    //}
 
-    // 커스텀키를 추가 할 수 있는 버튼을 추가한다.
-    if (ImGui::Button("Add Custom Key", ImVec2(150, 50))) {
-        KeyMapInfo newItem;
-        newItem.gamePadKeyType = GamePadButtonType_e::None;
-        newItem.keyVal = 0;
-        newItem.keyType = KeyType_e::CUSTOM;
-        hostingKeyMap._customKeyList.push_back(newItem);
-    }
+    //// 파일을 저장하고 키매핑 설정이 적용 될 수 있도록 버튼을 추가한다
+    //if (ImGui::Button("Apply", ImVec2(100, 50))) {
+    //    ApplyKeyMap();
+    //    SaveKeyFile();
+    //}
+
+    //ImGui::SameLine();
+
+    //// 커스텀키를 추가 할 수 있는 버튼을 추가한다.
+    //if (ImGui::Button("Add Custom Key", ImVec2(150, 50))) {
+    //    KeyMapInfo newItem;
+    //    newItem.gamePadKeyType = GamePadButtonType_e::None;
+    //    newItem.keyVal = 0;
+    //    newItem.keyType = KeyType_e::CUSTOM;
+    //    hostingKeyMap._customKeyList.push_back(newItem);
+    //}
   
-    // 기본 게임 키보드 매핑을 할 수 있도록 UI를 그린다.
-    
+    //// 기본 게임 키보드 매핑을 할 수 있도록 UI를 그린다.
 
     AppStyle::pop();
 
@@ -294,56 +306,49 @@ string KeyboardMapWidget::drawPresetList(string currentPresetName)
     KeyboardMap& hostingKeyMap = _hosting.getGamepadClient().getKeyMap();
     ImGui::SetNextItemWidth(300);
 
-    if (ImGui::BeginCombo("##PresetListCombo", selectedPresetName.c_str()))
-    {
-        for (map<string, KeySet_t>::iterator itr = hostingKeyMap._keyTable.begin(); 
-            itr != hostingKeyMap._keyTable.end(); itr++)
-        {
-            string presetName = itr->first;
+    if (ImGui::BeginCombo("##PresetListCombo", selectedPresetName.c_str())) {
+
+        for (auto& profile : hostingKeyMap.profiles) {
+            string presetName = profile.name;
             bool isSelected = selectedPresetName == presetName;
 
-            if (ImGui::Selectable(presetName.c_str(), isSelected))
-            {
-                ApplyKeyMap();
-                selectedPresetName = presetName;
-                resetPresetName(selectedPresetName.c_str(), selectedPresetName.length());
-                hostingKeyMap.LoadPreset(selectedPresetName);
-                InitializeKeyMapSetting(_hosting);
-            }
+            if (ImGui::Selectable((std::to_string(profile.userID) + ":" + presetName).c_str(), isSelected)) {
+                hostingKeyMap._curPresetName = presetName;
+                hostingKeyMap._curPresetID = profile.userID;
+			}
 
-            if (isSelected)
-            {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
 
         ImGui::EndCombo();
     }
 
-    ImGui::SameLine();
-
-    if (ImGui::Button("Add", ImVec2(30, 25))) {
+    // Profiles are now created by the user, so the Add button is no longer needed.
+    /*if (ImGui::Button("Add", ImVec2(30, 25))) {
         ApplyKeyMap();
         selectedPresetName = hostingKeyMap.AddNewPreset();
         InitializeKeyMapSetting(_hosting);
-    }
+    }*/
 
-    int limitLen = PRESET_NAME_LEN - selectedPresetName.length();
-    if(ImGui::InputText(" ", _presetNameBuffer, PRESET_NAME_LEN, ImGuiInputTextFlags_EnterReturnsTrue))
-    {
-        string newName = string(_presetNameBuffer); // 입력받은 문자에 개행 문자 혹은 쓰레기값이 들어갈수 있어 문자열로 변환하며 클리어 시켜준다
-        KeyboardMapsUtil::trim(newName); //공백을 제거한다.
-        UpdatePresetName(newName, currentPresetName);
-    }
+    //int limitLen = PRESET_NAME_LEN - selectedPresetName.length();
+    //if(ImGui::InputText(" ", _presetNameBuffer, PRESET_NAME_LEN, ImGuiInputTextFlags_EnterReturnsTrue))
+    //{
+    //    string newName = string(_presetNameBuffer); // 입력받은 문자에 개행 문자 혹은 쓰레기값이 들어갈수 있어 문자열로 변환하며 클리어 시켜준다
+    //    KeyboardMapsUtil::trim(newName); //공백을 제거한다.
+    //    UpdatePresetName(newName, currentPresetName);
+    //}
 
-    ImGui::SameLine();
-
-    if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(20.0, 20.0))) {
-        if (hostingKeyMap.RemoveCurPreset())
-        {
-            resetPresetName(hostingKeyMap._curPresetName.c_str(), hostingKeyMap._curPresetName.length());
-
-        }//현재 프리셋을 제거한다
+    if (hostingKeyMap._curPresetID != 0) {
+        ImGui::SameLine();
+        if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(20.0, 20.0))) {
+            selectedPresetName = "Default";
+            uint32_t curPresetID = hostingKeyMap._curPresetID;
+            hostingKeyMap._curPresetID = 0;
+            hostingKeyMap._curPresetName = selectedPresetName;
+            hostingKeyMap.deleteProfile(curPresetID);
+        }
     }
 
     return selectedPresetName;
@@ -383,7 +388,8 @@ void KeyboardMapWidget::drawKeySetLine(string keyName, uint16_t& key)
     cursor = ImGui::GetCursorPos();
     ImGui::SetCursorPosX(textSize.x + (COLUMN_1_SIZE - textSize.x) + 25);
 
-    string curKeyName = KeyboardMapsUtil::getKeyToString(key);
+    KeyboardMap& hostingKeyMap = _hosting.getGamepadClient().getKeyMap();
+    string curKeyName = KeyboardMapsUtil::getKeyToString(hostingKeyMap.getKeyForButton(keyName));
     int allowedKeyLen = sizeof(_allowedSettionKeys) / sizeof(uint16_t);
     string labelName = "##" + keyName;
     ImGui::SetNextItemWidth(150);
@@ -392,20 +398,21 @@ void KeyboardMapWidget::drawKeySetLine(string keyName, uint16_t& key)
     {
         for (int idx = 0; idx < allowedKeyLen; idx++)
         {
-            bool isSelected = key == _allowedSettionKeys[idx];
+            //bool isSelected = hostingKeyMap.isKeySetForButton(keyName, key);
 
             string itemKeyName = KeyboardMapsUtil::getKeyToString(_allowedSettionKeys[idx]);
 
-            if (ImGui::Selectable(itemKeyName.c_str(), isSelected))
+            if (ImGui::Selectable(itemKeyName.c_str(), false))
             {
                 curKeyName = itemKeyName;
-                key = _allowedSettionKeys[idx];
+                hostingKeyMap.setButton(keyName, _allowedSettionKeys[idx]);
+                hostingKeyMap.saveProfiles();
             }
 
-            if (isSelected)
+            /*if (isSelected)
             {
                 ImGui::SetItemDefaultFocus();
-            }
+            }*/
         }
         ImGui::EndCombo();
     }

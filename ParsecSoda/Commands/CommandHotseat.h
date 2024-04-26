@@ -18,15 +18,13 @@ public:
 
 	bool run() override {
 
-		if (MetadataCache::preferences.hotseat) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " hotseat has been disabled.";
-			MetadataCache::preferences.hotseat = false;
-			_hotseat.stop();
+		if (Config::cfg.hotseat.enabled) {
+			_replyMessage = Config::cfg.chatbotName + " hotseat has been disabled.";
+			Config::cfg.hotseat.enabled = false;
 		}
 		else {
-			_replyMessage = MetadataCache::preferences.chatbotName + " hotseat has been enabled.";
-			MetadataCache::preferences.hotseat = true;
-			_hotseat.start();
+			_replyMessage = Config::cfg.chatbotName + " hotseat has been enabled.";
+			Config::cfg.hotseat.enabled = true;
 		}
 
 		return true;

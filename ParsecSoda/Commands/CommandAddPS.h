@@ -16,9 +16,9 @@ public:
 
 	bool run() override {
 
-		_gamepadClient.createGamepad(AGamepad::Type::DUALSHOCK);
+		_gamepadClient.createGamepad(AGamepad::Type::DUALSHOCK, true);
 
-		_replyMessage = MetadataCache::preferences.chatbotName + " | Added playstation controller.\0";
+		_replyMessage = Config::cfg.chatbotName + "Added playstation controller.\0";
 		return true;
 	}
 

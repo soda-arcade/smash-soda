@@ -1,7 +1,7 @@
 #include "ChatWidget.h"
 
-ChatWidget::ChatWidget(Hosting& hosting) // , function<void(void)> onMessageCallback
-    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0) // , _onMessageCallback(onMessageCallback)
+ChatWidget::ChatWidget(Hosting& hosting, function<void(void)> onMessageCallback)
+    : _hosting(hosting), _chatLog(hosting.getMessageLog()), _messageCount(0), _onMessageCallback(onMessageCallback)
 {
     setSendBuffer("\0");
 }
@@ -16,7 +16,8 @@ bool ChatWidget::render()
     stopwatch.start();
 
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
+    ImGui::SetNextWindowPos(ImVec2(45, 5), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Chat", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
     AppStyle::pushInput();
 

@@ -24,7 +24,7 @@ public:
 		
 		ostringstream reply;
 
-		reply << MetadataCache::preferences.chatbotName + " " + _sender.name + 
+		reply << Config::cfg.chatbotName + " " + _sender.name + 
 			" pressed the triangle button ";
 		reply << randomNumber;
 		reply << " times!";

@@ -9,7 +9,8 @@ GuestListWidget::GuestListWidget(Hosting& hosting)
 bool GuestListWidget::render()
 {
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
+    ImGui::SetNextWindowPos(ImVec2(45, 418), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Guests", (bool*)0);
     AppStyle::pushInput();
 
@@ -186,6 +187,12 @@ void GuestListWidget::renderOnlineGuests()
             ImGui::SameLine();
 			ImGui::Image(AppIcons::eye, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.70f, 0.41f, 0.80f, 1.00f));
         }
+        ImGui::SameLine();
+        if (Config::cfg.hotseat.enabled) {
+            ImGui::Dummy(ImVec2(10, 0));
+            ImGui::SameLine();
+            ImGui::Image(AppIcons::hotseat, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.84f, 0.00f, 0.00f, 1.00f));
+        }
         
         AppStyle::pop();
         AppFonts::pushInput();
@@ -240,6 +247,10 @@ void GuestListWidget::renderOnlineGuests()
                     string("!ban ") + to_string(userID)
                     ).c_str(), true);
 			}
+
+            if (ImGui::Selectable("Create Keyboard Profile")) {
+                _hosting.getGamepadClient().getKeyMap().createProfile(name, userID);
+            }
 
             AppStyle::pop();
 			ImGui::EndPopup();

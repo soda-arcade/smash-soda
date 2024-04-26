@@ -7,10 +7,9 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     ParsecHostConfig cfg = hosting.getHostConfig();
     try
     {
-        strcpy_s(_roomName, cfg.name);
         strcpy_s(_gameID, cfg.gameID);
-        strcpy_s(_gameName, MetadataCache::preferences.gameName.c_str());
-		strcpy_s(_description, MetadataCache::preferences.description.c_str());
+        strcpy_s(_gameName, Config::cfg.room.game.c_str());
+		strcpy_s(_description, Config::cfg.room.details.c_str());
         strcpy_s(_secret, cfg.secret);
         strcpy_s(_kioskApplication, "");
         strcpy_s(_kioskParam, "");
@@ -19,7 +18,6 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     {
         try
         {
-            strcpy_s(_roomName, "");
             strcpy_s(_gameID, "");
 			strcpy_s(_gameName, "");
 			strcpy_s(_description, "");
@@ -28,30 +26,23 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
             strcpy_s(_kioskParam, "");
         } catch (const std::exception&) {}
     }
-	_publicGame = MetadataCache::preferences.publicRoom;
     _maxGuests = cfg.maxGuests;
     
-    _micVolume = MetadataCache::preferences.micVolume;
+    _micVolume = Config::cfg.audio.micVolume;
     _audioIn.volume = (float)_micVolume / 100.0f;
     
-    _speakersVolume = MetadataCache::preferences.speakersVolume;
+    _speakersVolume = Config::cfg.audio.speakersVolume;
     _audioOut.volume = (float)_speakersVolume / 100.0f;
 
-    _audioIn.isEnabled = MetadataCache::preferences.micEnabled;
-    _audioOut.isEnabled = MetadataCache::preferences.speakersEnabled;
+    _audioIn.isEnabled = Config::cfg.audio.micEnabled;
+    _audioOut.isEnabled = Config::cfg.audio.speakersEnabled;
 
-    _latencyLimiter = MetadataCache::preferences.latencyLimitEnabled;
-    _latencyLimit = MetadataCache::preferences.latencyLimitValue;
+    _latencyLimiter = Config::cfg.room.latencyLimit;
+    _latencyLimit = Config::cfg.room.latencyLimitThreshold;
 
-    _hotseat = MetadataCache::preferences.hotseat;
-    _hotseatSeats = MetadataCache::preferences.hotseatSeats;
-    _hotseatSlotMatch = MetadataCache::preferences.hotseatSlotMatch;
-    _hotseatTime = MetadataCache::preferences.hotseatTime;
-    _hotseatAFK = MetadataCache::preferences.hotseatAFK;
-    _hotseatAFKTime = MetadataCache::preferences.hotseatAFKTime;
-    _hotseatPause = MetadataCache::preferences.hotseatPause;
+    _hotseat = Config::cfg.hotseat.enabled;
 
-    _kioskMode = MetadataCache::preferences.kioskMode;
+    _kioskMode = Config::cfg.kioskMode.enabled;
 
     if (strlen(_secret) == 0) {
         try { strcpy_s(_secret, "play-now"); }
@@ -59,15 +50,28 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     }
     updateSecretLink();
 
-    if (strlen(_kioskApplication) == 0) {
-        try { strcpy_s(_kioskApplication, MetadataCache::preferences.kioskApplication.c_str()); }
-        catch (const std::exception&) {}
-    }
+}
 
-    if (strlen(_kioskParam) == 0) {
-        try { strcpy_s(_kioskParam, MetadataCache::preferences.kioskParameters.c_str()); }
-        catch (const std::exception&) {}
-    }
+/// <summary>
+/// Validate settings before sending to Soda Arcade.
+/// </summary>
+/// <returns></returns>
+bool HostSettingsWidget::validateSettings() {
+
+    // Game must be between 3 and 255 characters
+	if (strlen(_gameName) < 3 || strlen(_gameName) > 255) {
+		_gameNameError = "Game name must be between 3 and 255 characters.";
+		return false;
+	}
+
+	// Details can't be longer than 255 characters
+	if (strlen(_description) > 255) {
+		_descriptionError = "Description can't be longer than 255 characters.";
+		return false;
+	}
+
+	return true;
+    
 }
 
 /// <summary>
@@ -76,7 +80,8 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
 bool HostSettingsWidget::render(HWND& hwnd) {
     
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
+    ImGui::SetNextWindowPos(ImVec2(464, 5), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(600, 700));
     ImGui::Begin("Hosting", (bool*)0);
     AppStyle::pushInput();
 
@@ -116,50 +121,28 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     // Vector of themes
     AppStyle::pushLabel();
-    ImGui::Text("GAME");
+    ImGui::Text("LIBRARY");
     AppStyle::pop();
     AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
     vector<GameData> games = _hosting.getGameList().getGames();
-	string defaultValue = "Add games you own in the library widget.";
+	string emptyValue = "Add games you own in the library widget.";
 
-    int libraryID = MetadataCache::preferences.selectedGame;
+    bool isValid = (games.size() > 0 && _libraryID > -1 && _libraryID <= games.size());
+
+    // Game picker
     if (ImGui::BeginCombo("### Game picker combo", (
-        games.size() == 0 || libraryID == 0 || libraryID > games.size() ? defaultValue.c_str() : games[libraryID - 1].name.c_str()
+        isValid ? games[_libraryID].name.c_str() : emptyValue.c_str()
         ), ImGuiComboFlags_HeightLarge)) {
         // Game data list inumerator
 		for (int i = 0; i < games.size(); ++i) {
-			bool isSelected = (i == libraryID-1);
+			bool isSelected = (i == _libraryID);
+
+            // Set the game
 			if (ImGui::Selectable(games[i].name.c_str(), isSelected)) {
-                MetadataCache::preferences.selectedGame = games[i].itemID;
-
-                // Set room name
-                string prepend = (MetadataCache::preferences.prependRegion != "" ? "[" + MetadataCache::preferences.prependRegion + "] " : "")
-                    + (MetadataCache::preferences.prependPingLimit && _latencyLimiter
-                        ? "[<" + to_string(_latencyLimit) + "ms] " : "")
-                    + games[i].name;
-
-                try { strcpy_s(_roomName, prepend.c_str()); }
-                catch (const std::exception&) {}
-
-                // Set game ID
-                try { strcpy_s(_gameID, games[i].gameID.c_str()); }
-                catch (const std::exception&) {}
-
-                // Set game name
-				MetadataCache::preferences.gameName = games[i].name;
+                _libraryID = i;
                 try { strcpy_s(_gameName, games[i].name.c_str()); }
-                catch (const std::exception&) {}
-
-                // Set hotseat
-                MetadataCache::preferences.hotseat = games[i].hotseat;
-
-                // Set hotseat seats
-                MetadataCache::preferences.hotseatSeats = games[i].seats;
-
-                // Kiosk mode
-                MetadataCache::preferences.kioskMode = games[i].kiosk;
-                
+                catch (const std::exception&) {}    
 			}
             
             if (isSelected) {
@@ -175,35 +158,102 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     AppStyle::pop();
     
     ImGui::Dummy(dummySize);
-    
-    if (ImForm::InputText("ROOM NAME", _roomName, "The text displayed below thumbnails on the Arcade. No profanity please.")) {
-        string prepend = (MetadataCache::preferences.prependRegion != "" ? "[" + MetadataCache::preferences.prependRegion + "]" : "")
-			+ (MetadataCache::preferences.prependPingLimit && _latencyLimiter
-                ? "[<" + to_string(_latencyLimit) + "ms]" : "")
-            + _roomName;
 
-        try { strcpy_s(_roomName, prepend.c_str()); }
-        catch (const std::exception&) {}
+    if (ImForm::InputText("GAME NAME", _gameName, "Required. The game you are hosting. Be sure to write the exact name of the game to find correct cover art.")) {
+	
+        // Can't be longer than 255 characters
+        if (strlen(_gameName) > 255) {
+            string name = _gameName;
+            name = name.substr(0, 255);
+            strcpy_s(_gameName, name.c_str());
+        }
+
+    }
+    if (_gameNameError.length() > 0) {
+        AppStyle::pushInput();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::TextWrapped(_gameNameError.c_str());
     }
 
-    if (ImForm::InputText("GAME NAME", _gameName, "Used for assigning correct box art on the Arcade.")) {
-		// Process text here?
+    if (!Config::cfg.room.privateRoom) {
+        if (ImForm::InputText("DETAILS", _description,
+            "Any additional details about the game or your room. This will be displayed when somebody clicks your post.")) {
+
+            // Can't be longer than 255 characters
+            if (strlen(_description) > 255) {
+                string desc = _description;
+                desc = desc.substr(0, 255);
+                strcpy_s(_description, desc.c_str());
+			}
+
+        }
+        if (_descriptionError.length() > 0) {
+            AppStyle::pushInput();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::TextWrapped(_descriptionError.c_str());
+        }
+
+        AppStyle::pushLabel();
+        ImGui::Text("CUSTOM ARTWORK");
+        AppStyle::pushInput();
+        ImGui::SetNextItemWidth(size.x);
+        if (ImGui::BeginCombo("### Artwork picker combo", Config::cfg.artwork[_selectedArtwork].title.c_str(), ImGuiComboFlags_HeightLarge)) {
+
+            for (size_t i = 0; i < Config::cfg.artwork.size(); ++i) {
+                bool isSelected = (i == _selectedArtwork);
+                if (ImGui::Selectable(Config::cfg.artwork[i].title.c_str(), isSelected)) {
+                    _selectedArtwork = i;
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        AppStyle::pushLabel();
+        ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
+        AppStyle::pop();
+        ImGui::Dummy(ImVec2(0, 10.0f));
+
+        AppStyle::pushLabel();
+        ImGui::Text("POST THEME");
+        AppStyle::pushInput();
+        ImGui::SetNextItemWidth(size.x);
+        if (ImGui::BeginCombo("### Post theme picker combo", _postThemes[_selectedTheme].c_str(), ImGuiComboFlags_HeightLarge)) {
+
+            for (size_t i = 0; i < 6; ++i) {
+                bool isSelected = (i == _selectedTheme);
+                if (ImGui::Selectable(_postThemes[i].c_str(), isSelected)) {
+                    _selectedTheme = i;
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        AppStyle::pushLabel();
+        ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
+        AppStyle::pop();
+        ImGui::Dummy(ImVec2(0, 10.0f));
+
     }
 
-	if (ImForm::InputText("DESCRIPTION", _description, 
-        "A short description for your room displayed when hovering over your room on the Arcade. Max 140 characters. No profanity please.")) {
-        // Limit to 140 characters
-		if (strlen(_description) > 140) {
-			_description[140] = '\0';
-		}
-    }
+    char link[256];
+    if (Config::cfg.room.privateRoom) {
+        strcpy_s(link, _secretLink);
+	}
+    else {
+		string arcadeLink = "https://soda-arcade.com/invite/" + Config::cfg.arcade.username + "/" + _secret;
+        strcpy_s(link, arcadeLink.c_str());
+	}
 
     AppStyle::pushLabel();
     ImGui::Text("SHARE LINK");
     AppStyle::pop();
     ImGui::SetNextItemWidth(size.x - 10);
     AppStyle::pushInput();
-    ImGui::InputText("##Secret link", _secretLink, 128, ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputText("##Secret link", link, 128, ImGuiInputTextFlags_ReadOnly);
     AppStyle::pop();
     AppStyle::pushLabel();
     ImGui::TextWrapped("Users can join your room directly with this link.");
@@ -217,8 +267,8 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     ImGui::BeginChild("##Guest slot child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("GUEST SLOTS");
-    if (IntRangeWidget::render("guest count", _maxGuests, 0, 64, 0.025f)) {
-        
+    if (IntRangeWidget::render("guest count", _maxGuests, 0, 20, 0.025f)) {
+		Config::cfg.room.guestLimit = _maxGuests;
     }
     ImGui::EndChild();
 
@@ -227,9 +277,24 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::BeginChild("##Public room child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("PUBLIC ROOM");
     ImGui::Indent(20);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _publicGame, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        _publicGame = !_publicGame;
-		MetadataCache::preferences.publicRoom = _publicGame;
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, !Config::cfg.room.privateRoom, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+
+		// If public game is false, check we have authenticated with Soda Arcade
+		if (Config::cfg.room.privateRoom) {
+			if (Config::cfg.arcade.token == "") {
+				Config::cfg.arcade.showLogin = true;
+			}
+			else {
+				Config::cfg.room.privateRoom = false;
+			}
+		}
+		else {
+			Config::cfg.room.privateRoom = true;
+		}
+
+        //_publicGame = !_publicGame;
+        //Config::cfg.room.publicRoom = _publicGame;
+        //updateSecretLink();
     }
     ImGui::EndChild();
 
@@ -253,16 +318,8 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::BeginChild("##Hotseat child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("HOTSEAT");
     ImGui::Indent(8);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, MetadataCache::preferences.hotseat, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        MetadataCache::preferences.hotseat = !MetadataCache::preferences.hotseat;
-        if (_hosting.isRunning()) {
-			if (MetadataCache::preferences.hotseat) {
-                _hosting.getHotseat().start();
-			}
-			else {
-				_hosting.getHotseat().stop();
-			}
-        }
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.hotseat.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        Config::cfg.hotseat.enabled = !Config::cfg.hotseat.enabled;
     }
     ImGui::EndChild();
 
@@ -271,17 +328,23 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::BeginChild("##Kiosk child", ImVec2(size.x / 3, 50.0f));
     ImGui::Text("KIOSK MODE");
     ImGui::Indent(15);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, MetadataCache::preferences.kioskMode, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        MetadataCache::preferences.kioskMode = !MetadataCache::preferences.kioskMode;
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.kioskMode.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        // Can only start kiosk mode when a game is selected
+        if (!Config::cfg.kioskMode.enabled && _libraryID == -1) {
+            return;
+        }
+        
+        Config::cfg.kioskMode.enabled = !Config::cfg.kioskMode.enabled;
         if (_hosting.isRunning()) {
-            if (MetadataCache::preferences.kioskMode) {
-                _hosting.startKioskMode();
-            }
-            else {
-                _hosting.getProcessMan().stop();
-            }
+            if (Config::cfg.kioskMode.enabled) {
+                ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
+			} else {
+				ProcessMan::instance.stop();
+			}
         }
     }
+    TitleTooltipWidget::render("Kiosk Mode", "Kiosk mode can only be started when you have selected a game from your library.");
+
     ImGui::EndChild();
 
     ImGui::SameLine();
@@ -290,14 +353,10 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::Indent(20);
     ImGui::Text("OVERLAY");
     ImGui::Indent(8);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, MetadataCache::preferences.overlayShow, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        MetadataCache::preferences.overlayShow = !MetadataCache::preferences.overlayShow;
+    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.overlay.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        Config::cfg.overlay.enabled = !Config::cfg.overlay.enabled;
         if (_hosting.isRunning()) {
-            if (_hosting.getOverlay().isActive) {
-                _hosting.getOverlay().stop();
-			} else {
-				_hosting.getOverlay().start();
-			}
+            
         }
     }
     ImGui::EndChild();
@@ -332,29 +391,28 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     if (ConfirmPopupWidget::render(popupTitle.c_str(), showPopup))
     {
         // Was clicked and is already running (must stop)
-        if (_hosting.isRunning())
-        {
+        if (_hosting.isRunning()) {
             _hosting.stopHosting();
             if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(false);
         }
 
         // Was clicked and is not running (must start)
-        else
-        {
-            MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
-            MetadataCache::preferences.latencyLimitValue = _latencyLimit;
+        else if (Config::cfg.room.privateRoom || validateSettings()) {
+            savePreferences();
 
-            MetadataCache::preferences.gameName = _gameName;
-            MetadataCache::preferences.description = _description;
-
-            _hosting.setHostConfig(_roomName, _gameID, _maxGuests, false, _secret);
+            _hosting.setHostConfig("", _gameID, _maxGuests, false, _secret);
             _hosting.applyHostConfig();
             _hosting.startHosting();
             if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(true);
+
+            // Start kiosk mode
+            if (Config::cfg.kioskMode.enabled) {
+				ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
+			}
         }
     }
 
-    if (_hosting.isRunning() && isDirty()) {
+    if (_hosting.isRunning()) {
 
         ImGui::Dummy(dummySize);
         indentSize = 0.5f * size.x - 65.0f;
@@ -363,15 +421,39 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         AppColors::pushInput();
         AppFonts::pushTitle();
         ImGui::PushStyleColor(ImGuiCol_Button, AppColors::primary);
-        if (ImGui::Button("Update Settings")) {
-			MetadataCache::preferences.gameName = _gameName;
-            MetadataCache::preferences.description = _description;
-            _hosting.setHostConfig(_roomName, _gameID, _maxGuests, _publicGame, _secret);
-            _hosting.applyHostConfig();
-            _hosting.parsecArcadeUpdate();
-            savePreferences();
+        
+        // Parsec settings were changed
+        if (isDirty()) {
+
+            if (ImGui::Button("Update Settings")) {
+                // Apply settings for Parsec
+                _hosting.setHostConfig("", "1wdoHfhhZH5lPuZCwGBete0HIAj", _maxGuests, false, _secret);
+                _hosting.applyHostConfig();
+
+                savePreferences();
+
+                // Update on Soda Arcade
+                if (!Config::cfg.room.privateRoom) {
+                    Arcade::instance.createPost();
+                }
+            }
+            TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");
+
+        } else 
+
+        // Soda Arcade settings were changed
+        if (_gameName != Config::cfg.room.game || _description != Config::cfg.room.details) {
+            if (ImGui::Button("Update Settings")) {
+                savePreferences();
+
+                // Update on Soda Arcade
+                if (!Config::cfg.room.privateRoom) {
+                    Arcade::instance.createPost();
+                }
+            }
+            TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");
         }
-        TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");
+
         ImGui::PopStyleColor();
         AppStyle::pop();
 
@@ -390,7 +472,7 @@ void HostSettingsWidget::renderAudio() {
 
     if (!_hosting.isRunning() && _hosting.isReady())
     {
-        if (!_hosting._disableMicrophone) _audioIn.captureAudio();
+        if (Config::cfg.audio.micEnabled) _audioIn.captureAudio();
         _audioOut.captureAudio();
     }
 
@@ -421,7 +503,7 @@ void HostSettingsWidget::renderAudio() {
     AppStyle::pushLabel();
     ImGui::Text("MICROPHONE");
 
-    if (!_hosting._disableMicrophone)
+    if (Config::cfg.audio.micEnabled)
     {
 
         previousMicVolume = _micVolume;
@@ -445,145 +527,29 @@ void HostSettingsWidget::renderAudio() {
 }
 
 /// <summary>
-/// Renders the hotseat settings panel.
-/// </summary>
-void HostSettingsWidget::renderHotseat() {
-
-    static ImVec2 size;
-    static ImVec2 pos;
-
-    size = ImGui::GetContentRegionAvail();
-    pos = ImGui::GetWindowPos();
-
-    ImGui::Dummy(ImVec2(0.0f, 10.0f));
-
-    _hotseat = MetadataCache::preferences.hotseat;
-    if (ImForm::InputToggle("HOTSEAT", _hotseat,
-        "When hotseat mode is enabled, the active gamepad(s) will be swapped between your guests.")) {
-        MetadataCache::preferences.hotseat = _hotseat;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputNumber("SEATS", _hotseatSeats, 1, 8,
-        "The number of guests that can be put in to hotseat(s).")) {
-        MetadataCache::preferences.hotseatSeats = _hotseatSeats;
-        MetadataCache::savePreferences();
-    }
-
-    _hotseatSlotMatch = MetadataCache::preferences.hotseatSlotMatch;
-    if (ImForm::InputCheckbox("Xinput slots must match?", _hotseatSlotMatch,
-        "Most games require player 1 to use xinput slot 1, player 2 in slot 2 etc. The host should have their controller disconnected before enabling this.")) {
-        MetadataCache::preferences.hotseatSlotMatch = _hotseatSlotMatch;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputNumber("HOTSEAT TIME", _hotseatTime, 5, 60,
-        "The amount of time the hotseat guest(s) has to play.")) {
-        MetadataCache::preferences.hotseatTime = _hotseatTime;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputCheckbox("AFK Strip", _hotseatAFK,
-        "If the current hotseat guest goes AFK for a set period of time, they will automatically be set to spectate.")) {
-        MetadataCache::preferences.hotseatAFK = _hotseatAFK;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputNumber("AFK TIME", _hotseatAFKTime, 1, 60,
-        "If AFK STRIP is enabled, then if the hotseat guest is away for this amount of time they'll be moved to spectate.")) {
-        MetadataCache::preferences.hotseatAFKTime = _hotseatAFKTime;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputCheckbox("Pause on Swap", _hotseatPause,
-        "Have the start button be pressed automatically when the hotseat guest is swapped.")) {
-        MetadataCache::preferences.hotseatPause = _hotseatPause;
-        MetadataCache::savePreferences();
-    }
-
-    ImGui::Dummy(ImVec2(0.0f, 20.0f));
-
-}
-
-/// <summary>
-/// Renders the kiosk mode settings panel.
-/// </summary>
-void HostSettingsWidget::renderKiosk() {
-
-    static ImVec2 size;
-    static ImVec2 pos;
-
-    size = ImGui::GetContentRegionAvail();
-    pos = ImGui::GetWindowPos();
-
-    ImGui::Dummy(ImVec2(0.0f, 10.0f));
-
-    AppStyle::pushLabel();
-    ImGui::Text("KIOSK MODE");
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _kioskMode, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        MetadataCache::preferences.kioskMode = !MetadataCache::preferences.kioskMode;
-        _kioskMode = MetadataCache::preferences.kioskMode;
-    }
-    if (MetadataCache::preferences.kioskMode)    TitleTooltipWidget::render("Kiosk Mode Off", "Don't launch in kiosk mode.");
-    else                    TitleTooltipWidget::render("Kiosk Mode On", "Automatically restart a program if it is closed.");
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("When kiosk mode is enabled, if the game/app you are hosting is stopped, it will automatically be restarted again.");
-    AppStyle::pop();
-
-    ImGui::Dummy(ImVec2(0, 20.0f));
-
-    AppStyle::pushLabel();
-    ImGui::Text("APPLICATION FILE PATH");
-
-    ImGui::SetNextItemWidth(size.x - 10);
-    AppStyle::pushInput();
-    if (ImGui::InputText("##Kioskapplication", _kioskApplication, 256)) {
-        MetadataCache::preferences.kioskApplication = _kioskApplication;
-    }
-    TitleTooltipWidget::render("Kiosk Application File Path", "Set the file path of the program you wish to restart.");
-
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("The file path of the program you wish to host (this will be started automatically when hosting starts).");
-    AppStyle::pop();
-
-    ImGui::Dummy(ImVec2(0, 10.0f));
-
-    AppStyle::pushLabel();
-    ImGui::Text("LAUNCH PARAMETERS");
-
-    ImGui::SetNextItemWidth(size.x - 10);
-    AppStyle::pushInput();
-    if (ImGui::InputText("##Kioskparameters", _kioskParam, 256)) {
-        MetadataCache::preferences.kioskParameters = _kioskParam;
-    }
-    TitleTooltipWidget::render("Kiosk Parameters", "Pass any additional parameters to the kiosk application.");
-
-    AppStyle::pushLabel();
-    ImGui::TextWrapped("If the program requires launch parameters you can set them here.");
-    AppStyle::pop();
-
-    ImGui::Dummy(ImVec2(0.0f, 20.0f));
-
-}
-
-/// <summary>
 /// Saves the new preferences.
 /// </summary>
 void HostSettingsWidget::savePreferences() {
-    MetadataCache::preferences.roomName = _roomName;
-    MetadataCache::preferences.gameID = strlen(_gameID) <= 25 ? "1wdoHfhhZH5lPuZCwGBete0HIAj" : _gameID;
-    MetadataCache::preferences.guestCount = _maxGuests;
-    MetadataCache::preferences.publicRoom = _publicGame;
-    MetadataCache::preferences.secret = _secret;
-    MetadataCache::preferences.micVolume = _micVolume;
-    MetadataCache::preferences.micEnabled = _audioIn.isEnabled;
-    MetadataCache::preferences.speakersVolume = _speakersVolume;
-    MetadataCache::preferences.speakersEnabled = _audioOut.isEnabled;
-    MetadataCache::preferences.latencyLimitEnabled = _latencyLimiter;
-    MetadataCache::preferences.latencyLimitValue = _latencyLimit;
-    MetadataCache::preferences.kioskApplication = _kioskApplication;
-    MetadataCache::preferences.kioskParameters = _kioskParam;
-    MetadataCache::savePreferences();
+	Config::cfg.room.game = _gameName;
+	Config::cfg.room.details = _description;
+    Config::cfg.room.guestLimit = _maxGuests;
+    Config::cfg.room.secret = _secret;
+    Config::cfg.audio.micVolume = _micVolume;
+    Config::cfg.audio.micEnabled = _audioIn.isEnabled;
+    Config::cfg.audio.speakersVolume = _speakersVolume;
+    Config::cfg.audio.speakersEnabled = _audioOut.isEnabled;
+    Config::cfg.room.latencyLimit = _latencyLimiter;
+    Config::cfg.room.latencyLimitThreshold = _latencyLimit;
+
+    // Theme
+    string theme = _postThemes[_selectedTheme];
+    transform(theme.begin(), theme.end(), theme.begin(), ::tolower);
+    Config::cfg.room.theme = theme;
+
+    // Artwork
+    Config::cfg.room.artworkID = Config::cfg.artwork[_selectedArtwork].id;
+
+    Config::cfg.Save();
 }
 
 /// <summary>
@@ -613,9 +579,9 @@ bool HostSettingsWidget::isDirty() {
     if (
         _publicGame != cfg.publicGame ||
         _maxGuests != cfg.maxGuests ||
-        _latencyLimiter != MetadataCache::preferences.latencyLimitEnabled ||
-        _latencyLimit != MetadataCache::preferences.latencyLimitValue ||
-        (strcmp(_roomName, cfg.name) != 0) ||
+        _latencyLimiter != Config::cfg.room.latencyLimit ||
+        _latencyLimit != Config::cfg.room.latencyLimitThreshold ||
+        (strcmp("", cfg.name) != 0) ||
         (strcmp(_gameID, cfg.gameID) != 0) ||
         (strcmp(_secret, cfg.secret) != 0)
     ) return true;

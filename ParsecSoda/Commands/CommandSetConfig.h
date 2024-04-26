@@ -15,7 +15,7 @@ public:
 
 	bool run() override
 	{
-		_replyMessage = MetadataCache::preferences.chatbotName + " | Room settings applied.\0";
+		_replyMessage = Config::cfg.chatbotName + "Room settings applied.\0";
 		ParsecHostSetConfig(_parsec, _config, _sessionId);
 		return true;
 	}

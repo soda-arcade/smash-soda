@@ -1,36 +1,39 @@
 #pragma once
 
-#if !defined(_WIN32)
-	#include <Windows.h>
-#endif
-
-#include <atlbase.h>
-#include <atlconv.h>
-#include <cstdlib>
-#include <iostream>
-#include <string>
-#include <tchar.h>
+#include <vector>
 #include <thread>
-#include <atomic>
-#include "../ChatLog.h"
-#include "../ChatBot.h"
+#include <direct.h>
+#include <iostream>
+#include <windows.h>
+#include <shlobj.h>
+#include <chrono>
+#include <ctime>
 
+using namespace std;
+
+/// <summary>
+/// Handles the launching and stopping of a process
+/// </summary>
 class ProcessMan {
 public:
-	ProcessMan();
-	void init(ChatLog& chatLog);
 
-	DWORD start(string path, string args);
-	DWORD launch(LPCWSTR path_cstr, LPCWSTR args_cstr);
-	void stop();
-	bool kill(DWORD pid);
-	bool isProcessRunning(DWORD pid);
+	ProcessMan();
+
+	void start(string path, string args);
+	void stop(bool kill = false);
+	void restart();
+
+	static ProcessMan instance;
 
 private:
-	std::atomic<bool> _isRunning = false;
-	DWORD pid;
-	ChatLog* _chatLog;
-	thread _thread;
-	LPWSTR path_cstr;
-	LPWSTR args_cstr;
+	thread processThread;
+
+	LPCWSTR filePath;
+	LPCWSTR fileArgs;
+
+	void launch();
+
+	bool isRunning = false;
+	DWORD processId = 0;
+
 };

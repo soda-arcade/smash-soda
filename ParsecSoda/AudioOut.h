@@ -12,6 +12,7 @@
 #include "Helpers/Stringer.h"
 #include "AudioTools.h"
 #include "Frequency.h"
+#include "Core/Config.h"
 #include "MetadataCache.h"
 
 #define AUDIO_OUT_FORCE_RELEASE -1

@@ -21,7 +21,7 @@ public:
 		{
 			_replyMessage =
 				std::string() +
-				MetadataCache::preferences.chatbotName + " | Usage: !rc <integer in range [1, " +
+				Config::cfg.chatbotName + " | Usage: !rc <integer in range [1, " +
 				to_string(maxIndex) +
 				"]>\nExample: !rc 1\0"
 				;
@@ -32,16 +32,16 @@ public:
 		std::ostringstream reply;
 		if (_intArg < 1 || _intArg > maxIndex)
 		{
-			reply << MetadataCache::preferences.chatbotName + " | Wrong index: " << _intArg << " is not in range [1, " << maxIndex << "].\0";
+			reply << Config::cfg.chatbotName + "Wrong index: " << _intArg << " is not in range [1, " << maxIndex << "].\0";
 		}
 
 		if (_gamepadClient.connect(_intArg - 1))
 		{
-			reply << MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " connected.\0";
+			reply << Config::cfg.chatbotName + "Gamepad " << _intArg << " connected.\0";
 		}
 		else
 		{
-			reply << MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " fail to connect.\0";
+			reply << Config::cfg.chatbotName + "Gamepad " << _intArg << " fail to connect.\0";
 		}
 
 		_replyMessage = reply.str();

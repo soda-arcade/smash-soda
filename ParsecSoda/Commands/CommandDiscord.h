@@ -18,8 +18,8 @@ public:
 	bool run() override
 	{
 		
-		if (MetadataCache::preferences.discord != "")
-			_replyMessage = MetadataCache::preferences.discord.c_str();
+		if (Config::cfg.chat.discord != "")
+			_replyMessage = Config::cfg.chat.discord.c_str();
 		else return false;
 
 		return true;

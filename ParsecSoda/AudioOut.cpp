@@ -340,8 +340,8 @@ void AudioOut::fetchDevices()
 void AudioOut::setFrequency(Frequency frequency)
 {
 	_frequency = (uint32_t)frequency;
-	MetadataCache::preferences.speakersFrequency = _frequency;
-	MetadataCache::savePreferences();
+	Config::cfg.audio.speakersFrequency = _frequency;
+	Config::cfg.Save();
 }
 
 Frequency AudioOut::getFrequency()

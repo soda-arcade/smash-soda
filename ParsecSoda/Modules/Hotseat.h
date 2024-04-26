@@ -2,11 +2,18 @@
 
 #include <vector>
 #include <thread>
-
-#include "../Helpers/Stopwatch.h"
-
-//#include "../Models/Seat.h"
+#include <direct.h>
+#include <iostream>
+#include <windows.h>
+#include <shlobj.h>
+#include <chrono>
+#include <ctime>
+#include "../Helpers/StopwatchTimer.h"
 #include "../Models/GuestData.h"
+
+#include <nlohmann/json.hpp>
+using namespace std;
+using json = nlohmann::json;
 
 /// <summary>
 /// Handles the hotseat system.
@@ -14,72 +21,51 @@
 class Hotseat {
 public:
 
-	class Seat {
+	class HotseatUser {
 	public:
-		GuestData guest = GuestData();
-		Stopwatch timer;
-		Stopwatch reminder;
-		int reminderIntervals = 4;
-		
-		Seat() {
-			timer.setDuration(MetadataCache::preferences.hotseatTime * 60000);
-			
-			// Reminder duration is a 1/4 of timer duration
-			uint32_t reminderDuration = (timer.getDuration() / 4);
-			reminder.setDuration(reminderDuration);
-		}
+		bool cooldown = false;
+		int userId = 0;
+		string userName = "";
 
-		void extendTime(int minutes) {
-			uint32_t current = MetadataCache::hotseat.hotseatClock.getDuration();
-			timer.setDuration(current + (minutes * 60000));
+		bool inSeat = false;
+		StopwatchTimer* stopwatch;
+		time_t timeLastPlayed = 0;
 
-			// Reminder duration is a 1/4 of timer duration
-			reminderIntervals = 4;
-			uint32_t reminderDuration = (timer.getDuration() / 4);
-			reminder.setDuration(reminderDuration);
-		}
-		
-		void decreaseTime(int minutes) {
-			uint32_t current = MetadataCache::hotseat.hotseatClock.getDuration();
-			timer.setDuration(current - (minutes * 60000));
-
-			// Reminder duration is a 1/4 of timer duration
-			reminderIntervals = 4;
-			uint32_t reminderDuration = (timer.getDuration() / 4);
-			reminder.setDuration(reminderDuration);
-		}
+		string status = "Not played yet";
 	};
-	
-	bool isStarted = false;
-	bool isRunning = false;
-	int activeIndex = 0;
-	
-	vector<Seat> seats;
-	vector<GuestData> queue;
+
+	vector<HotseatUser> users;
 	
 	Hotseat();
-	
-	void start();
-	void stop();
-	
-	void enqueue(GuestData guest);
-	void dequeue(GuestData guest);
-	
-	bool unseat(int seatIndex);
-	void seatGuest(GuestData guestData, int seatIndex = -1);
-	bool unseatGuest(uint32_t guestId);
-	bool inSeat(uint32_t guestId);
-	
-	void extendTime(int minutes, int seatIndex = -1);
-	void decreaseTime(int minutes, int seatIndex = -1);
 
-	string formatDuration(long ms);
+	void Start();
+	void Stop();
+
+	HotseatUser* getUser(int id);
+
+	bool checkUser(int id, string name);
+	void pauseUser(int id);
+	void extendUser(int id, long ms);
+	void deductUser(int id, long ms);
+
+	string getUserTimeRemaining(int id);
+
+	int getCoolDownTime(int id);
+
+	void Log(string message);
+
+	static Hotseat instance;
+	bool updated = false;
 
 private:
+	thread hotseatThread;
+	bool running = false;
 
-	thread _startThread;
-	thread _runThread;
+	void _createUser(int id, string name);
 
-	void _run();
+	time_t getCurrentTimestamp();
+	std::time_t addMinutesToTimestamp(std::time_t timestamp, int minutesToAdd);
+	std::time_t subtractMinutesFromTimestamp(std::time_t timestamp, int minutesToSubtract);
+	int getMinutesDifference(std::time_t timestamp1, std::time_t timestamp2);
 	
 };

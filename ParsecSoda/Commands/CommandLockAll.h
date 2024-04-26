@@ -19,14 +19,14 @@ public:
 
 	bool run() override {
 
-		if (MetadataCache::preferences.lockedPads) {
+		if (Config::cfg.input.lockedPads) {
 
 			std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
 			for (; gi != _gamepadClient.gamepads.end(); ++gi) {
 				(*gi)->setLocked(false);
 			}
-			MetadataCache::preferences.lockedPads = false;
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Everybody's pads were unlocked!\0";
+			Config::cfg.input.lockedPads = false;
+			_replyMessage = Config::cfg.chatbotName + "Everybody's pads were unlocked!\0";
 
 		}
 		else {
@@ -35,8 +35,8 @@ public:
 			for (; gi != _gamepadClient.gamepads.end(); ++gi) {
 				(*gi)->setLocked(true);
 			}
-			MetadataCache::preferences.lockedPads = true;
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Everybody's pads were locked!\0";
+			Config::cfg.input.lockedPads = true;
+			_replyMessage = Config::cfg.chatbotName + "Everybody's pads were locked!\0";
 
 		}
 

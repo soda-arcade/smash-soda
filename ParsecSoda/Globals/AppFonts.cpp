@@ -9,7 +9,7 @@ ImFont* AppFonts::sugoidekai;
 
 void AppFonts::init(ImGuiIO& io) {
 
-	label = io.Fonts->AddFontFromFileTTF(APPFONTS_LIGHT, 12.0f);
+	label = io.Fonts->AddFontFromFileTTF(APPFONTS_LIGHT, 14.0f);
 	title = io.Fonts->AddFontFromFileTTF(APPFONTS_BOLD, 16.0f);
 	input = io.Fonts->AddFontFromFileTTF(APPFONTS_SEMI_BOLD, 16.0f);
 	inputArrow = io.Fonts->AddFontFromFileTTF(APPFONTS_SEMI_BOLD, 1.0f);

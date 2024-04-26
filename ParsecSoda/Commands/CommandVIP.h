@@ -28,7 +28,7 @@ public:
 		switch (_searchResult)
 		{
 		case SEARCH_USER_HISTORY_RESULT::NOT_FOUND:
-			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + ", I cannot find the user you want to make a VIP.\0";
+			_replyMessage = string() + Config::cfg.chatbotName + _sender.name + ", I cannot find the user you want to make a VIP.\0";
 			break;
 
 		case SEARCH_USER_HISTORY_RESULT::ONLINE:
@@ -43,7 +43,7 @@ public:
 
 		case SEARCH_USER_HISTORY_RESULT::FAILED:
 		default:
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !vip <username>\nExample: !vip melon\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !vip <username>\nExample: !vip melon\0";
 			break;
 		}
 
@@ -72,7 +72,7 @@ private:
 
 		if (!_vip.isVIP(target.userID)) {
 
-			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + target.name + " was made a VIP!\0";
+			_replyMessage = string() + Config::cfg.chatbotName + target.name + " was made a VIP!\0";
 
 			if (_vip.VIP(target)) {
 
@@ -100,7 +100,7 @@ private:
 			if (found) {
 				std::ostringstream reply;
 				reply
-					<< MetadataCache::preferences.chatbotName + " " << _sender.name << " has revoked VIP permissions for:\n"
+					<< Config::cfg.chatbotName << _sender.name << " has revoked VIP permissions for:\n"
 					<< "\t\t" << unmoddedGuest.name << "\t(#" << unmoddedGuest.userID << ")\0";
 				_replyMessage = reply.str();
 				_guestHistory.add(unmoddedGuest);

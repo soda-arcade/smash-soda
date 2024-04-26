@@ -279,12 +279,6 @@
     <ClCompile Include="Modules\Macro.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Modules\Overlay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\WebSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\OverlayWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -300,16 +294,25 @@
     <ClCompile Include="Modules\Tournament.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Models\Seat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Mailman.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="KeyboardMapsUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\KeyboardMapWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Overlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\AutoMod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\StopwatchTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Arcade.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -372,9 +375,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandBonk.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands\CommandGameId.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CommandGuests.h">
@@ -453,9 +453,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyboardMaps.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands\CommandJoin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
@@ -788,12 +785,6 @@
     <ClInclude Include="Commands\CommandAddPS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Modules\Overlay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\WebSocket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Commands\CommandTriangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -812,28 +803,49 @@
     <ClInclude Include="Modules\Tournament.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\Command1v1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands\Command2v2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands\CommandKOTH.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Commands\CommandWin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Models\Seat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\Mailman.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\KeyboardMapWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyboardMapsUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Overlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandKeyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandRPG.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandRollCall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandStripAll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\AutoMod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandUnmute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\StopwatchTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Arcade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

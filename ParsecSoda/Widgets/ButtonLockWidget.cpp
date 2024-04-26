@@ -3,13 +3,13 @@
 ButtonLockWidget::ButtonLockWidget(Hosting& hosting)
     : _hosting(hosting)
 {
-    lockedGamepad.bLeftTrigger = MetadataCache::preferences.lockedGamepadLeftTrigger;
-    lockedGamepad.bRightTrigger = MetadataCache::preferences.lockedGamepadRightTrigger;
-    lockedGamepad.sThumbLX = MetadataCache::preferences.lockedGamepadLX;
-    lockedGamepad.sThumbLY = MetadataCache::preferences.lockedGamepadLY;
-    lockedGamepad.sThumbRX = MetadataCache::preferences.lockedGamepadRX;
-    lockedGamepad.sThumbRY = MetadataCache::preferences.lockedGamepadRY;
-    lockedGamepad.wButtons = MetadataCache::preferences.lockedGamepadButtons;
+    lockedGamepad.bLeftTrigger = Config::cfg.input.lockedGamepadLeftTrigger;
+    lockedGamepad.bRightTrigger = Config::cfg.input.lockedGamepadRightTrigger;
+    lockedGamepad.sThumbLX = Config::cfg.input.lockedGamepadLX;
+    lockedGamepad.sThumbLY = Config::cfg.input.lockedGamepadLY;
+    lockedGamepad.sThumbRX = Config::cfg.input.lockedGamepadRX;
+    lockedGamepad.sThumbRY = Config::cfg.input.lockedGamepadRY;
+    lockedGamepad.wButtons = Config::cfg.input.lockedGamepadButtons;
 }
 
 void ButtonLockWidget::setColor(float hue) {

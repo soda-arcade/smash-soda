@@ -14,7 +14,7 @@ bool AudioSettingsWidget::render()
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 450), ImVec2(600, 700));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Audio");
     AppStyle::pushLabel();
 
@@ -25,7 +25,7 @@ bool AudioSettingsWidget::render()
 
     if (!_hosting.isRunning() && _hosting.isReady())
     {
-        if (!_hosting._disableMicrophone) _audioIn.captureAudio();
+        if (Config::cfg.audio.micEnabled) _audioIn.captureAudio();
         _audioOut.captureAudio();
     }
 
@@ -34,7 +34,7 @@ bool AudioSettingsWidget::render()
     // =============================================================
     //  Input devices
     // =============================================================
-    if (!_hosting._disableMicrophone)
+    if (Config::cfg.audio.micEnabled)
     {
         static UINT& currentInputDevice = _audioIn.currentDevice.id;
         ImGui::SetNextItemWidth(size.x);
@@ -61,8 +61,8 @@ bool AudioSettingsWidget::render()
                 {
                     currentInputDevice = i;
                     _audioIn.selectInputDevice(i);
-                    MetadataCache::preferences.audioInputDevice = i;
-                    MetadataCache::savePreferences();
+                    Config::cfg.audio.inputDevice = i;
+                    Config::cfg.Save();
                 }
                 if (isSelected)
                 {
@@ -135,8 +135,8 @@ bool AudioSettingsWidget::render()
             {
                 currentOutputDevice = i;
                 _audioOut.setOutputDevice(i);
-                MetadataCache::preferences.audioOutputDevice = i;
-                MetadataCache::savePreferences();
+                Config::cfg.audio.outputDevice = i;
+                Config::cfg.Save();
             }
             if (isSelected)
             {

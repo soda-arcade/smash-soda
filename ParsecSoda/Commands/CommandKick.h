@@ -24,7 +24,7 @@ public:
 		{
 		case SEARCH_USER_RESULT::NOT_FOUND:
 			{
-				_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + ", I cannot find the user you want to kick.\0";
+				_replyMessage = std::string() + Config::cfg.chatbotName + _sender.name + ", I cannot find the user you want to kick.\0";
 			}
 			break;
 
@@ -34,12 +34,12 @@ public:
 
 			if (_sender.userID == _targetGuest.userID)
 			{
-				_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + " kicked themselves in confusion!\0";
+				_replyMessage = std::string() + Config::cfg.chatbotName + _sender.name + " kicked themselves in confusion!\0";
 				ParsecHostKickGuest(_parsec, _targetGuest.id);
 			}
 			else
 			{
-				_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _targetGuest.name+ " was kicked by " + _sender.name + "!\0";
+				_replyMessage = std::string() + Config::cfg.chatbotName + _targetGuest.name+ " was kicked by " + _sender.name + "!\0";
 				ParsecHostKickGuest(_parsec, _targetGuest.id);
 				
 				//try
@@ -54,7 +54,7 @@ public:
 		
 		case SEARCH_USER_RESULT::FAILED:
 		default:
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !kick <username>\nExample: !kick melon\0";
+			_replyMessage = Config::cfg.chatbotName + " | Usage: !kick <username>\nExample: !kick melon\0";
 			break;
 		}
 

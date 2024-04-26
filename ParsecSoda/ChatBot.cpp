@@ -1,75 +1,74 @@
 #include "ChatBot.h"
 
 
-ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool isHost)
-{
+ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool isHost) {
 	const uint32_t previous = this->_lastUserId;
-
 	setLastUserId(BOT_GUESTID);
 
-	// Pleb commands
-	//if (msgIsEqual(msg, CommandAFK::prefixes()))		return new CommandAFK(_guests, _gamepadClient);
-	if (msgStartsWith(msg, CommandBB::prefixes()))		return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
-	if (msgIsEqual(msg, CommandDiscord::prefixes()))	return new CommandDiscord(sender);
-	if (msgIsEqual(msg, CommandFF::prefixes()))			return new CommandFF(sender, _gamepadClient, _hotseat);
-	if (msgIsEqual(msg, Command8Ball::prefixes()))		return new Command8Ball(sender);
-	if (msgIsEqual(msg, CommandFortune::prefixes()))	return new CommandFortune(sender);
-	if (msgIsEqual(msg, CommandHelp::prefixes()))		return new CommandHelp(sender, _tierList);
-	//if (CommandIpFilter::containsIp(msg))				return new CommandIpFilter(msg, sender, _parsec, _ban, isHost);
-	if (msgIsEqual(msg, CommandJoin::prefixes()))		return new CommandJoin();
-	if (msgIsEqual(msg, CommandMirror::prefixes()))		return new CommandMirror(sender, _gamepadClient);
-	if (msgIsEqual(msg, CommandOne::prefixes()))		return new CommandOne(sender, _gamepadClient);
-	if (msgIsEqual(msg, CommandPads::prefixes()))		return new CommandPads(_gamepadClient);
-	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList, _gamepadClient, _hotseat);
-	if (msgStartsWith(msg, CommandRequest::prefixes()))	return new CommandRequest(msg);
-	if (msgStartsWith(msg, CommandSwap::prefixes()))	return new CommandSwap(msg, sender, _gamepadClient);
-	if (msgIsEqual(msg, CommandTriangle::prefixes()))	return new CommandTriangle(sender, _gamepadClient, _macro);
-	
-	// Tournaments
-	//if (msgStartsWith(msg, Command1v1::prefixes()))		return new Command1v1(msg, _tierList, _tournament);
-	//if (msgStartsWith(msg, Command2v2::prefixes()))		return new Command2v2(msg, _tierList, _tournament);
-	//if (msgStartsWith(msg, CommandKOTH::prefixes()))	return new CommandKOTH(msg, _tierList, _tournament);
-
-//#if !BASIC_VERSION
-	if (!_basicVersion)
-	{
-		if (msgStartsWith(msg, CommandSFX::prefixes()))		return new CommandSFX(msg, _sfxList);
-		if (msgStartsWith(msg, CommandBonk::prefixes()))	return new CommandBonk(msg, sender, _guests, _host);
-	}
-//#endif
-	
-
+	// Get the user's tier and permissions
 	Tier tier = _tierList.getTier(sender.userID);
 
-	// Admin & Moderator commands
-	if (tier >= Tier::ADMIN || isHost)
-	{
-		if (msgStartsWith(msg, CommandAddXbox::prefixes()))		return new CommandAddXbox(_gamepadClient);
-		if (msgStartsWith(msg, CommandAddPS::prefixes()))		return new CommandAddPS(_gamepadClient);
+	/*
+	REGULAR USER COMMANDS
+	Any user can use these commands. Regular users have the "PLEB" tier
+	(hey I didn't name people that, blame Flávio!)
+	*/
+	if (msgStartsWith(msg, CommandBB::prefixes()))			return new CommandBB(_gamepadClient, _macro, _tierList, _vip, sender);
+	if (msgStartsWith(msg, CommandBonk::prefixes()))		return new CommandBonk(msg, sender, _guests, _host);
+	if (msgIsEqual(msg, CommandDiscord::prefixes()))		return new CommandDiscord(sender);
+	if (msgIsEqual(msg, CommandFF::prefixes()))				return new CommandFF(sender, _gamepadClient, _hotseat);
+	if (msgIsEqual(msg, Command8Ball::prefixes()))			return new Command8Ball(sender);
+	if (msgIsEqual(msg, CommandFortune::prefixes()))		return new CommandFortune(sender);
+	if (msgIsEqual(msg, CommandHelp::prefixes()))			return new CommandHelp(sender, _tierList);
+	if (msgStartsWith(msg, CommandKeyboard::prefixes()))	return new CommandKeyboard(msg, sender, _gamepadClient, _tierList);
+	//if (CommandIpFilter::containsIp(msg))					return new CommandIpFilter(msg, sender, _parsec, _ban, isHost);
+	if (msgIsEqual(msg, CommandMirror::prefixes()))			return new CommandMirror(sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandOne::prefixes()))			return new CommandOne(sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandPads::prefixes()))			return new CommandPads(_gamepadClient);
+	if (msgStartsWith(msg, CommandSpectate::prefixes()))	return new CommandSpectate(msg, sender, _guests, _tierList, _gamepadClient, _hotseat);
+	if (msgStartsWith(msg, CommandRequest::prefixes()))		return new CommandRequest(msg);
+	if (msgStartsWith(msg, CommandSwap::prefixes()))		return new CommandSwap(msg, sender, _gamepadClient);
+	if (msgIsEqual(msg, CommandTriangle::prefixes()))		return new CommandTriangle(sender, _gamepadClient, _macro);
+	if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
+	if (msgIsEqual(msg, CommandRPG::prefixes()))			return new CommandRPG(msg, sender, _guests);
+	if (msgIsEqual(msg, CommandRollCall::prefixes()))		return new CommandRollCall(msg, sender, _guests);
+	if (msgStartsWith(msg, CommandSFX::prefixes()))			return new CommandSFX(msg, _sfxList);
+
+	/*
+	ADMIN COMMANDS
+	The host and moderators can use these commands. Moderators have the 
+	"ADMIN" tier. The host has the "GOD" tier.
+	*/
+	if (tier >= Tier::ADMIN || isHost) {
+
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory, _ban);
 		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender, _hotseat);
 		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
-		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg, _hotseat);
-		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg, _hotseat);
+		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg, sender, _guests, _host);
+		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
 		//if (msgStartsWith(msg, CommandLock::prefixes()))		return new CommandLock(msg, sender, _gamepadClient);
 		if (msgStartsWith(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
-		if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRC::prefixes()))			return new CommandRC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
 		//if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient, _hotseat);
+		if (msgStartsWith(msg, CommandStripAll::prefixes()))	return new CommandStripAll(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandTimer::prefixes()))		return new CommandTimer(msg);
 		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _ban, _guestHistory);
+		if (msgStartsWith(msg, CommandUnmute::prefixes()))		return new CommandUnmute(msg, sender, _guests, _host);
 
 	}
 
-	// God commands
-	if (tier >= Tier::GOD || isHost)
-	{
-		if (msgStartsWith(msg, CommandGameId::prefixes()))		return new CommandGameId(msg, _hostConfig);
+	/*
+	HOST COMMANDS
+	Only the host can use these commands. The host has the "GOD" tier.
+	*/
+	if (tier >= Tier::GOD || isHost) {
+		if (msgStartsWith(msg, CommandAddXbox::prefixes()))		return new CommandAddXbox(_gamepadClient);
+		if (msgStartsWith(msg, CommandAddPS::prefixes()))		return new CommandAddPS(_gamepadClient);
 		if (msgStartsWith(msg, CommandGuests::prefixes()))		return new CommandGuests(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandMic::prefixes()))			return new CommandMic(msg, _audioIn);
 		if (msgStartsWith(msg, CommandName::prefixes()))		return new CommandName(msg, _hostConfig);
@@ -80,9 +79,8 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgIsEqual(msg, CommandQuit::prefixes()))			return new CommandQuit(_hostingLoopController);
 		if (msgStartsWith(msg, CommandMod::prefixes()))			return new CommandMod(msg, sender, _parsec, _guests, _guestHistory, _mod, _tierList);
 		if (msgStartsWith(msg, CommandUnmod::prefixes()))		return new CommandUnmod(msg, sender, _mod, _guestHistory, _tierList);
-
-		if (msgStartsWith(msg, CommandVIP::prefixes()))			return new CommandVIP(msg, sender, _parsec, _guests, _guestHistory, _vip, _tierList);
 		if (msgStartsWith(msg, CommandUnVIP::prefixes()))		return new CommandUnVIP(msg, sender, _vip, _guestHistory, _tierList);
+		if (msgStartsWith(msg, CommandVIP::prefixes()))			return new CommandVIP(msg, sender, _parsec, _guests, _guestHistory, _vip, _tierList);
 	}
 
 	this->setLastUserId(previous);
@@ -117,7 +115,7 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 		case 11:
 
 			// VIP Spots
-			if (_vip.isVIP(guest.userID)) {
+			/*if (_vip.isVIP(guest.userID)) {
 				_hostConfig.maxGuests = _hostConfig.maxGuests + 1;
 				MetadataCache::preferences.extraSpots++;
 				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
@@ -128,7 +126,7 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 
 				reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
 
-			}
+			}*/
 
 			break;
 		case -12007:
@@ -160,7 +158,7 @@ const std::string ChatBot::formatBannedGuestMessage(Guest guest)
 const std::string ChatBot::formatModGuestMessage(Guest guest) {
 
 	std::ostringstream reply;
-	reply << MetadataCache::preferences.chatbotName + " | Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
+	reply << Config::cfg.chatbotName + "Moderator \n\t\t" << guest.name << " \t (#" << guest.userID << ") has joined!\0";
 
 	return reply.str();
 
@@ -217,5 +215,5 @@ void ChatBot::setLastUserId(uint32_t lastId)
 
 void ChatBot::updateSettings()
 {
-	_basicVersion = MetadataCache::preferences.basicVersion;
+	//_basicVersion = Config::cfg.general.basicVersion;
 }

@@ -18,7 +18,7 @@ public:
 	{
 		if (!ACommandIntegerArg::run())
 		{
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !lock <integer in range [1, 4]>\nExample: !lock 4\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !lock <integer in range [1, 4]>\nExample: !lock 4\0";
 			return false;
 		}
 
@@ -28,7 +28,7 @@ public:
 			pad->setLocked(!pad->isLocked());
 
 			std::ostringstream reply;
-			reply << MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " was locked by " << _sender.name << "\0";
+			reply << Config::cfg.chatbotName + "Gamepad " << _intArg << " was locked by " << _sender.name << "\0";
 			_replyMessage = reply.str();
 		}
 		return true;
@@ -42,7 +42,7 @@ public:
 protected:
 	static vector<const char*> internalPrefixes()
 	{
-		return vector<const char*> { "!lockpad " };
+		return vector<const char*> { "!lock " };
 	}
 	string _msg;
 	Guest& _sender;

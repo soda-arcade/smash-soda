@@ -140,5 +140,6 @@ Project Link: [https://github.com/MickeyUK/SmashSoda](https://github.com/MickeyU
 * [MickeyUK] - [GitHub](https://github.com/MickeyUK) - Smash Soda Project Lead
 * [FlavioFS] - [GitHub](https://github.com/FlavioFS/) - Original Parsec Soda Developer
 * [v6000] - [GitHub](https://github.com/v6ooo/) - Developer of Parsec Soda V, which Smash Soda is a derivative of
+* [unuruu5760] - [GitHub] (https://github.com/unuruu5760) - Added the Keyboard Widget
 * [R3DPanda] - [GitHub](https://github.com/R3DPanda1/) - Helped with some of the theme integration
 * [MicrosoftMoment] - [GitHub](https://github.com/MicrosoftMoment) - Helps with the Wiki

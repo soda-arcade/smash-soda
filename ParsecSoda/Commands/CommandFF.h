@@ -19,24 +19,19 @@ public:
 	{
 		std::ostringstream reply;
 
-		// Is hotseat mode enabled?
-		if (MetadataCache::preferences.hotseat) {
-			_hotseat.unseatGuest(_sender.userID);
-			reply << MetadataCache::preferences.chatbotName + " " << _sender.name << " has given up their place in the hotseat.\0";
+		if (Config::cfg.hotseat.enabled) {
+			Hotseat::instance.pauseUser(_sender.userID);
+		}
+
+		_droppedPadCount = _gamepadClient.onQuit(_sender);
+		if (_droppedPadCount > 1) {
+			reply << Config::cfg.chatbotName << _sender.name << " has dropped " << _droppedPadCount << " gamepads!\0";
+		}
+		else if (_droppedPadCount > 0) {
+			reply << Config::cfg.chatbotName << _sender.name << " has dropped " << _droppedPadCount << " gamepad!\0";
 		}
 		else {
-
-			_droppedPadCount = _gamepadClient.onQuit(_sender);
-			if (_droppedPadCount > 1) {
-				reply << MetadataCache::preferences.chatbotName + " | " << _sender.name << " has dropped " << _droppedPadCount << " gamepads!\0";
-			}
-			else if (_droppedPadCount > 0) {
-				reply << MetadataCache::preferences.chatbotName + " | " << _sender.name << " has dropped " << _droppedPadCount << " gamepad!\0";
-			}
-			else {
-				reply << MetadataCache::preferences.chatbotName + " | " << _sender.name << " has no gamepads to drop.\0";
-			}
-			
+			reply << Config::cfg.chatbotName << _sender.name << " has no gamepads to drop.\0";
 		}
 
 		_replyMessage = reply.str();

@@ -21,26 +21,20 @@ using namespace std;
 
 Hosting::Hosting()
 {
-	
+
 	// Create a random 8 character string
-	srand(time(NULL));
-	string secret = "";
-	for (int i = 0; i < 8; i++) {
-		secret += (char)(rand() % 26 + 97);
-	}
-	MetadataCache::preferences.secret = secret;
 	_roomToken = "";
 	
 	_hostConfig = EMPTY_HOST_CONFIG;
 	MetadataCache::loadPreferences();
 	setHostConfig(
-		MetadataCache::preferences.roomName,
-		MetadataCache::preferences.gameID,
-		MetadataCache::preferences.guestCount,
-		MetadataCache::preferences.publicRoom,
-		secret
+		"",
+		"",
+		Config::cfg.room.guestLimit,
+		false,
+		Config::cfg.room.secret
 	);
-	setHostVideoConfig(MetadataCache::preferences.fps, MetadataCache::preferences.bandwidth);
+	setHostVideoConfig(Config::cfg.video.fps, Config::cfg.video.bandwidth);
 
 	_sfxList.init("./SFX/custom/_sfx.json");
 	
@@ -65,18 +59,17 @@ Hosting::Hosting()
 	_masterOfPuppets.init(_gamepadClient);
 	_masterOfPuppets.start();
 
-	_latencyLimitEnabled = MetadataCache::preferences.latencyLimitEnabled;
-	_latencyLimitValue = MetadataCache::preferences.latencyLimitValue;
-	_disableMicrophone = MetadataCache::preferences.disableMicrophone;
-	_disableGuideButton = MetadataCache::preferences.disableGuideButton;
-	_disableKeyboard = MetadataCache::preferences.disableKeyboard;
-	_lockedGamepad.bLeftTrigger = MetadataCache::preferences.lockedGamepadLeftTrigger;
-	_lockedGamepad.bRightTrigger = MetadataCache::preferences.lockedGamepadRightTrigger;
-	_lockedGamepad.sThumbLX = MetadataCache::preferences.lockedGamepadLX;
-	_lockedGamepad.sThumbLY = MetadataCache::preferences.lockedGamepadLY;
-	_lockedGamepad.sThumbRX = MetadataCache::preferences.lockedGamepadRX;
-	_lockedGamepad.sThumbRY = MetadataCache::preferences.lockedGamepadRY;
-	_lockedGamepad.wButtons = MetadataCache::preferences.lockedGamepadButtons;
+	_latencyLimitEnabled = Config::cfg.room.latencyLimit;
+	_latencyLimitThreshold = Config::cfg.room.latencyLimitThreshold;
+	_disableGuideButton = Config::cfg.input.disableGuideButton;
+	_disableKeyboard = Config::cfg.input.disableKeyboard;
+	_lockedGamepad.bLeftTrigger = Config::cfg.input.lockedGamepadLeftTrigger;
+	_lockedGamepad.bRightTrigger = Config::cfg.input.lockedGamepadRightTrigger;
+	_lockedGamepad.sThumbLX = Config::cfg.input.lockedGamepadLX;
+	_lockedGamepad.sThumbLY = Config::cfg.input.lockedGamepadLY;
+	_lockedGamepad.sThumbRX = Config::cfg.input.lockedGamepadRX;
+	_lockedGamepad.sThumbRY = Config::cfg.input.lockedGamepadRY;
+	_lockedGamepad.wButtons = Config::cfg.input.lockedGamepadButtons;
 }
 
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -102,8 +95,8 @@ void Hosting::broadcastChatMessage(string message)
 	}
 }
 
-void Hosting::init()
-{
+void Hosting::init() {
+	
 	_parsecStatus = ParsecInit(NULL, NULL, (char *)SDK_PATH, &_parsec);
 	_dx11.init();
 	_gamepadClient.setParsec(_parsec);
@@ -115,8 +108,6 @@ void Hosting::init()
 		_gamepadClient.createAllGamepads();
 		_createGamepadsThread.detach();
 		_macro.init(_gamepadClient, _guestList);
-		_processMan.init(_chatLog);
-		_overlay.init(_processMan, _chatLog);
 		_tournament.init(*_parsec, _guestList, _gamepadClient, _chatLog, _macro);
 	});
 
@@ -128,16 +119,16 @@ void Hosting::init()
 	audioOut.setOutputDevice(preferences.audioOutputDevice);		// TODO Fix leak in setOutputDevice
 	audioOut.captureAudio();
 	audioOut.volume = 0.3f;
-	audioOut.setFrequency((Frequency)MetadataCache::preferences.speakersFrequency);
+	audioOut.setFrequency((Frequency)Config::cfg.audio.speakersFrequency);
 
 	vector<AudioInDevice> audioInputDevices = audioIn.listInputDevices();
 	if (preferences.audioInputDevice >= audioInputDevices.size()) {
 		preferences.audioInputDevice = 0;
 	}
-	AudioInDevice device = audioIn.selectInputDevice(preferences.audioInputDevice);
+	AudioInDevice device = audioIn.selectInputDevice(Config::cfg.audio.inputDevice);
 	audioIn.init(device);
 	audioIn.volume = 0.8f;
-	audioIn.setFrequency((Frequency)MetadataCache::preferences.micFrequency);
+	audioIn.setFrequency((Frequency)Config::cfg.audio.micFrequency);
 
 	preferences.isValid = true;
 	MetadataCache::savePreferences(preferences);
@@ -351,6 +342,10 @@ MasterOfPuppets& Hosting::getMasterOfPuppets()
 	return _masterOfPuppets;
 }
 
+Overlay& Hosting::getOverlay() {
+	return _overlay;
+}
+
 const char** Hosting::getGuestNames()
 {
 	return _guestList.guestNames;
@@ -401,8 +396,8 @@ void Hosting::setHostVideoConfig(uint32_t fps, uint32_t bandwidth)
 {
 	_hostConfig.video->encoderFPS = fps;
 	_hostConfig.video->encoderMaxBitrate = bandwidth;
-	MetadataCache::preferences.fps = fps;
-	MetadataCache::preferences.bandwidth = bandwidth;
+	Config::cfg.video.fps = fps;
+	Config::cfg.video.bandwidth = bandwidth;
 }
 
 void Hosting::setPublicRoom(bool isPublicRoom)
@@ -429,6 +424,9 @@ void Hosting::setRoomSecret(string secret)
 	catch (const std::exception&) {}
 }
 
+/// <summary>
+/// Starts hosting the Parsec session.
+/// </summary>
 void Hosting::startHosting() {
 
 	if (!_isRunning) {
@@ -444,16 +442,20 @@ void Hosting::startHosting() {
 				_eventThread = thread ([this]() {pollEvents(); });
 				_latencyThread = thread([this]() {pollLatency(); });
 				_smashSodaThread = thread([this]() { pollSmashSoda(); });
-				//_gamepadThread = thread([this]() {pollGamepad(); });
 				_mainLoopControlThread = thread ([this]() {mainLoopControl(); });
 
-				// Hotseat mode
-				if (MetadataCache::preferences.hotseat)
-					_hotseat.start();
+				// Start the chat automoderator
+				AutoMod::instance.Start();
 
-				// Start kiosk mode
-				if (MetadataCache::preferences.kioskMode)
-					startKioskMode();
+				// Hotseat mode
+				if (Config::cfg.hotseat.enabled) {
+					Hotseat::instance.Start();
+				}
+
+				// Overlay
+				if (Config::cfg.overlay.enabled) {
+					_overlay.start();
+				}
 
 			}
 		}
@@ -464,69 +466,34 @@ void Hosting::startHosting() {
 	bool debug = true;
 }
 
-void Hosting::stopHosting()
-{
+/// <summary>
+/// Stops hosting the Parsec session.
+/// </summary>
+void Hosting::stopHosting() {
+
+	// Stop the chat automoderator
+	AutoMod::instance.Stop();
+
+	// Remove post on Soda Arcade
+	if (!Config::cfg.room.privateRoom) {
+		Arcade::instance.deletePost();
+	}
+
 	_isRunning = false;
 	_guestList.clear();
 
-	// Stop hotseat
-	_hotseat.stop();
+	// Stop hotseat mode
+	if (Config::cfg.hotseat.enabled) {
+		Hotseat::instance.Stop();
+	}
 
 	// Disable overlay
-	if (MetadataCache::preferences.overlayShow) {
-		_overlay.stop();
+	_overlay.stop();
+
+	// Stop kiosk mode
+	if (Config::cfg.kioskMode.enabled) {
+		ProcessMan::instance.stop();
 	}
-
-	// Clear kiosk mode
-	if (MetadataCache::preferences.kioskMode) {
-		_processMan.stop();
-	}
-
-	// Stop hosting on Arcade
-	if (_roomToken != "") {
-	
-		json j;
-		j["token"] = _roomToken;
-
-		std::future<string> fut = _mailman.POST("https://mickeyuk.com/api/arcade/soda/close", j.dump());
-		std::thread resultThread([&]() {
-			logMessage("Room removed from mickeyuk.com/arcade");
-		});
-		resultThread.detach();
-		
-	}
-
-}
-
-void Hosting::startKioskMode() {
-
-	_chatLog.logMessage("Kiosk mode temporarily disabled...will fix in next update!");
-	return;
-
-	_chatLog.logMessage("Starting kiosk mode...");
-	
-	// Find selected game
-	for (int i = 0; i < _gamesList.getGames().size(); ++i) {
-		if (_gamesList.getGames()[i].itemID == MetadataCache::preferences.selectedGame) {
-			GameData selectedGame = _gamesList.getGames()[i];
-			
-
-			// Start kiosk mode
-			_chatLog.logCommand("Starting: " + selectedGame.path);
-			DWORD pid = _processMan.start(selectedGame.path, "");
-			if (pid != 0) {
-				_chatLog.logCommand("Kiosk mode started!");
-			}
-			else {
-				_chatLog.logCommand("Kiosk mode failed to start!");
-			}
-			
-			return;
-		}
-	}
-
-	// Kiosk mode can't start without a selected game
-	_chatLog.logCommand("Kiosk mode can't start without a selected game!");
 
 }
 
@@ -548,8 +515,10 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 
 void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside) {
 	
-	// Handle all the auto muting stuff
-	//if (!handleMuting(message, guest)) return;
+	// Has the user been muted?
+	if (AutoMod::instance.isMuted(guest.userID)) {
+		return;
+	}
 
 	ACommand* command = _chatBot->identifyUserDataMessage(message, guest, isHost);
 	command->run();
@@ -570,16 +539,18 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
 			_overlay.sendChatMessage(guest, message);
+
+			// Record last message
+			AutoMod::instance.RecordMessage(guest.userID, guest.name, message);
 		}
 	}
 
 	// Chatbot's command reply
-	if (!command->replyMessage().empty() && command->type() != COMMAND_TYPE::DEFAULT_MESSAGE)
-	{
-
+	if (!command->replyMessage().empty() && command->type() != COMMAND_TYPE::DEFAULT_MESSAGE) {
 		broadcastChatMessage(command->replyMessage());
 		_chatLog.logCommand(command->replyMessage());
 		_chatBot->setLastUserId();
+		_overlay.sendLogMessage(command->replyMessage());
 	}
 
 	delete command;
@@ -600,11 +571,131 @@ bool Hosting::handleMuting(const char* message, Guest& guest) {
 
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="message"></param>
+/// <param name="isHidden"></param>
 void Hosting::sendHostMessage(const char* message, bool isHidden) {
 	static bool isAdmin = true;
 	handleMessage(message, _host, true, isHidden);
 }
 
+// ============================================================
+// 
+//  SODA ARCADE
+// 
+// ============================================================
+
+/// <summary>
+/// Creates or updates a room post on the Soda Arcade.
+/// </summary>
+/// <returns></returns>
+bool Hosting::saveRoomOnArcade() {
+	
+	logMessage("Making a post on Soda Arcade...");
+	json j;
+
+	// Parsec stuff
+	string peer_id = getSession().hostPeerId;
+	string secret = Config::cfg.room.secret;
+	string link = (string("https://parsec.gg/g/") + peer_id + "/" + secret + "/").c_str();
+
+	// Is arcade post set?
+	if (arcadeRoomID != -1) {
+		j["id"] = arcadeRoomID;
+	}
+
+	// Properties
+	j["link"] = link;
+	j["peer_id"] = peer_id;
+	j["secret"] = secret;
+	j["slug"] = Config::cfg.room.secret;
+	
+	j["game"] = Config::cfg.room.game;
+	j["private"] = Config::cfg.room.privateRoom;
+	j["guest_limit"] = Config::cfg.room.guestLimit;
+	j["details"] = Config::cfg.room.details;
+	//j["latency_limit"] = (Config::cfg.room.latencyLimit ? Config::cfg.room.latencyLimitThreshold : 0);
+	j["theme"] = Config::cfg.room.theme;
+	//j["artwork_id"] = Config::cfg.room.artworkID;
+
+	string data = j.dump();
+	size_t bodySize = sizeof(char) * data.length();
+
+	// Headers
+	string headers = "Content-Type: application/json\r\n";
+	headers += "Content-Length: " + to_string(bodySize) + "\r\n";
+	if (!Config::cfg.arcade.token.empty()) {
+		headers += "Authorization: Bearer " + Config::cfg.arcade.token + "\r\n";
+	}
+
+	// Make request
+	void* response = nullptr;
+	size_t responseSize = 0;
+	uint16_t status = 0;
+
+	std::string domain = "soda-arcade.test";
+	std::string path = "/api/post/smash";
+	const bool success = MTY_HttpRequest(
+		domain.c_str(), 0, false, "POST", path.c_str(), headers.c_str(),
+		data.c_str(), bodySize,
+		20000,
+		&response, &responseSize, &status
+	);
+	/*if (responseSize > 0) {
+		json result = json::parse(responseStr);
+		arcadeRoomID = result["data"]["id"];
+		logMessage(to_string(arcadeRoomID));
+		logMessage(to_string(status));
+	}
+	else {
+		logMessage("Could not list your room on Soda Arcade for some reason.");
+	}*/
+
+	return true;
+	
+}
+
+/// <summary>
+/// Deletes a room post on the Soda Arcade.
+/// </summary>
+/// <returns></returns>
+bool Hosting::deleteRoomOnArcade() {
+
+	if (arcadeRoomID != -1) {
+		json j;
+
+		// Properties
+		j["post_id"] = arcadeRoomID;
+		string data = j.dump();
+		size_t bodySize = sizeof(char) * data.length();
+
+		// Headers
+		string headers = "Content-Type: application/json\r\n";
+		headers += "Content-Length: " + to_string(bodySize) + "\r\n";
+		if (!Config::cfg.arcade.token.empty()) {
+			headers += "Authorization: Bearer " + Config::cfg.arcade.token + "\r\n";
+		}
+
+		// Make request
+		void* response = nullptr;
+		size_t responseSize = 0;
+		uint16_t status = 0;
+
+		std::string domain = "soda-arcade.test";
+		std::string path = "/api/post";
+		MTY_HttpRequest(
+			domain.c_str(), 0, false, "DELETE", path.c_str(), headers.c_str(),
+			data.c_str(), bodySize,
+			20000,
+			&response, &responseSize, &status
+		);
+
+	}
+
+	return true;
+}
 
 // ============================================================
 // 
@@ -619,7 +710,7 @@ void Hosting::initAllModules()
 		_connectGamepadsThread.detach();
 	});
 
-	parsecArcadeStart();
+	roomStart();
 }
 
 void Hosting::submitSilence()
@@ -642,7 +733,7 @@ void Hosting::liveStreamMedia()
 
 		_dx11.captureScreen(_parsec);
 
-		if (!_disableMicrophone && audioIn.isEnabled && audioOut.isEnabled)
+		if (Config::cfg.audio.micEnabled && audioIn.isEnabled && audioOut.isEnabled)
 		{
 			audioIn.captureAudio();
 			audioOut.captureAudio();
@@ -663,7 +754,7 @@ void Hosting::liveStreamMedia()
 			}
 			else submitSilence();
 		}
-		else if (!_disableMicrophone && audioIn.isEnabled)
+		else if (Config::cfg.audio.micEnabled && audioIn.isEnabled)
 		{
 			audioIn.captureAudio();
 			if (audioIn.isReady())
@@ -771,12 +862,12 @@ void Hosting::pollLatency()
 			_guestList.updateMetrics(guests, guestCount);
 
 			// Latency limiter
-			if (MetadataCache::preferences.latencyLimitEnabled) {
+			if (Config::cfg.room.latencyLimit) {
 				for (size_t mi = 0; mi < guestCount; mi++) {
 					MyMetrics m = _guestList.getMetrics(guests[mi].id);
 
 					if (m.averageNetworkLatencySize > 5 &&
-						m.averageNetworkLatency > MetadataCache::preferences.latencyLimitValue) {
+						m.averageNetworkLatency > Config::cfg.room.latencyLimitThreshold) {
 						ParsecHostKickGuest(_parsec, guests[mi].id);
 					}
 				}
@@ -806,16 +897,10 @@ void Hosting::pollSmashSoda() {
 		// Handles all the automatic button press stuff
 		_macro.run();
 
-		// Handles the hotseat cycling
-		//_hotseat.run();
-
-		// Handle overlay communication
-		//_overlay.run();
-
 		// Updated room settings?
-		if (MetadataCache::preferences.roomChanged) {
+		if (Config::cfg.roomChanged) {
 			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
-			MetadataCache::preferences.roomChanged = false;
+			Config::cfg.roomChanged = false;
 		}
 
 	}
@@ -845,12 +930,6 @@ void Hosting::addNewGuest(Guest guest) {
 	newGuest.timer.start();
 	newGuestList.push_back(newGuest);
 
-	// Hotseat enabled?
-	if (MetadataCache::preferences.hotseat) {
-		GuestData guestData = GuestData(guest.name, guest.userID);
-		_hotseat.enqueue(guestData);
-	}
-
 	try {
 		PlaySound(TEXT("./SFX/new_guest.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
 	}
@@ -871,7 +950,7 @@ void Hosting::handleNewGuests() {
 		if (newGuestList.front().timer.isFinished()) {
 
 			// Welcome message
-			string msg = MetadataCache::preferences.welcomeMessage;
+			string msg = Config::cfg.chat.welcomeMessage;
 			msg = regex_replace(msg, regex("_PLAYER_"), newGuest.guest.name);
 			ParsecHostSendUserData(_parsec, newGuestList.front().guest.id, HOSTING_CHAT_MSG_ID, msg.c_str());
 
@@ -887,21 +966,6 @@ void Hosting::handleNewGuests() {
 bool Hosting::isLatencyRunning()
 {
 	return _isLatencyThreadRunning;
-}
-
-void Hosting::pollGamepad()
-{
-	_gamepadMutex.lock();
-	_isGamepadThreadRunning = true;
-	while (_isRunning) {
-		Sleep(100);
-		if (_overlay.isActive) {
-			_overlay.sendGamepads(_gamepadClient.gamepads);
-		}
-	}
-	_isGamepadThreadRunning = false;
-	_gamepadMutex.unlock();
-	_gamepadThread.detach();
 }
 
 bool Hosting::isGamepadRunning() {
@@ -933,19 +997,18 @@ void Hosting::pollInputs() {
 	_inputThread.detach();
 }
 
-void Hosting::updateButtonLock(LockedGamepadState lockedGamepad)
-{
+void Hosting::updateButtonLock(LockedGamepadState lockedGamepad) {
 	_lockedGamepad = lockedGamepad;
-	MetadataCache::preferences.lockedGamepadLeftTrigger = _lockedGamepad.bLeftTrigger;
-	MetadataCache::preferences.lockedGamepadRightTrigger = _lockedGamepad.bRightTrigger;
-	MetadataCache::preferences.lockedGamepadLX = _lockedGamepad.sThumbLX;
-	MetadataCache::preferences.lockedGamepadLY = _lockedGamepad.sThumbLY;
-	MetadataCache::preferences.lockedGamepadRX = _lockedGamepad.sThumbRX;
-	MetadataCache::preferences.lockedGamepadRY = _lockedGamepad.sThumbRY;
-	MetadataCache::preferences.lockedGamepadButtons = _lockedGamepad.wButtons;
+	Config::cfg.input.lockedGamepadLeftTrigger = _lockedGamepad.bLeftTrigger;
+	Config::cfg.input.lockedGamepadRightTrigger = _lockedGamepad.bRightTrigger;
+	Config::cfg.input.lockedGamepadLX = _lockedGamepad.sThumbLX;
+	Config::cfg.input.lockedGamepadLY = _lockedGamepad.sThumbLY;
+	Config::cfg.input.lockedGamepadRX = _lockedGamepad.sThumbRX;
+	Config::cfg.input.lockedGamepadRY = _lockedGamepad.sThumbRY;
+	Config::cfg.input.lockedGamepadButtons = _lockedGamepad.wButtons;
 }
 
-bool Hosting::parsecArcadeStart() {
+bool Hosting::roomStart() {
 	
 	if (isReady()) {
 		ParsecStatus status = ParsecHostStart(_parsec, HOST_DESKTOP, &_hostConfig, _parsecSession.sessionId.c_str());
@@ -955,60 +1018,13 @@ bool Hosting::parsecArcadeStart() {
 		status = ParsecHostStart(_parsec, HOST_GAME, &_hostConfig, _parsecSession.sessionId.c_str());
 
 		// Init overlay
-		if (MetadataCache::preferences.overlayShow) {
-			_overlay.start();
+		if (Config::cfg.overlay.enabled) {
+			
 		}
 
-		// Post to Arcade service
-		if (MetadataCache::preferences.publicRoom) {
-
-			logMessage("...sending room listing to mickeyuk.com/arcade");
-
-			string link = (string("https://parsec.gg/g/") + getSession().hostPeerId + "/" + MetadataCache::preferences.secret + "/").c_str();
-
-			json j;
-			j["title"] = _hostConfig.name;
-			j["host"] = _host.name;
-			j["link"] = link.c_str();
-
-			// If game name set
-			char _gameName[256];
-			char _description[140];
-			try {
-				strcpy_s(_gameName, MetadataCache::preferences.gameName.c_str());
-				strcpy_s(_description, MetadataCache::preferences.description.c_str());
-			}
-			catch (const std::exception&) {
-				try {
-					strcpy_s(_gameName, "");
-					strcpy_s(_description, "");
-				}
-				catch (const std::exception&) {}
-			}
-			
-			j["game_name"] = _gameName;
-			j["description"] = _description;
-			j["guests_max"] = _hostConfig.maxGuests;
-
-			std::future<string> fut = _mailman.POST("https://mickeyuk.com/api/arcade/soda/create", j.dump());
-			std::thread resultThread([&]() {
-
-				// Get response
-				string result = fut.get();
-
-				// Parse response
-				json j = json::parse(result);
-
-				if (j["status"] == 200) {
-					_roomToken = j["token"];
-					logMessage("Your room is now listed at mickeyuk.com/arcade");
-				}
-				else {
-					logMessage("There was something with your room and it couldn't be listed");
-				}
-
-			});
-			resultThread.detach();
+		// Send room to Soda Arcade
+		if (!Config::cfg.room.privateRoom) {
+			Arcade::instance.createPost();
 		}
 		
 		return status == PARSEC_OK;
@@ -1016,66 +1032,6 @@ bool Hosting::parsecArcadeStart() {
 	}
 	return false;
 }
-
-/// <summary>
-/// Updates the listing on the Parsec Arcade.
-/// </summary>
-void Hosting::parsecArcadeUpdate() {
-
-	if (MetadataCache::preferences.publicRoom) {
-
-		logMessage("...sending room listing to mickeyuk.com/arcade");
-
-		string link = (string("https://parsec.gg/g/") + getSession().hostPeerId + "/" + MetadataCache::preferences.secret + "/").c_str();
-
-		json j;
-		j["title"] = _hostConfig.name;
-		j["host"] = _host.name;
-		j["link"] = link.c_str();
-
-		// If game name set
-		char _gameName[256];
-		char _description[140];
-		try {
-			strcpy_s(_gameName, MetadataCache::preferences.gameName.c_str());
-			strcpy_s(_description, MetadataCache::preferences.description.c_str());
-		}
-		catch (const std::exception&) {
-			try {
-				strcpy_s(_gameName, "");
-				strcpy_s(_description, "");
-			}
-			catch (const std::exception&) {}
-		}
-
-		j["game_name"] = _gameName;
-		j["description"] = _description;
-		j["guests_max"] = _hostConfig.maxGuests;
-		j["token"] = _roomToken;
-
-		std::future<string> fut = _mailman.POST("https://mickeyuk.com/api/arcade/soda/update", j.dump());
-		std::thread resultThread([&]() {
-
-			// Get response
-			string result = fut.get();
-
-			// Parse response
-			json j = json::parse(result);
-
-			if (j["status"] == 200) {
-				logMessage("Your room is now listed at mickeyuk.com/arcade");
-			}
-			else {
-				logMessage("There was something with your room and it couldn't be listed");
-			}
-
-		});
-		resultThread.detach();
-
-	}
-	
-}
-
 
 bool Hosting::isFilteredCommand(ACommand* command) {
 	
@@ -1173,29 +1129,27 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			// Show welcome message
 			addNewGuest(guest);
 
+			_overlay.addGuest(to_string(guest.userID), guest.name);
+
 		}
 		else {
 			
 			// Were extra spots made?
-			if (status != 11 && MetadataCache::preferences.extraSpots > 0) {
+			/*if (status != 11 && MetadataCache::preferences.extraSpots > 0) {
 				_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
 				MetadataCache::preferences.extraSpots--;
 				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
-			}
+			}*/
+
+			_overlay.removeGuest(to_string(guest.userID));
 
 			// Remove from active guests list
 			MetadataCache::removeActiveGuest(guest);
-			if (MetadataCache::hotseat.spectators.empty() == false) {
-				for (int i = MetadataCache::hotseat.spectators.size() - 1; i >= 0; i--) {
-					if (MetadataCache::hotseat.spectators.at(i) == guest.userID) {
-						MetadataCache::hotseat.spectators.erase(MetadataCache::hotseat.spectators.begin() + i);
-					}
-				}
-			}
 
-			// Remove from hotseat queue
-			GuestData data = GuestData(guest.name, guest.userID);
-			_hotseat.dequeue(data);
+			// Hotseat mode
+			if (Config::cfg.hotseat.enabled) {
+				Hotseat::instance.pauseUser(guest.userID);
+			}
 
 			_guestList.deleteMetrics(guest.id);
 			int droppedPads = 0;
@@ -1227,10 +1181,9 @@ bool Hosting::removeGame(string name) {
 }
 
 void Hosting::logMessage(string message) {
-
-	// Get chatbot name
-	string chatbotName = MetadataCache::preferences.chatbotName;
+	string chatbotName = Config::cfg.chatbotName;
 	_chatLog.logCommand(chatbotName + " " + message);
+	_overlay.sendLogMessage(message);
 }
 
 /// <summary>
@@ -1238,11 +1191,11 @@ void Hosting::logMessage(string message) {
 /// </summary>
 /// <returns></returns>
 bool Hosting::isHotseatEnabled() {
-	return _hotseat.isRunning;
+	return false;
 }
 
 /// <summary>
-/// 
+/// Helper function to add fake guests to the guest list.
 /// </summary>
 /// <param name="count"></param>
 void Hosting::addFakeGuests(int count) {
@@ -1260,6 +1213,9 @@ void Hosting::addFakeGuests(int count) {
 
 }
 
+/// <summary>
+/// Helper function to generate a random string.
+/// </summary>
 string Hosting::randomString(const int len) {
 
 	static const char alphanum[] =
@@ -1274,20 +1230,4 @@ string Hosting::randomString(const int len) {
 	}
 
 	return tmp_s;
-}
-
-Overlay& Hosting::getOverlay() {
-
-	return _overlay;
-
-}
-
-Hotseat& Hosting::getHotseat() {
-
-	return _hotseat;
-
-}
-
-ProcessMan& Hosting::getProcessMan() {
-	return _processMan;
 }

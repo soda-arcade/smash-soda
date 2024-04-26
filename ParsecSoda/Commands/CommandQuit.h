@@ -13,7 +13,7 @@ public:
 
 	bool run() override
 	{
-		_replyMessage = MetadataCache::preferences.chatbotName + " | Closing stream...\0";
+		_replyMessage = Config::cfg.chatbotName + "Closing stream...\0";
 		_hostingLoopController = false;
 		return true;
 	}

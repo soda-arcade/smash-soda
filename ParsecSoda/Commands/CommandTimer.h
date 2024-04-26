@@ -17,7 +17,7 @@ public:
 	bool run() override {
 
 		if (!ACommandIntegerArg::run()) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
 			return false;
 		}
 

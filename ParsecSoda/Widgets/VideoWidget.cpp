@@ -3,8 +3,8 @@
 VideoWidget::VideoWidget(Hosting& hosting)
     : _hosting(hosting), _dx11(_hosting.getDX11())
 {
-    _fps = (int) MetadataCache::preferences.fps;
-    _bandwidth = (int)MetadataCache::preferences.bandwidth;
+    _fps = (int)Config::cfg.video.fps;
+    _bandwidth = (int)Config::cfg.video.bandwidth;
 }
 
 bool VideoWidget::render()
@@ -15,7 +15,7 @@ bool VideoWidget::render()
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(500, 600));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Video");
 
 
@@ -156,7 +156,7 @@ bool VideoWidget::render()
     static Debouncer debouncer(DEBOUNCER_TIME_MS, [&]() {
         _hosting.setHostVideoConfig(_fps, _bandwidth);
         _hosting.applyHostConfig();
-        MetadataCache::savePreferences();
+        Config::cfg.Save();
     });
     if (previousFps != _fps || previousBandwidth != _bandwidth)
     {

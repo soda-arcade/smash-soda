@@ -242,8 +242,8 @@ void DX11::enumGPUS()
 
 bool DX11::init()
 {
-	_currentScreen = MetadataCache::preferences.monitor;
-	_currentGPU = MetadataCache::preferences.adapter;
+	_currentScreen = Config::cfg.video.monitor;
+	_currentGPU = Config::cfg.video.adapter;
 	enumGPUS();
 
 	int lresult(-1);
@@ -416,8 +416,8 @@ void DX11::setScreen(UINT index)
 	if (index < _screens.size())
 	{
 		_currentScreen = index;
-		MetadataCache::preferences.monitor = index;
-		MetadataCache::savePreferences();
+		Config::cfg.video.monitor = index;
+		Config::cfg.Save();
 		clearAndRecover();
 	}
 }
@@ -438,8 +438,8 @@ void DX11::setGPU(size_t index)
 	{
 		_mutex.lock();
 		_currentGPU = index;
-		MetadataCache::preferences.adapter = index;
-		MetadataCache::savePreferences();
+		Config::cfg.video.adapter = index;
+		Config::cfg.Save();
 		fetchScreenList();
 		init();
 		_mutex.unlock();

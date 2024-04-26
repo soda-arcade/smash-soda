@@ -3,6 +3,7 @@
 #include "ACommand.h"
 #include <iostream>
 #include "../CompilerDirectives.h"
+#include "../Modules/ProcessMan.h"
 
 using namespace std;
 
@@ -17,24 +18,23 @@ public:
 
 	bool run() override {
 
-		if (MetadataCache::preferences.kioskMode) {
+		if (Config::cfg.kioskMode.enabled) {
 
 			if (!MetadataCache::kiosk.isRestarting) {
 
-				_replyMessage = MetadataCache::preferences.chatbotName + " | Restarting yuzu...";
-				_tsystem(_T("taskkill /F /T /IM yuzu.exe"));
+				_replyMessage = Config::cfg.chatbotName + "Restarting application...";
 
 			}
 			else {
 
-				_replyMessage = MetadataCache::preferences.chatbotName + " | The application is restarting...wait!";
+				_replyMessage = Config::cfg.chatbotName + "The application is restarting...wait!";
 
 			}
 
 		}
 		else {
 
-			_replyMessage = MetadataCache::preferences.chatbotName + " | The host does not have kiosk mode enabled.";
+			_replyMessage = Config::cfg.chatbotName + "The host does not have kiosk mode enabled.";
 
 		}
 		

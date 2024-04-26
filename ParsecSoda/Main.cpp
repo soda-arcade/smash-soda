@@ -11,6 +11,7 @@
 #include <d3d11.h>
 #include <tchar.h>
 #include <Windows.h>
+#include <WinINet.h>
 #include <iostream>
 #include <string>
 #include <SDL.h>
@@ -41,17 +42,14 @@
 #include "Widgets/HotseatWidget.h"
 #include "Widgets/TournamentWidget.h"
 #include "Widgets/KeyboardMapWidget.h"
-// CodeSomnia : Widgets/KeyboardMapWidget.h Added
-
-#include "Modules/Mailman.h"
 
 using namespace std;
 
 // Data
-static ID3D11Device*            g_pd3dDevice = NULL;
-static ID3D11DeviceContext*     g_pd3dDeviceContext = NULL;
-static IDXGISwapChain*          g_pSwapChain = NULL;
-static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
+static ID3D11Device* g_pd3dDevice = NULL;
+static ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
+static IDXGISwapChain* g_pSwapChain = NULL;
+static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
 Hosting g_hosting;
 
 // Forward declarations of helper functions
@@ -62,12 +60,14 @@ void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Main code
-int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
+int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
+
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
 
-    MetadataCache::loadPreferences();
+    // Load config
+    Config::cfg.Load();
 
     WNDCLASSEX wc;
     wc.cbSize = sizeof(WNDCLASSEX);
@@ -85,8 +85,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     ::RegisterClassEx(&wc);
     HWND hwnd = ::CreateWindow(
         wc.lpszClassName, _T("Smash Soda"), WS_OVERLAPPEDWINDOW,
-        MetadataCache::preferences.windowX, MetadataCache::preferences.windowY,
-        MetadataCache::preferences.windowW, MetadataCache::preferences.windowH,
+        Config::cfg.video.windowX, Config::cfg.video.windowY,
+        Config::cfg.video.windowW, Config::cfg.video.windowH,
         NULL, NULL, wc.hInstance, NULL
     );
 
@@ -131,8 +131,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     g_hosting.init();
 
     HostSettingsWidget hostSettingsWindow(g_hosting, [&hwnd](bool isRunning) {
-            SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Smash Soda" : L"Smash Soda");
-    });
+        SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Smash Soda" : L"Smash Soda");
+        });
     LoginWidget loginWindow(g_hosting, hostSettingsWindow);
     LogWidget logWindow(g_hosting);
     GuestListWidget guestsWindow(g_hosting);
@@ -145,24 +145,25 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     ButtonLockWidget buttonLockWidget(g_hosting);
     LibraryWidget libraryWidget(g_hosting);
     OverlayWidget overlayWidget(g_hosting);
-	HotseatWidget hotseatWidget(g_hosting);
-	TournamentWidget tournamentWidget(g_hosting);
+    HotseatWidget hotseatWidget(g_hosting);
+    TournamentWidget tournamentWidget(g_hosting);
     VersionWidget versionWidget;
 
-    ChatWidget chatWindow(g_hosting);
+    //ChatWidget chatWindow(g_hosting);
     KeyboardMapWidget keyMapWidget(g_hosting); //-- CodeSomnia Add Start--
-    //FLASHWINFO fi;
-    //fi.cbSize = sizeof(FLASHWINFO);
-    //fi.hwnd = hwnd;
-    ////fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
-    //fi.dwFlags = FLASHW_TRAY;
-    ////fi.uCount = 0;
-    //fi.uCount = 1;
-    //fi.dwTimeout = 0;
-    //ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
-    //    FlashWindowEx(&fi);
-    //});
-    
+
+    FLASHWINFO fi;
+    fi.cbSize = sizeof(FLASHWINFO);
+    fi.hwnd = hwnd;
+    fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+    fi.uCount = 0;
+    fi.dwTimeout = 0;
+    ChatWidget chatWindow(g_hosting, [&hwnd, &fi]() {
+        if (Config::cfg.general.flashWindow) {
+            FlashWindowEx(&fi);
+        };
+        });
+
     //ITaskbarList3* m_pTaskBarlist;
     //CoCreateInstance(
     //    CLSID_TaskbarList, NULL, CLSCTX_ALL,
@@ -171,26 +172,26 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
     //m_pTaskBarlist->SetProgressValue(hwnd, 1, 2);
 
     ImVec4 clear_color = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
-    ImGui::loadStyle(MetadataCache::preferences.theme);
+    clear_color = ImGui::loadStyle(Config::cfg.general.theme);
 
-    bool showHostSettings = MetadataCache::preferences.showHostSettings;
-    bool showChat = MetadataCache::preferences.showChat;
-    bool showLog = MetadataCache::preferences.showLog;
-    bool showGuests = MetadataCache::preferences.showGuests;
-    bool showGamepads = MetadataCache::preferences.showGamepads;
-    bool showMasterOfPuppets = MetadataCache::preferences.showMasterOfPuppets;
-    bool showAudio = MetadataCache::preferences.showAudio;
-    bool showVideo = MetadataCache::preferences.showVideo;
+    bool showHostSettings = Config::cfg.widgets.host;
+    bool showChat = Config::cfg.widgets.chat;
+    bool showLog = Config::cfg.widgets.log;
+    bool showGuests = Config::cfg.widgets.guests;
+    bool showGamepads = Config::cfg.widgets.gamepads;
+    bool showMasterOfPuppets = Config::cfg.widgets.masterOfPuppets;
+    bool showAudio = Config::cfg.widgets.audio;
+    bool showVideo = Config::cfg.widgets.video;
     bool showStyles = true;
     bool showInfo = false;
     bool showLogin = true;
-    bool showSettings = MetadataCache::preferences.showSettings;
-    bool showButtonLock = MetadataCache::preferences.showButtonLock;
-    bool showLibrary = MetadataCache::preferences.showLibrary;
-    bool showOverlay = false;
-    bool showHotseat = MetadataCache::preferences.showHotseat;
+    bool showSettings = Config::cfg.widgets.settings;
+    bool showButtonLock = Config::cfg.widgets.buttonLock;
+    bool showLibrary = Config::cfg.widgets.library;
+    bool showOverlay = Config::cfg.widgets.overlay;
+    bool showHotseat = Config::cfg.widgets.hotseat;
     bool showTournament = false;
-    bool showKeyMap = true; //-- CodeSomnia Add --
+    bool showKeyMap = Config::cfg.widgets.keyMapper; //-- CodeSomnia Add --
 
     ParsecSession& g_session = g_hosting.getSession();
 
@@ -199,25 +200,53 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         g_hosting.fetchAccountData(true);
         showLogin = !g_hosting.getSession().isValid();
         t.detach();
-    });
+        });
 
     // =====================================================================
     //  Check for updates
     // =====================================================================
-    Mailman _mailman;
-    std::future<string> fut = _mailman.GET("https://mickeyuk.com/api/version/smash_soda");
-	std::thread resultThread([&]() {
+    
+    // Make request
+    void* response = nullptr;
+    size_t responseSize = 0;
+    uint16_t status = 0;
 
-        // Get string response from fut
-        string result = fut.get();
-		
-        // If string not blank
-		if (!result.empty()) {
-            versionWidget.update(result);
-		}
-        
-    });
-    resultThread.join();
+    std::string domain = "mickeyuk.com";
+    std::string path = "/api/version/smash_soda";
+    bool success = MTY_HttpRequest(
+        domain.c_str(), 0, true, "GET", path.c_str(), "Content-Type: application/json",
+        NULL, 0,
+        5000,
+        &response, &responseSize, &status
+    );
+    if (success) {
+        const char* responseStr = (const char*)response;
+        if (responseSize > 0 && status == 200) {
+
+            // Parse JSON
+            json j = json::parse(responseStr);
+
+            j.at("version").get_to(versionWidget.latestVersion);
+            j.at("content").get_to(versionWidget.changeLog);
+
+            // Check if version is different
+            if (versionWidget.latestVersion != versionWidget.version) {
+                versionWidget.showUpdate = true;
+            } else
+
+            // If overlay was updated
+            if (Config::cfg.overlay.update) {
+
+                versionWidget.showDownload = true;
+
+            }
+
+        }
+    }
+    
+    // =====================================================================
+    //  Soda Arcade
+    // =====================================================================
 
     // =====================================================================
     //  Register Hotkeys
@@ -280,6 +309,12 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
         if (versionWidget.showUpdate) {
             versionWidget.renderUpdateWindow();
         }
+        else if (Config::cfg.arcade.showLogin) {
+            versionWidget.renderLoginWindow();
+        }
+        else if (Config::cfg.overlay.update) {
+            versionWidget.renderDownloadWindow();
+        }
 
         if (showLogin) {
             loginWindow.render(showLogin);
@@ -299,8 +334,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             if (showButtonLock)         buttonLockWidget.render();
             if (showLibrary)            libraryWidget.render();
             if (showOverlay)            overlayWidget.render();
-			if (showHotseat)            hotseatWidget.render();
-			if (showTournament)         tournamentWidget.render();
+            if (showHotseat)            hotseatWidget.render();
+            if (showTournament)         tournamentWidget.render();
 
             //-- CodeSomnia Add Start--
             if (showKeyMap)
@@ -312,8 +347,8 @@ int CALLBACK WinMain( _In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _I
             NavBar::render(
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
-                showGuests, showLog, showAudio, showVideo, showInfo, showSettings, 
-				showButtonLock, showLibrary, showOverlay, showHotseat, showTournament, showKeyMap
+                showGuests, showLog, showAudio, showVideo, showInfo, showSettings,
+                showButtonLock, showLibrary, showOverlay, showHotseat, showTournament, showKeyMap
             );
 
             //-- CodeSomnia Moidified End--
@@ -420,7 +455,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-        return true;    
+        return true;
     switch (msg)
     {
     case WM_SIZE:
@@ -441,11 +476,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         RECT windowRect;
         if (GetWindowRect(hWnd, &windowRect))
         {
-            MetadataCache::preferences.windowX = windowRect.left;
-            MetadataCache::preferences.windowY = windowRect.top;
-            MetadataCache::preferences.windowW = windowRect.right - windowRect.left;
-            MetadataCache::preferences.windowH = windowRect.bottom - windowRect.top;
-            MetadataCache::savePreferences();
+            Config::cfg.video.windowX = windowRect.left;
+            Config::cfg.video.windowY = windowRect.top;
+            Config::cfg.video.windowW = windowRect.right - windowRect.left;
+            Config::cfg.video.windowH = windowRect.bottom - windowRect.top;
+            Config::cfg.Save();
         }
         Sleep(1000);
         ::PostQuitMessage(0);

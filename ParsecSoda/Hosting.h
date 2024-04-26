@@ -14,6 +14,9 @@
 #include <mutex>
 #include <regex>
 #include <future>
+
+#include "Core/Config.h"
+
 #include "parsec-dso.h"
 #include "ParsecSession.h"
 #include "DX11.h"
@@ -40,11 +43,11 @@
 #include "Helpers/Debouncer.h"
 #include "Modules/Macro.h"
 #include "Modules/Hotseat.h"
-#include "Modules/WebSocket.h"
+#include "Modules/Overlay.h"	
 #include "Modules/ProcessMan.h"
-#include "Modules/Overlay.h"
 #include "Modules/Tournament.h"
-#include "Modules/Mailman.h"
+#include "Modules/AutoMod.h"
+#include "Modules/Arcade.h"
 
 #include <nlohmann/json.hpp>
 using namespace std;
@@ -98,10 +101,7 @@ public:
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
-	Macro& getMacro();
 	Overlay& getOverlay();
-	Hotseat& getHotseat();
-	ProcessMan& getProcessMan();
 
 	const char** getGuestNames();
 	void toggleGamepadLock();
@@ -116,7 +116,6 @@ public:
 	void setRoomSecret(string secret);
 	void startHosting();
 	void stopHosting();
-	void parsecArcadeUpdate();
 	void stripGamepad(int index);
 	void setOwner(AGamepad& gamepad, Guest newOwner, int padId);
 	void logMessage(string message);
@@ -143,10 +142,15 @@ public:
 	AudioOut audioOut;
 	HWND mainWindow;
 	bool _latencyLimitEnabled = false;
-	unsigned int _latencyLimitValue = 0;
-	bool _disableMicrophone = false;
+	unsigned int _latencyLimitThreshold = 0;
 	bool _disableGuideButton = false;
 	bool _disableKeyboard = false;
+	
+	// Soda Arcade
+	string arcadeAPIUrl = "https://soda-arcade.com/api";
+	int arcadeRoomID = -1;
+	bool saveRoomOnArcade();
+	bool deleteRoomOnArcade();
 
 private:
 
@@ -160,8 +164,7 @@ private:
 	void pollInputs();
 	void pollLatency();
 	void pollSmashSoda();	// Custom features thread
-	void pollGamepad();
-	bool parsecArcadeStart();
+	bool roomStart();
 	bool isFilteredCommand(ACommand* command);
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
 
@@ -194,10 +197,8 @@ private:
 	TierList _tierList;
 	Macro _macro;
 	Hotseat _hotseat;
-	Overlay _overlay;
-	ProcessMan _processMan;
 	Tournament _tournament;
-	Mailman _mailman;
+	Overlay _overlay;
 
 	bool _isRunning = false;
 	bool _isTestMode = false;

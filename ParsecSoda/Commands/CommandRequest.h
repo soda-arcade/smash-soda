@@ -14,7 +14,11 @@ public:
 
 	bool run() override {
 
-		_replyMessage = MetadataCache::preferences.chatbotName + " | Test!\0";
+		/*
+		Spotify Integration...may finish in future update :D - Mickey
+		*/
+
+		//_replyMessage = Config::cfg.chatbotName + " | Test!\0";
 		return true;
 
 	}

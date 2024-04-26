@@ -16,9 +16,9 @@ public:
 
 	bool run() override {
 
-		_gamepadClient.createGamepad();
+		_gamepadClient.createGamepad(AGamepad::Type::XBOX, true);
 
-		_replyMessage = MetadataCache::preferences.chatbotName + " | Added Xbox controller.\0";
+		_replyMessage = Config::cfg.chatbotName + "Added Xbox controller.\0";
 		return true;
 	}
 

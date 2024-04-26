@@ -39,6 +39,7 @@ public:
 
 private:
 	void savePreferences();
+	bool validateSettings();
 	bool isDirty();
 	float lerp(float val1, float val2, float t = 0.11f);
 	float easing(float t);
@@ -52,19 +53,21 @@ private:
 	ToggleIconButtonWidget _publicRoomBtn, _playBtn;
 
 	// Attributes
-	char _roomName[HOST_NAME_LEN];
 	char _gameID[GAME_ID_LEN];
-	char _gameName[256];
+	char _gameName[255];
 	char _description[140];
 	char _secret[HOST_SECRET_LEN];
 	char _secretLink[128];
 	bool _kioskMode;
 	char _kioskApplication[256];
 	char _kioskParam[256];
+	char _shareLink[256];
 	int32_t _maxGuests;
 	bool _publicGame;
 	bool _latencyLimiter;
 	int32_t _latencyLimit;
+	int _selectedArtwork = 0;
+	int _selectedTheme = 0;
 
 	// Hotseat
 	bool _hotseat;
@@ -78,8 +81,15 @@ private:
 	int _micVolume = 80;
 	int _speakersVolume = 30;
 
+	int _libraryID = -1;
+
+	// Errors
+	string _gameNameError = "";
+	string _descriptionError = "";
 
 	const unsigned int DEBOUNCE_TIME_MS = 1000;
 	function<void(bool)> _onHostRunningStatusCallback;
+
+	string _postThemes[6] = { "Default", "Black", "Blue", "Green", "Red", "Full Image"};
 };
 

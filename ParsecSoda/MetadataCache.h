@@ -95,7 +95,7 @@ public:
 		bool showVideo = false;
 		bool showThumbs = false;
 		bool latencyLimitEnabled = false;
-		unsigned int latencyLimitValue = 0;
+		unsigned int latencyLimitThreshold = 0;
 		bool lockedGamepadLeftTrigger = false;
 		bool lockedGamepadRightTrigger = false;
 		bool lockedGamepadLX = false;

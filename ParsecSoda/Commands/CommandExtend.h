@@ -1,78 +1,78 @@
 #pragma once
 
+#include "ACommandSearchUser.h"
+#include <Windows.h>
+#include <mmsystem.h>
+#include <iostream>
 #include <sstream>
-#include "parsec-dso.h"
-#include "ACommandStringArg.h"
+#include "parsec.h"
 #include "../Modules/Hotseat.h"
 
-class CommandExtend : public ACommandStringArg
+class CommandExtend : public ACommandSearchUser
 {
 public:
+	ParsecMetrics metrics;
+	stringstream ping;
+
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::BOT_MESSAGE; }
 
-	CommandExtend(const char* msg, Hotseat& hotseat)
-		: ACommandStringArg(msg, internalPrefixes()), _hotseat(hotseat)
+	CommandExtend(const char* msg, Guest& sender, GuestList& guests, Guest& host)
+		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _host(host)
 	{}
 
 	bool run() override {
 
-		if (!MetadataCache::preferences.hotseat) return false;
-
-		if (!ACommandStringArg::run()) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !extend <minutes> <seat (optional)>\0";
-			return false;
-		}
-		
-		// Split _strArg by spaces
-		std::istringstream iss(_stringArg);
-		std::vector<std::string> results(std::istream_iterator<std::string>{iss},
-			std::istream_iterator<std::string>());
-
-		// Convert first value to int
-		int _intArg = 0;
-		try {
-			_intArg = std::stoi(results[0]);
-		}
-		catch (std::invalid_argument) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !extend <minutes> <seat (optional)>\0";
-			return false;
-		}
-		
-		if (results.size() != 2) {
-			_hotseat.extendTime(_intArg);
-		}
-		else {
-			// Convert second value to int
-			int _seat = -1;
+		// Look for user
+		ACommandSearchUser::run();
+		if (_searchResult != SEARCH_USER_RESULT::FOUND) {
 			try {
-				_seat = std::stoi(results[1]);
+				if (_host.userID == stoul(_targetUsername)) {
+					_targetGuest = _host;
+					_searchResult = SEARCH_USER_RESULT::FOUND;
+				}
 			}
-			catch (std::invalid_argument) {
-				_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !extend <minutes> <seat (optional)>\0";
-				return false;
+			catch (const std::exception&) {}
+
+			if (_searchResult != SEARCH_USER_RESULT::FOUND && _targetUsername.compare(_host.name) == 0) {
+				_targetGuest = _host;
+				_searchResult = SEARCH_USER_RESULT::FOUND;
 			}
-			_hotseat.extendTime(_intArg, _seat);
 		}
 
-		// Add time to timer
-		//_hotseat.extendTime(_intArg);
 
-		std::ostringstream reply;
-		reply << "[HOTSEAT] | The hotseat time for current guest(s) extended by: " << _intArg << " minutes.\0";
-		_replyMessage = reply.str();
+		bool rv = false;
 
-		return true;
+		switch (_searchResult) {
+		case SEARCH_USER_RESULT::NOT_FOUND:
+			break;
 
+		case SEARCH_USER_RESULT::FOUND:
+
+			rv = true;
+			
+			Hotseat::instance.extendUser(_targetGuest.userID, 5);
+
+			break;
+
+		case SEARCH_USER_RESULT::FAILED:
+		default:
+			_replyMessage = Config::cfg.chatbotName + "Usage: !extend <username>\nExample: !extend bigboi83\0";
+			break;
+		}
+
+		return rv;
 	}
 
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!extend" };
+		return vector<const char*> { "!extend", "!increase" };
 	}
 
 protected:
-	Hotseat& _hotseat;
-	
-	static vector<const char*> internalPrefixes() {
+	static vector<const char*> internalPrefixes()
+	{
 		return vector<const char*> { "!extend " };
 	}
+
+	Guest& _sender;
+	Guest& _host;
 };

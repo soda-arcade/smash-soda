@@ -244,8 +244,6 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
 			if (!MTY_JSONObjGetBool(json, "showButtonLock", &preferences.showButtonLock)) preferences.showButtonLock = false;
 			if (!MTY_JSONObjGetBool(json, "showLibrary", &preferences.showLibrary)) preferences.showLibrary = false;
 			if (!MTY_JSONObjGetBool(json, "showHotseat", &preferences.showHotseat)) preferences.showHotseat = false;
-            if (!MTY_JSONObjGetBool(json, "latencyLimitEnabled", &preferences.latencyLimitEnabled)) preferences.latencyLimitEnabled = false;
-            if (!MTY_JSONObjGetUInt(json, "latencyLimitValue", &preferences.latencyLimitValue)) preferences.latencyLimitValue = 200;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadLeftTrigger", &preferences.lockedGamepadLeftTrigger)) preferences.lockedGamepadLeftTrigger = false;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadRightTrigger", &preferences.lockedGamepadRightTrigger)) preferences.lockedGamepadRightTrigger = false;
             if (!MTY_JSONObjGetBool(json, "lockedGamepadLX", &preferences.lockedGamepadLX)) preferences.lockedGamepadLX = false;
@@ -259,7 +257,6 @@ MetadataCache::Preferences MetadataCache::loadPreferences()
             else preferences.discord = "";
 
             // HOTSEAT
-            if (!MTY_JSONObjGetBool(json, "hotseat", &preferences.hotseat)) preferences.latencyLimitEnabled = false;
             if (!MTY_JSONObjGetBool(json, "hotseatSlotMatch", &preferences.hotseatSlotMatch)) preferences.hotseatSlotMatch = true;
             if (!MTY_JSONObjGetUInt(json, "hotseatSeats", &preferences.hotseatSeats)) preferences.hotseatSeats = 1;
             if (!MTY_JSONObjGetUInt(json, "hotseatTime", &preferences.hotseatTime)) preferences.hotseatTime = 15;
@@ -376,8 +373,6 @@ bool MetadataCache::savePreferences(MetadataCache::Preferences preferences)
         MTY_JSONObjSetBool(json, "showAudio", preferences.showAudio);
         MTY_JSONObjSetBool(json, "showVideo", preferences.showVideo);
         MTY_JSONObjSetBool(json, "showThumbs", preferences.showThumbs);
-        MTY_JSONObjSetBool(json, "latencyLimitEnabled", preferences.latencyLimitEnabled);
-        MTY_JSONObjSetUInt(json, "latencyLimitValue", preferences.latencyLimitValue);
         MTY_JSONObjSetBool(json, "lockedGamepadLeftTrigger", preferences.lockedGamepadLeftTrigger);
         MTY_JSONObjSetBool(json, "lockedGamepadRightTrigger", preferences.lockedGamepadRightTrigger);
         MTY_JSONObjSetBool(json, "lockedGamepadLX", preferences.lockedGamepadLX);
@@ -695,22 +690,16 @@ vector<GameData> MetadataCache::loadGamesList() {
                 bool nameSuccess = MTY_JSONObjGetString(game, "name", name, 128);
                 bool pathSuccess = MTY_JSONObjGetString(game, "path", path, 256);
                 bool paramSuccess = MTY_JSONObjGetString(game, "parameters", parameters, 256);
-                bool thumbSuccess = MTY_JSONObjGetString(game, "thumbnailPath", thumbnailPath, 256);
-                bool gameIDSuccess = MTY_JSONObjGetString(game, "gameID", gameID, 256);
-				bool kioskSuccess = MTY_JSONObjGetBool(game, "kiosk", &kiosk);
-				bool hotseatSuccess = MTY_JSONObjGetBool(game, "hotseat", &hotseat);
-				bool seatsSuccess = MTY_JSONObjGetUInt(game, "seats", &seats);
 
-				if (itemIDSuccess && nameSuccess && pathSuccess && paramSuccess && thumbSuccess && 
-                    gameIDSuccess && kioskSuccess && hotseatSuccess && seatsSuccess)
+				if (itemIDSuccess && nameSuccess && pathSuccess && paramSuccess)
                 {
-                    result.push_back(GameData(itemID, name, path, parameters, thumbnailPath, gameID, kiosk, hotseat, seats));
+                    result.push_back(GameData(itemID, name, path, parameters));
                 }
             }
 
-            std::sort(result.begin(), result.end(), [](const GameData a, const GameData b) {
+            /*std::sort(result.begin(), result.end(), [](const GameData a, const GameData b) {
                 return a.gameID < b.gameID;
-                });
+            });*/
 
             MTY_JSONDestroy(&json);
         }
@@ -740,11 +729,6 @@ bool MetadataCache::saveGamesList(vector<GameData> games)
             MTY_JSONObjSetString(game, "name", (*gi).name.c_str());
             MTY_JSONObjSetString(game, "path", (*gi).path.c_str());
             MTY_JSONObjSetString(game, "parameters", (*gi).parameters.c_str());
-            MTY_JSONObjSetString(game, "thumbnailPath", (*gi).thumbnailPath.c_str());
-            MTY_JSONObjSetString(game, "gameID", (*gi).gameID.c_str());
-            MTY_JSONObjSetBool(game, "kiosk", (*gi).kiosk);
-			MTY_JSONObjSetBool(game, "hotseat", (*gi).hotseat);
-            MTY_JSONObjSetUInt(game, "seats", (*gi).seats);
 
             MTY_JSONArrayAppendItem(json, game);
         }
@@ -828,9 +812,6 @@ bool MetadataCache::saveGuestTiers(vector<GuestTier> guestTiers)
 }
 
 bool MetadataCache::saveTheme(int theme) {
-
-    preferences.theme = theme;
-    MetadataCache::savePreferences();
 
     return true;
 

@@ -23,10 +23,10 @@ public:
 		if (tier == Tier::ADMIN || tier == Tier::MOD || tier == Tier::GOD || _vip.isVIP(_sender.userID)) {
 			_macro.pressButtonForAll(ParsecGamepadButton::GAMEPAD_BUTTON_B);
 			_macro.pressButtonForAll(ParsecGamepadButton::GAMEPAD_BUTTON_B);
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Everybody's B button was pressed twice!\0";
+			_replyMessage = Config::cfg.chatbotName + "Everybody's B button was pressed twice!\0";
 		}
 		else {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Only mods and VIPs can use this command!\0";
+			_replyMessage = Config::cfg.chatbotName + "Only mods and VIPs can use this command!\0";
 		}
 		
 		return true;

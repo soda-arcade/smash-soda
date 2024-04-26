@@ -18,42 +18,27 @@ public:
 		name = "";
 		path = "";
 		parameters = "";
-		thumbnailPath = "";
-		gameID = "";
-		kiosk = false;
-		hotseat = false;
-		seats = 0;
 	}
 
 	/**
 	 * Full constructor.
 	 */
-	GameData(uint32_t itemID, string name, string path, string param, string thumb, string gameID, bool kiosk, bool hotseat, uint32_t seats) {
-		set(itemID, name, path, param, thumb, gameID, kiosk, hotseat, seats);
+	GameData(uint32_t itemID, string name, string path, string param) {
+		set(itemID, name, path, param);
 	}
 
 
-	void set(uint32_t itemID, string name, string path, string param, string thumb, string gameID, bool kiosk, bool hotseat, uint32_t seats) {
+	void set(uint32_t itemID, string name, string path, string param) {
 		this->itemID = itemID;
 		this->name = name;
 		this->path = path;
 		this->parameters = param;
-		this->thumbnailPath = thumb;
-		this->gameID = gameID;
-		this->kiosk = kiosk;
-		this->hotseat = hotseat;
-		this->seats = seats;
 	}
 
 	uint32_t itemID;
 	std::string name;
 	std::string path;
 	std::string parameters;
-	std::string thumbnailPath;
-	std::string gameID;
-	bool kiosk;
-	bool hotseat;
-	uint32_t seats;
 
 };
 

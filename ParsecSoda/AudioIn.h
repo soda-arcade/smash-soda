@@ -11,6 +11,7 @@
 #include <initguid.h>
 #include "Helpers/Stringer.h"
 #include "AudioTools.h"
+#include "Core/Config.h"
 #include "MetadataCache.h"
 #include "Frequency.h"
 

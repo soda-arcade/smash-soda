@@ -20,7 +20,7 @@ public:
 	{
 		if (!ACommandStringArg::run())
 		{
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !unvip <username>\nExample: !unvip MickeyUK\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !unvip <username>\nExample: !unvip MickeyUK\0";
 			return false;
 		}
 
@@ -46,7 +46,7 @@ public:
 		{
 			std::ostringstream reply;
 			reply
-				<< MetadataCache::preferences.chatbotName + " | " << _sender.name << " has revoked VIP permissions for: \n"
+				<< Config::cfg.chatbotName << _sender.name << " has revoked VIP permissions for: \n"
 				<< "\t\t" << unmoddedGuest.name << "\t(#" << unmoddedGuest.userID << ")\0";
 			_replyMessage = reply.str();
 			_guestHistory.add(unmoddedGuest);
@@ -54,7 +54,7 @@ public:
 		}
 		else
 		{
-			_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + ", I cannot find the user you want to unvip.\0";
+			_replyMessage = std::string() + Config::cfg.chatbotName + _sender.name + ", I cannot find the user you want to unvip.\0";
 			return false;
 		}
 	}

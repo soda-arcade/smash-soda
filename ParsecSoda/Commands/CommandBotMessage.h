@@ -15,7 +15,7 @@ public:
 
 	bool run() override
 	{
-		_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | " + _msg + "\0";
+		_replyMessage = std::string() + Config::cfg.chatbotName + _msg + "\0";
 		return true;
 	}
 

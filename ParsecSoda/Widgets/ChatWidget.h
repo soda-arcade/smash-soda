@@ -14,7 +14,7 @@
 class ChatWidget
 {
 public:
-	ChatWidget(Hosting& hosting); // , function<void(void)> onMessageCallback = nullptr);
+	ChatWidget(Hosting& hosting, function<void(void)> onMessageCallback = nullptr);
 	bool render();
 
 	const ImVec2 DEFAULT_BUTTON_SIZE = ImVec2(40, 40);

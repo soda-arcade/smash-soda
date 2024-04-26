@@ -16,7 +16,7 @@ public:
 	{
 		if ( !ACommandStringArg::run() )
 		{
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !name <roomname>\nExample: !name Let's Play Gauntlet!\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !name <roomname>\nExample: !name Let's Play Gauntlet!\0";
 			return false;
 		}
 
@@ -33,7 +33,7 @@ public:
 
 		strcpy_s(_config.name, _stringArg.c_str());
 
-		_replyMessage = std::string() + MetadataCache::preferences.chatbotName + " | Room name changed:\n" + _stringArg + "\0";
+		_replyMessage = std::string() + "Room name changed:\n" + _stringArg + "\0";
 		return true;
 	}
 

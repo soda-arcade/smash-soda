@@ -6,12 +6,14 @@ extern Hosting g_hosting;
 HotseatWidget::HotseatWidget(Hosting& hosting)
     : _hosting(hosting)
 {
+	_playTime = Config::cfg.hotseat.playTime;
+	_resetTime = Config::cfg.hotseat.resetTime;
 }
 
 bool HotseatWidget::render() {
 
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Hotseat", (bool*)0);
     AppStyle::pushInput();
 
@@ -29,7 +31,7 @@ bool HotseatWidget::render() {
     {
         AppFonts::pushInput();
         AppColors::pushTitle();
-        if (ImGui::BeginTabItem("Overview"))
+        if (ImGui::BeginTabItem("Users"))
         {
             renderOverview();
             ImGui::EndTabItem();
@@ -54,102 +56,112 @@ bool HotseatWidget::render() {
 
 }
 
+/// <summary>
+/// Render users in the hotseat
+/// </summary>
 void HotseatWidget::renderOverview() {
 
-	Hotseat& hotseat = g_hosting.getHotseat();
     static ImVec2 size;
-    static ImVec2 pos;
     size = ImGui::GetContentRegionAvail();
-    pos = ImGui::GetWindowPos();
+    static ImVec2 cursor;
 
-    ImGui::Dummy(ImVec2(0, 10.0f));
+    cursor = ImGui::GetCursorPos();
+    ImGui::BeginGroup();
 
-	//AppStyle::pushLabel();
-	//ImGui::Text("Time Remaining");
-    //AppStyle::pushPositive();
-	//string time = hotseat.formatDuration(hotseat.playTimer.getRemainingTime());
-	//ImGui::Text(time.c_str());
+    ImGui::Dummy(ImVec2(0, 5));
 
-    ImGui::Dummy(ImVec2(0, 10.0f));
-    
-    AppStyle::pushLabel();
-    ImGui::Text("Queue");
-    ImGui::Separator();
+    if (Config::cfg.hotseat.enabled) {
 
-    ImGui::Dummy(ImVec2(0, 5.0f));
-    
-	for (int i = 0; i < hotseat.queue.size(); i++) {
-        AppStyle::pushPositive();
-        string index = to_string(i + 1) + ". ";
-        ImGui::Text(index.c_str());
-		ImGui::SameLine();
-        
-        if (i < MetadataCache::preferences.hotseatSeats) {
-            AppStyle::pushPositive();
-        }
-        else {
+        // Calculate the maximum to parent height
+        float groupMaxHeight = size.y - 10;
+
+        // Begin a scrolling region with the maximum height
+        ImGui::BeginChild("ScrollingRegion", ImVec2(0, groupMaxHeight), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+        // For each HotseatUser in Hotseat::instance.users
+        for (Hotseat::HotseatUser& user : Hotseat::instance.users) {
+
+            cursor = ImGui::GetCursorPos();
+
             AppStyle::pushInput();
-        }
-		ImGui::Text(hotseat.queue[i].name.c_str());
+            ImGui::Indent(5);
+            ImGui::Text("%s", user.userName.c_str());
+            ImGui::Unindent(5);
+            AppStyle::pop();
 
-        // Seat time
-		if (i < MetadataCache::preferences.hotseatSeats) {
-            AppStyle::pushNegative();
-            string time = hotseat.formatDuration(hotseat.seats[i].timer.getRemainingTime());
-			ImGui::Text(time.c_str());
-		}
-        
-	}
+            ImGui::SameLine();
+            AppStyle::pushPositive();
+            ImGui::Text("#%d", user.userId);
+            AppStyle::pop();
+
+            ImGui::Indent(5);
+            AppStyle::pushLabel();
+            //ImGui::Text(user.status.c_str());
+
+            // Get the time remaining for the user (in minutes)
+            if (user.stopwatch->isRunning()) {
+				ImGui::Text(user.stopwatch->getRemainingTime().c_str());
+			}
+			else {
+                int cooldownTime = Hotseat::instance.getCoolDownTime(user.userId);
+                if (cooldownTime > 0) {
+					ImGui::Text("%d minute(s) to wait", cooldownTime);
+				}
+				else {
+                    ImGui::Text(user.stopwatch->getRemainingTime().c_str());
+				}
+			}
+
+            AppStyle::pop();
+            ImGui::Unindent(5);
+
+            ImGui::Dummy(ImVec2(0, 5));
+
+        }
+
+        ImGui::EndChild();
+
+    }
+
+    ImGui::EndGroup();
 
     AppStyle::pop();
     AppStyle::pushInput();
     
 }
 
+/// <summary>
+/// Render the hotseat settings
+/// </summary>
 void HotseatWidget::renderSettings() {
 
-    _hotseatSeats = MetadataCache::preferences.hotseatSeats;
-    _hotseatTime = MetadataCache::preferences.hotseatTime;
-    _hotseatAFK = MetadataCache::preferences.hotseatAFK;
-    _hotseatAFKTime = MetadataCache::preferences.hotseatAFKTime;
-    _hotseatPause = MetadataCache::preferences.hotseatPause;
-
     static ImVec2 size;
-    static ImVec2 pos;
     size = ImGui::GetContentRegionAvail();
-    pos = ImGui::GetWindowPos();
+    static ImVec2 cursor;
 
-    ImGui::Dummy(ImVec2(0, 10.0f));
+    ImGui::Dummy(ImVec2(0, 5));
 
-    if (ImForm::InputNumber("SEATS", _hotseatSeats, 1, 8,
-        "The number of guests that can be put in to hotseat(s).")) {
-        MetadataCache::preferences.hotseatSeats = _hotseatSeats;
-        MetadataCache::savePreferences();
+    cursor = ImGui::GetCursorPos();
+    ImGui::BeginGroup();
+
+    if (ImForm::InputNumber("PLAY TIME", _playTime, 1, 999,
+        "This is how long a user gets in the hotseat (in minutes).")) {
+        Config::cfg.hotseat.playTime = _playTime;
+        _playTime = Config::cfg.hotseat.playTime;
+        Config::cfg.Save();
     }
 
-    if (ImForm::InputNumber("HOTSEAT TIME", _hotseatTime, 5, 60,
-        "The amount of time the hotseat guest(s) has to play.")) {
-        MetadataCache::preferences.hotseatTime = _hotseatTime;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputCheckbox("AFK Strip", _hotseatAFK,
-        "If the current hotseat guest goes AFK for a set period of time, they will automatically be set to spectate.")) {
-        MetadataCache::preferences.hotseatAFK = _hotseatAFK;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputNumber("AFK TIME", _hotseatAFKTime, 1, 60,
-        "If AFK STRIP is enabled, then if the hotseat guest is away for this amount of time they'll be moved to spectate.")) {
-        MetadataCache::preferences.hotseatAFKTime = _hotseatAFKTime;
-        MetadataCache::savePreferences();
-    }
-
-    if (ImForm::InputCheckbox("Pause on Swap", _hotseatPause,
-        "Have the start button be pressed automatically when the hotseat guest is swapped.")) {
-        MetadataCache::preferences.hotseatPause = _hotseatPause;
-        MetadataCache::savePreferences();
-    }
+    if (ImForm::InputNumber("RESET TIME", _resetTime, _playTime+5, 999,
+		"This is how long a user must wait before they can play again (in minutes).")) {
+        if (_resetTime < _playTime + 5) {
+            _resetTime = _playTime + 5;
+        }
+        else {
+            Config::cfg.hotseat.resetTime = _resetTime;
+            _resetTime = Config::cfg.hotseat.resetTime;
+            Config::cfg.Save();
+        }
+	}
 
     AppStyle::pop();
     AppStyle::pushInput();

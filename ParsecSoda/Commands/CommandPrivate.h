@@ -15,7 +15,7 @@ public:
 
 	bool run() override
 	{
-		_replyMessage = MetadataCache::preferences.chatbotName + " | Room set to private.\0";
+		_replyMessage = Config::cfg.chatbotName + "Room set to private.\0";
 		_config.publicGame = false;
 		return true;
 	}

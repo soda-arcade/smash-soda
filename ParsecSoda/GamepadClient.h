@@ -16,6 +16,7 @@
 #include "KeyboardMaps.h"
 #include "GuestList.h"
 #include "MetadataCache.h"
+#include "Modules/Hotseat.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ public:
 	~GamepadClient();
 	void setParsec(ParsecDSO* parsec);
 	bool init();
-	AGamepad* createGamepad(AGamepad::Type type = AGamepad::Type::XBOX);
+	AGamepad* createGamepad(AGamepad::Type type = AGamepad::Type::XBOX, bool connectPad = false);
 	void createAllGamepads();
 	void createGamepads(int xboxPadCount, int dsPadCount);
 	void connectAllGamepads();
@@ -76,6 +77,8 @@ public:
 	bool connect(int gamepadIndex);
 	bool disconnect(int gamepadIndex);
 	bool clearOwner(int gamepadIndex);
+	bool strip(int guestUserID);
+	bool stripAll();
 
 	bool sendMessage(Guest guest, ParsecMessage message);
 	bool sendButtonMessageForPad(AGamepad* gamepad, ParsecGamepadButtonMessage& button);
@@ -99,6 +102,7 @@ public:
 	bool canDrop = true;
 
 	KeyboardMap& getKeyMap() { return this->_keyboardMap; }// -- CodeSomnia Add --
+	bool mapKeyboard(uint32_t userID, string button);
 
 private:
 
@@ -112,15 +116,15 @@ private:
 	bool tryAssignGamepad(Guest guest, uint32_t padId, int currentSlots, bool isKeyboard, GuestPreferences prefs = GuestPreferences());
 	bool isRequestState(ParsecMessage message);
 	bool isRequestButton(ParsecMessage message);
-	bool isRequestKeyboard(ParsecMessage message);
+	bool isRequestKeyboard(uint32_t userID, ParsecMessage message);
 
 	void reduce(function<void(AGamepad*)> func);
 	bool reduceUntilFirst(function<bool(AGamepad*)> func);
 
-	XINPUT_STATE toXInput(ParsecGamepadStateMessage& state, XINPUT_STATE previousState, GuestPreferences& prefs);
-	XINPUT_STATE toXInput(ParsecGamepadButtonMessage& button, XINPUT_STATE previousState, GuestPreferences& prefs);
-	XINPUT_STATE toXInput(ParsecGamepadAxisMessage& axis, XINPUT_STATE previousState, GuestPreferences& prefs);
-	XINPUT_STATE toXInput(ParsecKeyboardMessage& key, AGamepad::Keyboard& keyboard, XINPUT_STATE previousState, GuestPreferences& prefs);
+	XINPUT_STATE toXInput(ParsecGamepadStateMessage& state, XINPUT_STATE previousState, GuestPreferences& prefs, uint32_t userID);
+	XINPUT_STATE toXInput(ParsecGamepadButtonMessage& button, XINPUT_STATE previousState, GuestPreferences& prefs, uint32_t userID);
+	XINPUT_STATE toXInput(ParsecGamepadAxisMessage& axis, XINPUT_STATE previousState, GuestPreferences& prefs, uint32_t userID);
+	XINPUT_STATE toXInput(ParsecKeyboardMessage& key, AGamepad::Keyboard& keyboard, XINPUT_STATE previousState, GuestPreferences& prefs, uint32_t userID);
 
 
 	PVIGEM_CLIENT _client;
@@ -132,6 +136,10 @@ private:
 	KeyboardMap _keyboardMap;
 
 	bool _isBusy = false;
+
+	bool _isMapping = false;
+	uint32_t _mappingID = 0;
+	string _mappingButton = "";
 
 	int _xboxCount;
 	int _dsCount;

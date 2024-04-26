@@ -18,29 +18,19 @@ public:
 	{
 
 		if (!ACommandIntegerArg::run()) {
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
 			return false;
 		}
 
-		if (_gamepadClient.isSlave) {
-
-			// Are we in hotseat mode?
-			if (MetadataCache::preferences.hotseat) {
-				_hotseat.unseat(_intArg - 1);
-			}
-			
-		}
-		else {
-			bool success = _gamepadClient.clearOwner(_intArg - 1);
-			if (!success) {
-				_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
-				return false;
-			}
+		bool success = _gamepadClient.clearOwner(_intArg - 1);
+		if (!success) {
+			_replyMessage = Config::cfg.chatbotName + "Usage: !strip <integer in range [1, 4]>\nExample: !strip 4\0";
+			return false;
 		}
 
 		std::ostringstream reply;
 		reply
-			<< MetadataCache::preferences.chatbotName + " | Gamepad " << _intArg << " was forcefully dropped by " << _sender.name << "\n"
+			<< Config::cfg.chatbotName + "Gamepad " << _intArg << " was forcefully dropped by " << _sender.name << "\n"
 			<< "\t\tType !pads to see the gamepad list.\0";
 
 		_replyMessage = reply.str();

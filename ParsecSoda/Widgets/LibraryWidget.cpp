@@ -10,7 +10,7 @@ bool LibraryWidget::render() {
 
     // Widget top
     AppStyle::pushTitle();
-    ImGui::SetNextWindowSizeConstraints(ImVec2(150, 150), ImVec2(800, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(800, 900));
     ImGui::Begin("Library", (bool*)0);
     AppStyle::pop();
 
@@ -69,12 +69,7 @@ bool LibraryWidget::renderGameList() {
             memset(_editName, 0, 256);
             memset(_editPath, 0, 256);
             memset(_editParam, 0, 256);
-            memset(_editThumb, 0, 256);
-            strncpy_s(_editID, defaultID.c_str(), 256);
-			_editKiosk = false;
-			_editHotseat = false;
-			_editSeats = 1;
-			showEditForm = true;
+            showEditForm = true;
         }
         ImGui::PopStyleColor(4);
         //AppColors::pushButton();
@@ -94,8 +89,6 @@ bool LibraryWidget::renderGameList() {
             name = _games[i].name;
             path = _games[i].path;
             parameters = _games[i].parameters;
-            thumbnailPath = _games[i].thumbnailPath;
-            gameID = _games[i].gameID;
         
             // Remove game
             IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30));
@@ -113,11 +106,7 @@ bool LibraryWidget::renderGameList() {
                 strncpy_s(_editName, _games[i].name.c_str(), 256);
                 strncpy_s(_editPath, _games[i].path.c_str(), 256);
                 strncpy_s(_editParam, _games[i].parameters.c_str(), 256);
-                strncpy_s(_editThumb, _games[i].thumbnailPath.c_str(), 256);
-				strncpy_s(_editID, _games[i].gameID.c_str(), 256);
-				_editKiosk = _games[i].kiosk;
-				_editHotseat = _games[i].hotseat;
-				_editSeats = _games[i].seats;
+
 				popupEditIndex = i;
                 showEditForm = true;
 			}
@@ -174,17 +163,24 @@ bool LibraryWidget::renderForm(int index) {
     
 	ImForm::InputText("Game Path", _editPath, "Path to the game executable.");
 
+    AppStyle::pushButton();
+    AppColors::pushButtonSolid();
+    if (ImGui::Button("Browse...")) {
+        std::string filePath = openFileDialog();
+        if (!filePath.empty()) {
+            
+            // Copy to _editPath
+            strncpy_s(_editPath, filePath.c_str(), 256);
+
+        }
+    }
+    ImGui::PopStyleColor(4);
+
+    ImGui::Dummy(ImVec2(0, 10));
+
 	ImForm::InputText("Launch Parameters", _editParam, "Parameters to pass to the game executable when launching in kiosk mode.");
     
-	ImForm::InputText("Game ID", _editID, "The game ID that Parsec will use to identify the game and display the correct thumbnail. Leave as default if you do not know ID.");
-
-	ImForm::InputCheckbox("Kiosk Mode", _editKiosk, "If checked, the game will be launched in kiosk mode. This will restart the game if it closes whilst the room is still open.");
-
-	ImForm::InputCheckbox("Hotseat", _editHotseat, "If checked, the game will be launched in hotseat mode. This will cycle through guests in your room and allow them to play the game.");
-
-	ImForm::InputNumber("Seats", _editSeats, 1, 100, "The number of seats available for guests to play the game. This will be ignored if hotseat is not enabled.");
-
-    // Save button
+	// Save button
     AppStyle::pushPositive();
 	if (ImGui::Button("Save")) {
 
@@ -196,11 +192,6 @@ bool LibraryWidget::renderForm(int index) {
 			game.name = _editName;
 			game.path = _editPath;
 			game.parameters = _editParam;
-			game.thumbnailPath = _editThumb;
-			game.gameID = _editID;
-			game.kiosk = _editKiosk;
-			game.hotseat = _editHotseat;
-			game.seats = _editSeats;
 
 			// Add to game list
             _hosting.getGameList().getGames().push_back(game);
@@ -215,11 +206,6 @@ bool LibraryWidget::renderForm(int index) {
 			_hosting.getGameList().getGames()[index].name = _editName;
 			_hosting.getGameList().getGames()[index].path = _editPath;
 			_hosting.getGameList().getGames()[index].parameters = _editParam;
-			_hosting.getGameList().getGames()[index].thumbnailPath = _editThumb;
-			_hosting.getGameList().getGames()[index].gameID = _editID;
-			_hosting.getGameList().getGames()[index].kiosk = _editKiosk;
-			_hosting.getGameList().getGames()[index].hotseat = _editHotseat;
-			_hosting.getGameList().getGames()[index].seats = _editSeats;
 
             MetadataCache::saveGamesList(_hosting.getGameList().getGames());
             
@@ -242,4 +228,30 @@ bool LibraryWidget::renderForm(int index) {
 
     return true;
     
+}
+
+std::string LibraryWidget::openFileDialog() {
+    OPENFILENAME ofn;
+    TCHAR szFile[MAX_PATH] = { 0 };
+
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = NULL;
+    ofn.lpstrFilter = TEXT("Executable Files\0*.exe\0All Files\0*.*\0");
+    ofn.lpstrFile = szFile;
+    ofn.lpstrFile[0] = '\0';
+    ofn.nMaxFile = sizeof(szFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    if (GetOpenFileName(&ofn) == TRUE) {
+        // Convert TCHAR* to std::string
+        int size_needed = WideCharToMultiByte(CP_UTF8, 0, ofn.lpstrFile, -1, NULL, 0, NULL, NULL);
+        std::string filePath(size_needed, 0);
+        WideCharToMultiByte(CP_UTF8, 0, ofn.lpstrFile, -1, &filePath[0], size_needed, NULL, NULL);
+        return filePath;
+    }
+    else {
+        // User canceled the dialog or an error occurred
+        return std::string();
+    }
 }

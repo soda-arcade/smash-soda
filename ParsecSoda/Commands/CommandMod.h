@@ -28,7 +28,7 @@ public:
 		switch (_searchResult)
 		{
 		case SEARCH_USER_HISTORY_RESULT::NOT_FOUND:
-			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + _sender.name + ", I cannot find the user you want to make a mod.\0";
+			_replyMessage = string() + Config::cfg.chatbotName + _sender.name + ", I cannot find the user you want to make a mod.\0";
 			break;
 
 		case SEARCH_USER_HISTORY_RESULT::ONLINE:
@@ -43,7 +43,7 @@ public:
 
 		case SEARCH_USER_HISTORY_RESULT::FAILED:
 		default:
-			_replyMessage = MetadataCache::preferences.chatbotName + " | Usage: !mod <username>\nExample: !mod melon\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !mod <username>\nExample: !mod melon\0";
 			break;
 		}
 
@@ -71,10 +71,10 @@ private:
 		bool result = false;
 
 		if (_sender.userID == target.userID)
-			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | You don't need to be a mod...you're the boss, " + _sender.name + "!\0";
+			_replyMessage = string() + Config::cfg.chatbotName + "You don't need to be a mod...you're the boss, " + _sender.name + "!\0";
 		else
 		{
-			_replyMessage = string() + MetadataCache::preferences.chatbotName + " | " + target.name + " was made a mod by " + _sender.name + "!\0";
+			_replyMessage = string() + Config::cfg.chatbotName + target.name + " was made a mod by " + _sender.name + "!\0";
 
 			if (_mod.mod(target))
 			{

@@ -2,524 +2,426 @@
 extern Hosting g_hosting;
 #include "Hotseat.h"
 
+Hotseat Hotseat::instance = Hotseat::Hotseat();
+
 /// <summary>
 /// Constructor
 /// </summary>
-Hotseat::Hotseat() {}
-
-/// <summary>
-/// Start the hotseat system.
-/// </summary>
-void Hotseat::start() {
-
-	MetadataCache::preferences.xboxPuppetCount = 0;
-	MetadataCache::preferences.ds4PuppetCount = 0;
-
-	_startThread = thread([&]() {
-
-		// Get gamepad client
-		GamepadClient& gamepadClient = g_hosting.getGamepadClient();
-
-		// Is another system already running? Abort
-		if (gamepadClient.isBusy() || gamepadClient.isSlave) {
-			return;
-		}
-
-		// Take control of gamepads
-		gamepadClient.isSlave = true;
-
-		// Get number of hotseats
-		int seatCount = MetadataCache::preferences.hotseatSeats;
-
-		// Create seats
-		for (int i = 0; i < seatCount; i++) {
-			Seat seat = Seat();
-			seats.push_back(seat);
-		}
-
-		// Create gamepads for seats
-		int xboxPads = seatCount < 4 ? seatCount : 4;
-		int ds4Pads = seatCount > 4 ? seatCount - 4 : 0;
-
-		// Clear existing pads
-		gamepadClient.releaseGamepads();
-		Sleep(200);
-		
-		for (uint16_t i = 0; i < xboxPads; i++) {
-			gamepadClient.createGamepad(AGamepad::Type::XBOX);
-			Sleep(200);
-		}
-		for (uint16_t i = 0; i < ds4Pads; i++) {
-			gamepadClient.createGamepad(AGamepad::Type::DUALSHOCK);
-			Sleep(200);
-		}
-		std::vector<AGamepad*>::iterator gi = gamepadClient.gamepads.begin();
-		for (; gi != gamepadClient.gamepads.end(); ++gi) {
-			(*gi)->connect();
-			Sleep(200);
-		}
-		gi = gamepadClient.gamepads.begin();
-		for (; gi != gamepadClient.gamepads.end(); ++gi) {
-			(*gi)->refreshIndex();
-		}
-		Sleep(200);
-
-		// Get guest list
-		vector<Guest>& guests = g_hosting.getGuests();
-		for (uint16_t i = 0; i < guests.size(); i++) {
-			GuestData guestData = GuestData(guests[i].name, guests[i].userID);
-			enqueue(guestData);
-		}
-		Sleep(200);
-
-		// Start the run thread
-		_runThread = thread([&]() {
-			_run();
-		});
-		_runThread.detach();
-
-	});
-	
-	_startThread.detach();
-
-}
-
-/// <summary>
-/// Stop the hotseat system.
-/// </summary>
-void Hotseat::stop() {
-
-	// Stop thread
-	isRunning = false;
-	isStarted = false;
-
-	// Get gamepad client
-	GamepadClient& gamepadClient = g_hosting.getGamepadClient();
-	if (gamepadClient.isBusy()) {
-		return;
-	}
-
-	// Clear queue and seats
-	queue.clear();
-	seats.clear();
-
-	// Release gamepads
-	gamepadClient.isSlave = false;
-	gamepadClient.releaseGamepads();
+Hotseat::Hotseat() {
 	
 }
 
 /// <summary>
-/// Adds a guest to the queue.
+/// Starts the hotseat thread.
 /// </summary>
-/// <param name="guest"></param>
-void Hotseat::enqueue(GuestData guest) {
+void Hotseat::Start() {
 
-	if (!MetadataCache::isSpectating(guest.userID)) {
-		
-		// For each seat
-		for (int i = 0; i < seats.size(); i++) {
+	// Start the hotseat thread
+	if (!running) {
+		running = true;
+		hotseatThread = std::thread([&] {
 
-			// Get seat
-			Seat& seat = seats[i];
+			while (running) {
 
-			// If seat is empty
-			if (seat.guest.userID == 0) {
+				// Get current timestamp
+				std::time_t currentTime = getCurrentTimestamp();
 
-				// Put the guest in the seat
-				seatGuest(guest, i);
-				break;
+				// Loop through all users
+				for (HotseatUser& user : users) {
 
-			}
+					// A user can try to play again
+					user.cooldown = false;
 
-		}
-		
-		queue.push_back(guest);
-	}
+					// Check if user is in seat
+					if (user.inSeat) {
 
-}
+						// Check if user has time remaining
+						if (user.stopwatch->isFinished()) {
 
-/// <summary>
-/// Removes a guest from the queue.
-/// </summary>
-/// <param name="guest"></param>
-void Hotseat::dequeue(GuestData guest) {
+							// Stop the stopwatch
+							user.stopwatch->stop();
 
-	// Remove from queue
-	for (int i = 0; i < queue.size(); i++) {
-		if (queue[i].userID == guest.userID) {
-			queue.erase(queue.begin() + i);
-			return;
-		}
-	}
+							// Remove user from seat
+							user.inSeat = false;
 
-	// Unseat guest if in hotseat
-	for (int i = 0; i < seats.size(); i++) {
-		Seat& seat = seats[i];
-		if (seat.guest.userID == guest.userID) {
-			unseat(i);
-			return;
-		}
-	}
+							// Strip pads
+							g_hosting.getGamepadClient().strip(user.userId);
 
-}
+							// Log user removed
+							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime) + " minutes.");
 
-/// <summary>
-/// Extends time on the seat.
-/// </summary>
-/// <param name="minutes"></param>
-/// <param name="seatIndex">optional</param>
-void Hotseat::extendTime(int minutes, int seatIndex) {
+						} else {
 
-	// Everyone
-	if (seatIndex == -1) {
+							// Log user time remaining
+							Log("User " + user.userName + " has " + user.stopwatch->getRemainingTime() + " remaining.");
 
-		// For each seat
-		for (int i = 0; i < seats.size(); i++) {
+						}
 
-			// Get seat
-			Seat& seat = seats[i];
+					}
 
-			// Extend time
-			int currentTime = seat.timer.getDuration();
-			seat.timer.setDuration(currentTime + (minutes * 60000));
-
-			// Update reminder
-			seat.reminderIntervals = 4;
-			uint32_t reminderDuration = (seat.timer.getDuration() / 4);
-			seat.reminder.setDuration(reminderDuration);
-
-		}
-		
-	}
-	else {
-
-		// Get seat
-		Seat& seat = seats[seatIndex];
-
-		// Extend time
-		int currentTime = seat.timer.getDuration();
-		seat.timer.setDuration(currentTime + (minutes * 60000));
-
-		// Update reminder
-		seat.reminderIntervals = 4;
-		uint32_t reminderDuration = (seat.timer.getDuration() / 4);
-		seat.reminder.setDuration(reminderDuration);
-		
-	}
-
-}
-
-/// <summary>
-/// Decrease time on the seat.
-/// </summary>
-/// <param name="minutes"></param>
-/// <param name="seatIndex">optional</param>
-void Hotseat::decreaseTime(int minutes, int seatIndex) {
-
-	// Everyone
-	if (seatIndex == -1) {
-
-		// For each seat
-		for (int i = 0; i < seats.size(); i++) {
-
-			// Get seat
-			Seat& seat = seats[i];
-
-			// Time can't be below zero
-			int currentTime = seat.timer.getDuration();
-			int newTime = currentTime - (minutes * 60000);
-			if (newTime < 0) {
-				newTime = 0;
-			}
-
-			// Extend time
-			seat.timer.setDuration(newTime);
-
-			// Update reminder
-			seat.reminderIntervals = 4;
-			uint32_t reminderDuration = (seat.timer.getDuration() / 4);
-			seat.reminder.setDuration(reminderDuration);
-
-		}
-
-	}
-	else {
-
-		// Get seat
-		Seat& seat = seats[seatIndex];
-
-		// Time can't be below zero
-		int currentTime = seat.timer.getDuration();
-		int newTime = currentTime - (minutes * 60000);
-		if (newTime < 0) {
-			newTime = 0;
-		}
-
-		// Extend time
-		seat.timer.setDuration(newTime);
-
-		// Update reminder
-		seat.reminderIntervals = 4;
-		uint32_t reminderDuration = (seat.timer.getDuration() / 4);
-		seat.reminder.setDuration(reminderDuration);
-
-	}
-	
-}
-
-/// <summary>
-/// Hotseat loop every 1 second 
-/// </summary>
-void Hotseat::_run() {
-
-	// Start all seat timers at same time
-	for (int i = 0; i < seats.size(); i++) {
-		seats[i].timer.start();
-		seats[i].reminder.start();
-		seats[i].reminderIntervals = 4;
-	}
-
-	// Start
-	isRunning = true;
-
-	// Loop
-	while (isRunning) {
-
-		// For each seat
-		for (int i = 0; i < seats.size(); i++) {
-
-			// Get seat
-			Seat& seat = seats[i];
-			if (seat.guest.userID == 0 ||
-				g_hosting.getGuests().size() < seats.size()) {
-				seats[i].timer.reset();
-				seats[i].reminder.reset();
-				seats[i].reminderIntervals = 4;
-				continue;
-			}
-
-			// If seat is expired
-			if (seat.timer.isFinished()) {
-				
-				seat.timer.reset();
-
-				if (g_hosting.getGuests().size() >= seats.size()) {
-					unseat(i);
 				}
 
+				// Sleep for a minute
+				std::this_thread::sleep_for(std::chrono::minutes(1));
 			}
-
-			// If time for next reminder
-			if (seat.reminder.isFinished() && seat.reminderIntervals > 0) {
-
-				// Get guest
-				Guest& guest = g_hosting.getGuests()[g_hosting.getGuestIndex(seat.guest.userID)];
-
-				// Get remaining time
-				int remaining = seat.timer.getRemainingTime();
-				
-				// Send reminder
-				string message = guest.name + " has " + formatDuration(remaining) + " left in the hotseat.";
-				g_hosting.logMessage(message);
-				
-				// Reset timer
-				seat.reminder.reset();
-				seat.reminderIntervals--;
-
-			}
-
-		}
-
-		// Sleep for 1 second
-		Sleep(1000);
-		
+		});
+		hotseatThread.detach();
 	}
-	
-}
-
-/// <summary>
-/// Removes a guest from a seat.
-/// </summary>
-/// <param name="seatIndex"></param>
-/// <returns></returns>
-bool Hotseat::unseat(int seatIndex) {
-
-	// Get seat
-	Seat& seat = seats[seatIndex];
-	GuestData currentGuest = seat.guest;
-
-	// Reset seat
-	seat.guest = GuestData();
-	
-	// Erase guest from queue
-	int guestIndex = 0;
-	for (int i = 0; i < queue.size(); i++) {
-		if (queue[i].userID == currentGuest.userID) {
-			queue.erase(queue.begin() + i);
-			guestIndex = i;
-			break;
-		}
-	}
-	
-	// Add guest to end of queue
-	queue.push_back(currentGuest);
-
-	// Go through queue and find new guest to put in seat
-	for (int i = guestIndex; i < queue.size(); i++) {
-
-		// If guest invalid?
-		bool found = false;
-		vector<Guest>& guestList = g_hosting.getGuests();
-		for (int j = 0; j < guestList.size(); j++) {
-			if (guestList[j].userID == queue[i].userID) {
-				found = true;
-			}
-		}
-		if (!found || MetadataCache::isSpectating(queue[i].userID)) {
-			dequeue(queue[i]);
-			continue;
-		}
-
-		// Get guest
-		if (!inSeat(queue[i].userID)) {
-			
-			// Put guest in seat
-			seat.guest.name = queue[i].name;
-			seat.guest.userID = queue[i].userID;
-
-			// Get guest
-			int guestIndex = g_hosting.getGuestIndex(queue[i].userID);
-			if (guestIndex != -1) {
-
-				// Get guest
-				Guest& guest = g_hosting.getGuests()[guestIndex];
-
-				// Assign pad
-				g_hosting.getGamepadClient().getGamepad(seatIndex)->setOwner(guest, 0, false);
-
-				string message = queue[i].name + " has been put in seat " + to_string(seatIndex + 1) + ".";
-				g_hosting.logMessage(message);
-
-			}
-			
-			break;
-		}
-
-	}
-
-	// Reset timer
-	seat.timer.reset();
-	seat.reminder.reset();
-	seat.reminderIntervals = 4;
-
-	return true;
 
 }
 
 /// <summary>
-/// Checks to see if a guest is already in a seat.
+/// Stops the hotseat thread.
 /// </summary>
-/// <param name="guestID"></param>
-/// <returns></returns>
-bool Hotseat::inSeat(uint32_t guestID) {
+void Hotseat::Stop() {
 
-	// Is guest already in a seat?
-	for (int i = 0; i < seats.size(); i++) {
-		if (seats[i].guest.userID == guestID) {
-			return true;
-		}
+	// Stop the hotseat thread
+	running = false;
+
+	// Stop all active users
+	for (HotseatUser& user : users) {
+		user.inSeat = false;
+		user.stopwatch->stop();
 	}
 
-	return false;
-	
 }
 
 /// <summary>
-/// Puts a guest in a seat.
+/// Find a user by id.
 /// </summary>
-/// <param name="guestID"></param>
-/// <returns></returns>
-void Hotseat::seatGuest(GuestData guestData, int seatIndex) {
+Hotseat::HotseatUser* Hotseat::getUser(int id) {
 
-	if (seatIndex == -1) {
-
-		// Find first available seat
-		for (int i = 0; i < seats.size(); i++) {
-			if (seats[i].guest.userID == 0) {
-				seatIndex = i;
-				break;
-			}
+	// Find user
+	for (HotseatUser& user : users) {
+		if (user.userId == id) {
+			return &user;
 		}
-		
 	}
-	
-	// Get seat
-	Seat& seat = seats[seatIndex];
-	seat.timer.reset();
-	seat.reminder.reset();
-	seat.reminderIntervals = 4;
-	
-	// Get guest
-	int guestIndex = g_hosting.getGuestIndex(guestData.userID);
-	if (guestIndex != -1) {
-		
-		// Get guest
-		Guest& guest = g_hosting.getGuests()[guestIndex];
 
-		// Assign pad
-		g_hosting.getGamepadClient().getGamepad(seatIndex)->setOwner(guest, 0, false);
-		
-		g_hosting.logMessage(guestData.name + " has been put in seat " + to_string(seatIndex + 1) + ".");
+	// If user not found, return nullptr
+	return nullptr;
+
+}
+
+/// <summary>
+/// Check if a user can be seated.
+/// </summary>
+/// <param name="id"></param>
+/// <returns></returns>
+bool Hotseat::checkUser(int id, string name) {
+
+	// Get current timestamp
+	std::time_t currentTime = getCurrentTimestamp();
+
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user == nullptr) {
+
+		// Create a new user
+		_createUser(id, name);
+
+		return true;
 
 	}
 	else {
-		
-	}
 
-}
+		// Check if user has time remaining
+		if (user->stopwatch->getRemainingMs() > 0) {
 
-/// <summary>
-/// Forcibly removes a guest from a seat.
-/// </summary>
-/// <param name="guestID"></param>
-/// <returns></returns>
-bool Hotseat::unseatGuest(uint32_t guestID) {
+			// User still has time remaining, so they can join
+			// Log user reseated
+			Log("User " + user->userName + " has been reseated. They have " + user->stopwatch->getRemainingTime() + " remaining.");
 
-	// Is guest already in a seat?
-	for (int i = 0; i < seats.size(); i++) {
-		if (seats[i].guest.userID == guestID) {
-			unseat(i);
+			// Start the stopwatch
+			user->stopwatch->resume();
+
+			// Add user to seat
+			user->inSeat = true;
+
 			return true;
+		}
+		else {
+			// User has no time remaining
+
+			// Get time since last played
+			int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
+
+			// Check if user is on cooldown
+			if (minutesSinceLastPlayed < Config::cfg.hotseat.resetTime) {
+				// User is on cooldown, prevent reseating
+				// Log user on cooldown
+				if (!user->cooldown) {
+					Log("User " + user->userName + " is on cooldown. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
+					// Prevent spamming
+					user->cooldown = true;
+				}
+
+				return false;
+
+			}
+			else {
+
+				if (user->stopwatch->isPaused()) {
+
+					// User is not on cooldown, reseat them
+					// Log user reseated
+					Log("User " + user->userName + " is now in the seat. They have " + user->stopwatch->getRemainingTime() + " left.");
+
+					// Start the stopwatch
+					user->stopwatch->resume();
+
+				} else {
+
+					// User is not on cooldown, reseat them
+					// Log user reseated
+					Log("User " + user->userName + " has been reseated. They have " + to_string(Config::cfg.hotseat.playTime) + " minutes.");
+
+					// Set the stopwatch time
+					user->stopwatch->start(Config::cfg.hotseat.playTime);
+
+				}
+
+				// Add user to seat
+				user->inSeat = true;
+
+				// Update last played time
+				user->timeLastPlayed = currentTime;
+
+				return true;
+			}
 		}
 	}
 
-	return false;
+	return true;
+}
+
+/// <summary>
+/// Creates a new Hotseat user.
+/// </summary>
+/// <param name="id"></param>
+/// <param name="name"></param>
+void Hotseat::_createUser(int id, std::string name) {
+    // Create a new user
+    HotseatUser user;
+    user.userId = id;
+    user.userName = name;
+    user.inSeat = true;
+    user.timeLastPlayed = getCurrentTimestamp();
+    user.stopwatch = new StopwatchTimer();
+
+	// Set the stopwatch time
+	user.stopwatch->start(Config::cfg.hotseat.playTime);
+
+    // Add the user to the list
+    users.push_back(user);
+
+    // Log user added
+    Log("User " + name + " added to hotseat. They have " + std::to_string(Config::cfg.hotseat.playTime) + " minutes.");
+}
+
+/// <summary>
+/// Remove a user from hotseat.
+/// </summary>
+void Hotseat::pauseUser(int id) {
+
+	// Get current timestamp
+	std::time_t currentTime = getCurrentTimestamp();
+
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+
+		// Was user in seat?
+		if (user->inSeat) {
+
+			// Stop the stopwatch
+			user->stopwatch->pause();
+
+			// Remove user from seat
+			user->inSeat = false;
+
+			// Record time last played
+			user->timeLastPlayed = currentTime;
+
+			// Did the user have time remaining?
+			if (user->stopwatch->getRemainingMs() > 0) {
+
+				// Log user paused
+				Log("User " + user->userName + " left the seat with " + user->stopwatch->getRemainingTime() + " remaining.");
+
+			}
+		
+		}
+
+	}
 
 }
 
 /// <summary>
-/// Helper function for formatting duration.
+/// Extend a user's hotseat time.
 /// </summary>
-/// <param name="ms">Duration in milliseconds</param>
-/// <returns>string</returns>
-string Hotseat::formatDuration(long ms) {
+void Hotseat::extendUser(int id, long minutes) {
 
-	//3600000 milliseconds in an hour
-	long hr = ms / 3600000;
-	ms = ms - 3600000 * hr;
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
 
-	//60000 milliseconds in a minute
-	long min = ms / 60000;
-	ms = ms - 60000 * min;
+		// Extend the user's time in minutes
+		user->stopwatch->addMinutes(minutes);
 
-	//1000 milliseconds in a second
-	long sec = ms / 1000;
-	ms = ms - 1000 * sec;
+		// Log user extended
+		Log("User " + user->userName + " has been extended by " + to_string(minutes) + " minutes.");
 
-	ostringstream output;
-	output << min << "min " << sec << "sec";
+	}
 
-	return output.str();
+}
 
+/// <summary>
+/// Deduct time from a user.
+/// </summary>
+void Hotseat::deductUser(int id, long minutes) {
+
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+
+		// Deduct the user's time in minutes
+		user->stopwatch->subtractMinutes(minutes);
+
+		// Log user deducted
+		Log("User " + user->userName + " has been deducted by " + to_string(minutes) + " minutes.");
+
+	}
+
+}
+
+/// <summary>
+/// Get the time remaining for a user.
+/// </summary>
+/// <param name="id"></param>
+/// <returns></returns>
+string Hotseat::getUserTimeRemaining(int id) {
+
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+
+		// Get the user's time remaining
+		return user->stopwatch->getRemainingTime();
+
+	}
+
+	return "";
+
+}
+
+/// <summary>
+/// Log a message and print in chat.
+/// </summary>
+/// <param name="message"></param>
+void Hotseat::Log(string message) {
+	
+	// Format message
+	string msg = "[HOTSEAT] ";
+	msg += message;
+
+	// Print message
+	g_hosting.logMessage(msg);
+	g_hosting.broadcastChatMessage(msg);
+
+}
+
+/// <summary>
+/// Helper function to get the current timestamp.
+/// </summary>
+/// <returns></returns>
+std::time_t Hotseat::getCurrentTimestamp() {
+
+	// Get the current time point
+	auto currentTime = std::chrono::system_clock::now();
+
+	// Convert the time point to a duration since the epoch
+	auto durationSinceEpoch = currentTime.time_since_epoch();
+
+	// Convert the duration to seconds
+	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(durationSinceEpoch);
+
+	// Return the timestamp as time_t type
+	return seconds.count();
+
+}
+
+/// <summary>
+/// Helper function to get the minutes difference between two timestamps.
+/// </summary>
+/// <param name="timestamp1"></param>
+/// <param name="timestamp2"></param>
+/// <returns></returns>
+int Hotseat::getMinutesDifference(std::time_t timestamp1, std::time_t timestamp2) {
+
+	// Calculate the difference in seconds
+	std::time_t difference = timestamp2 - timestamp1;
+
+	// Convert the difference to minutes
+	int minutesDifference = difference / 60;
+
+	return minutesDifference;
+}
+
+/// <summary>
+/// Helper function to add minutes to a timestamp.
+/// </summary>
+/// <param name="timestamp"></param>
+/// <param name="minutesToAdd"></param>
+/// <returns></returns>
+std::time_t Hotseat::addMinutesToTimestamp(std::time_t timestamp, int minutesToAdd) {
+
+	// Convert the minutes to seconds
+	std::time_t secondsToAdd = minutesToAdd * 60;
+
+	// Add the seconds to the timestamp
+	std::time_t newTimestamp = timestamp + secondsToAdd;
+
+	return newTimestamp;
+}
+
+/// <summary>
+/// Helper function to subtract minutes from a timestamp.
+/// </summary>
+/// <param name="timestamp"></param>
+/// <param name="minutesToSubtract"></param>
+/// <returns></returns>
+std::time_t Hotseat::subtractMinutesFromTimestamp(std::time_t timestamp, int minutesToSubtract) {
+
+	// Convert the minutes to seconds
+	std::time_t secondsToSubtract = minutesToSubtract * 60;
+
+	// Subtract the seconds from the timestamp
+	std::time_t newTimestamp = timestamp - secondsToSubtract;
+
+	return newTimestamp;
+
+}
+
+/// <summary>
+/// Get the remaining cooldown time for a user.
+/// </summary>
+/// <param name="id"></param>
+/// <returns></returns>
+int Hotseat::getCoolDownTime(int id) {
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+
+		// If the user still has time remaining
+		if (user->stopwatch->getRemainingMs() > 0) {
+			return 0;
+		}
+
+		std::time_t currentTime = getCurrentTimestamp();
+		int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
+		if (minutesSinceLastPlayed < Config::cfg.hotseat.resetTime) {
+			return Config::cfg.hotseat.resetTime - minutesSinceLastPlayed;
+		}
+	}
+	return 0;
 }

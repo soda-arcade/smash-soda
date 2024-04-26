@@ -26,4 +26,6 @@ private:
 	// Attributes
 	string _logBuffer;
 	vector<AGamepad*>& _gamepads;
+
+	void renderPadInputTypeIcon(AGamepad* pad, const size_t& gamepadIndex, bool& refreshGamepads);
 };
