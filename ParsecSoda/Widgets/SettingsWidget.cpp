@@ -184,11 +184,11 @@ void SettingsWidget::renderChatbot() {
 
     ImGui::Dummy(ImVec2(0, 10.0f));
 
-    if (ImForm::InputCheckbox("Disable !sfx", _sfxEnabled,
+    /*if (ImForm::InputCheckbox("Disable !sfx", _sfxEnabled,
         "Prevents guests from using these commands in chat.")) {
         Config::cfg.audio.sfxEnabled = _sfxEnabled;
         Config::cfg.Save();
-    }
+    }*/
 
     if (ImForm::InputText("CHATBOT NAME", _chatbot,
         "Can give the ChatBot a silly name if you want!")) {

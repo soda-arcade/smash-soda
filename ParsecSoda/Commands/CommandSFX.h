@@ -4,20 +4,26 @@
 #include "parsec-dso.h"
 #include "ACommandStringArg.h"
 #include "../SFXList.h"
+#include "../TierList.h"
 
 class CommandSFX : public ACommandStringArg
 {
 public:
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::SFX; }
 	
-	CommandSFX(const char* msg, SFXList &sfxList)
-		: ACommandStringArg(msg, internalPrefixes()), _sfxList(sfxList)
+	CommandSFX(const char* msg, Guest& sender, SFXList &sfxList, TierList &tierList)
+		: ACommandStringArg(msg, internalPrefixes()), _sender(sender), _sfxList(sfxList), _tierList(tierList)
 	{}
 
 	bool run() override {
 
+		// Tier list enabled?
+		Tier tier = _tierList.getTier(_sender.userID);
+
 		// SFX enabled?
-		if (Config::cfg.audio.sfxEnabled == false) {
+		if (tier == Tier::PLEB && !Config::cfg.permissions.guest.useSFX ||
+			tier == Tier::MOD && !Config::cfg.permissions.moderator.useSFX ||
+			tier == Tier::GOD && !Config::cfg.permissions.vip.useSFX) {
 			_replyMessage = Config::cfg.chatbotName + "Sound effects are disabled.\0";
 			return false;
 		}
@@ -76,5 +82,7 @@ protected:
 	{
 		return vector<const char*> { "!sfx " };
 	}
+	Guest& _sender;
+	TierList& _tierList;
 	SFXList& _sfxList;
 };

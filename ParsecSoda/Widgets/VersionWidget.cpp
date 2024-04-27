@@ -2,7 +2,7 @@
 
 // Constructor
 VersionWidget::VersionWidget() {
-	version = "4.0.0";
+	version = "4.0.1";
 	latestVersion = "";
 	changeLog = "";
 	error = "";
@@ -191,7 +191,7 @@ bool VersionWidget::renderDownloadWindow() {
 
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 35);
     if (ImGui::Button("Download")) {
-        const wchar_t* link = L"https://github.com/MickeyUK/smash-soda-overlay/releases/tag/2.0.1/SmashSodaOverlay.zip";
+        const wchar_t* link = L"https://github.com/MickeyUK/smash-soda-overlay/releases/latest";
         ShellExecute(0, 0, link, 0, 0, SW_SHOW);
         Config::cfg.overlay.update = false;
         Config::cfg.Save();

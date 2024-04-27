@@ -232,13 +232,13 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
             // Check if version is different
             if (versionWidget.latestVersion != versionWidget.version) {
                 versionWidget.showUpdate = true;
+                Config::cfg.overlay.update = true;
+                Config::cfg.Save();
             } else
 
             // If overlay was updated
             if (Config::cfg.overlay.update) {
-
                 versionWidget.showDownload = true;
-
             }
 
         }

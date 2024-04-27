@@ -32,7 +32,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgStartsWith(msg, CommandPing::prefixes()))		return new CommandPing(msg, sender, _guests, _host);
 	if (msgIsEqual(msg, CommandRPG::prefixes()))			return new CommandRPG(msg, sender, _guests);
 	if (msgIsEqual(msg, CommandRollCall::prefixes()))		return new CommandRollCall(msg, sender, _guests);
-	if (msgStartsWith(msg, CommandSFX::prefixes()))			return new CommandSFX(msg, _sfxList);
+	if (msgStartsWith(msg, CommandSFX::prefixes()))			return new CommandSFX(msg, sender, _sfxList, _tierList);
 
 	/*
 	ADMIN COMMANDS
@@ -48,7 +48,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
-		//if (msgStartsWith(msg, CommandLock::prefixes()))		return new CommandLock(msg, sender, _gamepadClient);
+		//if (msgIsEqual(msg, CommandLock::prefixes()))			return new CommandLock(msg, sender, _gamepadClient);
 		if (msgStartsWith(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRC::prefixes()))			return new CommandRC(msg, _gamepadClient);
