@@ -160,6 +160,7 @@ bool GamepadsWidget::render()
         {
             renderPadInputTypeIcon(gi, i, refreshGamepads);
         }
+        ImGui::EndGroup();
 
         ImGui::SameLine();
         

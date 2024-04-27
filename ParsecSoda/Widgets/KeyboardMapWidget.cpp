@@ -250,12 +250,13 @@ bool KeyboardMapWidget::render()
 
     ImGui::Dummy(ImVec2(0, 10));
 
-    AppStyle::pushButton();
+    AppFonts::pushInput();
     AppColors::pushButtonSolid();
     if (ImGui::Button("Reset to Default")) {
         hostingKeyMap.resetProfile(hostingKeyMap._curPresetID);
     }
-    ImGui::PopStyleColor(4);
+    AppColors::popButton();
+    AppFonts::pop();
 
     // Hiding custom key stuff for now because makes things too complicated
     //int totalSize = hostingKeyMap._customKeyList.size();
