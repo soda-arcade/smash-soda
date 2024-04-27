@@ -33,7 +33,7 @@ void Overlay::start() {
     _createConnectionThread = thread([this]() {
 
         // Wait for the process to start fully
-        while (!isConnected) {
+        /*while (!isConnected) {
             connectionAttempts++;
             if (connectionAttempts > 10) {
                 g_hosting.logMessage("Failed to launch the overlay. See this guide for instructions: https://github.com/mickeyuk/smash-soda/wiki/overlay");
@@ -43,66 +43,66 @@ void Overlay::start() {
             }
             Sleep(5000);
             createConnection();
+        }*/
+
+        // Get the path of the executable
+        wchar_t exePath[MAX_PATH];
+        GetModuleFileName(NULL, exePath, MAX_PATH);
+
+        // Extract the directory from the path
+        wchar_t* lastBackslash = wcsrchr(exePath, L'\\');
+        if (lastBackslash != NULL) {
+            *lastBackslash = L'\0'; // Replace the last backslash with null terminator
         }
 
-    //    // Get the path of the executable
-    //    wchar_t exePath[MAX_PATH];
-    //    GetModuleFileName(NULL, exePath, MAX_PATH);
+        // Construct the full path to the overlay executable
+        wchar_t overlayPath[MAX_PATH];
+        swprintf_s(overlayPath, MAX_PATH, L"%s\\overlay\\SmashSodaOverlay.exe", exePath);
 
-    //    // Extract the directory from the path
-    //    wchar_t* lastBackslash = wcsrchr(exePath, L'\\');
-    //    if (lastBackslash != NULL) {
-    //        *lastBackslash = L'\0'; // Replace the last backslash with null terminator
-    //    }
+        // Create the process
+        STARTUPINFO si;
+        PROCESS_INFORMATION pi;
 
-    //    // Construct the full path to the overlay executable
-    //    wchar_t overlayPath[MAX_PATH];
-    //    swprintf_s(overlayPath, MAX_PATH, L"%s\\overlay\\SmashSodaOverlay.exe", exePath);
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        ZeroMemory(&pi, sizeof(pi));
 
-    //    // Create the process
-    //    STARTUPINFO si;
-    //    PROCESS_INFORMATION pi;
+        // Start the child process. 
+        if (!CreateProcess(overlayPath,	// No module name (use command line)
+            (LPWSTR)"",			        // Command line
+            NULL,						// Process handle not inheritable
+            NULL,						// Thread handle not inheritable
+            FALSE,						// Set handle inheritance to FALSE
+            0,							// No creation flags
+            NULL,						// Use parent's environment block
+            NULL,						// Use parent's starting directory 
+            &si,						// Pointer to STARTUPINFO structure
+            &pi)						// Pointer to PROCESS_INFORMATION structure
+            ) {
 
-    //    ZeroMemory(&si, sizeof(si));
-    //    si.cb = sizeof(si);
-    //    ZeroMemory(&pi, sizeof(pi));
+            g_hosting.logMessage("Failed to launch the overlay. See this guide for instructions: https://github.com/mickeyuk/smash-soda/wiki/overlay");
+            isRunning = false;
 
-    //    // Start the child process. 
-    //    if (!CreateProcess(overlayPath,	// No module name (use command line)
-    //        (LPWSTR)"",			        // Command line
-    //        NULL,						// Process handle not inheritable
-    //        NULL,						// Thread handle not inheritable
-    //        FALSE,						// Set handle inheritance to FALSE
-    //        0,							// No creation flags
-    //        NULL,						// Use parent's environment block
-    //        NULL,						// Use parent's starting directory 
-    //        &si,						// Pointer to STARTUPINFO structure
-    //        &pi)						// Pointer to PROCESS_INFORMATION structure
-    //        ) {
+            return;
+        }
+        else {
+            g_hosting.logMessage("Connecting to overlay...");
 
-    //        g_hosting.logMessage("Failed to launch the overlay. See this guide for instructions: https://github.com/mickeyuk/smash-soda/wiki/overlay");
-    //        isRunning = false;
+            // Wait for the process to start fully
+            while (!isConnected) {
+                connectionAttempts++;
+                if (connectionAttempts > 3) {
+					g_hosting.logMessage("Failed to connect to the overlay. Please make sure the overlay is running.");
+					isRunning = false;
+					return;
+				}
+                Sleep(10000);
+                createConnection();
+            }
+        }
 
-    //        return;
-    //    }
-    //    else {
-    //        g_hosting.logMessage("Connecting to overlay...");
-
-    //        // Wait for the process to start fully
-    //        while (!isConnected) {
-    //            connectionAttempts++;
-    //            if (connectionAttempts > 3) {
-				//	g_hosting.logMessage("Failed to connect to the overlay. Please make sure the overlay is running.");
-				//	isRunning = false;
-				//	return;
-				//}
-    //            Sleep(10000);
-    //            createConnection();
-    //        }
-    //    }
-
-    //    // Save the process ID
-    //    processId = pi.dwProcessId;
+        // Save the process ID
+        processId = pi.dwProcessId;
 
     });
 
