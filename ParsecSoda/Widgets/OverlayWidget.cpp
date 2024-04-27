@@ -27,10 +27,6 @@ bool OverlayWidget::render() {
     AppStyle::pushInput();
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    if (ImGui::Button("Test", ImVec2(size.x, 0))) {
-        _hosting.getOverlay().start();
-    }
-
     if (ImForm::InputCheckbox("Show Chat", _chat_enabled,
 		"Show chat window on the overlay.")) {
         Config::cfg.overlay.chat.active = _chat_enabled;

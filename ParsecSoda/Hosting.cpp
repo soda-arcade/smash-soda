@@ -1094,6 +1094,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		_chatLog.logCommand(logMessage);
 		MetadataCache::addActiveGuest(guest);
 		addNewGuest(guest);
+		_overlay.addGuest(to_string(guest.userID), guest.name);
 	}
 	else if (state == GUEST_FAILED)
 	{
