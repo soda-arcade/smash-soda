@@ -14,6 +14,7 @@ public:
 	static void pushPositive();
 	static void pushNegative();
 	static void pushButton();
+	static void popButton();
 	static void pop();
 };
 

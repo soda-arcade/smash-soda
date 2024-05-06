@@ -23,8 +23,8 @@ bool OverlayWidget::render() {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
     ImGui::Begin("Overlay", (bool*)0);
-
     AppStyle::pushInput();
+    
     ImVec2 size = ImGui::GetContentRegionAvail();
 
     if (ImForm::InputCheckbox("Show Chat", _chat_enabled,
@@ -43,7 +43,7 @@ bool OverlayWidget::render() {
 
     AppStyle::pushLabel();
     ImGui::Text("CHAT POSITION");
-    AppStyle::pushInput();
+    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("### Chat picker combo", _chat_position.c_str(), ImGuiComboFlags_HeightLarge)) {
         for (size_t i = 0; i < 6; ++i) {
@@ -66,7 +66,6 @@ bool OverlayWidget::render() {
         }
         ImGui::EndCombo();
     }
-    AppStyle::pop();
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
@@ -79,7 +78,7 @@ bool OverlayWidget::render() {
 
     AppStyle::pushLabel();
     ImGui::Text("GAMEPADS POSITION");
-    AppStyle::pushInput();
+    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("### Pads picker combo", _pads_position.c_str(), ImGuiComboFlags_HeightLarge)) {
         for (size_t i = 0; i < 6; ++i) {
@@ -102,7 +101,6 @@ bool OverlayWidget::render() {
         }
         ImGui::EndCombo();
     }
-    AppStyle::pop();
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
@@ -122,7 +120,7 @@ bool OverlayWidget::render() {
 
     AppStyle::pushLabel();
     ImGui::Text("GUESTS POSITION");
-    AppStyle::pushInput();
+    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("### Guests picker combo", _guests_position.c_str(), ImGuiComboFlags_HeightLarge)) {
         for (size_t i = 0; i < 6; ++i) {
@@ -145,11 +143,11 @@ bool OverlayWidget::render() {
         }
         ImGui::EndCombo();
     }
-    AppStyle::pop();
 
     // Widget bottom
     AppStyle::pop();
     ImGui::End();
+    AppStyle::pop();
 
     return true;
 

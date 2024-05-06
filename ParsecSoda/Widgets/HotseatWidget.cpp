@@ -36,7 +36,6 @@ bool HotseatWidget::render() {
             renderOverview();
             ImGui::EndTabItem();
         }
-        AppColors::pushTitle();
         if (ImGui::BeginTabItem("Settings")) {
             renderSettings();
             ImGui::EndTabItem();
@@ -124,9 +123,6 @@ void HotseatWidget::renderOverview() {
     }
 
     ImGui::EndGroup();
-
-    AppStyle::pop();
-    AppStyle::pushInput();
     
 }
 
@@ -163,7 +159,6 @@ void HotseatWidget::renderSettings() {
         }
 	}
 
-    AppStyle::pop();
-    AppStyle::pushInput();
+    ImGui::EndGroup();
 
 }

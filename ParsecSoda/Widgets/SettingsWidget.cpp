@@ -70,8 +70,6 @@ bool SettingsWidget::render()
 
     ImGui::BeginChild("Settings List", ImVec2(size.x, size.y));
 
-    AppStyle::pushLabel();
-    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x - 42);
     ImGui::SameLine();
     ImGui::Dummy(ImVec2(0, 5));
@@ -85,17 +83,15 @@ bool SettingsWidget::render()
             renderGeneral();
             ImGui::EndTabItem();
         }
-        AppColors::pushTitle();
         if (ImGui::BeginTabItem("Chat")) {
             renderChatbot();
             ImGui::EndTabItem();
         }
-        AppColors::pushTitle();
         if (ImGui::BeginTabItem("Permissions")) {
             renderPermissions();
             ImGui::EndTabItem();
         }
-        /*AppColors::pushTitle();
+        /*
         if (ImGui::BeginTabItem("Log")) {
             renderLog();
             ImGui::EndTabItem();
@@ -126,9 +122,11 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 10.0f));
 
+    AppStyle::pushInput();
+
     AppStyle::pushLabel();
     ImGui::Text("THEME");
-    AppStyle::pushInput();
+    AppStyle::pop();
     ImGui::SetNextItemWidth(size.x);
     if (ImGui::BeginCombo("### Thumbnail picker combo", themes[Config::cfg.general.theme].c_str(), ImGuiComboFlags_HeightLarge)) {
         for (size_t i = 0; i < 5; ++i) {
@@ -176,7 +174,6 @@ void SettingsWidget::renderGeneral() {
     }
 
     AppStyle::pop();
-    AppStyle::pushInput();
 
 }
 
@@ -248,6 +245,7 @@ void SettingsWidget::renderPermissions() {
 
     AppStyle::pushTitle();
     ImGui::Text("Regular Guest");
+    AppStyle::pop();
 
     if (ImForm::InputCheckbox("Can use !sfx command", _guestSFX)) {
         Config::cfg.permissions.guest.useSFX = _guestSFX;
@@ -261,6 +259,7 @@ void SettingsWidget::renderPermissions() {
 
     AppStyle::pushTitle();
     ImGui::Text("VIPs");
+    AppStyle::pop();
 
     if (ImForm::InputCheckbox("Can use !bb command", _vipBB)) {
         Config::cfg.permissions.vip.useBB = _vipBB;
@@ -269,6 +268,7 @@ void SettingsWidget::renderPermissions() {
 
     AppStyle::pushTitle();
     ImGui::Text("Moderators");
+    AppStyle::pop();
 
     if (ImForm::InputCheckbox("Can use !sfx command", _modSFX)) {
         Config::cfg.permissions.moderator.useSFX = _modSFX;

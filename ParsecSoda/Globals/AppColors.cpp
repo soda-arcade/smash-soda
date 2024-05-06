@@ -108,6 +108,10 @@ void AppColors::pushButtonSolid() {
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, primary);
 }
 
+void AppColors::popButton() {
+	ImGui::PopStyleColor(4);
+}
+
 void AppColors::pushWarning()
 {
 	pushColor(warning);

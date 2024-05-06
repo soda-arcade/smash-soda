@@ -79,34 +79,30 @@ bool VersionWidget::renderLoginWindow() {
     ImGui::SetNextWindowSize(size);
     ImGui::SetNextWindowFocus();
     ImGui::Begin("Soda Arcade###Soda Arcade Login Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+    AppStyle::pushInput();
+    AppColors::pushButtonSolid();
 
     // Center image
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 150);
     ImGui::Image(AppIcons::sodaArcadeLogo, ImVec2(300, 70));
 
-    AppStyle::pushSmall();
-
     // Text with wrap
+    AppStyle::pushSmall();
 	ImGui::TextWrapped("Soda Arcade is a new service for advertising your Parsec room when you mark it as public. You will need to create a account to use this service.");
+    AppStyle::pop();
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    AppStyle::pushInput();
-
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 48);
-    AppStyle::pushButton();
-    AppColors::pushButtonSolid();
     if (ImGui::Button("Create account")) {
 		const wchar_t* link = L"https://soda-arcade.com/register";
         ShellExecute(0, 0, link, 0, 0, SW_SHOW);
     }
     
-	AppStyle::pushInput();
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 96);
-    AppStyle::pushButton();
-    AppColors::pushButtonSolid();
+
     if (ImGui::Button("I don't want to use Soda Arcade")) {
 		Config::cfg.room.privateRoom = true;
 		Config::cfg.arcade.token = "";
@@ -130,8 +126,6 @@ bool VersionWidget::renderLoginWindow() {
 
 	ImGui::Spacing();
 
-	AppStyle::pushButton();
-	AppColors::pushButtonSolid();
     if (ImGui::Button("Login")) {
 
 		error = "";
@@ -150,16 +144,11 @@ bool VersionWidget::renderLoginWindow() {
 
     ImGui::Spacing();
 
-    AppStyle::pop();
-    AppStyle::pushLabel();
-
 	if (error.length() > 0) {
-        AppStyle::pop();
-        AppStyle::pushInput();
 		ImGui::TextWrapped(error.c_str());
     }
 
-    AppColors::pop();
+    AppColors::popButton();
     AppStyle::pop();
     ImGui::End();
     AppStyle::pop();
@@ -188,19 +177,19 @@ bool VersionWidget::renderDownloadWindow() {
     ImGui::SetNextWindowSize(size);
     ImGui::SetNextWindowFocus();
     ImGui::Begin("Update Overlay###Overlay Download Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
-
-    AppStyle::pushSmall();
+    AppStyle::pushInput();
+    AppColors::pushButtonSolid();
 
     // Text with wrap
+    AppStyle::pushSmall();
     ImGui::TextWrapped("The overlay files need to be updated. Delete the contents of the overlay folder wherever you have Smash Soda installed, and download the new files.");
+    AppStyle::pop();
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 35);
-    AppStyle::pushButton();
-    AppColors::pushButtonSolid();
     if (ImGui::Button("Download")) {
         const wchar_t* link = L"https://github.com/MickeyUK/smash-soda-overlay/releases/latest";
         ShellExecute(0, 0, link, 0, 0, SW_SHOW);
@@ -210,15 +199,13 @@ bool VersionWidget::renderDownloadWindow() {
     }
 
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 85);
-    AppStyle::pushButton();
-    AppColors::pushButtonSolid();
     if (ImGui::Button("I've already downloaded")) {
         showDownload = false;
         Config::cfg.overlay.update = false;
         Config::cfg.Save();
     }
 
-    AppColors::pop();
+    AppColors::popButton();
     AppStyle::pop();
     ImGui::End();
     AppStyle::pop();
@@ -247,36 +234,37 @@ bool VersionWidget::renderUpdateWindow() {
     ImGui::SetNextWindowSize(size);
     ImGui::SetNextWindowFocus();
     ImGui::Begin("Update Available###Update Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
-    
+    AppStyle::pushInput();
+
 	AppStyle::pushPositive();
 	ImGui::Text("Version: ");
     ImGui::SameLine();
     ImGui::Text(latestVersion.c_str());
-    
-    AppStyle::pushSmall();
-	
+    AppStyle::pop();
+
     // Text with wrap
+    AppStyle::pushSmall();
 	ImGui::TextWrapped("A new version of Smash Soda is available. Please close this, pull the latest commit and rebuild!");
+    AppStyle::pop();
     
     ImGui::Spacing();
 	ImGui::Separator();
     ImGui::Spacing();
     
-    AppStyle::pushInput();
+
     ImGui::Markdown(changeLog.c_str(), changeLog.length(), mdConfig);
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-    
-	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 50);
-    AppStyle::pushButton();
+
     AppColors::pushButtonSolid();
+	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 50);
 	if (ImGui::Button("Close")) {
 		showUpdate = false;
 	}
+    AppColors::popButton();
 
-    AppColors::pop();
     AppStyle::pop();
     ImGui::End();
     AppStyle::pop();

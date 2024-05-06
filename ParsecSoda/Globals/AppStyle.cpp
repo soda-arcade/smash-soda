@@ -47,6 +47,11 @@ void AppStyle::pushButton() {
 	AppColors::pushButton();
 }
 
+void AppStyle::popButton() {
+	AppFonts::pop();
+	AppColors::popButton();
+}
+
 void AppStyle::pop()
 {
 	AppFonts::pop();
