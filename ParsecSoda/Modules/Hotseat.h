@@ -7,12 +7,15 @@
 #include <windows.h>
 #include <shlobj.h>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 #include <ctime>
 #include "../Helpers/StopwatchTimer.h"
 #include "../Models/GuestData.h"
 
 #include <nlohmann/json.hpp>
 using namespace std;
+using namespace std::chrono;
 using json = nlohmann::json;
 
 /// <summary>
@@ -46,9 +49,12 @@ public:
 	bool checkUser(int id, string name);
 	void pauseUser(int id);
 	void extendUser(int id, long ms);
+	void screwUser(int id, long ms);
 	void deductUser(int id, long ms);
+	void rewardUser(int id, long ms);
 
 	string getUserTimeRemaining(int id);
+	string getCooldownRemaining(int id);
 
 	int getCoolDownTime(int id);
 

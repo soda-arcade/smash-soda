@@ -18,6 +18,7 @@ private:
 
     int _totalMin = 0; ///< Total minutes the timer was set to.
     int _remainingTime = 0; ///< Remaining time in milliseconds.
+    int _timeChange = 0; ///For use with the add/subtract minutes method
 
     void updateRemainingTime();
 

@@ -48,13 +48,17 @@ void Hotseat::Start() {
 							g_hosting.getGamepadClient().strip(user.userId);
 
 							// Log user removed
-							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime) + " minutes.");
+							int minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
+							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
 
 						} else {
 
 							// Log user time remaining
-							Log("User " + user.userName + " has " + user.stopwatch->getRemainingTime() + " remaining.");
-
+							if (user.stopwatch->getRemainingSec() <= 300)
+							{
+								Log("User " + user.userName + " has " + user.stopwatch->getRemainingTime() + " remaining.");
+							}
+							
 						}
 
 					}
@@ -133,7 +137,11 @@ bool Hotseat::checkUser(int id, string name) {
 			Log("User " + user->userName + " has been reseated. They have " + user->stopwatch->getRemainingTime() + " remaining.");
 
 			// Start the stopwatch
-			user->stopwatch->resume();
+			//Sloppy fix for reseating glitch from DIO. Just checks if its paused first
+			if (user->stopwatch->isRunning() == false)
+			{
+				user->stopwatch->resume();
+			}
 
 			// Add user to seat
 			user->inSeat = true;
@@ -144,7 +152,7 @@ bool Hotseat::checkUser(int id, string name) {
 			// User has no time remaining
 
 			// Get time since last played
-			int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
+			int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime); //current time - timelastplayed
 
 			// Check if user is on cooldown
 			if (minutesSinceLastPlayed < Config::cfg.hotseat.resetTime) {
@@ -168,7 +176,11 @@ bool Hotseat::checkUser(int id, string name) {
 					Log("User " + user->userName + " is now in the seat. They have " + user->stopwatch->getRemainingTime() + " left.");
 
 					// Start the stopwatch
-					user->stopwatch->resume();
+					//DIO Note: Scroll up
+					if (user->stopwatch->isRunning() == false)
+					{
+						user->stopwatch->resume();
+					}
 
 				} else {
 
@@ -240,8 +252,9 @@ void Hotseat::pauseUser(int id) {
 			// Remove user from seat
 			user->inSeat = false;
 
-			// Record time last played
-			user->timeLastPlayed = currentTime;
+			// Record time last played - DIO note: if you did !ff, this would make a cooldown be artifically larger, due to cooldown time being the reset time minus the time since last played
+			//user->timeLastPlayed = currentTime;
+			
 
 			// Did the user have time remaining?
 			if (user->stopwatch->getRemainingMs() > 0) {
@@ -277,6 +290,24 @@ void Hotseat::extendUser(int id, long minutes) {
 }
 
 /// <summary>
+/// Extend a user's cooldown time.
+/// </summary>
+void Hotseat::screwUser(int id, long minutes) {
+
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+		
+		user->timeLastPlayed += minutes * 60;
+
+		// Log user extended
+		Log("User " + user->userName + " has had their cooldown delayed by " + to_string(minutes) + " minutes.");
+
+	}
+
+}
+
+/// <summary>
 /// Deduct time from a user.
 /// </summary>
 void Hotseat::deductUser(int id, long minutes) {
@@ -296,6 +327,23 @@ void Hotseat::deductUser(int id, long minutes) {
 }
 
 /// <summary>
+/// Decrease a user's cooldown time.
+/// </summary>
+void Hotseat::rewardUser(int id, long minutes) {
+
+	// Find user
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+
+			user->timeLastPlayed -= minutes * 60;
+
+			// Log user extended
+			Log("User " + user->userName + " has had their cooldown delayed by " + to_string(minutes) + " minutes.");
+
+	}
+
+}
+/// <summary>
 /// Get the time remaining for a user.
 /// </summary>
 /// <param name="id"></param>
@@ -311,6 +359,33 @@ string Hotseat::getUserTimeRemaining(int id) {
 
 	}
 
+	return "";
+
+}
+
+string Hotseat::getCooldownRemaining(int id) {
+
+	HotseatUser* user = getUser(id);
+	if (user != nullptr) {
+
+
+		std::time_t currentTime = getCurrentTimestamp();
+		int secondsSinceLastPlayed = currentTime - user->timeLastPlayed;
+
+		int t = max(0, Config::cfg.hotseat.resetTime * 60 - secondsSinceLastPlayed);
+		
+		std::stringstream ss;
+
+		// Get the remaining minutes
+		auto cooldownMin = t / 60;
+		ss << std::setfill('0') << std::setw(2) << cooldownMin << "m:";
+		// Get the remaining seconds
+		auto cooldownSec = t % 60;
+		ss << std::setfill('0') << std::setw(2) << cooldownSec << "s";
+
+		return ss.str();
+
+	}
 	return "";
 
 }
@@ -418,7 +493,7 @@ int Hotseat::getCoolDownTime(int id) {
 		}
 
 		std::time_t currentTime = getCurrentTimestamp();
-		int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
+		int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime); //Currenttime - timelastplayed
 		if (minutesSinceLastPlayed < Config::cfg.hotseat.resetTime) {
 			return Config::cfg.hotseat.resetTime - minutesSinceLastPlayed;
 		}
