@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "ACommandSearchUserIntArg.h"
 #include <Windows.h>
 #include <mmsystem.h>
@@ -9,7 +8,8 @@
 #include "parsec.h"
 #include "../Modules/Hotseat.h"
 
-class CommandExtend : public ACommandSearchUserIntArg
+
+class CommandDecreaseCD : public ACommandSearchUserIntArg
 {
 public:
 	ParsecMetrics metrics;
@@ -17,7 +17,7 @@ public:
 
 	const COMMAND_TYPE type() override { return COMMAND_TYPE::BOT_MESSAGE; }
 
-	CommandExtend(const char* msg, Guest& sender, GuestList& guests, Guest& host)
+	CommandDecreaseCD(const char* msg, Guest& sender, GuestList& guests, Guest& host)
 		: ACommandSearchUserIntArg(msg, internalPrefixes(), guests), _sender(sender), _host(host)
 	{}
 
@@ -50,14 +50,12 @@ public:
 		case SEARCH_USER_RESULT::FOUND:
 
 			rv = true;
-			
-			Hotseat::instance.extendUser(_targetGuest.userID, _intArg);
-
+			Hotseat::instance.rewardUser(_targetGuest.userID, _intArg);
 			break;
 
 		case SEARCH_USER_RESULT::FAILED:
 		default:
-			_replyMessage = Config::cfg.chatbotName + "Usage: !extend <username> <n>\nExample: !extend bigboi83 6\0";
+			_replyMessage = Config::cfg.chatbotName + "Usage: !reward <username> <n>\nExample: !decrease bigboi83 6\0";
 			break;
 		}
 
@@ -65,13 +63,13 @@ public:
 	}
 
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!extend", "!increase" };
+		return vector<const char*> { "!reward", "!deductcd", "!decreasecd" };
 	}
 
 protected:
 	static vector<const char*> internalPrefixes()
 	{
-		return vector<const char*> { "!extend " };
+		return vector<const char*> { "!reward " };
 	}
 
 	Guest& _sender;

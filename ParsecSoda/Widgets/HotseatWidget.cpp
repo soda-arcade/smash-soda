@@ -141,16 +141,17 @@ void HotseatWidget::renderSettings() {
     ImGui::BeginGroup();
 
     if (ImForm::InputNumber("PLAY TIME", _playTime, 1, 999,
-        "This is how long a user gets in the hotseat (in minutes).")) {
+        "This is how much time a user is allowed to play every reset (in minutes).")) {
         Config::cfg.hotseat.playTime = _playTime;
         _playTime = Config::cfg.hotseat.playTime;
         Config::cfg.Save();
     }
 
-    if (ImForm::InputNumber("RESET TIME", _resetTime, _playTime+5, 999,
-		"This is how long a user must wait before they can play again (in minutes).")) {
-        if (_resetTime < _playTime + 5) {
-            _resetTime = _playTime + 5;
+    if (ImForm::InputNumber("RESET TIME", _resetTime, 0, 999,
+        //I let you set it as 0 -DIO
+		"This is how often a reset occurs for each user (in minutes).")) {
+        if (_resetTime < 0) {
+            _resetTime = 0;
         }
         else {
             Config::cfg.hotseat.resetTime = _resetTime;

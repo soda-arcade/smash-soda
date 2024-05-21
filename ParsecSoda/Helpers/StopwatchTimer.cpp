@@ -5,8 +5,9 @@
 /// </summary>
 /// <param name="minutes"></param>
 void StopwatchTimer::start(int minutes) {
-    _totalMin = minutes;
+    _totalMin = minutes; //35 minutes
     _remainingTime = minutes * 60 * 1000;
+    _timeChange = 0;
     _startTime = steady_clock::now();
     _isRunning = true;
     _isPaused = false;
@@ -30,6 +31,7 @@ void StopwatchTimer::pause() {
 
     auto elapsedTime = duration_cast<milliseconds>(_pauseTime - _startTime);
     _remainingTime = std::max(0, _totalMin * 60 * 1000 - static_cast<int>(elapsedTime.count()));
+
 }
 
 /// <summary>
@@ -91,7 +93,7 @@ std::string StopwatchTimer::getRemainingTime() {
 /// </summary>
 /// <param name="minutes"></param>
 void StopwatchTimer::addMinutes(int minutes) {
-    _remainingTime += (minutes * 60 * 1000);
+    _timeChange += (minutes * 60 * 1000);
 }
 
 /// <summary>
@@ -99,7 +101,7 @@ void StopwatchTimer::addMinutes(int minutes) {
 /// </summary>
 /// <param name="minutes"></param>
 void StopwatchTimer::subtractMinutes(int minutes) {
-	_remainingTime -= (minutes * 60 * 1000);
+    _timeChange -= (minutes * 60 * 1000);
 }
 
 /// <summary>
@@ -115,7 +117,7 @@ bool StopwatchTimer::isRunning() {
 /// </summary>
 /// <returns></returns>
 bool StopwatchTimer::isFinished() {
-	return _remainingTime == 0;
+	return _remainingTime <= 0;
 }
 
 /// <summary>
@@ -132,10 +134,10 @@ bool StopwatchTimer::isPaused() {
 void StopwatchTimer::updateRemainingTime() {
     if (_isRunning && !_isPaused) {
         auto elapsedTime = duration_cast<milliseconds>(steady_clock::now() - _startTime);
-        _remainingTime = std::max(0, _totalMin * 60 * 1000 - static_cast<int>(elapsedTime.count()));
+        _remainingTime = std::max(0, _totalMin * 60 * 1000 - static_cast<int>(elapsedTime.count()) + _timeChange);
 
         // Stop the timer if the remaining time is 0
-        if (_remainingTime == 0) {
+        if (_remainingTime <= 0) {
 			_isRunning = false;
 		}
     }

@@ -4,6 +4,8 @@
 #include "parsec-dso.h"
 #include "../Helpers/Stringer.h"
 #include "../GuestList.h"
+#include "ACommandSearchUser.h"
+#include "../Core/Config.h"
 
 class ACommandSearchUserIntArg : public ACommandPrefix
 {
@@ -28,7 +30,7 @@ public:
 			_intArg = std::stoi(argNumber);
 
 			std::string args = str.substr(strlen(_prefix));
-			std::string targetUsername = args.substr(0, args.size() - 2);
+			targetUsername = args.substr(0, args.size() - 2);
 
 
 			bool found = false;
@@ -58,4 +60,5 @@ protected:
 	GuestList& _guests;
 	Guest _targetGuest;
 	int _intArg;
+	std::string targetUsername;
 };

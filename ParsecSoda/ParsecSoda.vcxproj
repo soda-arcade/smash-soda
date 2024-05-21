@@ -179,6 +179,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Commands\CommandBonk.cpp" />
+    <ClCompile Include="Commands\CommandDecreaseCD.h" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="GameDataList.cpp" />
     <ClCompile Include="Helpers\StopwatchTimer.cpp" />
@@ -288,6 +289,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\CommandDecrease.h" />
     <ClInclude Include="Commands\CommandDiscord.h" />
     <ClInclude Include="Commands\CommandExtend.h" />
+    <ClInclude Include="Commands\CommandExtendCD.h" />
     <ClInclude Include="Commands\CommandFortune.h" />
     <ClInclude Include="Commands\CommandHotseat.h" />
     <ClInclude Include="Commands\CommandKeyboard.h" />
@@ -296,6 +298,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Commands\CommandMod.h" />
     <ClInclude Include="Commands\CommandMute.h" />
     <ClInclude Include="Commands\CommandPing.h" />
+    <ClInclude Include="Commands\CommandPlayTime.h" />
     <ClInclude Include="Commands\CommandRollCall.h" />
     <ClInclude Include="Commands\CommandRC.h" />
     <ClInclude Include="Commands\CommandRequest.h" />
