@@ -21,19 +21,14 @@
 #include "ParsecSession.h"
 #include "DX11.h"
 #include "matoya.h"
-#include "TierList.h"
-#include "ChatBot.h"
+#include "Chatbot/ChatBot.h"
 #include "ChatLog.h"
 #include "Helpers/Stringer.h"
 #include "AudioIn.h"
 #include "AudioOut.h"
 #include "AudioMix.h"
 #include "GamepadClient.h"
-#include "BanList.h"
-#include "ModList.h"
-#include "VIPList.h"
 #include "GuestList.h"
-#include "GameDataList.h"
 #include "SFXList.h"
 #include "MetadataCache.h"
 #include "CompilerDirectives.h"
@@ -56,8 +51,8 @@ using json = nlohmann::json;
 #define PARSEC_APP_CHAT_MSG 0
 #define HOSTING_CHAT_MSG_ID 0
 
-#define ROOM_NAME "Coding my own Parsec\nGamepad streaming\0"
-#define ROOM_SECRET "melonsod"
+#define ROOM_NAME "Test Room"
+#define ROOM_SECRET "mickeyuk"
 
 using namespace std;
 
@@ -94,10 +89,6 @@ public:
 	vector<Guest>& getGuestsAfterGuest(uint32_t targetGuestID, int count, bool ignoreSpectators);
 	vector<GuestData>& getGuestHistory();
 	MyMetrics getMetrics(uint32_t id);
-	BanList& getBanList();
-	ModList& getModList();
-	VIPList& getVIPList();
-	GameDataList& getGameList();
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
@@ -145,12 +136,6 @@ public:
 	unsigned int _latencyLimitThreshold = 0;
 	bool _disableGuideButton = false;
 	bool _disableKeyboard = false;
-	
-	// Soda Arcade
-	string arcadeAPIUrl = "https://soda-arcade.com/api";
-	int arcadeRoomID = -1;
-	bool saveRoomOnArcade();
-	bool deleteRoomOnArcade();
 
 private:
 
@@ -174,12 +159,11 @@ private:
 	bool isSpectator(int index);
 	string randomString(const int len);
 
+	static void LogCallback(ParsecLogLevel level, const char *msg, void *opaque);
+
 	// Attributes
 	AudioMix _audioMix;
 	DX11 _dx11;
-	BanList _banList;
-	ModList _modList;
-	VIPList _vipList;
 	GuestDataList _guestHistory;
 	GameDataList _gamesList;
 	ChatBot *_chatBot;

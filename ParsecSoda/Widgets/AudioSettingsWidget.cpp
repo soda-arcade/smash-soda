@@ -103,6 +103,7 @@ bool AudioSettingsWidget::render()
             _audioIn.isEnabled = !_audioIn.isEnabled;
         }
         _audioIn.volume = (float)micVolume / 100.0f;
+        Config::cfg.audio.micVolume = (float)micVolume;
 
 
         ImGui::Dummy(dummySize);
@@ -177,6 +178,7 @@ bool AudioSettingsWidget::render()
         _audioOut.isEnabled = !_audioOut.isEnabled;
     }
     _audioOut.volume = (float)speakersVolume / 100.0f;
+    Config::cfg.audio.speakersVolume = (float)speakersVolume;
 
     AppStyle::pop();
     ImGui::End();

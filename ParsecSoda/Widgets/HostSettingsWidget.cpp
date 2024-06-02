@@ -125,7 +125,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     AppStyle::pop();
     AppStyle::pushInput();
     ImGui::SetNextItemWidth(size.x);
-    vector<GameData> games = _hosting.getGameList().getGames();
+    vector<GameData> games = Cache::cache.gameList.getGames();
 	string emptyValue = "Add games you own in the library widget.";
 
     bool isValid = (games.size() > 0 && _libraryID > -1 && _libraryID <= games.size());
@@ -193,27 +193,44 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
             ImGui::TextWrapped(_descriptionError.c_str());
         }
 
-        AppStyle::pushLabel();
-        ImGui::Text("CUSTOM ARTWORK");
-        AppStyle::pushInput();
-        ImGui::SetNextItemWidth(size.x);
-        if (ImGui::BeginCombo("### Artwork picker combo", Config::cfg.artwork[_selectedArtwork].title.c_str(), ImGuiComboFlags_HeightLarge)) {
+        if (Arcade::instance.artwork.size() > 0) {
+            AppStyle::pushLabel();
+            ImGui::Text("CUSTOM ARTWORK");
+            AppStyle::pushInput();
+            ImGui::SetNextItemWidth(size.x);
 
-            for (size_t i = 0; i < Config::cfg.artwork.size(); ++i) {
-                bool isSelected = (i == _selectedArtwork);
-                if (ImGui::Selectable(Config::cfg.artwork[i].title.c_str(), isSelected)) {
-                    _selectedArtwork = i;
+            std::string defaultValue = "None";
+            if (_selectedArtwork != -1) {
+                defaultValue = Arcade::instance.artwork[_selectedArtwork].title;
+            }
+
+            if (ImGui::BeginCombo("### Artwork picker combo", defaultValue.c_str(), ImGuiComboFlags_HeightLarge)) {
+
+                if (ImGui::Selectable("None", (_selectedArtwork == -1))) {
+                    _selectedArtwork = -1;
+                    Arcade::instance.artworkID = -1;
                 }
-                if (isSelected) {
+                if (_selectedArtwork == -1) {
                     ImGui::SetItemDefaultFocus();
                 }
+
+                for (size_t i = 0; i < Arcade::instance.artwork.size(); ++i) {
+                    bool isSelected = (i == _selectedArtwork);
+                    if (ImGui::Selectable(Arcade::instance.artwork[i].title.c_str(), isSelected)) {
+                        _selectedArtwork = i;
+                        Arcade::instance.artworkID = Arcade::instance.artwork[i].id;
+                    }
+                    if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
             }
-            ImGui::EndCombo();
+            AppStyle::pushLabel();
+            ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
+            AppStyle::pop();
+            ImGui::Dummy(ImVec2(0, 10.0f));
         }
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
-        AppStyle::pop();
-        ImGui::Dummy(ImVec2(0, 10.0f));
 
         AppStyle::pushLabel();
         ImGui::Text("POST THEME");
@@ -233,7 +250,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
             ImGui::EndCombo();
         }
         AppStyle::pushLabel();
-        ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
+        ImGui::TextWrapped("This lets you change the colour theme of your room poster on Soda Arcade.");
         AppStyle::pop();
         ImGui::Dummy(ImVec2(0, 10.0f));
 
@@ -244,7 +261,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         strcpy_s(link, _secretLink);
 	}
     else {
-		string arcadeLink = "https://soda-arcade.com/invite/" + Config::cfg.arcade.username + "/" + _secret;
+		string arcadeLink = "https://soda-arcade.com/invite/" + Config::cfg.arcade.username + "/room";
         strcpy_s(link, arcadeLink.c_str());
 	}
 

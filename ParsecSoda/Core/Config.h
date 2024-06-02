@@ -7,6 +7,7 @@
 #include <shlobj.h>
 #include "matoya.h"
 #include <nlohmann/json.hpp>
+#include "../Helpers/PathHelper.h"
 
 using json = nlohmann::json;
 
@@ -20,6 +21,8 @@ public:
 		unsigned int theme = 4;
 		bool saveLog = false;
 		bool flashWindow = true;
+		bool ipBan = true;
+		bool parsecLogs = false;
 	};
 	
 	class Audio {
@@ -27,10 +30,10 @@ public:
 		unsigned int inputDevice = 0;
 		unsigned int outputDevice = 0;
 		unsigned int micFrequency = 44100;
-		unsigned int micVolume = 80;
+		float micVolume = 80;
 		bool micEnabled = false;
 		unsigned int speakersFrequency = 44100;
-		unsigned int speakersVolume = 30;
+		float speakersVolume = 50;
 		bool speakersEnabled = true;
 		bool sfxEnabled = true;
 	};
@@ -180,6 +183,7 @@ public:
 		string token = "";
 		string username = "";
 		bool showLogin = true;
+		int countryIndex = 220;
 	};
 
 	General general;
@@ -267,9 +271,4 @@ public:
 		}
 		return originalValue;
 	}
-	
-	private:
-		static string GetConfigPath();
-		static string GetCurrentPath();
-		static string GetAppDataPath();
 };

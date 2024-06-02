@@ -1,0 +1,75 @@
+#pragma once
+
+#include "ACommandPrefix.h"
+#include "parsec-dso.h"
+#include "../../../Helpers/Stringer.h"
+#include "../../../GuestList.h"
+#include "ACommandSearchUser.h"
+#include "../../../Core/Config.h"
+
+class ACommandSearchUserIntArg : public ACommandPrefix
+{
+public:
+
+	/**
+	 * @brief Construct a new ACommandSearchUserIntArg object
+	 * 
+	 * @param msg The message to parse
+	 * @param prefixes The prefixes to check for
+	 * @param guests The list of guests
+	 */
+	ACommandSearchUserIntArg(const char* msg, vector<const char*> prefixes, GuestList& guests)
+		: ACommandPrefix(msg, prefixes), _guests(guests), _searchResult(SEARCH_USER_RESULT::FAILED), _intArg(0)
+	{}
+
+	/**
+	 * @brief Get the search result
+	 * @return The search result
+	 */
+	bool run() {
+		if (!ACommandPrefix::run())
+		{
+			_searchResult = SEARCH_USER_RESULT::FAILED;
+			return false;
+		}
+
+		try
+		{
+			std::string str = _msg;
+
+			std::string argNumber = std::string() + str.back();
+			_intArg = std::stoi(argNumber);
+
+			std::string args = str.substr(strlen(_prefix));
+			targetUsername = args.substr(0, args.size() - 2);
+
+
+			bool found = false;
+			try
+			{
+				found = _guests.find(stoul(targetUsername), &_targetGuest);
+			}
+			catch (const std::exception&) {}
+
+			if (!found)
+			{
+				found = _guests.find(targetUsername, &_targetGuest);
+			}
+
+			_searchResult = found ? SEARCH_USER_RESULT::FOUND : SEARCH_USER_RESULT::NOT_FOUND;
+			return true;
+		}
+		catch (const std::exception&)
+		{
+			_searchResult = SEARCH_USER_RESULT::FAILED;
+			return false;
+		}
+	}
+
+protected:
+	SEARCH_USER_RESULT _searchResult;
+	GuestList& _guests;
+	Guest _targetGuest;
+	int _intArg;
+	std::string targetUsername;
+};

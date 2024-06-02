@@ -21,7 +21,7 @@
 #include "AudioControlWidget.h"
 #include <chrono>
 #include <functional>
-#include "../GameDataList.h"
+#include "../Core/Cache.h"
 
 class HostSettingsWidget
 {
@@ -90,6 +90,6 @@ private:
 	const unsigned int DEBOUNCE_TIME_MS = 1000;
 	function<void(bool)> _onHostRunningStatusCallback;
 
-	string _postThemes[6] = { "Default", "Black", "Blue", "Green", "Red", "Full Image"};
+	string _postThemes[6] = { "Default", "Black", "Blue", "Green", "Red"};
 };
 

@@ -1,8 +1,7 @@
 #include "GuestListWidget.h"
 
 GuestListWidget::GuestListWidget(Hosting& hosting)
-    : _hosting(hosting), _guests(hosting.getGuests()), _modList(_hosting.getModList()),
-    _banList(_hosting.getBanList()), _vipList(hosting.getVIPList()), _guestHistory(_hosting.getGuestHistory())
+    : _hosting(hosting), _guests(hosting.getGuests()), _guestHistory(_hosting.getGuestHistory())
 {
 }
 
@@ -170,13 +169,13 @@ void GuestListWidget::renderOnlineGuests()
         // Status icons
 		ImGui::SameLine();
         
-		if (_modList.isModded(userID) || _hosting.getHost().userID == userID) {
+		if (Cache::cache.modList.isModded(userID) || _hosting.getHost().userID == userID) {
             ImGui::Dummy(ImVec2(10, 0));
             ImGui::SameLine();
 			ImGui::Image(AppIcons::crown, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.75f, 0.75f, 0.0f, 1.00f));
         }
         ImGui::SameLine();
-        if (_vipList.isVIP(userID)) {
+        if (Cache::cache.vipList.isVIP(userID)) {
             ImGui::Dummy(ImVec2(10, 0));
             ImGui::SameLine();
 			ImGui::Image(AppIcons::star, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.73f, 0.73f, 0.73f, 1.00f));
@@ -294,7 +293,7 @@ void GuestListWidget::renderBannedGuests()
     static size_t popupIndex;
     static string name;
     static uint32_t userID;
-    static vector<GuestData>& _bannedGuests = _banList.getGuests();
+    static vector<GuestData>& _bannedGuests = Cache::cache.banList.getGuests();
     static string filterTextStr;
     static bool filterSuccess = false;
 
@@ -366,7 +365,7 @@ void GuestListWidget::renderBannedGuests()
             if (PopupWidgetEdit::render(string("Add reason").c_str(), showEditPopup, reason))
             {
                 _bannedGuests[i].reason = reason;
-                 MetadataCache::saveBannedUsers(_bannedGuests);
+                Cache::cache.banList.SaveToFile();
             }
         }
 
@@ -478,7 +477,7 @@ void GuestListWidget::renderModdedGuests() {
     static string name;
     static string reason;
     static uint32_t userID;
-    static vector<GuestData>& _moddedGuests = _modList.getGuests();
+    static vector<GuestData>& _moddedGuests = Cache::cache.modList.getGuests();
     static string filterTextStr;
     static bool filterSuccess = false;
 
@@ -573,7 +572,7 @@ void GuestListWidget::renderVIPGuests() {
     static string name;
     static string reason;
     static uint32_t userID;
-    static vector<GuestData>& _moddedGuests = _vipList.getGuests();
+    static vector<GuestData>& _moddedGuests = Cache::cache.vipList.getGuests();
     static string filterTextStr;
     static bool filterSuccess = false;
 

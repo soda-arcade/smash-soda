@@ -2,7 +2,7 @@
 #include "../ImGui/imform.h"
 
 LibraryWidget::LibraryWidget(Hosting& hosting)
-    : _hosting(hosting), _gameList(hosting.getGameList())
+    : _hosting(hosting)
 {
 }
 
@@ -41,7 +41,7 @@ bool LibraryWidget::renderGameList() {
     static string parameters;
     static string thumbnailPath;
     static string gameID;
-    static vector<GameData>& _games = _gameList.getGames();
+    static vector<GameData>& _games = Cache::cache.gameList.getGames();
     static string filterTextStr;
     static bool filterSuccess = false;
 	string defaultID = "1wdoHfhhZH5lPuZCwGBete0HIAj";
@@ -188,14 +188,14 @@ bool LibraryWidget::renderForm(int index) {
         if (index < 0) {
             
 			GameData game = GameData();
-            game.itemID = _hosting.getGameList().getGames().size() + 1;
+            game.itemID = Cache::cache.gameList.getGames().size() + 1;
 			game.name = _editName;
 			game.path = _editPath;
 			game.parameters = _editParam;
 
 			// Add to game list
-            _hosting.getGameList().getGames().push_back(game);
-            MetadataCache::saveGamesList(_hosting.getGameList().getGames());
+            Cache::cache.gameList.getGames().push_back(game);
+            Cache::cache.gameList.SaveToFile();
 
 		}
         
@@ -203,11 +203,11 @@ bool LibraryWidget::renderForm(int index) {
 		else {
 
 			// Update game
-			_hosting.getGameList().getGames()[index].name = _editName;
-			_hosting.getGameList().getGames()[index].path = _editPath;
-			_hosting.getGameList().getGames()[index].parameters = _editParam;
+			Cache::cache.gameList.getGames()[index].name = _editName;
+			Cache::cache.gameList.getGames()[index].path = _editPath;
+			Cache::cache.gameList.getGames()[index].parameters = _editParam;
 
-            MetadataCache::saveGamesList(_hosting.getGameList().getGames());
+            Cache::cache.gameList.SaveToFile();
             
         }
 

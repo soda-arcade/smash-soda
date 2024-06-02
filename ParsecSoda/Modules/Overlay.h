@@ -13,7 +13,7 @@
 #include <websocketpp/client.hpp>
 #include <nlohmann/json.hpp>
 #include "../Core/Config.h"
-#include "../ChatBot.h"
+#include "../Chatbot/ChatBot.h"
 #include "../GamepadClient.h"
 
 #include "../ChatLog.h"

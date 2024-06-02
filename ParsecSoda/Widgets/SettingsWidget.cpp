@@ -12,8 +12,10 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _autoIndex = Config::cfg.input.autoIndex;
     _flashWindow = Config::cfg.general.flashWindow;
     _sfxEnabled = Config::cfg.audio.sfxEnabled;
-    _bonkEnabled = Config::cfg.chat.bonkEnabled;
     _hostBonkProof = Config::cfg.chat.hostBonkProof;
+    _ipBan = Config::cfg.general.ipBan;
+    _parsecLogs = Config::cfg.general.parsecLogs;
+
     _microphoneEnabled = Config::cfg.audio.micEnabled;
 
     _muteTime = Config::cfg.chat.muteTime;
@@ -22,6 +24,8 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _saveChat = false;
 
     _prependPingLimit = false;
+
+    _countries = Countries();
 
     try
     {
@@ -91,11 +95,6 @@ bool SettingsWidget::render()
             renderPermissions();
             ImGui::EndTabItem();
         }
-        /*
-        if (ImGui::BeginTabItem("Log")) {
-            renderLog();
-            ImGui::EndTabItem();
-        }*/
         AppColors::pop();
         AppFonts::pop();
         ImGui::EndTabBar();
@@ -123,6 +122,29 @@ void SettingsWidget::renderGeneral() {
     ImGui::Dummy(ImVec2(0, 10.0f));
 
     AppStyle::pushInput();
+
+    AppStyle::pushLabel();
+    ImGui::Text("COUNTRY");
+    AppStyle::pop();
+    ImGui::SetNextItemWidth(size.x);
+    if (ImGui::BeginCombo("### Country picker combo", _countries.list[Config::cfg.arcade.countryIndex].second.c_str(), ImGuiComboFlags_HeightLarge)) {
+        for (size_t i = 0; i < _countries.list.size(); ++i) {
+            bool isSelected = (i == Config::cfg.arcade.countryIndex);
+            if (ImGui::Selectable(_countries.list[i].second.c_str(), isSelected)) {
+                Config::cfg.arcade.countryIndex = i;
+                Config::cfg.Save();
+            }
+            if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    AppStyle::pushLabel();
+    ImGui::TextWrapped("This will set the country flag on your Soda Arcade posts.");
+    AppStyle::pop();
+
+    ImGui::Dummy(ImVec2(0, 10));
 
     AppStyle::pushLabel();
     ImGui::Text("THEME");
@@ -170,6 +192,18 @@ void SettingsWidget::renderGeneral() {
     if (ImForm::InputCheckbox("Auto Index Gamepads", _autoIndex,
         "XInput indices will be identified automatically. Beware, this may cause BSOD crashes for some users!")) {
         Config::cfg.input.autoIndex = _autoIndex;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("Parsec Logs", _parsecLogs,
+        "When enabled this will print logs from Parsec in the Log window.")) {
+        Config::cfg.general.parsecLogs = _parsecLogs;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("IP Address Bans", _ipBan,
+        "When banning a user, their IP address will be banned from joining your room also.")) {
+        Config::cfg.general.ipBan = _ipBan;
         Config::cfg.Save();
     }
 
@@ -221,19 +255,12 @@ void SettingsWidget::renderChatbot() {
         Config::cfg.Save();
     }
 
-    /*if (ImForm::InputCheckbox("Host can't be bonked", _hostBonkProof,
-        "You DARE bonk the host!?")) {
-        Config::cfg.chat.hostBonkProof = _hostBonkProof;
-        Config::cfg.Save();
-    }*/
+    // if (ImForm::InputCheckbox("Host can't be bonked", _hostBonkProof,
+    //     "You DARE bonk the host!?")) {
+    //     Config::cfg.chat.hostBonkProof = _hostBonkProof;
+    //     Config::cfg.Save();
+    // }
 
-}
-
-/// <summary>
-/// Render log settings.
-/// </summary>
-void SettingsWidget::renderLog() {
-	// TODO: Add log settings
 }
 
 /// <summary>
@@ -260,6 +287,11 @@ void SettingsWidget::renderPermissions() {
     AppStyle::pushTitle();
     ImGui::Text("VIPs");
     AppStyle::pop();
+
+    if (ImForm::InputCheckbox("Can use !sfx command", _vipSFX)) {
+        Config::cfg.permissions.vip.useBB = _vipSFX;
+        Config::cfg.Save();
+    }
 
     if (ImForm::InputCheckbox("Can use !bb command", _vipBB)) {
         Config::cfg.permissions.vip.useBB = _vipBB;

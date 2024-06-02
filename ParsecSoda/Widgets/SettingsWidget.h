@@ -4,6 +4,7 @@
 #include "../Hosting.h"
 #include "../MetadataCache.h"
 #include "../Helpers/Debouncer.h"
+#include "../Helpers/Countries.h"
 #include "../globals/AppIcons.h"
 #include "../globals/AppFonts.h"
 #include "../globals/AppColors.h"
@@ -19,7 +20,6 @@ public:
 	bool render();
 	void renderGeneral();
 	void renderChatbot();
-	void renderLog();
 	void renderPermissions();
 
 private:
@@ -38,6 +38,8 @@ private:
 	bool _sfxEnabled = false;
 	bool _bonkEnabled = false;
 	bool _hostBonkProof = false;
+	bool _parsecLogs = false;
+	bool _ipBan = true;
 	unsigned int _latencyLimitThreshold = 0;
 	unsigned int _theme = 0;
 	char _discord[HOST_NAME_LEN] = "";
@@ -60,4 +62,5 @@ private:
 	bool _modSFX = false;
 
 	string themes[5] = { "Midnight", "Parsec Soda", "Parsec Soda V", "Mini", "Arcade" };
+	Countries _countries;
 };

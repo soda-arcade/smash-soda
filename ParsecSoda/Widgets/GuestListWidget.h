@@ -24,9 +24,6 @@ private:
 
 	// Dependency injection
 	Hosting& _hosting;
-	BanList& _banList;
-	ModList& _modList;
-	VIPList& _vipList;
 	
 	// Attributes
 	char _filterText[256] = "";

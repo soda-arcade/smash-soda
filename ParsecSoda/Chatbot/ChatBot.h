@@ -1,0 +1,139 @@
+#pragma once
+
+#include <string>
+#include <sstream>
+#include <vector>
+#include <regex>
+#include "parsec-dso.h"
+#include "../ParsecSession.h"
+#include "../Helpers/Stringer.h"
+#include "../GamepadClient.h"
+#include "../DX11.h"
+#include "../AudioIn.h"
+#include "../Core/Cache.h"
+
+#include "Commands/Base/ACommand.h"
+#include "Commands/CommandBotMessage.h"
+#include "Commands/CommandDefaultMessage.h"
+
+#include "Commands/God/CommandAddXbox.h"
+#include "Commands/God/CommandAddPS.h"
+#include "Commands/God/CommandGuests.h"
+#include "Commands/God/CommandMod.h"
+#include "Commands/God/CommandPrivate.h"
+#include "Commands/God/CommandPublic.h"
+#include "Commands/God/CommandQuit.h"
+#include "Commands/God/CommandSetConfig.h"
+#include "Commands/God/CommandSpeakers.h"
+#include "Commands/God/CommandUnmod.h"
+#include "Commands/God/CommandVersion.h"
+
+#include "Commands/Mod/CommandBan.h"
+#include "Commands/Mod/CommandDecrease.h"
+#include "Commands/Mod/CommandDecreaseCD.h"
+#include "Commands/Mod/CommandDC.h"
+#include "Commands/Mod/CommandExtend.h"
+#include "Commands/Mod/CommandExtendCD.h"
+#include "Commands/Mod/CommandHotseat.h"
+#include "Commands/Mod/CommandKick.h"
+#include "Commands/Mod/CommandMute.h"
+#include "Commands/Mod/CommandLimit.h"
+#include "Commands/Mod/CommandLock.h"
+//#include "Commands/Mod/CommandLockAll.h"
+#include "Commands/Mod/CommandOne.h"
+#include "Commands/Mod/CommandPads.h"
+#include "Commands/Mod/CommandName.h"
+#include "Commands/Mod/CommandRC.h"
+#include "Commands/Mod/CommandRestart.h"
+#include "Commands/Mod/CommandStrip.h"
+#include "Commands/Mod/CommandStripAll.h"
+#include "Commands/Mod/CommandSpot.h"
+#include "Commands/Mod/CommandUnban.h"
+#include "Commands/Mod/CommandUnmute.h"
+#include "Commands/Mod/CommandUnVIP.h"
+#include "Commands/Mod/CommandVideoFix.h"
+#include "Commands/Mod/CommandVIP.h"
+#include "Commands/Mod/CommandVerify.h"
+
+#include "Commands/Guest/Command8ball.h"
+#include "Commands/Guest/CommandAFK.h"
+#include "Commands/Guest/CommandBB.h"
+#include "Commands/Guest/CommandBonk.h"
+#include "Commands/Guest/CommandDiscord.h"
+#include "Commands/Guest/CommandFF.h"
+#include "Commands/Guest/CommandFortune.h"
+#include "Commands/Guest/CommandHelp.h"
+#include "Commands/Guest/CommandKeyboard.h"
+#include "Commands/Guest/CommandMirror.h"
+#include "Commands/Guest/CommandPing.h"
+#include "Commands/Guest/CommandPlayTime.h"
+#include "Commands/Guest/CommandRollCall.h"
+#include "Commands/Guest/CommandRPG.h"
+#include "Commands/Guest/CommandSFX.h"
+#include "Commands/Guest/CommandSpectate.h"
+#include "Commands/Guest/CommandSwap.h"
+#include "Commands/Guest/CommandTriangle.h"
+
+#include "../CompilerDirectives.h"
+#include "../MetadataCache.h"
+#include "../Modules/Macro.h"
+#include "../Modules/Hotseat.h"
+#include "../Modules/Tournament.h"
+
+#define BOT_GUESTID 0
+
+class ChatBot
+{
+public:
+
+	ChatBot(
+		AudioIn& audioIn, AudioOut& audioOut, DX11& dx11,
+		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
+		ParsecSession& parsecSession, SFXList& sfxList, Macro& macro, bool& hostingLoopController, Guest& host,
+		Hotseat& hotseat, Tournament& tournament
+	)
+		: _audioIn(audioIn), _audioOut(audioOut), _dx11(dx11),
+		_gamepadClient(gamepadClient), _guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), 
+		_parsecSession(parsecSession), _sfxList(sfxList), _macro(macro), _hostingLoopController(hostingLoopController), _host(host),
+		_hotseat(hotseat), _tournament(tournament)
+	{
+		//_basicVersion = Config::cfg.general.basicVersion;
+	}
+
+	ACommand * identifyUserDataMessage(const char* msg, Guest& sender, bool isHost = false);
+
+	const uint32_t getLastUserId() const;
+	void setLastUserId(const uint32_t lastId = BOT_GUESTID);
+
+	const std::string formatGuestConnection(Guest guest, ParsecGuestState state, ParsecStatus status);
+	const std::string formatBannedGuestMessage(Guest guest);
+	const std::string formatModGuestMessage(Guest guest);
+	CommandBotMessage sendBotMessage(const char * msg);
+	void updateSettings();
+
+private:
+	static bool msgStartsWith(const char* msg, const char* pattern);
+	static bool msgStartsWith(const char* msg, vector<const char*> patterns);
+	static bool msgIsEqual(const char* msg, const char* pattern);
+	static bool msgIsEqual(const char* msg, vector<const char*> patterns);
+
+	uint32_t _lastUserId = 0;
+
+	// Dependency Injection
+	ParsecDSO* _parsec;
+	AudioIn& _audioIn;
+	AudioOut& _audioOut;
+	DX11 &_dx11;
+	GamepadClient& _gamepadClient;
+	GuestList& _guests;
+	GuestDataList& _guestHistory;
+	ParsecHostConfig &_hostConfig;
+	ParsecSession &_parsecSession;
+	SFXList& _sfxList;
+	Macro& _macro;
+	Hotseat& _hotseat;
+	Tournament& _tournament;
+	bool &_hostingLoopController;
+	Guest& _host;
+	bool _basicVersion = false;
+};

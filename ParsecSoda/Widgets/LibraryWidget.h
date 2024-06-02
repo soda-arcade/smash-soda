@@ -11,6 +11,7 @@
 #include "TitleTooltipWidget.h"
 #include "ConfirmPopupWidget.h"
 #include "PopupWidgetEdit.h"
+#include "../Core/Cache.h"
 
 class LibraryWidget
 {
@@ -27,7 +28,6 @@ private:
 	
 	// Dependency injection
 	Hosting& _hosting;
-	GameDataList& _gameList;
 
 	bool showEditForm = false;
 

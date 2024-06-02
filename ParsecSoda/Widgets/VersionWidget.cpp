@@ -2,7 +2,7 @@
 
 // Constructor
 VersionWidget::VersionWidget() {
-	version = "4.0.1";
+	version = Cache::cache.version;
 	latestVersion = "";
 	changeLog = "";
 	error = "";
@@ -239,7 +239,7 @@ bool VersionWidget::renderUpdateWindow() {
 	AppStyle::pushPositive();
 	ImGui::Text("Version: ");
     ImGui::SameLine();
-    ImGui::Text(latestVersion.c_str());
+    ImGui::Text(Cache::cache.update.version.c_str());
     AppStyle::pop();
 
     // Text with wrap
@@ -252,18 +252,21 @@ bool VersionWidget::renderUpdateWindow() {
     ImGui::Spacing();
     
 
-    ImGui::Markdown(changeLog.c_str(), changeLog.length(), mdConfig);
+    ImGui::Markdown(Cache::cache.update.notes.c_str(), Cache::cache.update.notes.length(), mdConfig);
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
     AppColors::pushButtonSolid();
-	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 50);
-	if (ImGui::Button("Close")) {
-		showUpdate = false;
-	}
-    AppColors::popButton();
+    
+    if (!Cache::cache.update.critical) {
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 50);
+        if (ImGui::Button("Close")) {
+            showUpdate = false;
+        }
+        AppColors::popButton();
+    }
 
     AppStyle::pop();
     ImGui::End();

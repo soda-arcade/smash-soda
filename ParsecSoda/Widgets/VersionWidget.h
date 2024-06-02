@@ -9,6 +9,7 @@
 #include "../globals/AppStyle.h"
 #include "../ImGui/imform.h"
 #include "../Core/Config.h"
+#include "../Core/Cache.h"
 #include "../Modules/Arcade.h"
 
 #include <nlohmann/json.hpp>

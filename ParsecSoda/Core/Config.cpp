@@ -1,6 +1,6 @@
 #include "Config.h"
 
-Config Config::cfg = Config::Config();
+Config Config::cfg;
 
 /// <summary>
 /// Loads the config file.
@@ -8,7 +8,7 @@ Config Config::cfg = Config::Config();
 void Config::Load() {
 
 	// Get the config path
-	string configPath = GetConfigPath() + "\\config.json";
+	string configPath = PathHelper::GetConfigPath() + "\\config.json";
 	if (MTY_FileExists(configPath.c_str())) {
 
 		try {
@@ -23,15 +23,17 @@ void Config::Load() {
 			cfg.general.theme = setValue(cfg.general.theme, j["General"]["theme"].get<unsigned int>());
 			cfg.general.saveLog = setValue(cfg.general.saveLog, j["General"]["saveLog"].get<bool>());
 			cfg.general.flashWindow = setValue(cfg.general.flashWindow, j["General"]["flashWindow"].get<bool>());
+			cfg.general.ipBan = setValue(cfg.general.ipBan, j["General"]["ipBan"].get<bool>());
+			cfg.general.parsecLogs = setValue(cfg.general.parsecLogs, j["General"]["parsecLogs"].get<bool>());
 
 			// Set Audio properties
 			cfg.audio.inputDevice = setValue(cfg.audio.inputDevice, j["Audio"]["inputDevice"].get<unsigned int>());
 			cfg.audio.outputDevice = setValue(cfg.audio.outputDevice, j["Audio"]["outputDevice"].get<unsigned int>());
 			cfg.audio.micFrequency = setValue(cfg.audio.micFrequency, j["Audio"]["micFrequency"].get<unsigned int>());
-			cfg.audio.micVolume = setValue(cfg.audio.micVolume, j["Audio"]["micVolume"].get<unsigned int>());
+			cfg.audio.micVolume = setValue(cfg.audio.micVolume, j["Audio"]["micVolume"].get<float>());
 			cfg.audio.micEnabled = setValue(cfg.audio.micEnabled, j["Audio"]["micEnabled"].get<bool>());
 			cfg.audio.speakersFrequency = setValue(cfg.audio.speakersFrequency, j["Audio"]["speakersFrequency"].get<unsigned int>());
-			cfg.audio.speakersVolume = setValue(cfg.audio.speakersVolume, j["Audio"]["speakersVolume"].get<unsigned int>());
+			cfg.audio.speakersVolume = setValue(cfg.audio.speakersVolume, j["Audio"]["speakersVolume"].get<float>());
 			cfg.audio.speakersEnabled = setValue(cfg.audio.speakersEnabled, j["Audio"]["speakersEnabled"].get<bool>());
 			cfg.audio.sfxEnabled = setValue(cfg.audio.sfxEnabled, j["Audio"]["sfxEnabled"].get<bool>());
 
@@ -144,6 +146,7 @@ void Config::Load() {
 			cfg.arcade.token = setValue(cfg.arcade.token, j["Arcade"]["token"].get<string>());
 			cfg.arcade.username = setValue(cfg.arcade.username, j["Arcade"]["username"].get<string>());
 			cfg.arcade.showLogin = setValue(cfg.arcade.showLogin, j["Arcade"]["showLogin"].get<bool>());
+			cfg.arcade.countryIndex = setValue(cfg.arcade.countryIndex, j["Arcade"]["countryIndex"].get<unsigned int>());
 
 		} catch (json::exception &e) {
 			// Handle exception
@@ -164,7 +167,9 @@ void Config::Save() {
 	j["General"] = {
 		{"theme", cfg.general.theme},
 		{"saveLog", cfg.general.saveLog},
-		{"flashWindow", cfg.general.flashWindow}
+		{"flashWindow", cfg.general.flashWindow},
+		{"ipBan", cfg.general.ipBan},
+		{"parsecLogs", cfg.general.parsecLogs}
 	};
 
 	// Audio
@@ -312,11 +317,12 @@ void Config::Save() {
 	j["Arcade"] = {
 		{"token", cfg.arcade.token},
 		{"username", cfg.arcade.username},
-		{"showLogin", cfg.arcade.showLogin}
+		{"showLogin", cfg.arcade.showLogin},
+		{"countryIndex", cfg.arcade.countryIndex}
 	};
 
 	// Save the file
-	string configPath = GetConfigPath();
+	string configPath = PathHelper::GetConfigPath();
 	if (configPath != "") {
 
 		// Filepath
@@ -327,72 +333,4 @@ void Config::Save() {
 
 	}
 
-}
-
-/// <summary>
-/// Get the config file path.
-/// </summary>
-/// <returns></returns>
-string Config::GetConfigPath() {
-	
-	// If running in portable mode
-	string currentPath = GetCurrentPath();
-	if (MTY_FileExists((currentPath + "\\portable.txt").c_str())) {
-		return currentPath;
-	} else {
-
-		// Get the appdata path
-		string appDataPath = GetAppDataPath();
-		if (appDataPath != "") {
-			return appDataPath;
-		} else {
-			return "";
-		}
-
-	}
-
-	return "";
-}
-
-/// <summary>
-/// Gets the current path of the application.
-/// </summary>
-/// <returns></returns>
-string Config::GetCurrentPath() {
-	char cwd[1024];
-	if (_getcwd(cwd, sizeof(cwd)) != NULL) {
-		return string(cwd);
-	}
-	else {
-		return "";
-	}
-}
-
-/// <summary>
-/// Get the appdata path.
-/// </summary>
-/// <returns></returns>
-string Config::GetAppDataPath() {
-	string appDir = "\\SmashSodaTwo\\";
-
-	TCHAR tAppdata[1024];
-	if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata))) {
-		wstring wAppdata(tAppdata);
-		string appdata(wAppdata.begin(), wAppdata.end());
-		string dirPath = appdata + appDir;
-
-		bool isDirOk = false;
-
-		if (!MTY_FileExists(dirPath.c_str())) {
-			if (MTY_Mkdir(dirPath.c_str())) {
-				isDirOk = true;
-			}
-		} else {
-			isDirOk = true;
-		}
-
-		if (isDirOk) {
-			return dirPath;
-		}
-	}
 }

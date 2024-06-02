@@ -1,6 +1,7 @@
 #pragma once
 #include <nlohmann/json.hpp>
 #include "matoya.h"
+#include "../Helpers/Countries.h"
 
 using namespace std;
 
@@ -21,13 +22,24 @@ private:
 
 	string createHeaders(size_t size);
 public:
+	class Artwork {
+	public:
+		int id = 0;
+		string title = "";
+	};
+
 	static Arcade instance;
+	vector<Artwork> artwork = vector<Artwork>();
+	Countries countries = Countries();
+	int artworkID = -1;	/// The ID of the artwork associated with the room
 
 	Arcade();
 	
 	bool login(string email, string password);
+	bool checkToken(string token);
 
 	bool createPost();
-	bool updatePost();
 	bool deletePost();
+
+	bool getArtwork();
 };

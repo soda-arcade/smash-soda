@@ -248,18 +248,6 @@ public:
 	static bool savePreferences(Preferences preferences);
 	static bool savePreferences();
 
-	static vector<GuestData> loadBannedUsers();
-	static bool saveBannedUsers(vector<GuestData> guests);
-
-	static vector<GuestData> loadModdedUsers();
-	static bool saveModdedUsers(vector<GuestData> guests);
-
-	static vector<GuestData> loadVIPUsers();
-	static bool saveVIPUsers(vector<GuestData> guests);
-
-	static vector<GameData> loadGamesList();
-	static bool saveGamesList(vector<GameData> games);
-
 	static vector<GuestTier> loadGuestTiers();
 	static bool saveGuestTiers(vector<GuestTier> guestTiers);
 

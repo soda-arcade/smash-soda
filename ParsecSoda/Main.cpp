@@ -132,7 +132,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
 
     HostSettingsWidget hostSettingsWindow(g_hosting, [&hwnd](bool isRunning) {
         SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Smash Soda" : L"Smash Soda");
-        });
+    });
     LoginWidget loginWindow(g_hosting, hostSettingsWindow);
     LogWidget logWindow(g_hosting);
     GuestListWidget guestsWindow(g_hosting);
@@ -203,50 +203,21 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
         });
 
     // =====================================================================
-    //  Check for updates
-    // =====================================================================
-    
-    // Make request
-    void* response = nullptr;
-    size_t responseSize = 0;
-    uint16_t status = 0;
-
-    std::string domain = "mickeyuk.com";
-    std::string path = "/api/version/smash_soda";
-    bool success = MTY_HttpRequest(
-        domain.c_str(), 0, true, "GET", path.c_str(), "Content-Type: application/json",
-        NULL, 0,
-        5000,
-        &response, &responseSize, &status
-    );
-    if (success) {
-        const char* responseStr = (const char*)response;
-        if (responseSize > 0 && status == 200) {
-
-            // Parse JSON
-            json j = json::parse(responseStr);
-
-            j.at("version").get_to(versionWidget.latestVersion);
-            j.at("content").get_to(versionWidget.changeLog);
-
-            // Check if version is different
-            if (versionWidget.latestVersion != versionWidget.version) {
-                versionWidget.showUpdate = true;
-                Config::cfg.overlay.update = true;
-                Config::cfg.Save();
-            } else
-
-            // If overlay was updated
-            if (Config::cfg.overlay.update) {
-                versionWidget.showDownload = true;
-            }
-
-        }
-    }
-    
-    // =====================================================================
     //  Soda Arcade
     // =====================================================================
+    if (Config::cfg.arcade.token != "") {
+		Arcade::instance.checkToken(Config::cfg.arcade.token);
+	}
+
+    if (Cache::cache.checkForUpdates()) {
+        versionWidget.showUpdate = true;
+        Config::cfg.overlay.update = Cache::cache.update.overlay;
+        Config::cfg.Save();
+
+        if (Config::cfg.overlay.update) {
+            versionWidget.showDownload = true;
+        }
+    }
 
     // =====================================================================
     //  Register Hotkeys
