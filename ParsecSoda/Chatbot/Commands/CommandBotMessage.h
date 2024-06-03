@@ -13,7 +13,9 @@ public:
 	 */
 	CommandBotMessage(const char* msg)
 		: _msg(msg)
-	{}
+	{
+		isBotCommand = true;
+	}
 
 	/**
 	 * @brief Run the command

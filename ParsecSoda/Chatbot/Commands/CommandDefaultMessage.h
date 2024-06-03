@@ -21,7 +21,9 @@ public:
 	 */
 	CommandDefaultMessage(const char* msg, Guest& sender, uint32_t lastUserID, Tier tier, bool isHost = false)
 		: _msg(msg), _sender(sender), _lastUserID(lastUserID), _tier(tier), _isHost(isHost)
-	{}
+	{
+		isBotCommand = false;
+	}
 
 	/**
 	 * @brief Run the command

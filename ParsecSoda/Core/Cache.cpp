@@ -36,7 +36,7 @@ Cache::Cache() {
     LoadBannedIpAddresses();
 
     // Load tiers
-    // TODO: Load tiers from file
+	
 
 }
 

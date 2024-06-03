@@ -535,7 +535,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 
 		if (!defaultMessage.replyMessage().empty() && !isHidden) {
 			broadcastChatMessage(defaultMessage.replyMessage());
-			
+
 			string adjustedMessage = defaultMessage.replyMessage();
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
@@ -547,7 +547,7 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	}
 
 	// Chatbot's command reply
-	if (!command->replyMessage().empty()) {
+	if (!command->replyMessage().empty() && command->isBotCommand) {
 		broadcastChatMessage(command->replyMessage());
 		_chatLog.logCommand(command->replyMessage());
 		_chatBot->setLastUserId();

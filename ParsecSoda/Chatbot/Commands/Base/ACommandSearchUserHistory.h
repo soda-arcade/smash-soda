@@ -35,8 +35,8 @@ public:
 	 * @return The search result
 	 */
 	bool run() override {
-		if (!ACommandPrefix::run())
-		{
+		isBotCommand = true;
+		if (!ACommandPrefix::run()) {
 			_searchResult = SEARCH_USER_HISTORY_RESULT::FAILED;
 			return false;
 		}

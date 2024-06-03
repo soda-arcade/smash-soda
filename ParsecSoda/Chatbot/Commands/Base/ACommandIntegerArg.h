@@ -20,6 +20,7 @@ public:
 	 * @brief Get the integer argument
 	 */
 	bool run() override {
+		isBotCommand = true;
 		if (!ACommandPrefix::run()) {
 			return false;
 		}

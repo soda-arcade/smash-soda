@@ -27,6 +27,7 @@ public:
 	 * @return The search result
 	 */
 	bool run() {
+		isBotCommand = true;
 		if (!ACommandPrefix::run())
 		{
 			_searchResult = SEARCH_USER_RESULT::FAILED;

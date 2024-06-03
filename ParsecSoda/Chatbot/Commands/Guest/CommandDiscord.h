@@ -25,7 +25,7 @@ public:
 		
 		if (Config::cfg.chat.discord != "") {
 			SetReply(Config::cfg.chat.discord.c_str());
-		} else return false;
+		}
 
 		return true;
 	}

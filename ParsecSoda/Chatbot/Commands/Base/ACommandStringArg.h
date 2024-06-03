@@ -21,8 +21,8 @@ public:
 	 * @brief Get the string argument
 	 */
 	bool run() {
-		if (!ACommandPrefix::run())
-		{
+		isBotCommand = true;
+		if (!ACommandPrefix::run()) {
 			return false;
 		}
 

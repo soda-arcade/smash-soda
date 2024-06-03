@@ -9,6 +9,11 @@ class ACommand
 public:
 
 	/**
+	* @brief Is this command a bot command
+	*/
+	bool isBotCommand = true;
+
+	/**
 	 * @brief Run the command
 	 * @return true if the command was successful
 	 */
@@ -18,7 +23,8 @@ public:
 	 * Prefixes the reply with the Chatbot's name
 	 */
 	void SetReply(const std::string& message) {
-		_replyMessage = Config::cfg.chatbotName + message; 
+		_replyMessage = Config::cfg.chatbotName + message;
+		isBotCommand = true;
 	}
 
 	/**
