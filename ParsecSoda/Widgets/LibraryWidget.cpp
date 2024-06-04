@@ -121,7 +121,9 @@ bool LibraryWidget::renderGameList() {
                 )) {
 
                     // Remove from game list
-                    _hosting.removeGame(name);
+                    Cache::cache.gameList.remove(name, [&](GameData& guest) {
+		
+	                });
                     popupRemoveIndex = -1;
                     showRemovePopup = false;
 

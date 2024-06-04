@@ -102,7 +102,7 @@ vector<GameData> GameDataList::LoadFromFile() {
 
     string dirPath = PathHelper::GetConfigPath();
     if (!dirPath.empty()) {
-        string filepath = dirPath + "verified.json";
+        string filepath = dirPath + "games.json";
 
         if (MTY_FileExists(filepath.c_str())) {
             MTY_JSON* json = MTY_JSONReadFile(filepath.c_str());

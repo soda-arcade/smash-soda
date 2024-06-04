@@ -10,7 +10,7 @@ Cache Cache::cache = Cache();
 Cache::Cache() {
 
 	// Set the version
-	version = "5.0.2";
+	version = "5.0.3";
 
     // Load verified users
     vector<GuestData> verified = VerifiedList::LoadFromFile();
