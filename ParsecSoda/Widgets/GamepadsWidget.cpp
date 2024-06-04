@@ -213,187 +213,204 @@ bool GamepadsWidget::render()
         backupCursor = ImGui::GetCursorPos();
 
         ImGui::SetCursorPos(cursor);
-        ImGui::Button(
-            (string("##gamepad button") + to_string(i + 1)).c_str(),
-            //ImVec2(gamepadLabelWidth, 50.0f)
-            ImVec2(gamepadLabelWidth, 35.0f)
-        );
+        if (gi->isConnected()) {
+            ImGui::Button(
+                (string("##gamepad button") + to_string(i + 1)).c_str(),
+                //ImVec2(gamepadLabelWidth, 50.0f)
+                ImVec2(gamepadLabelWidth, 35.0f)
+            );
 
-        if (ImGui::BeginDragDropSource())
-        {
-            if (!_hosting.getGamepadClient().isSlave) {
-                ImGui::SetDragDropPayload("Gamepad", &i, sizeof(int));
+            if (ImGui::BeginDragDropSource())
+            {
+                if (!_hosting.getGamepadClient().isSlave) {
+                    ImGui::SetDragDropPayload("Gamepad", &i, sizeof(int));
 
-                AppFonts::pushInput();
-                AppColors::pushPrimary();
-                ImGui::Text("%s", (gi->owner.guest.isValid() ? gi->owner.guest.name.c_str() : "Empty gamepad"));
-                AppColors::pop();
-                AppFonts::pop();
+                    AppFonts::pushInput();
+                    AppColors::pushPrimary();
+                    ImGui::Text("%s", (gi->owner.guest.isValid() ? gi->owner.guest.name.c_str() : "Empty gamepad"));
+                    AppColors::pop();
+                    AppFonts::pop();
 
-                AppStyle::pushLabel();
-                ImGui::Text("Drop into another Gamepad to swap.");
-                AppStyle::pop();
-            }
-
-            ImGui::EndDragDropSource();
-        }
-        if (ImGui::BeginDragDropTarget())
-        {
-            if (!_hosting.getGamepadClient().isSlave) {
-                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Guest"))
-                {
-                    if (payload->DataSize == sizeof(int))
-                    {
-                        int guestIndex = *(const int*)payload->Data;
-                        if (guestIndex >= 0 && guestIndex < _hosting.getGuests().size()) {
-                            Guest& guest = _hosting.getGuests()[guestIndex];
-                            if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
-                                gi->owner.guest.copy(_hosting.getGuests()[guestIndex]);
-                            }
-                        }
-                    }
+                    AppStyle::pushLabel();
+                    ImGui::Text("Drop into another Gamepad to swap.");
+                    AppStyle::pop();
                 }
-                else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Gamepad"))
-                {
-                    if (payload->DataSize == sizeof(int))
+
+                ImGui::EndDragDropSource();
+            }
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (!_hosting.getGamepadClient().isSlave) {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Guest"))
                     {
-                        int sourceIndex = *(const int*)payload->Data;
-                        if (sourceIndex >= 0 && sourceIndex < _gamepads.size())
+                        if (payload->DataSize == sizeof(int))
                         {
-                            static GuestDevice backupOwner;
-                            backupOwner.copy(_gamepads[i]->owner);
+                            int guestIndex = *(const int*)payload->Data;
+                            if (guestIndex >= 0 && guestIndex < _hosting.getGuests().size()) {
+                                Guest& guest = _hosting.getGuests()[guestIndex];
+                                if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
+                                    gi->owner.guest.copy(_hosting.getGuests()[guestIndex]);
+                                }
+                            }
+                        }
+                    }
+                    else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Gamepad"))
+                    {
+                        if (payload->DataSize == sizeof(int))
+                        {
+                            int sourceIndex = *(const int*)payload->Data;
+                            if (sourceIndex >= 0 && sourceIndex < _gamepads.size())
+                            {
+                                static GuestDevice backupOwner;
+                                backupOwner.copy(_gamepads[i]->owner);
 
-                            Guest& guest = _gamepads[sourceIndex]->owner.guest;
+                                Guest& guest = _gamepads[sourceIndex]->owner.guest;
 
-                            if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
-                                _gamepads[i]->copyOwner(_gamepads[sourceIndex]);
-                                _gamepads[sourceIndex]->owner.copy(backupOwner);
-                                _gamepads[i]->clearState();
-                                _gamepads[sourceIndex]->clearState();
+                                if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
+                                    _gamepads[i]->copyOwner(_gamepads[sourceIndex]);
+                                    _gamepads[sourceIndex]->owner.copy(backupOwner);
+                                    _gamepads[i]->clearState();
+                                    _gamepads[sourceIndex]->clearState();
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            ImGui::EndDragDropTarget();
+                ImGui::EndDragDropTarget();
+            }
         }
 
         ImGui::SetCursorPos(backupCursor);
 
-        ImGui::Dummy(ImVec2(0, 8));
+        if (gi->isConnected()) {
 
-        ImGui::Indent(20.0f);
+            ImGui::Dummy(ImVec2(0, 8));
 
-        if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
-        {
-            if (!_hosting.getGamepadClient().isSlave) {
-                gi->clearOwner();
-            }
-        }
-        TitleTooltipWidget::render("Strip gamepad", "Unlink current user from this gamepad.");
+            ImGui::Indent(20.0f);
 
-        ImGui::SameLine();
-
-        if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOff, gi->isConnected(), ImVec2(24, 24)))
-        {
-            if (!_hosting.getGamepadClient().isSlave) {
-                if (gi->isConnected()) {
-                    gi->disconnect();
-                }
-                else {
-                    gi->connect();
-                }
-
-                isConnectionButtonPressed = true;
-            }
-        }
-        if (gi->isConnected()) TitleTooltipWidget::render("Connected gamepad", "Press to \"physically\" disconnect\nthis gamepad (at O.S. level).");
-        else                  TitleTooltipWidget::render("Disconnected gamepad", "Press to \"physically\" connect\nthis gamepad (at O.S. level).");
-
-        ImGui::SameLine();
-
-        if (gi->isLocked())
-        {
-            if (IconButton::render(AppIcons::lock, AppColors::negative, ImVec2(24, 24)))
+            if (IconButton::render(AppIcons::back, AppColors::primary, ImVec2(24, 24)))
             {
                 if (!_hosting.getGamepadClient().isSlave) {
-                    gi->toggleLocked();
+                    gi->clearOwner();
                 }
             }
-            TitleTooltipWidget::render("Locked gamepad", "Unlock this specific gamepad, allowing inputs and picking.");
-        }
-        else
-        {
-            if (IconButton::render(AppIcons::unlock, AppColors::positive, ImVec2(24, 24)))
+            TitleTooltipWidget::render("Strip gamepad", "Unlink current user from this gamepad.");
+
+            ImGui::SameLine();
+
+            if (ToggleIconButtonWidget::render(AppIcons::padOn, AppIcons::padOff, gi->isConnected(), ImVec2(24, 24)))
             {
                 if (!_hosting.getGamepadClient().isSlave) {
-                    gi->toggleLocked();
+                    if (gi->isConnected()) {
+                        gi->disconnect();
+                    }
+                    else {
+                        gi->connect();
+                    }
+
+                    isConnectionButtonPressed = true;
                 }
             }
-            TitleTooltipWidget::render("Unlocked gamepad", "Lock this specific gamepad, preventing inputs or picking.");
-        }
+            if (gi->isConnected()) TitleTooltipWidget::render("Connected gamepad", "Press to \"physically\" disconnect\nthis gamepad (at O.S. level).");
+            else                  TitleTooltipWidget::render("Disconnected gamepad", "Press to \"physically\" connect\nthis gamepad (at O.S. level).");
 
-        ImGui::SameLine();
+            ImGui::SameLine();
 
-        if (gi->isLockedButtons())
-        {
-            if (IconButton::render(AppIcons::buttonLock, AppColors::negative, ImVec2(24, 24)))
+            if (gi->isLocked())
             {
-                if (!_hosting.getGamepadClient().isSlave) {
-                    gi->toggleLockedButtons();
+                if (IconButton::render(AppIcons::lock, AppColors::negative, ImVec2(24, 24)))
+                {
+                    if (!_hosting.getGamepadClient().isSlave) {
+                        gi->toggleLocked();
+                    }
                 }
-            }
-            TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
-        }
-        else
-        {
-            if (IconButton::render(AppIcons::buttonLock, AppColors::positive, ImVec2(24, 24)))
-            {
-                if (!_hosting.getGamepadClient().isSlave) {
-                    gi->toggleLockedButtons();
-                }
-            }
-            TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
-        }
-
-        ImGui::SameLine();
-
-        ImGui::BeginGroup();
-
-        ImGui::Indent(10.0f);
-
-        if (!_hosting.getGamepadClient().isSlave) {
-            if (_hosting.getGamepadClient().isPuppetMaster && gi->isPuppet)
-            {
-                ImGui::Dummy(ImVec2(0, 5.0f));
-                ImGui::Image(AppIcons::puppet, ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), AppColors::primary);
-                TitleTooltipWidget::render("Puppet", "This gamepad is under control of Master of Puppets.");
+                TitleTooltipWidget::render("Locked gamepad", "Unlock this specific gamepad, allowing inputs and picking.");
             }
             else
             {
-                static int deviceIndices[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-                ImGui::Dummy(ImVec2(0, 5.0f));
-                ImGui::SetNextItemWidth(40);
-                deviceIndices[i] = gi->owner.deviceID;
-
-                AppFonts::pushTitle();
-                if (ImGui::DragInt(
-                    (string("##DeviceIndex") + to_string(i)).c_str(),
-                    &deviceIndices[i], 0.1f, -1, 65536
-                ))
+                if (IconButton::render(AppIcons::unlock, AppColors::positive, ImVec2(24, 24)))
                 {
-                    gi->owner.deviceID = deviceIndices[i];
+                    if (!_hosting.getGamepadClient().isSlave) {
+                        gi->toggleLocked();
+                    }
                 }
-                if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                AppFonts::pop();
-
-                TitleTooltipWidget::render("Device index", "A guest may have multiple gamepads in the same machine.");
+                TitleTooltipWidget::render("Unlocked gamepad", "Lock this specific gamepad, preventing inputs or picking.");
             }
+
+            ImGui::SameLine();
+
+            if (gi->isLockedButtons())
+            {
+                if (IconButton::render(AppIcons::buttonLock, AppColors::negative, ImVec2(24, 24)))
+                {
+                    if (!_hosting.getGamepadClient().isSlave) {
+                        gi->toggleLockedButtons();
+                    }
+                }
+                TitleTooltipWidget::render("Unlock buttons", "Make sure you set it up");
+            }
+            else
+            {
+                if (IconButton::render(AppIcons::buttonLock, AppColors::positive, ImVec2(24, 24)))
+                {
+                    if (!_hosting.getGamepadClient().isSlave) {
+                        gi->toggleLockedButtons();
+                    }
+                }
+                TitleTooltipWidget::render("Lock buttons", "Make sure you set it up");
+            }
+
+            ImGui::SameLine();
+
+            ImGui::BeginGroup();
+
+            ImGui::Indent(10.0f);
+
+            if (!_hosting.getGamepadClient().isSlave) {
+                if (_hosting.getGamepadClient().isPuppetMaster && gi->isPuppet)
+                {
+                    ImGui::Dummy(ImVec2(0, 5.0f));
+                    ImGui::Image(AppIcons::puppet, ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), AppColors::primary);
+                    TitleTooltipWidget::render("Puppet", "This gamepad is under control of Master of Puppets.");
+                }
+                else
+                {
+                    static int deviceIndices[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+                    ImGui::Dummy(ImVec2(0, 5.0f));
+                    ImGui::SetNextItemWidth(40);
+                    deviceIndices[i] = gi->owner.deviceID;
+
+                    AppFonts::pushTitle();
+                    if (ImGui::DragInt(
+                        (string("##DeviceIndex") + to_string(i)).c_str(),
+                        &deviceIndices[i], 0.1f, -1, 65536
+                    ))
+                    {
+                        gi->owner.deviceID = deviceIndices[i];
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                    AppFonts::pop();
+
+                    TitleTooltipWidget::render("Device index", "A guest may have multiple gamepads in the same machine.");
+                }
+            }
+
+            ImGui::EndGroup();
+        } else {
+            ImGui::BeginGroup();
+                ImGui::Indent(20);
+                //ImGui::Dummy(ImVec2(0, 20.0f));
+                AppColors::pushButtonSolid();
+                if (ImGui::Button("Connect Gamepad")) {
+                    gi->connect();
+                    isConnectionButtonPressed = true;
+                }
+                ImGui::PopStyleColor(4);
+                //AppColors::pushButton();
+                ImGui::Unindent(20);
+            ImGui::EndGroup();
         }
-
-        ImGui::EndGroup();
-
 
         ImGui::EndChild();
         
@@ -413,7 +430,9 @@ bool GamepadsWidget::render()
 
         //static AnimatedGamepadWidget agw;
         //AnimatedGamepadWidget::render(gi->getState().Gamepad, 30);
-        agw->render(gi->getState().Gamepad, 30);
+        if (gi->isConnected()) {
+            agw->render(gi->getState().Gamepad, 30);
+        }
 
         ImGui::EndGroup();
 

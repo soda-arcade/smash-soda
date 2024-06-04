@@ -222,8 +222,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // =====================================================================
     //  Register Hotkeys
     // =====================================================================
-    RegisterHotKey(NULL, 1, MOD_CONTROL, 0x42); // !bb command
-    RegisterHotKey(NULL, 2, MOD_CONTROL, 0x4C); // !lockall command
+    if (Config::cfg.general.hotkeyBB) RegisterHotKey(NULL, 1, MOD_CONTROL, 0x42); // !bb command
+    if (Config::cfg.general.hotkeyLock) RegisterHotKey(NULL, 2, MOD_CONTROL, 0x4C); // !lockall command
 
     // =====================================================================
 

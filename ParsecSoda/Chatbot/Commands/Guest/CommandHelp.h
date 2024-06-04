@@ -23,7 +23,7 @@ public:
 	 * @return true if the command was successful
 	 */
 	bool run() override {
-		//_replyMessage = Config::cfg.chatbotName + "For a full list of commands, visit: https://bit.ly/smash-soda";
+		_replyMessage = Config::cfg.chatbotName + "For a full list of commands, visit: https://bit.ly/smash-soda";
 		return true;
 	}
 

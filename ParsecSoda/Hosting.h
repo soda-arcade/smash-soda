@@ -29,7 +29,6 @@
 #include "AudioMix.h"
 #include "GamepadClient.h"
 #include "GuestList.h"
-#include "SFXList.h"
 #include "MetadataCache.h"
 #include "CompilerDirectives.h"
 #include "Helpers/Stopwatch.h"
@@ -177,7 +176,6 @@ private:
 	ParsecSession _parsecSession;
 	ParsecStatus _parsecStatus;
 	Guest _host;
-	SFXList _sfxList;
 	TierList _tierList;
 	Macro _macro;
 	Hotseat _hotseat;

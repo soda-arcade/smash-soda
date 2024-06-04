@@ -25,6 +25,8 @@ void Config::Load() {
 			cfg.general.flashWindow = setValue(cfg.general.flashWindow, j["General"]["flashWindow"].get<bool>());
 			cfg.general.ipBan = setValue(cfg.general.ipBan, j["General"]["ipBan"].get<bool>());
 			cfg.general.parsecLogs = setValue(cfg.general.parsecLogs, j["General"]["parsecLogs"].get<bool>());
+			cfg.general.hotkeyBB = setValue(cfg.general.hotkeyBB, j["General"]["hotkeyBB"].get<bool>());
+			cfg.general.hotkeyLock = setValue(cfg.general.hotkeyLock, j["General"]["hotkeyLock"].get<bool>());
 
 			// Set Audio properties
 			cfg.audio.inputDevice = setValue(cfg.audio.inputDevice, j["Audio"]["inputDevice"].get<unsigned int>());
@@ -169,7 +171,9 @@ void Config::Save() {
 		{"saveLog", cfg.general.saveLog},
 		{"flashWindow", cfg.general.flashWindow},
 		{"ipBan", cfg.general.ipBan},
-		{"parsecLogs", cfg.general.parsecLogs}
+		{"parsecLogs", cfg.general.parsecLogs},
+		{"hotkeyBB", cfg.general.hotkeyBB},
+		{"hotkeyLock", cfg.general.hotkeyLock}
 	};
 
 	// Audio

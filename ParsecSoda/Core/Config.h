@@ -23,6 +23,8 @@ public:
 		bool flashWindow = true;
 		bool ipBan = true;
 		bool parsecLogs = false;
+		bool hotkeyBB = true;
+		bool hotkeyLock = true;
 	};
 	
 	class Audio {

@@ -32,6 +32,9 @@ Cache::Cache() {
     vector<GuestData> vips = VIPList::LoadFromFile();
     vipList = VIPList(vips);
 
+	// Load SFX
+	sfxList.init("./SFX/custom/_sfx.json");
+
     // Load banned IP addresses from file
     LoadBannedIpAddresses();
 

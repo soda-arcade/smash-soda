@@ -6,6 +6,7 @@
 #include "../Lists/TierList.h"
 #include "../Lists/GameDataList.h"
 #include "../Lists/VIPList.h"
+#include "../Lists/SFXList.h"
 
 /**
  * @brief Cache class
@@ -40,6 +41,7 @@ public:
     TierList tierList; // List of tiers
     VIPList vipList; // List of VIPs
     GameDataList gameList; // Host's list of games
+    SFXList sfxList; // List of SFX
 
 	std::string pendingIpAddress; // This holds the last recorded IP address of a user
     std::unordered_map<uint32_t, std::string> userIpMap; // Map of user IDs to IP addresses

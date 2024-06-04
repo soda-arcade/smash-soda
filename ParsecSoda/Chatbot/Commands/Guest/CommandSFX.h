@@ -4,7 +4,6 @@
 #include "../../../Core/Cache.h"
 #include "parsec-dso.h"
 #include "../Base/ACommandStringArg.h"
-#include "../../../SFXList.h"
 
 class CommandSFX : public ACommandStringArg
 {
@@ -15,8 +14,8 @@ public:
 	 * 
 	 * @param sender 
 	 */
-	CommandSFX(const char* msg, Guest& sender, SFXList &sfxList)
-		: ACommandStringArg(msg, internalPrefixes()), _sender(sender), _sfxList(sfxList)
+	CommandSFX(const char* msg, Guest& sender)
+		: ACommandStringArg(msg, internalPrefixes()), _sender(sender)
 	{}
 
 	/**
@@ -38,40 +37,34 @@ public:
 			return false;
 		}
 
-		if (_sfxList.size() <= 0) {
+		if (Cache::cache.sfxList.size() <= 0) {
 			SetReply("No sound effects available.\0");
 			return false;
 		}
 
-		if ( !ACommandStringArg::run() )
-		{
-			_replyMessage =
-				Config::cfg.chatbotName +
+		if ( !ACommandStringArg::run() ) {
+			std:string reply =
 				string("Usage: !sfx <sound name> | Example: !sfx bruh\n") +
 				string("List of available sound names:\n") +
-				_sfxList.loadedTags() +
+				Cache::cache.sfxList.loadedTags() +
 				string("\0");
+			SetReply(reply);
 			return false;
 		}
 
-		SFXList::SFXPlayResult result = _sfxList.play(_stringArg);
+		SFXList::SFXPlayResult result = Cache::cache.sfxList.play(_stringArg);
 
 		switch (result)
 		{
 		case SFXList::SFXPlayResult::COOLDOWN:
-			_replyMessage =
-				Config::cfg.chatbotName +
-				string(" | Command !sfx is on cooldown: ") +
-				to_string(_sfxList.getRemainingCooldown()) +
-				string(" seconds left.");
+			SetReply(string(" | Command !sfx is on cooldown: ") +
+				to_string(Cache::cache.sfxList.getRemainingCooldown()) +
+				string(" seconds left."));
 			break;
 		case SFXList::SFXPlayResult::NOT_FOUND:
-			_replyMessage =
-				Config::cfg.chatbotName +
-				string(" | This sound does not exist.\n") +
-				string("List of available sound effects:\n") +
-				_sfxList.loadedTags() +
-				string("\0");
+				SetReply(string(" | Command !sfx is on cooldown: ") +
+				to_string(Cache::cache.sfxList.getRemainingCooldown()) +
+				string(" seconds left."));
 			break;
 		case SFXList::SFXPlayResult::OK:
 		default:
@@ -92,10 +85,8 @@ public:
 	}
 
 protected:
-	static vector<const char*> internalPrefixes()
-	{
+	static vector<const char*> internalPrefixes() {
 		return vector<const char*> { "!sfx " };
 	}
 	Guest& _sender;
-	SFXList& _sfxList;
 };

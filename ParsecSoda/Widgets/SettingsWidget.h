@@ -52,6 +52,8 @@ private:
 	bool _autoMute;
 	int32_t _autoMuteTime;
 	bool _saveChat;
+	bool _hotkeyBB;
+	bool _hotkeyLock;
 
 	bool _guestBB = false;
 	bool _vipBB = false;
@@ -60,6 +62,10 @@ private:
 	bool _guestSFX = false;
 	bool _vipSFX = false;
 	bool _modSFX = false;
+
+	bool _guestControls = false;
+	bool _vipControls = false;
+	bool _modControls = false;
 
 	string themes[5] = { "Midnight", "Parsec Soda", "Parsec Soda V", "Mini", "Arcade" };
 	Countries _countries;

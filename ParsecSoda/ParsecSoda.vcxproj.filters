@@ -156,7 +156,7 @@
     <ClCompile Include="Widgets\AudioControlWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SFXList.cpp">
+    <ClCompile Include="Lists\SFXList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\NavBar.cpp">
@@ -566,7 +566,7 @@
     <ClInclude Include="AudioTools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SFXList.h">
+    <ClInclude Include="Lists\SFXList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chatbot\Commands\Guest\CommandSFX.h">

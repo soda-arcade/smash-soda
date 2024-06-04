@@ -35,8 +35,6 @@ Hosting::Hosting()
 		Config::cfg.room.secret
 	);
 	setHostVideoConfig(Config::cfg.video.fps, Config::cfg.video.bandwidth);
-
-	_sfxList.init("./SFX/custom/_sfx.json");
 	
 	_tierList.loadTiers();
 	_tierList.saveTiers();
@@ -157,7 +155,7 @@ void Hosting::init() {
 	_chatBot = new ChatBot(
 		audioIn, audioOut, _dx11,
 		_gamepadClient, _guestList, _guestHistory, _parsec,
-		_hostConfig, _parsecSession, _sfxList, 
+		_hostConfig, _parsecSession,
 		_macro, _isRunning, _host, _hotseat, _tournament
 	);
 

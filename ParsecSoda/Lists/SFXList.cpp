@@ -6,8 +6,18 @@ void SFXList::init(const char* jsonPath)
 	_lastCooldown = 0;
 	stringstream tags;
 
-    if (MTY_FileExists(jsonPath))
-    {
+	// Clear the list
+	_sfxList.clear();
+
+	// Clear the loaded tags
+	_loadedTags.clear();
+
+	bool fileExists = MTY_FileExists("./SFX/custom/_sfx.json");
+	if (!fileExists) {
+		fileExists = MTY_FileExists("./SFX/custom/sfx.json");
+	}
+
+    if (fileExists) {
 		try
 		{
 			MTY_JSON* json = MTY_JSONReadFile(jsonPath);

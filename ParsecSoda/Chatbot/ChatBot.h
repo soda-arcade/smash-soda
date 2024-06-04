@@ -89,12 +89,12 @@ public:
 	ChatBot(
 		AudioIn& audioIn, AudioOut& audioOut, DX11& dx11,
 		GamepadClient& gamepadClient, GuestList& guests, GuestDataList& guestHistory, ParsecDSO* parsec, ParsecHostConfig& hostConfig,
-		ParsecSession& parsecSession, SFXList& sfxList, Macro& macro, bool& hostingLoopController, Guest& host,
+		ParsecSession& parsecSession, Macro& macro, bool& hostingLoopController, Guest& host,
 		Hotseat& hotseat, Tournament& tournament
 	)
 		: _audioIn(audioIn), _audioOut(audioOut), _dx11(dx11),
 		_gamepadClient(gamepadClient), _guests(guests), _guestHistory(guestHistory), _parsec(parsec), _hostConfig(hostConfig), 
-		_parsecSession(parsecSession), _sfxList(sfxList), _macro(macro), _hostingLoopController(hostingLoopController), _host(host),
+		_parsecSession(parsecSession), _macro(macro), _hostingLoopController(hostingLoopController), _host(host),
 		_hotseat(hotseat), _tournament(tournament)
 	{
 		//_basicVersion = Config::cfg.general.basicVersion;
@@ -129,7 +129,6 @@ private:
 	GuestDataList& _guestHistory;
 	ParsecHostConfig &_hostConfig;
 	ParsecSession &_parsecSession;
-	SFXList& _sfxList;
 	Macro& _macro;
 	Hotseat& _hotseat;
 	Tournament& _tournament;

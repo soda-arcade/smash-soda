@@ -23,18 +23,29 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _autoMuteTime = Config::cfg.chat.autoMuteTime;
     _saveChat = false;
 
+    _hotkeyBB = Config::cfg.general.hotkeyBB;
+    _hotkeyLock = Config::cfg.general.hotkeyLock;
+
+    _guestSFX = Config::cfg.permissions.guest.useSFX;
+    _guestBB = Config::cfg.permissions.guest.useBB;
+    _guestControls = Config::cfg.permissions.guest.changeControls;
+
+    _vipSFX = Config::cfg.permissions.vip.useSFX;
+    _vipBB = Config::cfg.permissions.vip.useBB;
+    _vipControls = Config::cfg.permissions.vip.changeControls;
+
+    _modSFX = Config::cfg.permissions.moderator.useSFX;
+    _modBB = Config::cfg.permissions.moderator.useBB;
+    _modControls = Config::cfg.permissions.moderator.changeControls;
+
     _prependPingLimit = false;
 
     _countries = Countries();
 
-    try
-    {
+    try {
         strcpy_s(_discord, Config::cfg.chat.discord.c_str());
-    }
-    catch (const std::exception&)
-    {
-        try
-        {
+    } catch (const std::exception&) {
+        try {
             strcpy_s(_discord, "");
         }
         catch (const std::exception&) {}
@@ -189,6 +200,28 @@ void SettingsWidget::renderGeneral() {
         _hosting._disableKeyboard = _disableKeyboard;
     }
 
+    if (ImForm::InputCheckbox("Enable !bb hotkey (CTRL+B)", _hotkeyBB,
+        "Disable this if you have hotkeys that conflict with this.")) {
+        Config::cfg.general.hotkeyBB = _hotkeyBB;
+        if (_hotkeyBB) {
+            RegisterHotKey(NULL, 1, MOD_CONTROL, 0x42);
+        } else {
+            UnregisterHotKey(NULL, 1);
+        }
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("Enable !lock hotkey (CTRL+L)", _hotkeyLock,
+        "Disable this if you have hotkeys that conflict with this.")) {
+        Config::cfg.general.hotkeyLock = _hotkeyLock;
+        if (_hotkeyLock) {
+            RegisterHotKey(NULL, 2, MOD_CONTROL, 0x4C);
+        } else {
+            UnregisterHotKey(NULL, 2);
+        }
+        Config::cfg.Save();
+    }
+
     if (ImForm::InputCheckbox("Auto Index Gamepads", _autoIndex,
         "XInput indices will be identified automatically. Beware, this may cause BSOD crashes for some users!")) {
         Config::cfg.input.autoIndex = _autoIndex;
@@ -255,6 +288,17 @@ void SettingsWidget::renderChatbot() {
         Config::cfg.Save();
     }
 
+    ImGui::BeginGroup();
+        ImGui::Indent(10);
+        AppColors::pushButtonSolid();
+        if (ImGui::Button("Refresh SFX List")) {
+            Cache::cache.sfxList.init("./SFX/custom/_sfx.json");
+        }
+        ImGui::PopStyleColor(4);
+        //AppColors::pushButton();
+	    ImGui::Unindent(10);
+	ImGui::EndGroup();
+
     // if (ImForm::InputCheckbox("Host can't be bonked", _hostBonkProof,
     //     "You DARE bonk the host!?")) {
     //     Config::cfg.chat.hostBonkProof = _hostBonkProof;
@@ -284,6 +328,11 @@ void SettingsWidget::renderPermissions() {
         Config::cfg.Save();
     }
 
+    if (ImForm::InputCheckbox("Can change keyboard controls", _guestControls)) {
+        Config::cfg.permissions.guest.changeControls = _guestControls;
+        Config::cfg.Save();
+    }
+
     AppStyle::pushTitle();
     ImGui::Text("VIPs");
     AppStyle::pop();
@@ -298,6 +347,11 @@ void SettingsWidget::renderPermissions() {
         Config::cfg.Save();
     }
 
+    if (ImForm::InputCheckbox("Can change keyboard controls", _vipControls)) {
+        Config::cfg.permissions.vip.changeControls = _vipControls;
+        Config::cfg.Save();
+    }
+
     AppStyle::pushTitle();
     ImGui::Text("Moderators");
     AppStyle::pop();
@@ -309,6 +363,11 @@ void SettingsWidget::renderPermissions() {
 
     if (ImForm::InputCheckbox("Can use !bb command", _modBB)) {
         Config::cfg.permissions.moderator.useBB = _modBB;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("Can change keyboard controls", _modControls)) {
+        Config::cfg.permissions.moderator.changeControls = _modControls;
         Config::cfg.Save();
     }
 

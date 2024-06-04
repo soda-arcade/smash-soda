@@ -243,7 +243,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Widgets\LoadingRingWidget.cpp" />
     <ClCompile Include="Widgets\LoginWidget.cpp" />
     <ClCompile Include="MetadataCache.cpp" />
-    <ClCompile Include="SFXList.cpp" />
+    <ClCompile Include="Lists\SFXList.cpp" />
     <ClCompile Include="Widgets\AudioControlWidget.cpp" />
     <ClCompile Include="GuestDevice.cpp" />
     <ClCompile Include="Widgets\BoolButtonWidget.cpp" />
@@ -389,7 +389,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Widgets\LoadingRingWidget.h" />
     <ClInclude Include="Widgets\LoginWidget.h" />
     <ClInclude Include="MetadataCache.h" />
-    <ClInclude Include="SFXList.h" />
+    <ClInclude Include="Lists\SFXList.h" />
     <ClInclude Include="Widgets\AudioControlWidget.h" />
     <ClInclude Include="GuestDevice.h" />
     <ClInclude Include="Widgets\BoolButtonWidget.h" />

@@ -1,8 +1,3 @@
-<b>
-Alas, Parsec have shut down their arcade service and third party application support, so the good times are over! Archiving this project for now, but I have heard murmurs of
-Parsec having internal discussions for ongoing support for Parsec Soda. Fingers crossed!
-</b>
-
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -10,7 +5,7 @@ Parsec having internal discussions for ongoing support for Parsec Soda. Fingers 
   <h3 align="center">Smash Soda</h3>
 
   <p align="center">
-    Open source Parsec Arcade hosting tool
+    Unofficial Tool for Hosting on Parsec
     <br />
     <a href="https://github.com/MickeyUK/SmashSoda/releases">Latest Release</a>
     ·
@@ -41,7 +36,7 @@ Parsec having internal discussions for ongoing support for Parsec Soda. Fingers 
 
 This is a modification of <a href="https://github.com/FlavioFS/">ParsecSoda</a>, a tool developed by <a href="https://github.com/FlavioFS/">FlavioFS</a> for improving the hosting experience on Parsec Arcade. It builds upon modifications made by user <a href="https://github.com/v6ooo/">v6000</a>.
 
-The aim of this project is to add additional useful features, with a focus on those who wish to host Super Smash Bros Ultimate.
+The aim of this project is to make it easier for people to host public rooms with Parsec, with lots of new features and moderation tools. It also uses an unofficial alternative to the now discontinued Parsec Arcade, called [Soda Arcade](https://soda-arcade.com).
 
 This is an experimental version of Parsec Soda...expect bugs! Help development by reporting <a href="https://github.com/MickeyUK/SmashSoda/issues">issues</a> and contributing to the <a href="https://github.com/MickeyUK/SmashSoda/discussions">Discussions</a>!
 
@@ -141,5 +136,6 @@ Project Link: [https://github.com/MickeyUK/SmashSoda](https://github.com/MickeyU
 * [FlavioFS] - [GitHub](https://github.com/FlavioFS/) - Original Parsec Soda Developer
 * [v6000] - [GitHub](https://github.com/v6ooo/) - Developer of Parsec Soda V, which Smash Soda is a derivative of
 * [unuruu5760] - [GitHub] (https://github.com/unuruu5760) - Added the Keyboard Widget
+* [MonaJava] - [GitHub] (https://github.com/MonaJava) - Work on hotseat
 * [8-Bit] - [GitHub] (https://github.com/8BitProtogen) - Helps with the Smash Soda wiki
 * [R3DPanda] - [GitHub](https://github.com/R3DPanda1/) - Helped with some of the theme integration
