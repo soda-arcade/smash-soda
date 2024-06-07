@@ -39,7 +39,10 @@ Cache::Cache() {
     LoadBannedIpAddresses();
 
     // Load tiers
-	
+	tierList.loadTiers();
+
+	// Check for updates
+	checkForUpdates();
 
 }
 
