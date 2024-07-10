@@ -72,7 +72,7 @@ public:
 	 * @return std::vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!decrease", "!deduct" };
+		return vector<const char*> { "!decrease", "!taketime" };
 	}
 
 protected:

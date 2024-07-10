@@ -44,6 +44,15 @@ Cache::Cache() {
 	// Check for updates
 	checkForUpdates();
 
+	// Start thread to check for updates
+	std::thread updateThread = std::thread([this]() {
+		while (true) {
+			std::this_thread::sleep_for(std::chrono::minutes(2));
+			checkForUpdates();
+		}
+	});
+	updateThread.detach();
+
 }
 
 /**
@@ -86,6 +95,7 @@ bool Cache::checkForUpdates() {
 		update.critical = j["critical"].get<bool>();
 
 		// Add banned users if not already banned
+		globalBans.clear();
 		for (auto& bannedId : j["banned"]) {
 			if (!isGlobalBanned(bannedId.get<uint32_t>())) {
 				addGlobalBan(bannedId.get<uint32_t>());
@@ -93,6 +103,7 @@ bool Cache::checkForUpdates() {
 		}
 
 		// Add the SODA COPS!!!
+		sodaCops.clear();
 		for (auto& copId : j["cops"]) {
 			if (!isSodaCop(copId.get<uint32_t>())) {
 				addSodaCop(copId.get<uint32_t>());

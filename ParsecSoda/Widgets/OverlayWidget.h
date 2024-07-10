@@ -36,5 +36,6 @@ private:
 
 	// Dependency injection
 	Hosting& _hosting;
+	DX11& _dx11;
 
 };

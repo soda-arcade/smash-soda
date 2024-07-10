@@ -48,6 +48,7 @@ public:
 		int windowY = 0;
 		int windowW = 1280;
 		int windowH = 720;
+		unsigned int resolutionIndex = 0;
 		unsigned int fps = 60;
 		unsigned int bandwidth = 20;
 	};
@@ -151,6 +152,8 @@ public:
 		};
 		
 		string port = "9002";
+		string theme = "";
+		int monitor = 0;
 		bool update = true;
 		bool enabled = false;
 		float opacity = 0.9f;
@@ -188,6 +191,12 @@ public:
 		int countryIndex = 220;
 	};
 
+	class Socket {
+		public:
+		bool enabled = true;
+		int port = 9002;
+	};
+
 	General general;
 	Audio audio;
 	Video video;
@@ -200,6 +209,35 @@ public:
 	Overlay overlay;
 	Permissions permissions;
 	Arcade arcade;
+	Socket socket;
+
+	// Supported resolutions
+	struct Resolution {
+		std::string label;
+		int width;
+		int height;
+
+		Resolution(std::string lbl, int w, int h) : label(lbl), width(w), height(h) {}
+	};
+
+	std::vector<Resolution> resolutions = {
+		{"Keep Host Resolution", 0, 0},
+		{"3840x2160", 3840, 2160},
+		{"3840x1600", 3840, 1600},
+		{"3440x1440", 3440, 1440},
+		{"2560x1600", 2560, 1600},
+		{"2560x1440", 2560, 1440},
+		{"2560x1080", 2560, 1080},
+		{"1920x1200", 1920, 1200},
+		{"1920x1080", 1920, 1080},
+		{"1680x1050", 1680, 1050},
+		{"1600x1200", 1600, 1200},
+		{"1366x768", 1366, 768},
+		{"1280x1024", 1280, 1024},
+		{"1280x800", 1280, 800},
+		{"1280x720", 1280, 720},
+		{"1024x768", 1024, 768}
+	};
 
 	// Soda Arcade models
 	class ArcadePost {
@@ -234,6 +272,9 @@ public:
 
 	// Formats the custom chatbot name
 	string chatbotName = "[ChatBot] ";
+
+	// Overlay theme names loaded from the themes folder
+	vector<string> overlayThemes = vector<string>();
 
 	// Constructor
 	Config() {
@@ -273,4 +314,6 @@ public:
 		}
 		return originalValue;
 	}
+private:
+	void static LoadOverlayThemes();
 };

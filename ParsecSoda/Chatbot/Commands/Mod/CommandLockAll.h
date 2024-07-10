@@ -25,26 +25,26 @@ public:
 	 */
 	bool run() override {
 
-		// if (Config::cfg.input.lockedPads) {
+		if (Config::cfg.input.lockedPads) {
 
-		// 	std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
-		// 	for (; gi != _gamepadClient.gamepads.end(); ++gi) {
-		// 		(*gi)->setLocked(false);
-		// 	}
-		// 	Config::cfg.input.lockedPads = false;
-		// 	_replyMessage = Config::cfg.chatbotName + "Everybody's pads were unlocked!\0";
+			std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
+			for (; gi != _gamepadClient.gamepads.end(); ++gi) {
+				(*gi)->setLocked(false);
+			}
+			Config::cfg.input.lockedPads = false;
+			_replyMessage = Config::cfg.chatbotName + "Everybody's pads were unlocked!\0";
 
-		// }
-		// else {
+		}
+		else {
 
-		// 	std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
-		// 	for (; gi != _gamepadClient.gamepads.end(); ++gi) {
-		// 		(*gi)->setLocked(true);
-		// 	}
-		// 	Config::cfg.input.lockedPads = true;
-		// 	_replyMessage = Config::cfg.chatbotName + "Everybody's pads were locked!\0";
+			std::vector<AGamepad*>::iterator gi = _gamepadClient.gamepads.begin();
+			for (; gi != _gamepadClient.gamepads.end(); ++gi) {
+				(*gi)->setLocked(true);
+			}
+			Config::cfg.input.lockedPads = true;
+			_replyMessage = Config::cfg.chatbotName + "Everybody's pads were locked!\0";
 
-		// }
+		}
 
 		return true;
 

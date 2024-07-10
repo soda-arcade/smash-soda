@@ -61,7 +61,7 @@ public:
 
 		case SEARCH_USER_RESULT::FAILED:
 		default:
-			SetReply("Usage: !screw <username> <n>\nExample: !screw bigboi83 6\0");
+			SetReply("Usage: !cooldown <username> <n>\nExample: !cooldown bigboi83 6\0");
 			break;
 		}
 
@@ -74,13 +74,13 @@ public:
 	 * @return std::vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!screw", "!extendcd", "!increasecd" };
+		return vector<const char*> { "!cooldown" };
 	}
 
 protected:
 	static vector<const char*> internalPrefixes()
 	{
-		return vector<const char*> { "!screw " };
+		return vector<const char*> { "!cooldown " };
 	}
 
 	Guest& _sender;

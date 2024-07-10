@@ -2,7 +2,7 @@
 extern Hosting g_hosting;
 #include "ProcessMan.h"
 
-ProcessMan ProcessMan::instance = ProcessMan::ProcessMan();
+ProcessMan ProcessMan::instance = ProcessMan();
 
 /// <summary>
 /// Constructor
@@ -116,6 +116,53 @@ void ProcessMan::launch() {
 /// Restarts the application.
 /// </summary>
 void ProcessMan::restart() {
-	stop(true);
+	TerminateProcess(OpenProcess(PROCESS_TERMINATE, FALSE, processId), 0);
+	// Stop the process thread
+	if (processThread.joinable()) {
+		processThread.join();
+	}
 	launch();
+}
+
+void ProcessMan::open(string path, string args) {
+
+	// Create the process
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	// Convert path and args to LPCWSTR
+	std::wstring wpath(path.begin(), path.end());
+	std::wstring wargs(args.begin(), args.end());
+    LPCWSTR lpath = wpath.c_str();
+    LPCWSTR largs = wargs.c_str();
+	DWORD pId = 0;
+
+	// Start the child process. 
+	if (!CreateProcess(lpath,		// No module name (use command line)
+		(LPWSTR)largs,				// Command line
+		NULL,						// Process handle not inheritable
+		NULL,						// Thread handle not inheritable
+		FALSE,						// Set handle inheritance to FALSE
+		0,							// No creation flags
+		NULL,						// Use parent's environment block
+		NULL,						// Use parent's starting directory 
+		&si,						// Pointer to STARTUPINFO structure
+		&pi)						// Pointer to PROCESS_INFORMATION structure
+		) {
+		return;
+	}
+
+	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pId);
+	if (hProcess == NULL) {
+		// Log error or handle invalid process ID
+		return;
+	}
+
+	DWORD exitCode;
+	if (!GetExitCodeProcess(hProcess, &exitCode)) {
+		// Log error
+		CloseHandle(hProcess);
+	}
+	CloseHandle(hProcess);
+
 }

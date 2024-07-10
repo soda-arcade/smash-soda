@@ -322,7 +322,6 @@ bool GamepadClient::clearOwner(int gamepadIndex)
 		if (Config::cfg.hotseat.enabled && gamepads[gamepadIndex]->isOwned()) {
 			Hotseat::instance.pauseUser(gamepads[gamepadIndex]->owner.guest.userID);
 		}
-		g_hosting.getOverlay().padUnassign(gamepads[gamepadIndex]->owner.guest.userID);
 		gamepads[gamepadIndex]->clearOwner();
 		
 		return true;
@@ -400,7 +399,6 @@ bool GamepadClient::strip(int guestUserID) {
 			success = true;
 
 			Hotseat::instance.pauseUser(guestUserID);
-			g_hosting.getOverlay().padUnassign(guestUserID);
 		}
 	});
 
@@ -420,7 +418,6 @@ bool GamepadClient::stripAll() {
 			success = true;
 
 			Hotseat::instance.pauseUser(gamepad->owner.guest.userID);
-			g_hosting.getOverlay().padUnassign(gamepad->owner.guest.userID);
 		}
 	});
 
@@ -524,8 +521,7 @@ const GamepadClient::PICK_REQUEST GamepadClient::pick(Guest guest, int gamepadIn
 			if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
 				pad->clearState();
 				pad->copyOwner(gamepad);
-				gamepad->clearOwner(); 
-				g_hosting.getOverlay().padAssign(guest.userID, guest.name, pad->getIndex());
+				gamepad->clearOwner();
 			}
 			return true;
 		}
@@ -777,7 +773,6 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 		if (!(isPuppetMaster && gamepad->isPuppet) && (!gamepad->isLocked() && gamepad->isAttached() && !gamepad->owner.guest.isValid())) {
 			if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
 				gamepad->setOwner(guest, deviceID, isKeyboard);
-				g_hosting.getOverlay().padAssign(guest.userID, guest.name, gamepad->getIndex());
 			}
 			return true;
 		}

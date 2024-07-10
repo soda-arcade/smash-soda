@@ -64,3 +64,47 @@ string PathHelper::GetAppDataPath() {
 		}
 	}
 }
+
+std::string PathHelper::ConvertTCHARToString(const TCHAR* tcharStr) {
+#ifdef UNICODE
+    std::wstring wstr(tcharStr);
+    return std::string(wstr.begin(), wstr.end());
+#else
+    return std::string(tcharStr);
+#endif
+}
+
+std::wstring PathHelper::ConvertStringToWString(const std::string& str) {
+    return std::wstring(str.begin(), str.end());
+}
+
+std::vector<std::string> PathHelper::GetFilenames(const std::string& directoryPath, bool includeExtension) {
+    std::vector<std::string> filenames;
+    WIN32_FIND_DATA findFileData;
+#ifdef UNICODE
+    std::wstring wDirectoryPath = ConvertStringToWString(directoryPath);
+    HANDLE hFind = FindFirstFile((wDirectoryPath + L"\\*").c_str(), &findFileData);
+#else
+    HANDLE hFind = FindFirstFile((directoryPath + "\\*").c_str(), &findFileData);
+#endif
+
+    if (hFind == INVALID_HANDLE_VALUE) {
+        std::cerr << "Failed to open directory: " << directoryPath << std::endl;
+        return filenames;
+    }
+
+    do {
+        const std::string fileOrDirName = ConvertTCHARToString(findFileData.cFileName);
+        if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            std::string filename = fileOrDirName;
+            if (!includeExtension) {
+                size_t lastDot = fileOrDirName.find_last_of(".");
+                filename = (lastDot == std::string::npos) ? fileOrDirName : fileOrDirName.substr(0, lastDot);
+            }
+            filenames.push_back(filename);
+        }
+    } while (FindNextFile(hFind, &findFileData) != 0);
+
+    FindClose(hFind);
+    return filenames;
+}

@@ -353,7 +353,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         
         Config::cfg.kioskMode.enabled = !Config::cfg.kioskMode.enabled;
         if (_hosting.isRunning()) {
-            if (Config::cfg.kioskMode.enabled) {
+            if (Config::cfg.kioskMode.enabled && _libraryID != -1) {
                 ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
 			} else {
 				ProcessMan::instance.stop();
@@ -371,10 +371,15 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::Text("OVERLAY");
     ImGui::Indent(8);
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.overlay.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        Config::cfg.overlay.enabled = !Config::cfg.overlay.enabled;
         if (_hosting.isRunning()) {
-            
+            if (Config::cfg.overlay.enabled) {
+                WebSocket::instance.closeOverlay();
+            }
+            else {
+                WebSocket::instance.launchOverlay();
+            }
         }
+        Config::cfg.overlay.enabled = !Config::cfg.overlay.enabled;
     }
     ImGui::EndChild();
 

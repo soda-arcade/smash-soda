@@ -1,3 +1,4 @@
+#include "../Modules/WebSocket.h"
 #include "Config.h"
 
 Config Config::cfg;
@@ -46,6 +47,7 @@ void Config::Load() {
 			cfg.video.windowY = setValue(cfg.video.windowY, j["Video"]["windowY"].get<int>());
 			cfg.video.windowW = setValue(cfg.video.windowW, j["Video"]["windowW"].get<int>());
 			cfg.video.windowH = setValue(cfg.video.windowH, j["Video"]["windowH"].get<int>());
+			cfg.video.resolutionIndex = setValue(cfg.video.resolutionIndex, j["Video"]["resolutionIndex"].get<unsigned int>());
 			cfg.video.fps = setValue(cfg.video.fps, j["Video"]["fps"].get<unsigned int>());
 			cfg.video.bandwidth = setValue(cfg.video.bandwidth, j["Video"]["bandwidth"].get<unsigned int>());
 
@@ -110,13 +112,14 @@ void Config::Load() {
 			cfg.hotseat.resetTime = setValue(cfg.hotseat.resetTime, j["Hotseat"]["resetTime"].get<unsigned int>());
 
 			// Set KioskMode properties
-			cfg.kioskMode.enabled = setValue(cfg.kioskMode.enabled, j["KioskMode"]["enabled"].get<bool>());
+			cfg.kioskMode.enabled = false;
 
 			// Set Overlay properties
 			cfg.overlay.update = setValue(cfg.overlay.update, j["Overlay"]["update"].get<bool>());
 			cfg.overlay.enabled = setValue(cfg.overlay.enabled, j["Overlay"]["enabled"].get<bool>());
 			cfg.overlay.opacity = setValue(cfg.overlay.opacity, j["Overlay"]["opacity"].get<float>());
-			cfg.overlay.port = setValue(cfg.overlay.port, j["Overlay"]["port"].get<string>());
+			cfg.overlay.theme = setValue(cfg.overlay.theme, j["Overlay"]["theme"].get<string>());
+			cfg.overlay.monitor = setValue(cfg.overlay.monitor, j["Overlay"]["monitor"].get<unsigned int>());
 
 			// Set Overlay::Chat properties
 			cfg.overlay.chat.active = setValue(cfg.overlay.chat.active, j["Overlay"]["chat"]["active"].get<bool>());
@@ -150,9 +153,16 @@ void Config::Load() {
 			cfg.arcade.showLogin = setValue(cfg.arcade.showLogin, j["Arcade"]["showLogin"].get<bool>());
 			cfg.arcade.countryIndex = setValue(cfg.arcade.countryIndex, j["Arcade"]["countryIndex"].get<unsigned int>());
 
+			// Socket
+			cfg.socket.enabled = setValue(cfg.socket.enabled, j["Socket"]["enabled"].get<bool>());
+			cfg.socket.port = setValue(cfg.socket.port, j["Socket"]["port"].get<unsigned int>());
+
 		} catch (json::exception &e) {
 			// Handle exception
 		}
+
+		// Load custom overlay themes
+		LoadOverlayThemes();
 
 	}
 
@@ -197,6 +207,7 @@ void Config::Save() {
 		{"windowY", cfg.video.windowY},
 		{"windowW", cfg.video.windowW},
 		{"windowH", cfg.video.windowH},
+		{"resolutionIndex", cfg.video.resolutionIndex},
 		{"fps", cfg.video.fps},
 		{"bandwidth", cfg.video.bandwidth}
 	};
@@ -280,7 +291,8 @@ void Config::Save() {
 		{"update", cfg.overlay.update},
 		{"enabled", cfg.overlay.enabled},
 		{"opacity", cfg.overlay.opacity},
-		{"port", cfg.overlay.port},
+		{"theme", cfg.overlay.theme},
+		{"monitor", cfg.overlay.monitor},
 		{"chat", {
 			{"active", cfg.overlay.chat.active},
 			{"position", cfg.overlay.chat.position},
@@ -325,6 +337,12 @@ void Config::Save() {
 		{"countryIndex", cfg.arcade.countryIndex}
 	};
 
+	// Socket
+	j["Socket"] = {
+		{"enabled", cfg.socket.enabled},
+		{"port", cfg.socket.port}
+	};
+
 	// Save the file
 	string configPath = PathHelper::GetConfigPath();
 	if (configPath != "") {
@@ -335,6 +353,33 @@ void Config::Save() {
 		string configString = j.dump(4);
 		bool success = MTY_WriteTextFile(filePath.c_str(), "%s", configString.c_str());
 
+		// Send over websocket
+		if (WebSocket::instance.isRunning()) {
+			WebSocket::instance.sendMessageToAll("app:config");
+		}
+
+	}
+
+}
+
+// This function reads the overlay themes from the themes folder,
+// then adds each filename to the overlayThemes vector.
+void Config::LoadOverlayThemes() {
+
+	// Get themes path
+	string themesPath = PathHelper::GetCurrentPath() + "\\overlay\\themes";
+
+	// Get all files in the directory
+	vector<string> files = PathHelper::GetFilenames(themesPath.c_str(), false);
+
+	// If there are files abort
+	if (files.size() == 0) {
+		return;
+	}
+
+	// For each file
+	for (string file : files) {
+		cfg.overlayThemes.push_back(file);
 	}
 
 }

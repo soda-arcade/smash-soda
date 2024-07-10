@@ -63,7 +63,7 @@ public:
 
 		case SEARCH_USER_RESULT::FAILED:
 		default:
-			SetReply("Usage: !reward <username> <n>\nExample: !decrease Zeyku 6\0");
+			SetReply("Usage: !warmup <username> <n>\nExample: !warmup Zeyku 6\0");
 			break;
 		}
 
@@ -76,13 +76,13 @@ public:
 	 * @return std::vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!reward", "!deductcd", "!decreasecd" };
+		return vector<const char*> { "!warmup" };
 	}
 
 protected:
 	static vector<const char*> internalPrefixes()
 	{
-		return vector<const char*> { "!reward " };
+		return vector<const char*> { "!warmup " };
 	}
 
 	Guest& _sender;

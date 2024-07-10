@@ -114,6 +114,27 @@ bool VideoWidget::render()
 
     ImGui::Dummy(dummySize);
 
+    // AppStyle::pushLabel();
+    // ImGui::Text("RESOLUTION");
+    // AppStyle::pushInput();
+    // ImGui::SetNextItemWidth(size.x);
+    // if (ImGui::BeginCombo("### Thumbnail picker combo", Config::cfg.resolutions[Config::cfg.video.resolutionIndex].label.c_str(), ImGuiComboFlags_HeightLarge)) {
+    //     for (size_t i = 0; i < 16; ++i) {
+    //         bool isSelected = (i == Config::cfg.video.resolutionIndex);
+    //         if (ImGui::Selectable(Config::cfg.resolutions[i].label.c_str(), isSelected)) {
+	// 			Config::cfg.video.resolutionIndex = i;
+	// 			Config::cfg.Save();
+    //         }
+    //         if (isSelected) {
+    //             ImGui::SetItemDefaultFocus();
+    //         }
+    //     }
+    //     ImGui::EndCombo();
+    // }
+    // AppStyle::pushLabel();
+    // ImGui::TextWrapped("Choose the output resolution for the stream.");
+    // AppStyle::pop();
+
     // =========================================================
     // Bandwidth
     // =========================================================
@@ -143,8 +164,7 @@ bool VideoWidget::render()
     AppStyle::pushLabel();
     ImGui::Text("FPS");
     AppStyle::pop();
-    if (IntRangeWidget::render("Encoder FPS", _fps, 10, 250, 0.5f))
-    {
+    if (IntRangeWidget::render("Encoder FPS", _fps, 10, 250, 0.5f)) {
         TitleTooltipWidget::render("Encoder FPS", "Limits the amount of frames per second.");
     }
     ImGui::EndGroup();

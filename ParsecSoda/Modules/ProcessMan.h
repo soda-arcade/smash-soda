@@ -22,6 +22,7 @@ public:
 	void start(string path, string args);
 	void stop(bool kill = false);
 	void restart();
+	static void open(string path, string args);
 
 	static ProcessMan instance;
 
@@ -34,6 +35,7 @@ private:
 	void launch();
 
 	bool isRunning = false;
+	bool isRestarting = false;
 	DWORD processId = 0;
 
 };

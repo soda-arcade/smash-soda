@@ -303,9 +303,6 @@
     <ClCompile Include="Core\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Modules\Overlay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Modules\AutoMod.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -325,6 +322,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Helpers\PathHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\WebSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -806,9 +806,6 @@
     <ClInclude Include="Core\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Modules\Overlay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Chatbot\Commands\Guest\CommandKeyboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -864,6 +861,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chatbot\Commands\God\CommandVersion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\WebSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

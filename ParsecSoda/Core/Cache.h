@@ -33,7 +33,7 @@ public:
     static Cache cache;
     Update update; // Update information
 
-    string version = "5.0.0"; // Current version of Smash Soda
+    string version = "5.1.0"; // Current version of Smash Soda
 
     VerifiedList verifiedList; // List of verified users
     BanList banList; // List of banned users

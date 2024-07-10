@@ -26,4 +26,5 @@ private:
 
 	int _fps = 60;
 	int _bandwidth = 20;
+	
 };

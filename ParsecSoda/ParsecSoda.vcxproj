@@ -194,11 +194,11 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Modules\AutoMod.cpp" />
     <ClCompile Include="Modules\Hotseat.cpp" />
     <ClCompile Include="Modules\Macro.cpp" />
-    <ClCompile Include="Modules\Overlay.cpp" />
     <ClCompile Include="Modules\ProcessMan.cpp" />
     <ClCompile Include="Modules\Tournament.cpp" />
     <ClCompile Include="Lists\VerifiedList.cpp" />
     <ClCompile Include="Lists\VIPList.cpp" />
+    <ClCompile Include="Modules\WebSocket.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
     <ClCompile Include="Widgets\HotseatWidget.cpp" />
     <ClCompile Include="Widgets\KeyboardMapWidget.cpp" />
@@ -336,11 +336,11 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Lists\ModList.h" />
     <ClInclude Include="DualshockGamepad.h" />
     <ClInclude Include="GamepadState.h" />
-    <ClInclude Include="Modules\Overlay.h" />
     <ClInclude Include="Modules\ProcessMan.h" />
     <ClInclude Include="Modules\Tournament.h" />
     <ClInclude Include="Lists\VerifiedList.h" />
     <ClInclude Include="Lists\VIPList.h" />
+    <ClInclude Include="Modules\WebSocket.h" />
     <ClInclude Include="Widgets\ButtonLockWidget.h" />
     <ClInclude Include="Widgets\HotseatWidget.h" />
     <ClInclude Include="Widgets\KeyboardMapWidget.h" />

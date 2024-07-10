@@ -76,7 +76,7 @@ public:
 	 * @return std::vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!extend", "!increase" };
+		return vector<const char*> { "!extend", "!increase", "!givetime" };
 	}
 
 protected:

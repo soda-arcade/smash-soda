@@ -9,9 +9,9 @@ ImFont* AppFonts::sugoidekai;
 
 void AppFonts::init(ImGuiIO& io) {
 
-	label = io.Fonts->AddFontFromFileTTF(APPFONTS_LIGHT, 14.0f);
-	title = io.Fonts->AddFontFromFileTTF(APPFONTS_BOLD, 16.0f);
-	input = io.Fonts->AddFontFromFileTTF(APPFONTS_SEMI_BOLD, 16.0f);
+	label = io.Fonts->AddFontFromFileTTF(APPFONTS_LIGHT, 14.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+	title = io.Fonts->AddFontFromFileTTF(APPFONTS_BOLD, 16.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+	input = io.Fonts->AddFontFromFileTTF(APPFONTS_SEMI_BOLD, 16.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
 	inputArrow = io.Fonts->AddFontFromFileTTF(APPFONTS_SEMI_BOLD, 1.0f);
 	sugoidekai = io.Fonts->AddFontFromFileTTF(APPFONTS_BOLD, 20.0f);
 

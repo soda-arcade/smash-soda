@@ -14,6 +14,7 @@
 #include <mutex>
 #include <regex>
 #include <future>
+#include "ImGui/imgui.h"
 
 #include "Core/Config.h"
 
@@ -37,7 +38,7 @@
 #include "Helpers/Debouncer.h"
 #include "Modules/Macro.h"
 #include "Modules/Hotseat.h"
-#include "Modules/Overlay.h"	
+#include "Modules/WebSocket.h"
 #include "Modules/ProcessMan.h"
 #include "Modules/Tournament.h"
 #include "Modules/AutoMod.h"
@@ -91,7 +92,6 @@ public:
 	vector<AGamepad*>& getGamepads();
 	GamepadClient& getGamepadClient();
 	MasterOfPuppets& getMasterOfPuppets();
-	Overlay& getOverlay();
 
 	const char** getGuestNames();
 	void toggleGamepadLock();
@@ -159,6 +159,7 @@ private:
 	string randomString(const int len);
 
 	static void LogCallback(ParsecLogLevel level, const char *msg, void *opaque);
+	ImVec2 stickShortToFloat(SHORT lx, SHORT ly, float& distance);
 
 	// Attributes
 	AudioMix _audioMix;
@@ -180,7 +181,6 @@ private:
 	Macro _macro;
 	Hotseat _hotseat;
 	Tournament _tournament;
-	Overlay _overlay;
 
 	bool _isRunning = false;
 	bool _isTestMode = false;

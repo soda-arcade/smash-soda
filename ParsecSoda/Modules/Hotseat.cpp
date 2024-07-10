@@ -2,7 +2,7 @@
 extern Hosting g_hosting;
 #include "Hotseat.h"
 
-Hotseat Hotseat::instance = Hotseat::Hotseat();
+Hotseat Hotseat::instance = Hotseat();
 
 /// <summary>
 /// Constructor
@@ -51,22 +51,14 @@ void Hotseat::Start() {
 							int minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
 							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
 
-						} else {
-
-							// Log user time remaining
-							if (user.stopwatch->getRemainingSec() <= 300)
-							{
-								Log("User " + user.userName + " has " + user.stopwatch->getRemainingTime() + " remaining.");
-							}
-							
 						}
 
 					}
 
 				}
 
-				// Sleep for a minute
-				std::this_thread::sleep_for(std::chrono::minutes(1));
+				// Sleep for a second
+				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
 		});
 		hotseatThread.detach();

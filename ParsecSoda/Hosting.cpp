@@ -129,8 +129,8 @@ void Hosting::init() {
 
 	audioOut.fetchDevices();
 	vector<AudioOutDevice> audioOutDevices = audioOut.getDevices();
-	if (preferences.audioOutputDevice >= audioOutDevices.size()) {
-		preferences.audioOutputDevice = 0;
+	if (Config::cfg.audio.outputDevice >= audioOutDevices.size()) {
+		Config::cfg.audio.outputDevice = 0;
 	}
 	audioOut.setOutputDevice(Config::cfg.audio.outputDevice);
 	audioOut.captureAudio();
@@ -138,8 +138,8 @@ void Hosting::init() {
 	audioOut.setFrequency((Frequency)Config::cfg.audio.speakersFrequency);
 
 	vector<AudioInDevice> audioInputDevices = audioIn.listInputDevices();
-	if (preferences.audioInputDevice >= audioInputDevices.size()) {
-		preferences.audioInputDevice = 0;
+	if (Config::cfg.audio.inputDevice >= audioInputDevices.size()) {
+		Config::cfg.audio.inputDevice = 0;
 	}
 	AudioInDevice device = audioIn.selectInputDevice(Config::cfg.audio.inputDevice);
 	audioIn.init(device);
@@ -186,6 +186,9 @@ void Hosting::release() {
 	_dx11.clear();
 	_gamepadClient.release();
 	_masterOfPuppets.stop();
+	if (WebSocket::instance.isRunning()) {
+		WebSocket::instance.stopServer();
+	}
 }
 
 bool Hosting::isReady() {
@@ -340,10 +343,6 @@ MasterOfPuppets& Hosting::getMasterOfPuppets()
 	return _masterOfPuppets;
 }
 
-Overlay& Hosting::getOverlay() {
-	return _overlay;
-}
-
 const char** Hosting::getGuestNames()
 {
 	return _guestList.guestNames;
@@ -389,16 +388,18 @@ void Hosting::setHostConfig(string roomName, string gameId, uint8_t maxGuests, b
 	setRoomSecret(secret);
 }
 
-void Hosting::setHostVideoConfig(uint32_t fps, uint32_t bandwidth)
-{
+void Hosting::setHostVideoConfig(uint32_t fps, uint32_t bandwidth) {
+	if (Config::cfg.video.resolutionIndex > 0) {
+		_hostConfig.video->resolutionX = Config::cfg.resolutions[Config::cfg.video.resolutionIndex].width;
+		_hostConfig.video->resolutionY = Config::cfg.resolutions[Config::cfg.video.resolutionIndex].height;
+	}
 	_hostConfig.video->encoderFPS = fps;
 	_hostConfig.video->encoderMaxBitrate = bandwidth;
 	Config::cfg.video.fps = fps;
 	Config::cfg.video.bandwidth = bandwidth;
 }
 
-void Hosting::setPublicRoom(bool isPublicRoom)
-{
+void Hosting::setPublicRoom(bool isPublicRoom) {
 	_hostConfig.publicGame = isPublicRoom;
 }
 
@@ -454,7 +455,6 @@ void Hosting::startHosting() {
 
 				// Overlay
 				if (Config::cfg.overlay.enabled) {
-					_overlay.start();
 				}
 
 			}
@@ -463,7 +463,11 @@ void Hosting::startHosting() {
 		{}
 	}
 
-	bool debug = true;
+	if (Config::cfg.socket.enabled) {
+		WebSocket::instance.createServer(9002);
+	}
+
+	bool debug = false;
 }
 
 /// <summary>
@@ -487,12 +491,14 @@ void Hosting::stopHosting() {
 		Hotseat::instance.Stop();
 	}
 
-	// Disable overlay
-	_overlay.stop();
-
 	// Stop kiosk mode
 	if (Config::cfg.kioskMode.enabled) {
 		ProcessMan::instance.stop();
+	}
+
+	// Stop web socket server
+	if (WebSocket::instance.isRunning()) {
+		WebSocket::instance.stopServer();
 	}
 
 }
@@ -537,7 +543,16 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 			string adjustedMessage = defaultMessage.replyMessage();
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
-			_overlay.sendChatMessage(guest, message);
+			if (WebSocket::instance.isRunning()) {
+				json j;
+				j["event"] = "chat:message";
+				j["data"]["user"] = {
+					{"id", guest.userID},
+					{"name", guest.name},
+				};
+				j["data"]["message"] = message;
+				WebSocket::instance.sendMessageToAll(j.dump());
+			}
 
 			// Record last message
 			AutoMod::instance.RecordMessage(guest.userID, guest.name, message);
@@ -549,7 +564,12 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 		broadcastChatMessage(command->replyMessage());
 		_chatLog.logCommand(command->replyMessage());
 		_chatBot->setLastUserId();
-		_overlay.sendLogMessage(command->replyMessage());
+		if (WebSocket::instance.isRunning()) {
+			json j;
+			j["event"] = "chat:log";
+			j["data"]["message"] = command->replyMessage();
+			WebSocket::instance.sendMessageToAll(j.dump());
+		}
 	}
 
 	delete command;
@@ -699,11 +719,38 @@ void Hosting::pollEvents()
 	while (_isRunning)
 	{
 		if (ParsecHostPollEvents(_parsec, 30, &event)) {
+			
 			ParsecGuest parsecGuest = event.guestStateChange.guest;
 			ParsecGuestState state = parsecGuest.state;
 			Guest guest = Guest(parsecGuest.name, parsecGuest.userID, parsecGuest.id);
 			guestCount = ParsecHostGetGuests(_parsec, GUEST_CONNECTED, &guests);
 			_guestList.setGuests(guests, guestCount);
+			//logMessage("event: " + to_string(event.type) + " guest: " + guest.name + " state: " + to_string(state) + " status: " + to_string(event.guestStateChange.status));
+
+			// Is room full?
+			if (event.guestStateChange.status == 1 && 
+			(Cache::cache.modList.isModded(guest.userID) || Cache::cache.vipList.isVIP(guest.userID)) &&
+				guestCount >= _hostConfig.maxGuests) {
+				logMessage("VIP user " + guest.name + " is trying to join, making room for them.");
+
+				// Make extra spot
+				_hostConfig.maxGuests = _hostConfig.maxGuests + 1;
+				MetadataCache::preferences.extraSpots++;
+				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+
+				// Send user a test message
+				ParsecHostSendUserData(_parsec, guest.id, HOSTING_CHAT_MSG_ID, "Welcome VIP user! We've made room for you.");
+				
+			} else {
+
+				// Was an extra spot made?
+				if (MetadataCache::preferences.extraSpots > 0) {
+					_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
+					MetadataCache::preferences.extraSpots--;
+					ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+				}
+
+			}
 
 			switch (event.type)
 			{
@@ -756,6 +803,24 @@ void Hosting::pollLatency()
 				}
 			}
 
+			if (WebSocket::instance.isRunning()) {
+				json j;
+				j["event"] = "guest:poll";
+
+				json users = json::array();
+				for (Guest guest : getGuests()) {
+					users.push_back({
+						{"id", to_string(guest.userID)},
+						{"tier", _tierList.getTier(guest.userID)},
+						{"name", guest.name},
+						{"latency", getGuestList().getMetrics(guest.id).metrics.networkLatency }
+					});
+				}
+				j["data"]["users"] = users;
+
+				WebSocket::instance.sendMessageToAll(j.dump());
+			}
+
 		}
 		
 	}
@@ -772,7 +837,7 @@ void Hosting::pollSmashSoda() {
 	_isSmashSodaThreadRunning = true;
 	while (_isRunning) {
 
-		Sleep(200);
+		Sleep(100);
 
 		// Handles welcome messages and other new guest stuff
 		handleNewGuests();
@@ -784,6 +849,77 @@ void Hosting::pollSmashSoda() {
 		if (Config::cfg.roomChanged) {
 			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 			Config::cfg.roomChanged = false;
+		}
+
+		// Poll inputs
+		if (WebSocket::instance.isRunning()) {
+			json j;
+			j["event"] = "gamepad:poll";
+			json pads = json::array();
+			for (AGamepad* gamepad : getGamepads()) {
+				if (gamepad->isConnected()) {
+
+					json pad;
+
+					// Owner
+					if (gamepad->owner.guest.userID != 0) {
+						json owner;
+						owner["id"] = gamepad->owner.guest.userID;
+						owner["name"] = gamepad->owner.guest.name;
+
+						owner["hotseatTime"] = Hotseat::instance.getUserTimeRemaining(gamepad->owner.guest.userID);
+
+						pad["owner"] = owner;
+					}
+
+					// Button array
+					WORD wButtons = gamepad->getState().Gamepad.wButtons;
+					json buttons = json::array();
+					buttons.push_back((wButtons & XUSB_GAMEPAD_A) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_B) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_X) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_Y) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_LEFT_SHOULDER) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_RIGHT_SHOULDER) != 0);
+					buttons.push_back(gamepad->getState().Gamepad.bLeftTrigger > 0);
+					buttons.push_back(gamepad->getState().Gamepad.bRightTrigger > 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_BACK) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_START) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_LEFT_THUMB) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_RIGHT_THUMB) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_DPAD_UP) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_DPAD_DOWN) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_DPAD_LEFT) != 0);
+					buttons.push_back((wButtons & XUSB_GAMEPAD_DPAD_RIGHT) != 0);
+
+					// Stick values
+					ImVec2 leftStick;
+					ImVec2 rightStick;
+					float lDistance = 0, rDistance = 0;
+
+					leftStick = stickShortToFloat(gamepad->getState().Gamepad.sThumbLX, gamepad->getState().Gamepad.sThumbLY, lDistance);
+					rightStick = stickShortToFloat(gamepad->getState().Gamepad.sThumbRX, gamepad->getState().Gamepad.sThumbRY, rDistance);
+
+					json axes = json::array();
+					axes.push_back(leftStick.x);
+					axes.push_back(leftStick.y);
+					axes.push_back(rightStick.x);
+					axes.push_back(rightStick.y);
+
+					// Create the pad object
+					pad["index"] = gamepad->getIndex();
+					pad["buttons"] = buttons;
+					pad["axes"] = axes;
+
+					// Add the pad to the array
+					pads.push_back(pad);
+
+				}
+			}
+
+			j["data"]["gamepads"] = pads;
+
+			WebSocket::instance.sendMessageToAll(j.dump());
 		}
 
 	}
@@ -995,7 +1131,6 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		_chatLog.logCommand(logMessage);
 		MetadataCache::addActiveGuest(guest);
 		addNewGuest(guest);
-		_overlay.addGuest(to_string(guest.userID), guest.name);
 	}
 	else if (state == GUEST_FAILED)
 	{
@@ -1040,21 +1175,17 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 				// Show welcome message
 				addNewGuest(guest);
 
-				_overlay.addGuest(to_string(guest.userID), guest.name);
-
 			}
 
 		}
 		else {
 			
 			// Were extra spots made?
-			/*if (status != 11 && MetadataCache::preferences.extraSpots > 0) {
+			if (MetadataCache::preferences.extraSpots > 0) {
 				_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
 				MetadataCache::preferences.extraSpots--;
 				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
-			}*/
-
-			_overlay.removeGuest(to_string(guest.userID));
+			}
 
 			// Remove from active guests list
 			MetadataCache::removeActiveGuest(guest);
@@ -1096,7 +1227,12 @@ bool Hosting::removeGame(string name) {
 void Hosting::logMessage(string message) {
 	string chatbotName = Config::cfg.chatbotName;
 	_chatLog.logCommand(chatbotName + " " + message);
-	_overlay.sendLogMessage(message);
+	if (WebSocket::instance.isRunning()) {
+		json j;
+		j["event"] = "chat:log";
+		j["data"]["message"] = chatbotName + " " + message;
+		WebSocket::instance.sendMessageToAll(j.dump());
+	}
 }
 
 /// <summary>
@@ -1143,4 +1279,55 @@ string Hosting::randomString(const int len) {
 	}
 
 	return tmp_s;
+}
+
+/// <summary>
+/// Converts a stick value from short to float.
+/// </summary>
+/// <param name="lx"></param>
+/// <param name="ly"></param>
+/// <param name="distance"></param>
+ImVec2 Hosting::stickShortToFloat(SHORT lx, SHORT ly, float& distance) {
+    static float shortMax = 32768;
+    ImVec2 stick = ImVec2(
+        (float)lx / shortMax,
+        (float)ly / shortMax
+    );
+    stick.x = min(max(stick.x, -1.0f), 1.0f);
+    stick.y = min(max(stick.y, -1.0f), 1.0f);
+
+    distance = sqrtf(stick.x * stick.x + stick.y * stick.y);
+    if (distance > 0.01f)
+    {
+        if (abs(lx) > abs(ly))
+        {
+            if (abs(stick.x) > 0.01f)
+            {
+                float yy = stick.y / abs(stick.x);
+                float xx = 1.0f;
+                float maxDiagonal = sqrtf(xx * xx + yy * yy);
+                if (maxDiagonal > 0.01f)
+                {
+                    stick.x /= maxDiagonal;
+                    stick.y /= maxDiagonal;
+                }
+            }
+        }
+        else
+        {
+            if (abs(stick.y) > 0.01f)
+            {
+                float xx = stick.x / abs(stick.y);
+                float yy = 1.0f;
+                float maxDiagonal = sqrtf(xx * xx + yy * yy);
+                if (maxDiagonal > 0.01f)
+                {
+                    stick.x /= maxDiagonal;
+                    stick.y /= maxDiagonal;
+                }
+            }
+        }
+    }
+
+    return stick;
 }

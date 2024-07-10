@@ -40,6 +40,7 @@ private:
 	bool _hostBonkProof = false;
 	bool _parsecLogs = false;
 	bool _ipBan = true;
+	bool _socketEnabled = true;
 	unsigned int _latencyLimitThreshold = 0;
 	unsigned int _theme = 0;
 	char _discord[HOST_NAME_LEN] = "";
@@ -48,9 +49,10 @@ private:
 
 	char _prependRegion[128] = "";
 
-	int32_t _muteTime;
+	int32_t _muteTime = 0;
 	bool _autoMute;
-	int32_t _autoMuteTime;
+	int32_t _autoMuteTime = 0;
+	int32_t _socketPort = 0;
 	bool _saveChat;
 	bool _hotkeyBB;
 	bool _hotkeyLock;

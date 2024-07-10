@@ -9,7 +9,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	Tier tier = Cache::cache.tierList.getTier(sender.userID);
 
 	// Is this a Soda Cop, laying down the law?
-	if (Cache::cache.isSodaCop(sender.userID)) {
+	if (!isHost && Cache::cache.isSodaCop(sender.userID)) {
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory);
 		if (msgIsEqual(msg, CommandVersion::prefixes()))		return new CommandVersion(sender);
@@ -57,7 +57,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
 		//if (msgIsEqual(msg, CommandLock::prefixes()))			return new CommandLock(msg, sender, _gamepadClient);
-		//if (msgStartsWith(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
+		if (msgStartsWith(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRC::prefixes()))			return new CommandRC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
@@ -117,23 +117,6 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 		{
 		case 5:
 			reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
-			break;
-		case 11:
-
-			// VIP Spots
-			/*if (_vip.isVIP(guest.userID)) {
-				_hostConfig.maxGuests = _hostConfig.maxGuests + 1;
-				MetadataCache::preferences.extraSpots++;
-				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
-
-				reply << "!full \t\t but made extra spot for " << guest.name << " #" << guest.userID << "\0";
-			}
-			else {
-
-				reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
-
-			}*/
-
 			break;
 		case -12007:
 			reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";

@@ -42,6 +42,9 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
 
     _countries = Countries();
 
+    _socketEnabled = Config::cfg.socket.enabled;
+    _socketPort = Config::cfg.socket.port;
+
     try {
         strcpy_s(_discord, Config::cfg.chat.discord.c_str());
     } catch (const std::exception&) {
@@ -161,6 +164,10 @@ void SettingsWidget::renderGeneral() {
     ImGui::Text("THEME");
     AppStyle::pop();
     ImGui::SetNextItemWidth(size.x);
+
+    if (Config::cfg.general.theme >= 5) {
+        Config::cfg.general.theme = 0;
+    }
     if (ImGui::BeginCombo("### Thumbnail picker combo", themes[Config::cfg.general.theme].c_str(), ImGuiComboFlags_HeightLarge)) {
         for (size_t i = 0; i < 5; ++i) {
             bool isSelected = (i == Config::cfg.general.theme);
@@ -180,7 +187,7 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
-    if (ImForm::InputCheckbox("Disable Microphone", _microphoneEnabled,
+    if (ImForm::InputCheckbox("Enable Microphone", _microphoneEnabled,
         "When enabled, the microphone cause audio issues in some games.")) {
         Config::cfg.audio.micEnabled = _microphoneEnabled;
 		Config::cfg.Save();
@@ -237,6 +244,18 @@ void SettingsWidget::renderGeneral() {
     if (ImForm::InputCheckbox("IP Address Bans", _ipBan,
         "When banning a user, their IP address will be banned from joining your room also.")) {
         Config::cfg.general.ipBan = _ipBan;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("WebSocket Server", _socketEnabled,
+        "When hosting, Smash Soda will create a WebSocket server that sends data to clients. Required for the overlay!")) {
+        Config::cfg.socket.enabled = _socketEnabled;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputNumber("WebSocket Port", _socketPort, 0, 65535,
+        "The port the WebSocket server will run on.")) {
+        Config::cfg.socket.port = _socketPort;
         Config::cfg.Save();
     }
 
