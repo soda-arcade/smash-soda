@@ -62,7 +62,7 @@ Check out the comprehensive Wiki guide on how to use Smash Soda <a href="https:/
            <div>Report issues and<br>request features</div>
         </td>
         <td align="center">
-           <a href="https://discord.gg/9ZHmwce">
+           <a href="https://discord.gg/DsR9NubWYk">
                <img width="60px" src="https://raw.githubusercontent.com/MickeyUK/SmashSoda/master/github/Icons/discord.png">
                <div>Discord</div>
            </a>
