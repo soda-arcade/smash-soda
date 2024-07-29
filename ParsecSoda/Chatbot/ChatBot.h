@@ -70,6 +70,7 @@
 #include "Commands/Guest/CommandRollCall.h"
 #include "Commands/Guest/CommandRPG.h"
 #include "Commands/Guest/CommandSFX.h"
+#include "Commands/Guest/CommandStopSFX.h"
 #include "Commands/Guest/CommandSpectate.h"
 #include "Commands/Guest/CommandSwap.h"
 #include "Commands/Guest/CommandTriangle.h"

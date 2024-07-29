@@ -25,6 +25,7 @@ private:
 	// Hotseat
 	int _playTime = 0;
 	int _resetTime = 0;
+	int _minResetTime = 0;
 
 	// Dependency injection
 	Hosting& _hosting;

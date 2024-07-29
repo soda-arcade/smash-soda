@@ -148,8 +148,7 @@ void HotseatWidget::renderSettings() {
     }
 
     if (ImForm::InputNumber("RESET TIME", _resetTime, 0, 999,
-        //I let you set it as 0 -DIO
-		"This is how often a reset occurs for each user (in minutes).")) {
+		"This is how often play time resets for each user (in minutes).")) {
         if (_resetTime < 0) {
             _resetTime = 0;
         }
@@ -159,6 +158,18 @@ void HotseatWidget::renderSettings() {
             Config::cfg.Save();
         }
 	}
+
+    if (ImForm::InputNumber("MINIMUM RESET TIME", _minResetTime, 0, 999,
+        "This is the time a user must wait by default each time their play time runs out (in minutes).")) {
+        if (_minResetTime < 0) {
+            _minResetTime = 0;
+        }
+        else {
+            Config::cfg.hotseat.minResetTime = _minResetTime;
+            _minResetTime = Config::cfg.hotseat.minResetTime;
+            Config::cfg.Save();
+        }
+    }
 
     ImGui::EndGroup();
 

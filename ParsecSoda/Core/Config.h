@@ -121,6 +121,7 @@ public:
 		bool enabled = false;
 		int playTime = 15;
 		int resetTime = 30;
+		int minResetTime = 5;
 	};
 	
 	class KioskMode {
