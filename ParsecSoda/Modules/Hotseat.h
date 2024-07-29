@@ -29,6 +29,7 @@ public:
 		bool cooldown = false;
 		int userId = 0;
 		string userName = "";
+		bool checkThisOnce = false;
 
 		bool inSeat = false;
 		StopwatchTimer* stopwatch;

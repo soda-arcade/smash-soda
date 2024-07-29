@@ -94,7 +94,7 @@ SFXList::SFXPlayResult SFXList::play(const string tag)
 
 			string path = string("./SFX/custom/") + string((*it).path);
 			wstring wide (path.begin(), path.end());
-			PlaySound(wide.c_str(), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+			PlaySound(wide.c_str(), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC | SND_SYSTEM);
 			_lastCooldown = (*it).cooldown;
 			_lastUseTimestamp = steady_clock::now();
 			return SFXPlayResult::OK;

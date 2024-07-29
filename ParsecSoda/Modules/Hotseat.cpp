@@ -51,6 +51,16 @@ void Hotseat::Start() {
 							int minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
 							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
 
+							user.checkThisOnce = false;
+						}
+						else {
+
+							// Log user time remaining
+							if (user.stopwatch->getRemainingSec() <= 300 &&  user.checkThisOnce == false)
+							{
+								Log("User " + user.userName + " has " + user.stopwatch->getRemainingTime() + " remaining.");
+								user.checkThisOnce = true;
+							}
 						}
 
 					}
@@ -127,7 +137,13 @@ bool Hotseat::checkUser(int id, string name) {
 			// User still has time remaining, so they can join
 			// Log user reseated
 			Log("User " + user->userName + " has been reseated. They have " + user->stopwatch->getRemainingTime() + " remaining.");
-
+			
+			
+			//check if the cooldown time would zero out before play time runs out
+			if (getCoolDownTime(id) < (user->stopwatch->getRemainingSec() + Config::cfg.hotseat.minResetTime * 60 + 60))
+			{
+				user->timeLastPlayed = currentTime + Config::cfg.hotseat.minResetTime * 60;
+			}
 			// Start the stopwatch
 			//Sloppy fix for reseating glitch from DIO. Just checks if its paused first
 			if (user->stopwatch->isRunning() == false)
@@ -330,7 +346,7 @@ void Hotseat::rewardUser(int id, long minutes) {
 			user->timeLastPlayed -= minutes * 60;
 
 			// Log user extended
-			Log("User " + user->userName + " has had their cooldown delayed by " + to_string(minutes) + " minutes.");
+			Log("User " + user->userName + " has had their cooldown shortened by " + to_string(minutes) + " minutes.");
 
 	}
 
