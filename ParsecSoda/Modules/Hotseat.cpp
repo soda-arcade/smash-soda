@@ -142,7 +142,7 @@ bool Hotseat::checkUser(int id, string name) {
 			//check if the cooldown time would zero out before play time runs out
 			if (getCoolDownTime(id) < (user->stopwatch->getRemainingSec() + Config::cfg.hotseat.minResetTime * 60 + 60))
 			{
-				user->timeLastPlayed = currentTime + Config::cfg.hotseat.minResetTime * 60;
+				user->timeLastPlayed = currentTime - Config::cfg.hotseat.resetTime + user->stopwatch->getRemainingSec() + Config::cfg.hotseat.minResetTime * 60;
 			}
 			// Start the stopwatch
 			//Sloppy fix for reseating glitch from DIO. Just checks if its paused first
