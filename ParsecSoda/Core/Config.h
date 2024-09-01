@@ -122,6 +122,7 @@ public:
 		int playTime = 15;
 		int resetTime = 30;
 		int minResetTime = 5;
+		bool multiBonus = true;
 	};
 	
 	class KioskMode {
