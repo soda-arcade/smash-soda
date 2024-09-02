@@ -282,7 +282,7 @@ void Config::Save() {
 		{"playTime", cfg.hotseat.playTime},
 		{"resetTime", cfg.hotseat.resetTime},
 		{"minResetTime", cfg.hotseat.minResetTime},
-		{"multiBonus", cfg.hotseat.multiBonus }
+		{"multiBonus", cfg.hotseat.multiBonus}
 	};
 
 	// KioskMode

@@ -26,7 +26,7 @@ private:
 	int _playTime = 0;
 	int _resetTime = 0;
 	int _minResetTime = 0;
-	bool _multiBonus = false;
+	bool _multiBonus = true;
 
 	// Dependency injection
 	Hosting& _hosting;
