@@ -140,7 +140,8 @@ bool Hotseat::checkUser(int id, string name) {
 			
 			
 			//check if the cooldown time would zero out before play time runs out
-			if (getCoolDownTime(id) < (user->stopwatch->getRemainingSec() + Config::cfg.hotseat.minResetTime * 60 + 60))
+			int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
+			if ((Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) < (user->stopwatch->getRemainingSec() / 60 + Config::cfg.hotseat.minResetTime))
 			{
 				user->timeLastPlayed = currentTime - Config::cfg.hotseat.resetTime * 60 + user->stopwatch->getRemainingSec() + Config::cfg.hotseat.minResetTime * 60;
 			}
