@@ -19,12 +19,26 @@ void Hotseat::Start() {
 	// Start the hotseat thread
 	if (!running) {
 		running = true;
+		if (!rewardTimer->isRunning() && Config::cfg.hotseat.multiBonus)
+		{
+			rewardTimer->start(12);
+		}
 		hotseatThread = std::thread([&] {
 
 			while (running) {
 
 				// Get current timestamp
 				std::time_t currentTime = getCurrentTimestamp();
+
+				
+				numUsers = 0;
+				for (size_t i = 0; i < g_hosting.getGamepads().size(); ++i)
+				{
+					if (g_hosting.getGamepads()[i]->isOwned())
+					{
+						numUsers += 1;
+					}
+				}
 
 				// Loop through all users
 				for (HotseatUser& user : users) {
@@ -49,7 +63,16 @@ void Hotseat::Start() {
 
 							// Log user removed
 							int minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
-							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
+
+							if ((Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) < Config::cfg.hotseat.minResetTime)
+							{
+								user.timeLastPlayed = currentTime - Config::cfg.hotseat.resetTime * 60  + Config::cfg.hotseat.minResetTime * 60;
+								Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.minResetTime) + " minutes.");
+							}
+							else
+							{
+								Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
+							}
 
 							user.checkThisOnce = false;
 						}
@@ -66,7 +89,27 @@ void Hotseat::Start() {
 					}
 
 				}
-
+				//check if bonus time should be given
+				if (rewardTimer->isFinished() && Config::cfg.hotseat.multiBonus == true)
+				{
+					// Loop through all users
+					for (HotseatUser& user : users) {
+						if (numUsers > 1)
+						{
+							if (numUsers < 5)
+							{
+								bonusMinutes = static_cast<int>(12 * (numUsers - 1) / numUsers);
+							}
+							else
+							{
+								bonusMinutes = 9;
+							}
+							extendUser(user.userId, bonusMinutes);
+							Log("MP Bonus: All users in hotseat have been granted " + to_string(bonusMinutes) + " extra minutes.");
+						}
+					}
+					rewardTimer->start(12);
+				}
 				// Sleep for a second
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
