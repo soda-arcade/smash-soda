@@ -170,10 +170,6 @@ void HotseatWidget::renderSettings() {
             Config::cfg.Save();
         }
     }
-    if (ImForm::InputCheckbox("Award extra time for multiplayer", _multiBonus)) {
-        Config::cfg.hotseat.multiBonus = _multiBonus;
-        Config::cfg.Save();
-    }
 
     ImGui::EndGroup();
 

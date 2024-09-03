@@ -111,7 +111,6 @@ void Config::Load() {
 			cfg.hotseat.playTime = setValue(cfg.hotseat.playTime, j["Hotseat"]["playTime"].get<unsigned int>());
 			cfg.hotseat.resetTime = setValue(cfg.hotseat.resetTime, j["Hotseat"]["resetTime"].get<unsigned int>());
 			cfg.hotseat.minResetTime = setValue(cfg.hotseat.minResetTime, j["Hotseat"]["minResetTime"].get<unsigned int>());
-			cfg.hotseat.multiBonus = setValue(cfg.hotseat.multiBonus, j["Hotseat"]["multiBonus"].get<bool>());
 
 			// Set KioskMode properties
 			cfg.kioskMode.enabled = false;
@@ -281,8 +280,7 @@ void Config::Save() {
 		{"enabled", cfg.hotseat.enabled},
 		{"playTime", cfg.hotseat.playTime},
 		{"resetTime", cfg.hotseat.resetTime},
-		{"minResetTime", cfg.hotseat.minResetTime},
-		{"multiBonus", cfg.hotseat.multiBonus }
+		{"minResetTime", cfg.hotseat.minResetTime}
 	};
 
 	// KioskMode

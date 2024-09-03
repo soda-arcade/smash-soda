@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="minutes"></param>
 void StopwatchTimer::start(int minutes) {
-    _totalMin = minutes;
+    _totalMin = minutes; //35 minutes
     _remainingTime = minutes * 60 * 1000;
     _timeChange = 0;
     _startTime = steady_clock::now();
