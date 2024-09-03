@@ -19,10 +19,7 @@ void Hotseat::Start() {
 	// Start the hotseat thread
 	if (!running) {
 		running = true;
-		if (!rewardTimer->isRunning() && Config::cfg.hotseat.multiBonus)
-		{
-			rewardTimer->start(12);
-		}
+		rewardTimer->start(12);
 		hotseatThread = std::thread([&] {
 
 			while (running) {
@@ -63,16 +60,12 @@ void Hotseat::Start() {
 
 							// Log user removed
 							int minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
-
+							//Config::cfg.hotseat.minResetTime
 							if ((Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) < Config::cfg.hotseat.minResetTime)
 							{
 								user.timeLastPlayed = currentTime - Config::cfg.hotseat.resetTime * 60  + Config::cfg.hotseat.minResetTime * 60;
-								Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.minResetTime) + " minutes.");
 							}
-							else
-							{
-								Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
-							}
+							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
 
 							user.checkThisOnce = false;
 						}

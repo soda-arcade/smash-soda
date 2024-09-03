@@ -8,8 +8,6 @@ HotseatWidget::HotseatWidget(Hosting& hosting)
 {
 	_playTime = Config::cfg.hotseat.playTime;
 	_resetTime = Config::cfg.hotseat.resetTime;
-    _minResetTime = Config::cfg.hotseat.minResetTime;
-    _multiBonus = Config::cfg.hotseat.multiBonus;
 }
 
 bool HotseatWidget::render() {
@@ -172,11 +170,10 @@ void HotseatWidget::renderSettings() {
             Config::cfg.Save();
         }
     }
-    /*if (ImForm::InputCheckbox("Award extra time for multiplayer", _multiBonus)) {
+    if (ImForm::InputCheckbox("Award extra time for multiplayer", _multiBonus)) {
         Config::cfg.hotseat.multiBonus = _multiBonus;
-        _multiBonus = Config::cfg.hotseat.multiBonus;
         Config::cfg.Save();
-    }*/
+    }
 
     ImGui::EndGroup();
 
