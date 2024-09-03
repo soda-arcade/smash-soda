@@ -8,6 +8,7 @@ HotseatWidget::HotseatWidget(Hosting& hosting)
 {
 	_playTime = Config::cfg.hotseat.playTime;
 	_resetTime = Config::cfg.hotseat.resetTime;
+    _minResetTime = Config::cfg.hotseat.minResetTime;
 }
 
 bool HotseatWidget::render() {
