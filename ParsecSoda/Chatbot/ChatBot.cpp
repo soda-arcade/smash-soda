@@ -39,6 +39,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (msgIsEqual(msg, CommandRPG::prefixes()))			return new CommandRPG(msg, sender, _guests);
 	if (msgIsEqual(msg, CommandRollCall::prefixes()))		return new CommandRollCall(msg, sender, _guests);
 	if (msgStartsWith(msg, CommandSFX::prefixes()))			return new CommandSFX(msg, sender);
+	if (msgIsEqual(msg, CommandStopSFX::prefixes()))		return new CommandStopSFX(sender);
 
 	/*
 	ADMIN COMMANDS
