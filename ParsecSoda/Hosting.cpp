@@ -1085,6 +1085,19 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			_chatLog.logMessage(Config::cfg.chatbotName + "Kicked a guest for using a banned IP address.");
 			ParsecHostKickGuest(_parsec, guest.id);
 		} else {
+			// Is the user behind a VPN?
+			if (Cache::cache.isVPN(Cache::cache.pendingIpAddress)) {
+				broadcastChatMessage(Config::cfg.chatbotName + " is behind a VPN.");
+				_chatLog.logMessage(Config::cfg.chatbotName + " is behind a VPN.");
+				if (Config::cfg.general.blockVPN) {
+					ParsecHostKickGuest(_parsec, guest.id);
+				}
+			}
+			else {
+				broadcastChatMessage(Config::cfg.chatbotName + " is NOT behind a VPN.");
+				_chatLog.logMessage(Config::cfg.chatbotName + " is NOT behind a VPN.");
+			}
+
 			Cache::cache.userIpMap[guest.userID] = Cache::cache.pendingIpAddress;
 		}
 		Cache::cache.pendingIpAddress.clear();

@@ -1,6 +1,7 @@
 #include "../Modules/WebSocket.h"
 #include "Config.h"
-
+#include "../Hosting.h"
+extern Hosting g_hosting;
 Config Config::cfg;
 
 /// <summary>
@@ -28,6 +29,7 @@ void Config::Load() {
 			cfg.general.parsecLogs = setValue(cfg.general.parsecLogs, j["General"]["parsecLogs"].get<bool>());
 			cfg.general.hotkeyBB = setValue(cfg.general.hotkeyBB, j["General"]["hotkeyBB"].get<bool>());
 			cfg.general.hotkeyLock = setValue(cfg.general.hotkeyLock, j["General"]["hotkeyLock"].get<bool>());
+			cfg.general.blockVPN = setValue(cfg.general.blockVPN, j["General"]["blockVPN"].get<bool>());
 
 			// Set Audio properties
 			cfg.audio.inputDevice = setValue(cfg.audio.inputDevice, j["Audio"]["inputDevice"].get<unsigned int>());
@@ -89,6 +91,7 @@ void Config::Load() {
 			cfg.chat.welcomeMessage = setValue(cfg.chat.welcomeMessage, j["Chat"]["welcomeMessage"].get<string>());
 			cfg.chat.bonkEnabled = setValue(cfg.chat.bonkEnabled, j["Chat"]["bonkEnabled"].get<bool>());
 			cfg.chat.hostBonkProof = setValue(cfg.chat.hostBonkProof, j["Chat"]["hostBonkProof"].get<bool>());
+			cfg.chat.messageNotification = setValue(cfg.chat.messageNotification, j["Chat"]["messageNotification"].get<bool>());
 
 			// Set Widgets properties
 			cfg.widgets.host = setValue(cfg.widgets.host, j["Widgets"]["host"].get<bool>());
@@ -158,6 +161,16 @@ void Config::Load() {
 			cfg.socket.enabled = setValue(cfg.socket.enabled, j["Socket"]["enabled"].get<bool>());
 			cfg.socket.port = setValue(cfg.socket.port, j["Socket"]["port"].get<unsigned int>());
 
+			// Hotkeys
+			cfg.hotkeys.enabled = setValue(cfg.hotkeys.enabled, j["Hotkeys"]["enabled"].get<bool>());
+			json hotkeys = j["Hotkeys"]["keys"];
+			for (json::iterator it = hotkeys.begin(); it != hotkeys.end(); ++it) {
+				Hotkey hotkey;
+				hotkey.command = it.value()["command"].get<string>();
+				hotkey.key = it.value()["key"].get<int>();
+				cfg.hotkeys.keys.push_back(hotkey);
+			}
+
 		} catch (json::exception &e) {
 			// Handle exception
 		}
@@ -184,7 +197,8 @@ void Config::Save() {
 		{"ipBan", cfg.general.ipBan},
 		{"parsecLogs", cfg.general.parsecLogs},
 		{"hotkeyBB", cfg.general.hotkeyBB},
-		{"hotkeyLock", cfg.general.hotkeyLock}
+		{"hotkeyLock", cfg.general.hotkeyLock},
+		{"blockVPN", cfg.general.blockVPN}
 	};
 
 	// Audio
@@ -254,7 +268,8 @@ void Config::Save() {
 		{"autoMuteTime", cfg.chat.autoMuteTime},
 		{"welcomeMessage", cfg.chat.welcomeMessage},
 		{"bonkEnabled", cfg.chat.bonkEnabled},
-		{"hostBonkProof", cfg.chat.hostBonkProof}
+		{"hostBonkProof", cfg.chat.hostBonkProof},
+		{"messageNotification", cfg.chat.messageNotification}
 	};
 
 	// Widgets
@@ -345,6 +360,20 @@ void Config::Save() {
 		{"port", cfg.socket.port}
 	};
 
+	// Hotkeys
+	vector <json> hotkeys;
+	for (Hotkey hotkey : cfg.hotkeys.keys) {
+		json hotkeyJson;
+		hotkeyJson["command"] = hotkey.command;
+		hotkeyJson["key"] = hotkey.key;
+		hotkeys.push_back(hotkeyJson);
+	}
+
+	j["Hotkeys"] = {
+		{"enabled", cfg.hotkeys.enabled},
+		{"keys", hotkeys}
+	};
+
 	// Save the file
 	string configPath = PathHelper::GetConfigPath();
 	if (configPath != "") {
@@ -384,4 +413,51 @@ void Config::LoadOverlayThemes() {
 		cfg.overlayThemes.push_back(file);
 	}
 
+}
+
+/// <summary>
+/// Map a hotkey to a command.
+/// </summary>
+void Config::SetHotkey() {
+	Config::cfg.mapHotkey = true;
+	auto keyThread = [&]() {
+		while (Config::cfg.mapHotkey) {
+			for (int keyCode = 0; keyCode < 256; ++keyCode) {
+				if (keyCode == VK_LBUTTON || keyCode == VK_RBUTTON || keyCode == VK_MBUTTON) {
+					continue; // Skip mouse buttons
+				}
+				if (GetAsyncKeyState(keyCode) & 0x8000) {
+					// Mouse clicks not allowed either
+					if (keyCode != VK_ESCAPE && keyCode != VK_RETURN && keyCode != VK_BACK) {
+						Config::cfg.AddHotkey(Config::cfg.pendingHotkeyCommand, keyCode);
+						Config::cfg.mapHotkey = false;
+						break;
+					}
+				}
+			}
+			Sleep(100);
+		}
+	};
+	std::thread(keyThread).detach();
+
+}
+
+void Config::AddHotkey(string command, int key) {
+	Hotkey hotkey;
+	hotkey.command = command;
+	hotkey.key = key;
+	cfg.hotkeys.keys.push_back(hotkey);
+	RegisterHotKey(g_hosting.mainWindow, cfg.hotkeys.keys.size(), MOD_CONTROL|MOD_NOREPEAT, key);
+	Config::cfg.Save();
+}
+
+void Config::RemoveHotkey(string command) {
+	for (int i = 0; i < cfg.hotkeys.keys.size(); i++) {
+		if (cfg.hotkeys.keys[i].command == command) {
+			cfg.hotkeys.keys.erase(cfg.hotkeys.keys.begin() + i);
+			UnregisterHotKey(g_hosting.mainWindow, i);
+			Config::cfg.Save();
+			break;
+		}
+	}
 }

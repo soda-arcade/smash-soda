@@ -44,6 +44,9 @@ Cache::Cache() {
 	// Check for updates
 	checkForUpdates();
 
+	// Get the VPN list
+	getVPNList();
+
 	// Start thread to check for updates
 	std::thread updateThread = std::thread([this]() {
 		while (true) {
@@ -178,6 +181,17 @@ void Cache::unbanIPAddress(std::string ip) {
 }
 
 /**
+ * @brief Remove last IP address from ban list.
+ */
+void Cache::unbanLastIPAddress() {
+	// Was the last IP address banned?
+	if (isBannedIPAddress(lastIpAddress)) {
+		// Unban the IP address
+		unbanIPAddress(lastIpAddress);
+	}
+}
+
+/**
  * @brief Check if an IP address is banned
  * @param ip The IP address to check
  * @return True if the IP address is banned, false otherwise
@@ -223,6 +237,65 @@ void Cache::LoadBannedIpAddresses() {
 
 	}
 
+}
+
+// Get the list of VPN IP addresses
+void Cache::getVPNList() {
+	string data = "";
+	size_t bodySize = sizeof(char) * data.length();
+
+	// Prepare the response
+	uint16_t _status = 0;
+	void* response = nullptr;
+	size_t responseSize = 0;
+
+	// Send the request
+	string headers = "Content-Type: application/json\r\n";
+	headers += "Content-Length: " + to_string(bodySize) + "\r\n";
+
+	string domain = "raw.githubusercontent.com";
+	string path = "/X4BNet/lists_vpn/main/ipv4.txt";
+	string method = "GET";
+
+	const bool success = MTY_HttpRequest(
+		domain.c_str(), 0, true, method.c_str(), path.c_str(),
+		headers.c_str(),
+		data.c_str(), bodySize, 20000,
+		&response, &responseSize, &_status
+	);
+
+	const char* responseStr = (const char*)response;
+	if (responseSize > 0 && _status == 200) {
+		// Convert response to std::string
+		string responseString(static_cast<char*>(response), responseSize);
+		
+		// Parse the response string into lines
+		istringstream responseStream(responseString);
+		string line;
+		cidrRanges.clear();  // Clear previous entries
+
+		while (getline(responseStream, line)) {
+			// Trim any leading or trailing whitespace (if needed)
+			line.erase(line.find_last_not_of(" \n\r\t") + 1); // Trim trailing spaces
+			if (!line.empty()) {
+				cidrRanges.push_back(IPRange(line));  // Add CIDR to the vector
+			}
+		}
+
+	}
+}
+
+// Function to check if an IP address is a VPN
+bool Cache::isVPN(const std::string& ip) {
+	uint32_t ip_num = IPRange::ipToUint(ip);
+
+	for (const auto& range : cidrRanges) {
+		if (ip_num >= range.start && ip_num <= range.end) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

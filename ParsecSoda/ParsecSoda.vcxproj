@@ -178,6 +178,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Chatbot\ChatBotCustom.cpp" />
     <ClCompile Include="Chatbot\Commands\Guest\CommandBonk.cpp" />
     <ClCompile Include="Chatbot\Commands\Mod\CommandDecreaseCD.h" />
     <ClCompile Include="Core\Cache.cpp" />
@@ -285,6 +286,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ButtonLock.h" />
+    <ClInclude Include="Chatbot\ChatBotCustom.h" />
     <ClInclude Include="Chatbot\Commands\CommandBotMessage.h" />
     <ClInclude Include="Chatbot\Commands\CommandDefaultMessage.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandVersion.h" />
@@ -292,6 +294,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Chatbot\Commands\God\CommandAddPS.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandAddXbox.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandBB.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandDCAll.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandDecrease.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandDiscord.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandExtend.h" />
@@ -315,6 +318,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Chatbot\Commands\CommandTemplate.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandTriangle.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandUnmod.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandUnbanLastIP.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandUnmute.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandUnVIP.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandVerify.h" />

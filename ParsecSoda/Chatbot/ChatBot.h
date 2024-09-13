@@ -74,12 +74,16 @@
 #include "Commands/Guest/CommandSpectate.h"
 #include "Commands/Guest/CommandSwap.h"
 #include "Commands/Guest/CommandTriangle.h"
+#include "Commands/Mod/CommandDCAll.h"
+#include "Commands/Mod/CommandUnbanLastIP.h"
 
 #include "../CompilerDirectives.h"
 #include "../MetadataCache.h"
 #include "../Modules/Macro.h"
 #include "../Modules/Hotseat.h"
 #include "../Modules/Tournament.h"
+
+#include "ChatBotCustom.h"
 
 #define BOT_GUESTID 0
 
@@ -98,7 +102,7 @@ public:
 		_parsecSession(parsecSession), _macro(macro), _hostingLoopController(hostingLoopController), _host(host),
 		_hotseat(hotseat), _tournament(tournament)
 	{
-		//_basicVersion = Config::cfg.general.basicVersion;
+		_chatBotCustom = new ChatBotCustom(audioIn, audioOut, dx11, gamepadClient, guests, guestHistory, parsec, hostConfig, parsecSession, macro, hostingLoopController, host, hotseat, tournament);
 	}
 
 	ACommand * identifyUserDataMessage(const char* msg, Guest& sender, bool isHost = false);
@@ -135,5 +139,6 @@ private:
 	Tournament& _tournament;
 	bool &_hostingLoopController;
 	Guest& _host;
+	ChatBotCustom* _chatBotCustom;
 	bool _basicVersion = false;
 };
