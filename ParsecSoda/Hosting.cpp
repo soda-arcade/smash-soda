@@ -1127,10 +1127,6 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 					ParsecHostKickGuest(_parsec, guest.id);
 				}
 			}
-			else {
-				broadcastChatMessage(Config::cfg.chatbotName + " " + guest.name + " is not behind a VPN.");
-				_chatLog.logMessage(Config::cfg.chatbotName + " " + guest.name + " is not behind a VPN.");
-			}
 
 			Cache::cache.userIpMap[guest.userID] = Cache::cache.pendingIpAddress;
 		}
