@@ -278,7 +278,7 @@ void Cache::getVPNList() {
 			// Trim any leading or trailing whitespace (if needed)
 			line.erase(line.find_last_not_of(" \n\r\t") + 1); // Trim trailing spaces
 			if (!line.empty()) {
-				cidrRanges.push_back(IPRange(line));  // Add CIDR to the vector
+				cidrRanges.push_back(line);  // Add CIDR to the vector
 			}
 		}
 
@@ -287,11 +287,26 @@ void Cache::getVPNList() {
 
 // Function to check if an IP address is a VPN
 bool Cache::isVPN(const std::string& ip) {
-	uint32_t ip_num = IPRange::ipToUint(ip);
 
 	for (const auto& range : cidrRanges) {
-		if (ip_num >= range.start && ip_num <= range.end) {
-			return true;
+		string base = range.substr(0, range.find_last_of('.'));
+		string start = range.substr(range.find_last_of('.') + 1, range.find_last_of('/') - range.find_last_of('.') - 1);
+		string end = range.substr(range.find_last_of('/') + 1);
+
+		// Convert the start and end to integers
+		uint32_t startInt = std::stoi(start);
+		uint32_t endInt = std::stoi(end);
+
+		// Does IP match the base?
+		if (ip.find(base) != string::npos) {
+			// Get the last octet of the IP
+			string lastOctet = ip.substr(ip.find_last_of('.') + 1);
+			uint32_t lastOctetInt = std::stoi(lastOctet);
+
+			// Is the last octet within the range?
+			if (lastOctetInt >= startInt && lastOctetInt <= endInt) {
+				return true;
+			}
 		}
 	}
 

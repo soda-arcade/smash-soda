@@ -77,7 +77,7 @@ public:
     std::string lastIpAddress; // This holds the last recorded IP address of a user
     std::unordered_map<uint32_t, std::string> userIpMap; // Map of user IDs to IP addresses
     vector<string> bannedIPs = vector<string>(); // List of banned IP addresses
-    vector<IPRange> cidrRanges = vector<IPRange>(); // List of CIDR ranges for VPNs
+    vector<string> cidrRanges = vector<string>(); // List of CIDR ranges for VPNs
 
     vector<uint32_t> sodaCops = vector<uint32_t>(); // List of Soda cops! These users have mod powers in any room
     vector<uint32_t> globalBans = vector<uint32_t>(); // List of users who are banned from all rooms

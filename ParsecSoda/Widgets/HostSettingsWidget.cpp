@@ -26,7 +26,7 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
             strcpy_s(_kioskParam, "");
         } catch (const std::exception&) {}
     }
-    _maxGuests = cfg.maxGuests;
+    _maxGuests = Config::cfg.room.guestLimit;
     
     _micVolume = Config::cfg.audio.micVolume;
     _audioIn.volume = (float)_micVolume / 100.0f;

@@ -264,9 +264,9 @@ void SettingsWidget::renderGeneral() {
         Config::cfg.Save();
     }
 
-    if (ImForm::InputCheckbox("Block VPNs", _socketEnabled,
+    if (ImForm::InputCheckbox("Block VPNs", _blockVPN,
         "It is advisable to only enable this if you are having issues with trolls, as some users use VPNs legitimately.")) {
-        Config::cfg.socket.enabled = _socketEnabled;
+        Config::cfg.general.blockVPN = _blockVPN;
         Config::cfg.Save();
     }
 
