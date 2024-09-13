@@ -1075,8 +1075,6 @@ bool Hosting::isIPInRange(const std::string& ip, const std::string& cidr) {
 	uint32_t ip_addr = ipToUint(ip);
 	uint32_t net_addr = ipToUint(base_ip);
 
-	_chatLog.logMessage("IP: " + ip + " Net: " + base_ip + " Prefix: " + std::to_string(prefix_len));
-
 	uint32_t mask = (prefix_len == 0) ? 0 : ~((1 << (32 - prefix_len)) - 1);
 
 	return (ip_addr & mask) == (net_addr & mask);
