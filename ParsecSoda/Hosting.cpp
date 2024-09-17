@@ -1145,11 +1145,12 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 				unbannedGuest = guest;
 			});
 		}
-
-		ParsecHostKickGuest(_parsec, guest.id);
-		logMessage = _chatBot->formatBannedGuestMessage(guest);
-		broadcastChatMessage(logMessage);
-		_chatLog.logCommand(logMessage);
+		else {
+			ParsecHostKickGuest(_parsec, guest.id);
+			logMessage = _chatBot->formatBannedGuestMessage(guest);
+			broadcastChatMessage(logMessage);
+			_chatLog.logCommand(logMessage);
+		}
 	}
 	else if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && Cache::cache.modList.isModded(guest.userID))
 	{
