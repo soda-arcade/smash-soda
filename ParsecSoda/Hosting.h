@@ -62,6 +62,7 @@ public:
 	Hosting();
 	void applyHostConfig();
 	void broadcastChatMessage(string message);
+	void broadcastChatMessageAndLogCommand(string message);
 	void init();
 	void release();
 	bool isReady();

@@ -125,13 +125,16 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 	{
 		switch (status)
 		{
-		case 5:
+		case HOST_WRN_KICKED:
 			reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
 			break;
-		case -12007:
+		case CONNECT_WRN_NO_ROOM:
+			reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+			break;
+		case NETWORK_ERR_BG_TIMEOUT:
 			reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
 			break;
-		case -13014:
+		case SERVER_ERR_CLIENT_ABORT:
 			reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
 			break;
 		default:
