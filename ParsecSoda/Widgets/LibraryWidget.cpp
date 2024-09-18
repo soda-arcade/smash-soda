@@ -6,12 +6,13 @@ LibraryWidget::LibraryWidget(Hosting& hosting)
 {
 }
 
-bool LibraryWidget::render() {
+bool LibraryWidget::render(bool& showWindow) {
 
     // Widget top
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(800, 900));
-    ImGui::Begin("Library", (bool*)0);
+    ImGui::Begin("Library", &showWindow);
+    if (!showWindow) Config::cfg.widgets.library = showWindow;
     AppStyle::pop();
 
     AppStyle::pushInput();

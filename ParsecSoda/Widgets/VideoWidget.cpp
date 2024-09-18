@@ -7,7 +7,7 @@ VideoWidget::VideoWidget(Hosting& hosting)
     _bandwidth = (int)Config::cfg.video.bandwidth;
 }
 
-bool VideoWidget::render()
+bool VideoWidget::render(bool& showWindow)
 {
     static float indentSize = 0;
     static ImVec2 dummySize = ImVec2(0.0f, 5.0f);
@@ -16,7 +16,8 @@ bool VideoWidget::render()
     AppStyle::pushTitle();
 
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Video");
+    ImGui::Begin("Video", &showWindow);
+    if (!showWindow) Config::cfg.widgets.video = showWindow;
 
 
     AppStyle::pushLabel();

@@ -14,7 +14,7 @@ class TournamentWidget {
 public:
 
 	TournamentWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 

@@ -78,11 +78,12 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     }
 }
 
-bool SettingsWidget::render()
+bool SettingsWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Settings", (bool*)0);
+    ImGui::Begin("Settings", &showWindow);
+    if (!showWindow) Config::cfg.widgets.settings = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();

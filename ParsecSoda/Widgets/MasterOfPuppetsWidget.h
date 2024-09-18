@@ -21,7 +21,7 @@ class MasterOfPuppetsWidget
 {
 public:
 	MasterOfPuppetsWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 	// Render engines

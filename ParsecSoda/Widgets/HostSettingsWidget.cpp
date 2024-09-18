@@ -77,12 +77,13 @@ bool HostSettingsWidget::validateSettings() {
 /// <summary>
 /// Renders the host settings widget.
 /// </summary>
-bool HostSettingsWidget::render(HWND& hwnd) {
-    
+bool HostSettingsWidget::render(bool &showWindow, HWND& hwnd) {
+
     AppStyle::pushTitle();
     ImGui::SetNextWindowPos(ImVec2(464, 5), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(600, 700));
-    ImGui::Begin("Hosting", (bool*)0);
+    ImGui::Begin("Hosting", &showWindow);
+    if (!showWindow) Config::cfg.widgets.host = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();

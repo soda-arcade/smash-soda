@@ -5,11 +5,12 @@ LogWidget::LogWidget(Hosting& hosting)
 {
 }
 
-bool LogWidget::render()
+bool LogWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Log", (bool*)0);
+    ImGui::Begin("Log", &showWindow);
+    if (!showWindow) Config::cfg.widgets.log = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();

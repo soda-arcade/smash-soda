@@ -9,7 +9,7 @@ class LogWidget
 {
 public:
 	LogWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 	string _logBuffer;

@@ -22,7 +22,7 @@ class AudioSettingsWidget
 {
 public:
 	AudioSettingsWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 	
 	const ImVec2 DEFAULT_BUTTON_SIZE = ImVec2(40, 40);
 

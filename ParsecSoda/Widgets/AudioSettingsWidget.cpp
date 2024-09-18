@@ -6,7 +6,7 @@ AudioSettingsWidget::AudioSettingsWidget(Hosting& hosting)
 {
 }
 
-bool AudioSettingsWidget::render()
+bool AudioSettingsWidget::render(bool& showWindow)
 {
     static float indentSize = 0;
     static ImVec2 dummySize = ImVec2(0.0f, 20.0f);
@@ -21,7 +21,9 @@ bool AudioSettingsWidget::render()
     AppStyle::pushTitle();
 
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(800, 900));
-    ImGui::Begin("Audio");
+    ImGui::Begin("Audio", &showWindow);
+    if (!showWindow) Config::cfg.widgets.audio = showWindow;
+
     AppStyle::pushLabel();
 
     static ImVec2 size;

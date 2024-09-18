@@ -1,6 +1,6 @@
 #include "InfoWidget.h"
 
-bool InfoWidget::render()
+bool InfoWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
 
@@ -14,7 +14,7 @@ bool InfoWidget::render()
         (res.y - size.y) * 0.5f
     ));
     ImGui::SetNextWindowSize(size);
-    ImGui::Begin("About###About Window", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("About###About Window", &showWindow, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
     AppStyle::pushInput();
     
     ImGui::Dummy(ImVec2(0, 10));

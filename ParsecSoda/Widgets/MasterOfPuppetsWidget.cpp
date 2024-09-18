@@ -5,7 +5,7 @@ MasterOfPuppetsWidget::MasterOfPuppetsWidget(Hosting& hosting)
 {
 }
 
-bool MasterOfPuppetsWidget::render()
+bool MasterOfPuppetsWidget::render(bool& showWindow)
 {
     static bool isWindowLocked = false;
     static int masterIndex = -1;
@@ -16,7 +16,8 @@ bool MasterOfPuppetsWidget::render()
     AppStyle::pushTitle();
 
     ImGui::SetNextWindowSizeConstraints(ImVec2(450, 100), ImVec2(1300, 900));
-    ImGui::Begin("Master of Puppets##Master of Puppets", 0, isWindowLocked ? ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize : 0);
+    ImGui::Begin("Master of Puppets##Master of Puppets", &showWindow, isWindowLocked ? ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize : 0);
+    if (!showWindow) Config::cfg.widgets.masterOfPuppets = showWindow;
     AppStyle::pushInput();
 
 

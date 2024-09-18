@@ -17,12 +17,13 @@ OverlayWidget::OverlayWidget(Hosting& hosting)
     _show_latency = Config::cfg.overlay.guests.showLatency;
 }
 
-bool OverlayWidget::render() {
+bool OverlayWidget::render(bool& showWindow) {
 
     // Widget top
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Overlay", (bool*)0);
+    ImGui::Begin("Overlay", &showWindow);
+    if (!showWindow) Config::cfg.widgets.overlay = showWindow;
     AppStyle::pushInput();
     
     ImVec2 size = ImGui::GetContentRegionAvail();

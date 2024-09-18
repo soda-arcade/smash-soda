@@ -6,7 +6,7 @@ ChatWidget::ChatWidget(Hosting& hosting, function<void(void)> onMessageCallback)
     setSendBuffer("\0");
 }
 
-bool ChatWidget::render()
+bool ChatWidget::render(bool &showWindow)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 5));
 
@@ -18,7 +18,8 @@ bool ChatWidget::render()
     AppStyle::pushTitle();
     ImGui::SetNextWindowPos(ImVec2(45, 5), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Chat", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
+    ImGui::Begin("Chat", &showWindow, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
+    if (!showWindow) Config::cfg.widgets.chat = showWindow;
     AppStyle::pushInput();
 
     static ImVec2 size;

@@ -17,7 +17,7 @@ class SettingsWidget
 {
 public:
 	SettingsWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 	void renderGeneral();
 	void renderChatbot();
 	void renderPermissions();

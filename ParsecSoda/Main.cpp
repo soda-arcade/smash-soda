@@ -297,25 +297,25 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
         }
         else
         {
-            if (showHostSettings)       hostSettingsWindow.render(hwnd);
-            if (showChat)               chatWindow.render();
-            if (showLog)                logWindow.render();
-            if (showGuests)             guestsWindow.render();
-            if (showGamepads)           gamepadsWindow.render();
-            if (showMasterOfPuppets)    masterOfPuppets.render();
-            if (showAudio)              audioSettingswidget.render();
-            if (showVideo)              videoWidget.render();
-            if (showInfo)               InfoWidget::render();
-            if (showSettings)           settingsWidget.render();
-            if (showButtonLock)         buttonLockWidget.render();
-            if (showLibrary)            libraryWidget.render();
-            if (showOverlay)            overlayWidget.render();
-            if (showHotseat)            hotseatWidget.render();
-            if (showTournament)         tournamentWidget.render();
+            if (showHostSettings)       hostSettingsWindow.render(showHostSettings, hwnd);
+            if (showChat)               chatWindow.render(showChat);
+            if (showLog)                logWindow.render(showLog);
+            if (showGuests)             guestsWindow.render(showGuests);
+            if (showGamepads)           gamepadsWindow.render(showGamepads);
+            if (showMasterOfPuppets)    masterOfPuppets.render(showMasterOfPuppets);
+            if (showAudio)              audioSettingswidget.render(showAudio);
+            if (showVideo)              videoWidget.render(showVideo);
+            if (showInfo)               InfoWidget::render(showInfo);
+            if (showSettings)           settingsWidget.render(showSettings);
+            if (showButtonLock)         buttonLockWidget.render(showButtonLock);
+            if (showLibrary)            libraryWidget.render(showLibrary);
+            if (showOverlay)            overlayWidget.render(showOverlay);
+            if (showHotseat)            hotseatWidget.render(showHotseat);
+            if (showTournament)         tournamentWidget.render(showTournament);
 
             //-- CodeSomnia Add Start--
             if (showKeyMap)
-                keyMapWidget.render();
+                keyMapWidget.render(showKeyMap);
             //-- CodeSomnia Add End--
             // 
             //-- CodeSomnia Moidified Start--
