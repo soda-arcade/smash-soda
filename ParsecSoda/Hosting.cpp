@@ -134,23 +134,22 @@ void Hosting::init() {
 	});
 
 	audioOut.fetchDevices();
-	vector<AudioOutDevice> audioOutDevices = audioOut.getDevices();
+	vector<AudioSourceDevice> audioOutDevices = audioOut.getDevices();
 	if (Config::cfg.audio.outputDevice >= audioOutDevices.size()) {
 		Config::cfg.audio.outputDevice = 0;
 	}
-	audioOut.setOutputDevice(Config::cfg.audio.outputDevice);
+	audioOut.setDevice(Config::cfg.audio.outputDevice);
 	audioOut.captureAudio();
 	audioOut.volume = Config::cfg.audio.speakersVolume;
-	audioOut.setFrequency((Frequency)Config::cfg.audio.speakersFrequency);
 
-	vector<AudioInDevice> audioInputDevices = audioIn.listInputDevices();
+	audioIn.fetchDevices();
+	vector<AudioSourceDevice> audioInputDevices = audioIn.getDevices();
 	if (Config::cfg.audio.inputDevice >= audioInputDevices.size()) {
 		Config::cfg.audio.inputDevice = 0;
 	}
-	AudioInDevice device = audioIn.selectInputDevice(Config::cfg.audio.inputDevice);
-	audioIn.init(device);
+	audioIn.setDevice(Config::cfg.audio.inputDevice);
+	audioIn.captureAudio();
 	audioIn.volume = Config::cfg.audio.micVolume;
-	audioIn.setFrequency((Frequency)Config::cfg.audio.micFrequency);
 
 	preferences.isValid = true;
 	MetadataCache::savePreferences(preferences);
@@ -622,11 +621,6 @@ void Hosting::initAllModules()
 	roomStart();
 }
 
-void Hosting::submitSilence()
-{
-	ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), nullptr, 0);
-}
-
 void Hosting::liveStreamMedia()
 {
 	_mediaMutex.lock();
@@ -642,16 +636,51 @@ void Hosting::liveStreamMedia()
 
 		_dx11.captureScreen(_parsec);
 
-		if (Config::cfg.audio.micEnabled && audioIn.isEnabled && audioOut.isEnabled)
+		/**
+		 * This lambda is a workaround to a ParsecSDK bug.
+		 * When using a virtual device (e.g.: VBAudio Cable),
+		 * ParsecSDK crashes if an already started audio stream
+		 * stops sending audio.
+		 */
+		static const auto submitSilence = [&]() {
+			ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), nullptr, 0);
+		};
+
+		// TODO fix for vb-cable
+		// You can't capture VB-cable unless sound is playing
+		// Resuming play after stopping also makes sound skip until you mute/unmute.
+		static unsigned int bufferErrorSpeakers = 0;
+		static unsigned int bufferErrorMic = 0;
+		static unsigned int maxBufferErrors = 100;
+
+		if (audioIn.isEnabled && audioOut.isEnabled)
 		{
 			audioIn.captureAudio();
 			audioOut.captureAudio();
+
+			if (!audioIn.isReady() && bufferErrorMic < maxBufferErrors) bufferErrorMic++;
+			if (!audioOut.isReady() && bufferErrorSpeakers < maxBufferErrors) bufferErrorSpeakers++;
+
 			if (audioIn.isReady() && audioOut.isReady())
 			{
 				vector<int16_t> mixBuffer = _audioMix.mix(audioIn.popBuffer(), audioOut.popBuffer());
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
+				bufferErrorSpeakers = 0;
+				bufferErrorMic = 0;
 			}
-			else submitSilence();
+			// temporary added to transmit sound when vb-cable capture stops
+			else if (audioOut.isReady() && bufferErrorMic >= maxBufferErrors)
+			{
+				vector<int16_t> buffer = audioOut.popBuffer();
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+			}
+			else if (audioIn.isReady() && bufferErrorSpeakers >= maxBufferErrors)
+			{
+				vector<int16_t> buffer = audioIn.popBuffer();
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+			}
+			else { submitSilence(); }
+
 		}
 		else if (audioOut.isEnabled)
 		{
@@ -659,21 +688,22 @@ void Hosting::liveStreamMedia()
 			if (audioOut.isReady())
 			{
 				vector<int16_t> buffer = audioOut.popBuffer();
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
-			else submitSilence();
+			else { submitSilence(); }
 		}
-		else if (Config::cfg.audio.micEnabled && audioIn.isEnabled)
+		else if (audioIn.isEnabled)
 		{
 			audioIn.captureAudio();
 			if (audioIn.isReady())
 			{
 				vector<int16_t> buffer = audioIn.popBuffer();
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, (uint32_t)audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
-			else submitSilence();
+			else { submitSilence(); }
 		}
-		else submitSilence();
+		else { submitSilence(); }
+		
 
 		sleepTimeMs = _mediaClock.getRemainingTime();
 		if (sleepTimeMs > 0)

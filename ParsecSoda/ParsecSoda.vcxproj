@@ -178,11 +178,15 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioSource.cpp" />
     <ClCompile Include="Chatbot\ChatBotCustom.cpp" />
     <ClCompile Include="Chatbot\Commands\Guest\CommandBonk.cpp" />
     <ClCompile Include="Chatbot\Commands\Mod\CommandDecreaseCD.h" />
     <ClCompile Include="Core\Cache.cpp" />
     <ClCompile Include="GameData.cpp" />
+    <ClCompile Include="ImGui\implot.cpp" />
+    <ClCompile Include="ImGui\implot_demo.cpp" />
+    <ClCompile Include="ImGui\implot_items.cpp" />
     <ClCompile Include="Lists\GameDataList.cpp" />
     <ClCompile Include="Helpers\PathHelper.cpp" />
     <ClCompile Include="Helpers\StopwatchTimer.cpp" />
@@ -285,6 +289,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Widgets\NavBar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioSource.h" />
     <ClInclude Include="ButtonLock.h" />
     <ClInclude Include="Chatbot\ChatBotCustom.h" />
     <ClInclude Include="Chatbot\Commands\CommandBotMessage.h" />
@@ -326,6 +331,8 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Core\Cache.h" />
     <ClInclude Include="GameData.h" />
     <ClInclude Include="Helpers\Countries.h" />
+    <ClInclude Include="ImGui\implot.h" />
+    <ClInclude Include="ImGui\implot_internal.h" />
     <ClInclude Include="Lists\GameDataList.h" />
     <ClInclude Include="Helpers\PathHelper.h" />
     <ClInclude Include="Helpers\StopwatchTimer.h" />

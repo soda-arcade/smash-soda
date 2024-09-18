@@ -177,12 +177,14 @@ bool LibraryWidget::renderForm(int index) {
         }
     }
     ImGui::PopStyleColor(4);
+    AppStyle::popButton();
 
     ImGui::Dummy(ImVec2(0, 10));
 
 	ImForm::InputText("Launch Parameters", _editParam, "Parameters to pass to the game executable when launching in kiosk mode.");
     
 	// Save button
+    AppStyle::pushButton();
     AppStyle::pushPositive();
 	if (ImGui::Button("Save")) {
 
@@ -218,15 +220,18 @@ bool LibraryWidget::renderForm(int index) {
         
 	}
     AppStyle::pop();
+    AppStyle::popButton();
 
 	ImGui::SameLine();
 
     // Cancel
+    AppStyle::pushButton();
 	AppStyle::pushNegative();
 	if (ImGui::Button("Cancel")) {
 		showEditForm = false;
 	}
     AppStyle::pop();
+    AppStyle::popButton();
 
     return true;
     

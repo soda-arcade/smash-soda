@@ -144,7 +144,6 @@ private:
 	bool _kioskModeEnabled = false;
 
 	void initAllModules();
-	void submitSilence();
 	void liveStreamMedia();
 	void mainLoopControl();
 	void pollEvents();

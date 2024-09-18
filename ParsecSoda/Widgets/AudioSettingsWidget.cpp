@@ -2,7 +2,7 @@
 
 AudioSettingsWidget::AudioSettingsWidget(Hosting& hosting)
     : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut),
-    _inputs(_hosting.audioIn.listInputDevices()), _outputs(_hosting.audioOut.getDevices())
+    _inputs(_hosting.audioIn.getDevices()), _outputs(_hosting.audioOut.getDevices())
 {
 }
 
@@ -11,10 +11,16 @@ bool AudioSettingsWidget::render()
     static float indentSize = 0;
     static ImVec2 dummySize = ImVec2(0.0f, 20.0f);
     static ImVec2 cursor;
+    static bool showPlot = false;
+
+    // Implot
+    static const int COUNT = AUDIOSRC_BUFFER_SIZE >> 2;
+    static const ImPlotRange RANGE(0, COUNT);
+    static const double SCALE = 32768.0;
 
     AppStyle::pushTitle();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(800, 900));
     ImGui::Begin("Audio");
     AppStyle::pushLabel();
 
@@ -25,89 +31,90 @@ bool AudioSettingsWidget::render()
 
     if (!_hosting.isRunning() && _hosting.isReady())
     {
-        if (Config::cfg.audio.micEnabled) _audioIn.captureAudio();
+        _audioIn.captureAudio();
         _audioOut.captureAudio();
     }
 
-    static float targetPreview;
 
     // =============================================================
     //  Input devices
     // =============================================================
-    if (Config::cfg.audio.micEnabled)
+    static size_t& currentInputDevice = _audioIn.currentDevice.index;
+    ImGui::SetNextItemWidth(size.x);
+
+    AppFonts::pushTitle();
+    AppColors::pushInput();
+    ImGui::Text("Microphone");
+    AppColors::pop();
+    AppFonts::pop();
+
+    ImGui::Dummy(ImVec2(0.0f, 5.0f));
+
+    AppStyle::pushLabel();
+    ImGui::Text("Source");
+    AppStyle::pop();
+    AppFonts::pushInput();
+    ImGui::SetNextItemWidth(size.x);
+    if (ImGui::BeginCombo("##input selection", _audioIn.currentDevice.name.c_str()))
     {
-        static UINT& currentInputDevice = _audioIn.currentDevice.id;
-        ImGui::SetNextItemWidth(size.x);
-
-        AppFonts::pushTitle();
-        AppColors::pushInput();
-        ImGui::Text("Microphone");
-        AppColors::pop();
-        AppFonts::pop();
-
-        ImGui::Dummy(ImVec2(0.0f, 5.0f));
-
-        AppStyle::pushLabel();
-        ImGui::Text("Source");
-        AppStyle::pop();
-        AppFonts::pushInput();
-        ImGui::SetNextItemWidth(size.x);
-        if (ImGui::BeginCombo("##input selection", _audioIn.currentDevice.name.c_str()))
+        for (size_t i = 0; i < _inputs.size(); i++)
         {
-            for (size_t i = 0; i < _inputs.size(); i++)
+            bool isSelected = (currentInputDevice == i);
+            if (ImGui::Selectable(_inputs[i].name.c_str(), isSelected))
             {
-                bool isSelected = (currentInputDevice == i);
-                if (ImGui::Selectable(_inputs[i].name.c_str(), isSelected))
-                {
-                    currentInputDevice = i;
-                    _audioIn.selectInputDevice(i);
-                    Config::cfg.audio.inputDevice = i;
-                    Config::cfg.Save();
-                }
-                if (isSelected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
+                currentInputDevice = i;
+                _audioIn.setDevice(i);
+                Config::cfg.audio.inputDevice = i;
+                Config::cfg.Save();
             }
-            ImGui::EndCombo();
+            if (isSelected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
-        AppFonts::pop();
-
-        ImGui::Dummy(ImVec2(0.0f, 2.0f));
-
-        static int micFrequencyIndex = frequencyToCombo(_audioIn.getFrequency());
-        AppStyle::pushLabel();
-        ImGui::Text("Frequency");
-        AppStyle::pop();
-        AppStyle::pushInput();
-        ImGui::SetNextItemWidth(size.x);
-        if (ImGui::Combo("###Mic Frequency", &micFrequencyIndex, " 44100 Hz\0 48000 Hz\0\0", 2))
-        {
-            _audioIn.reinit(comboToFrequency(micFrequencyIndex));
-        }
-        AppStyle::pop();
-
-        ImGui::Dummy(ImVec2(0.0f, 2.0f));
-
-        AppStyle::pushLabel();
-        ImGui::Text("Volume");
-        AppStyle::pop();
-
-        static int micVolume;
-        static float micPreview;
-        micVolume = (int)(100.0f * _audioIn.volume);
-        targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
-        micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
-        if (AudioControlWidget::render("Microphone##Audio In", &micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
-        {
-            _audioIn.isEnabled = !_audioIn.isEnabled;
-        }
-        _audioIn.volume = (float)micVolume / 100.0f;
-        Config::cfg.audio.micVolume = (float)micVolume;
-
-
-        ImGui::Dummy(dummySize);
+        ImGui::EndCombo();
     }
+    AppFonts::pop();
+
+    static char infrequencyLabel[32];
+    
+    snprintf(infrequencyLabel, sizeof(infrequencyLabel), "@ %d Hz", _audioIn.getFrequency());
+    AppStyle::pushLabel();
+    ImGui::Text(infrequencyLabel);
+    AppStyle::pop();
+
+    ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+    AppStyle::pushLabel();
+    ImGui::Text("Volume");
+    AppStyle::pop();
+
+    static int micVolume;
+    static float micPreview, targetPreview;
+    micVolume = (int)(100.0f * _audioIn.volume);
+    targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
+    micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
+    if (AudioControlWidget::render("Microphone##Audio In", &micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
+    {
+        _audioIn.isEnabled = !_audioIn.isEnabled;
+        Config::cfg.audio.micEnabled = _audioIn.isEnabled;
+    }
+    _audioIn.volume = (float)micVolume / 100.0f;
+    Config::cfg.audio.micVolume = (float)micVolume;
+
+    if (showPlot)
+    {
+        if (ImPlot::BeginPlot("Microphone"))
+        {
+            ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_Lock, ImPlotAxisFlags_Lock);
+            ImPlot::SetupAxesLimits(0, COUNT, -SCALE, SCALE);
+            ImPlot::PlotShaded("Input levels", _audioIn.getPlot(), COUNT);
+            ImPlot::EndPlot();
+        }
+    }
+
+
+    ImGui::Dummy(dummySize);
 
     // =============================================================
     //  Output devices
@@ -135,7 +142,7 @@ bool AudioSettingsWidget::render()
             if (ImGui::Selectable(_outputs[i].name.c_str(), isSelected))
             {
                 currentOutputDevice = i;
-                _audioOut.setOutputDevice(i);
+                _audioOut.setDevice(i);
                 Config::cfg.audio.outputDevice = i;
                 Config::cfg.Save();
             }
@@ -148,18 +155,10 @@ bool AudioSettingsWidget::render()
     }
     AppFonts::pop();
 
-    ImGui::Dummy(ImVec2(0.0f, 2.0f));
-
-    static int speakersFrequencyIndex = frequencyToCombo(_audioOut.getFrequency());
+    static char outfrequencyLabel[32];
+    snprintf(outfrequencyLabel, sizeof(outfrequencyLabel), "@ %d Hz", _audioOut.getFrequency());
     AppStyle::pushLabel();
-    ImGui::Text("Frequency");
-    AppStyle::pop();
-    AppStyle::pushInput();
-    ImGui::SetNextItemWidth(size.x);
-    if (ImGui::Combo("###Speakers Frequency", &speakersFrequencyIndex, " 44100 Hz\0 48000 Hz\0\0", 2))
-    {
-        _audioOut.setFrequency(comboToFrequency(speakersFrequencyIndex));
-    }
+    ImGui::Text(outfrequencyLabel);
     AppStyle::pop();
 
     ImGui::Dummy(ImVec2(0.0f, 2.0f));
@@ -167,6 +166,8 @@ bool AudioSettingsWidget::render()
     AppStyle::pushLabel();
     ImGui::Text("Volume");
     AppStyle::pop();
+
+    ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
     static int speakersVolume;
     static float speakersPreview;
@@ -176,45 +177,34 @@ bool AudioSettingsWidget::render()
     if (AudioControlWidget::render("Speakers##Audio Out", &speakersVolume, _audioOut.isEnabled, speakersPreview, AppIcons::speakersOn, AppIcons::speakersOff))
     {
         _audioOut.isEnabled = !_audioOut.isEnabled;
+        Config::cfg.audio.speakersEnabled = _audioOut.isEnabled;
     }
     _audioOut.volume = (float)speakersVolume / 100.0f;
     Config::cfg.audio.speakersVolume = (float)speakersVolume;
+
+    if (showPlot)
+    {
+        if (ImPlot::BeginPlot("Speakers"))
+        {
+            ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_Lock, ImPlotAxisFlags_Lock);
+            ImPlot::SetupAxesLimits(0, COUNT, -SCALE, SCALE);
+            ImPlot::PlotShaded("Output levels", _audioOut.getPlot(), COUNT);
+            ImPlot::EndPlot();
+        }
+    }
+
+    ImGui::Dummy(dummySize);
+
+    //ImGui::Checkbox("Plot Audio (debug for devs)", &showPlot);
+    //_audioIn.togglePlot(showPlot);
+    //_audioOut.togglePlot(showPlot);
+
 
     AppStyle::pop();
     ImGui::End();
     AppStyle::pop();
 
     return true;
-}
-
-int AudioSettingsWidget::frequencyToCombo(Frequency frequency)
-{
-    switch (frequency)
-    {
-    case Frequency::F48000:
-        return 1;
-        break;
-    case Frequency::F44100:
-    default:
-        return 0;
-        break;
-    }
-    return 0;
-}
-
-Frequency AudioSettingsWidget::comboToFrequency(int index)
-{
-    switch (index)
-    {
-    case 1:
-        return Frequency::F48000;
-        break;
-    default:
-    case 0:
-        return Frequency::F44100;
-        break;
-    }
-    return Frequency::F44100;
 }
 
 float AudioSettingsWidget::lerp(float val1, float val2, float t)

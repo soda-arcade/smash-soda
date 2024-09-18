@@ -36,7 +36,7 @@ void Config::Load() {
 			cfg.audio.outputDevice = setValue(cfg.audio.outputDevice, j["Audio"]["outputDevice"].get<unsigned int>());
 			cfg.audio.micFrequency = setValue(cfg.audio.micFrequency, j["Audio"]["micFrequency"].get<unsigned int>());
 			cfg.audio.micVolume = setValue(cfg.audio.micVolume, j["Audio"]["micVolume"].get<float>());
-			cfg.audio.micEnabled = setValue(cfg.audio.micEnabled, j["Audio"]["micEnabled"].get<bool>());
+			cfg.audio.micEnabled = setValue(cfg.audio.micEnabled, j["Audio"]["microphoneEnabled"].get<bool>());
 			cfg.audio.speakersFrequency = setValue(cfg.audio.speakersFrequency, j["Audio"]["speakersFrequency"].get<unsigned int>());
 			cfg.audio.speakersVolume = setValue(cfg.audio.speakersVolume, j["Audio"]["speakersVolume"].get<float>());
 			cfg.audio.speakersEnabled = setValue(cfg.audio.speakersEnabled, j["Audio"]["speakersEnabled"].get<bool>());
@@ -207,7 +207,7 @@ void Config::Save() {
 		{"outputDevice", cfg.audio.outputDevice},
 		{"micFrequency", cfg.audio.micFrequency},
 		{"micVolume", cfg.audio.micVolume},
-		{"micEnabled", cfg.audio.micEnabled},
+		{"microphoneEnabled", cfg.audio.micEnabled},
 		{"speakersFrequency", cfg.audio.speakersFrequency},
 		{"speakersVolume", cfg.audio.speakersVolume},
 		{"speakersEnabled", cfg.audio.speakersEnabled},

@@ -192,12 +192,6 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
-    if (ImForm::InputCheckbox("Enable Microphone", _microphoneEnabled,
-        "When enabled, the microphone cause audio issues in some games.")) {
-        Config::cfg.audio.micEnabled = _microphoneEnabled;
-		Config::cfg.Save();
-    }
-
     if (ImForm::InputCheckbox("Disable Guide Button", _disableGuideButton,
         "The guide button by default often brings up overlays in software, which can cause issues when hosting.")) {
         Config::cfg.input.disableGuideButton = _disableGuideButton;
