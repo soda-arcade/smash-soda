@@ -87,39 +87,39 @@ bool SettingsWidget::render()
 
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    ImGui::BeginChild("Settings List", ImVec2(size.x, size.y));
-
-    ImGui::SetNextItemWidth(size.x - 42);
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(0, 5));
-
     if (ImGui::BeginTabBar("Settings Tabs", ImGuiTabBarFlags_None))
     {
         AppFonts::pushInput();
         AppColors::pushTitle();
         if (ImGui::BeginTabItem("General"))
         {
+            ImGui::BeginChild("innerscroll");
             renderGeneral();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Chat")) {
+            ImGui::BeginChild("innerscroll");
             renderChatbot();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Permissions")) {
+            ImGui::BeginChild("innerscroll");
             renderPermissions();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Hotkeys")) {
+            ImGui::BeginChild("innerscroll");
             renderHotkeys();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         AppColors::pop();
         AppFonts::pop();
         ImGui::EndTabBar();
     }
-
-    ImGui::EndChild();
 
     AppStyle::pop();
     ImGui::End();
