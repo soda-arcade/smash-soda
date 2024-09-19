@@ -26,7 +26,7 @@ public:
 	void makeButton(string buttonText, ImVec2 size, uint16_t bitwise);
 	void makeButton(string buttonText, ImVec2 size, bool& boolToChange);
 	void makeButton(string buttonText, ImVec2 size, bool& boolToChange1, bool& boolToChange2);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 	// Dependency injection

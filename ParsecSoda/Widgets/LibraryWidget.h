@@ -18,7 +18,7 @@ class LibraryWidget
 public:
 
 	LibraryWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 	bool renderGameList();
 	bool renderForm(int index);
 

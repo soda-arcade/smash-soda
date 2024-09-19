@@ -15,7 +15,7 @@ class HotseatWidget {
 public:
 
 	HotseatWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 	void renderOverview();
 	void renderSettings();

@@ -54,11 +54,12 @@ void ButtonLockWidget::makeButton(string buttonText, ImVec2 size, bool& boolToCh
     ImGui::PopStyleColor(3);
 }
 
-bool ButtonLockWidget::render()
+bool ButtonLockWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 240), ImVec2(400, 240));
-    ImGui::Begin("Button Lock");
+    ImGui::Begin("Button Lock", &showWindow);
+    if (!showWindow) Config::cfg.widgets.buttonLock = showWindow;
     AppStyle::pop();
 
     AppStyle::pushInput();

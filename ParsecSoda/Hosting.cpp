@@ -111,6 +111,12 @@ void Hosting::broadcastChatMessage(string message)
 	}
 }
 
+void Hosting::broadcastChatMessageAndLogCommand(string message)
+{
+	broadcastChatMessage(message);
+	_chatLog.logCommand(message);
+}
+
 void Hosting::init() {
 	
 	_parsecStatus = ParsecInit(NULL, NULL, (char *)SDK_PATH, &_parsec);
@@ -128,23 +134,22 @@ void Hosting::init() {
 	});
 
 	audioOut.fetchDevices();
-	vector<AudioOutDevice> audioOutDevices = audioOut.getDevices();
+	vector<AudioSourceDevice> audioOutDevices = audioOut.getDevices();
 	if (Config::cfg.audio.outputDevice >= audioOutDevices.size()) {
 		Config::cfg.audio.outputDevice = 0;
 	}
-	audioOut.setOutputDevice(Config::cfg.audio.outputDevice);
+	audioOut.setDevice(Config::cfg.audio.outputDevice);
 	audioOut.captureAudio();
 	audioOut.volume = Config::cfg.audio.speakersVolume;
-	audioOut.setFrequency((Frequency)Config::cfg.audio.speakersFrequency);
 
-	vector<AudioInDevice> audioInputDevices = audioIn.listInputDevices();
+	audioIn.fetchDevices();
+	vector<AudioSourceDevice> audioInputDevices = audioIn.getDevices();
 	if (Config::cfg.audio.inputDevice >= audioInputDevices.size()) {
 		Config::cfg.audio.inputDevice = 0;
 	}
-	AudioInDevice device = audioIn.selectInputDevice(Config::cfg.audio.inputDevice);
-	audioIn.init(device);
+	audioIn.setDevice(Config::cfg.audio.inputDevice);
+	audioIn.captureAudio();
 	audioIn.volume = Config::cfg.audio.micVolume;
-	audioIn.setFrequency((Frequency)Config::cfg.audio.micFrequency);
 
 	preferences.isValid = true;
 	MetadataCache::savePreferences(preferences);
@@ -616,11 +621,6 @@ void Hosting::initAllModules()
 	roomStart();
 }
 
-void Hosting::submitSilence()
-{
-	ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), nullptr, 0);
-}
-
 void Hosting::liveStreamMedia()
 {
 	_mediaMutex.lock();
@@ -636,16 +636,51 @@ void Hosting::liveStreamMedia()
 
 		_dx11.captureScreen(_parsec);
 
-		if (Config::cfg.audio.micEnabled && audioIn.isEnabled && audioOut.isEnabled)
+		/**
+		 * This lambda is a workaround to a ParsecSDK bug.
+		 * When using a virtual device (e.g.: VBAudio Cable),
+		 * ParsecSDK crashes if an already started audio stream
+		 * stops sending audio.
+		 */
+		static const auto submitSilence = [&]() {
+			ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), nullptr, 0);
+		};
+
+		// TODO fix for vb-cable
+		// You can't capture VB-cable unless sound is playing
+		// Resuming play after stopping also makes sound skip until you mute/unmute.
+		static unsigned int bufferErrorSpeakers = 0;
+		static unsigned int bufferErrorMic = 0;
+		static unsigned int maxBufferErrors = 100;
+
+		if (audioIn.isEnabled && audioOut.isEnabled)
 		{
 			audioIn.captureAudio();
 			audioOut.captureAudio();
+
+			if (!audioIn.isReady() && bufferErrorMic < maxBufferErrors) bufferErrorMic++;
+			if (!audioOut.isReady() && bufferErrorSpeakers < maxBufferErrors) bufferErrorSpeakers++;
+
 			if (audioIn.isReady() && audioOut.isReady())
 			{
 				vector<int16_t> mixBuffer = _audioMix.mix(audioIn.popBuffer(), audioOut.popBuffer());
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), mixBuffer.data(), (uint32_t)mixBuffer.size() / 2);
+				bufferErrorSpeakers = 0;
+				bufferErrorMic = 0;
 			}
-			else submitSilence();
+			// temporary added to transmit sound when vb-cable capture stops
+			else if (audioOut.isReady() && bufferErrorMic >= maxBufferErrors)
+			{
+				vector<int16_t> buffer = audioOut.popBuffer();
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+			}
+			else if (audioIn.isReady() && bufferErrorSpeakers >= maxBufferErrors)
+			{
+				vector<int16_t> buffer = audioIn.popBuffer();
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+			}
+			else { submitSilence(); }
+
 		}
 		else if (audioOut.isEnabled)
 		{
@@ -653,21 +688,22 @@ void Hosting::liveStreamMedia()
 			if (audioOut.isReady())
 			{
 				vector<int16_t> buffer = audioOut.popBuffer();
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequencyHz(), buffer.data(), (uint32_t)buffer.size() / 2);
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioOut.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
-			else submitSilence();
+			else { submitSilence(); }
 		}
-		else if (Config::cfg.audio.micEnabled && audioIn.isEnabled)
+		else if (audioIn.isEnabled)
 		{
 			audioIn.captureAudio();
 			if (audioIn.isReady())
 			{
 				vector<int16_t> buffer = audioIn.popBuffer();
-				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, (uint32_t)audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
+				ParsecHostSubmitAudio(_parsec, PCM_FORMAT_INT16, audioIn.getFrequency(), buffer.data(), (uint32_t)buffer.size() / 2);
 			}
-			else submitSilence();
+			else { submitSilence(); }
 		}
-		else submitSilence();
+		else { submitSilence(); }
+		
 
 		sleepTimeMs = _mediaClock.getRemainingTime();
 		if (sleepTimeMs > 0)
@@ -1094,35 +1130,20 @@ bool Hosting::isVPN(const std::string& ip) {
 void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status) {
 
 	static string logMessage;
-
-	/*static string trickDesc = "";
-	static Debouncer debouncer = Debouncer(500, [&]() {
-		if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
-		{
-			try
-			{
-				if (trickDesc.size() > 0) trickDesc = "";
-				else trickDesc = "-";
-				strcpy_s(_hostConfig.desc, trickDesc.c_str());
-				applyHostConfig();
-			}
-			catch (const std::exception&) {}
-		}
-	});*/
+	GuestData guestData = GuestData(guest.name, guest.userID);
+	bool isBanned = Cache::cache.banList.isBanned(guest.userID);
 
 	// Try to determine the user's IP address
 	if (Cache::cache.pendingIpAddress.size() > 0) {
 
 		// Is this IP address banned?
 		if (Config::cfg.general.ipBan && Cache::cache.isBannedIPAddress(Cache::cache.pendingIpAddress)) {
-			broadcastChatMessage(Config::cfg.chatbotName + "Kicked a guest for using a banned IP address.");
-			_chatLog.logMessage(Config::cfg.chatbotName + "Kicked a guest for using a banned IP address.");
+			broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + "Kicked a guest for using a banned IP address.");
 			ParsecHostKickGuest(_parsec, guest.id);
 		} else {
 			// Is the user behind a VPN?
 			if (isVPN(Cache::cache.pendingIpAddress)) {
-				broadcastChatMessage(Config::cfg.chatbotName + " " + guest.name + " is behind a VPN.");
-				_chatLog.logMessage(Config::cfg.chatbotName + " " + guest.name + " is behind a VPN.");
+				broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + " " + guest.name + " is behind a VPN.");
 				if (Config::cfg.general.blockVPN) {
 					ParsecHostKickGuest(_parsec, guest.id);
 				}
@@ -1134,127 +1155,103 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		
 	}
 
-	// Is this a fake MickeyUK?
-	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && (guest.name == "MickeyUK" && guest.userID != 1693946)) {
-		ParsecHostKickGuest(_parsec, guest.id);
-		broadcastChatMessage(Config::cfg.chatbotName + "Kicked a fake MickeyUK! (lol)");
-		_chatLog.logMessage(Config::cfg.chatbotName + "Kicked a fake MickeyUK! (lol)");
-	} else
 
-	// Is the connecting guest the host?
-	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && (_host.userID == guest.userID))
-	{
-		_tierList.setTier(guest.userID, Tier::GOD);
-		MetadataCache::addActiveGuest(guest);
-
-		addNewGuest(guest);
-	}
-	else
-
-	if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && Cache::cache.banList.isBanned(guest.userID)) {
-
-		// Yes, but did this person try to ban a SODA COP!?
-		if (Cache::cache.isSodaCop(guest.userID)) {
-			GuestData unbannedGuest;
-			Cache::cache.banList.unban(guest.userID, [&unbannedGuest](GuestData& guest) {
-				unbannedGuest = guest;
-			});
-		}
-
-		ParsecHostKickGuest(_parsec, guest.id);
-		logMessage = _chatBot->formatBannedGuestMessage(guest);
-		broadcastChatMessage(logMessage);
-		_chatLog.logCommand(logMessage);
-	}
-	else if ((state == GUEST_CONNECTED || state == GUEST_CONNECTING) && Cache::cache.modList.isModded(guest.userID))
-	{
-		logMessage = _chatBot->formatModGuestMessage(guest);
-		broadcastChatMessage(logMessage);
-		_tierList.setTier(guest.userID, Tier::MOD);
-		_chatLog.logCommand(logMessage);
-		MetadataCache::addActiveGuest(guest);
-		addNewGuest(guest);
-	}
-	else if (state == GUEST_FAILED)
-	{
-		logMessage = _chatBot->formatGuestConnection(guest, state, status);
-		broadcastChatMessage(logMessage);
-		_chatLog.logCommand(logMessage);
-	}
-	else if (state == GUEST_CONNECTED || state == GUEST_DISCONNECTED)
-	{
-		static string guestMsg;
-		guestMsg.clear();
-		guestMsg = string(guest.name);
-
-		if (Cache::cache.banList.isBanned(guest.userID)) {
-			logMessage = _chatBot->formatBannedGuestMessage(guest);
-			broadcastChatMessage(logMessage);
-			_chatLog.logCommand(logMessage);
-			/*if (_hostConfig.maxGuests > 0 && _guestList.getGuests().size() + 1 == _hostConfig.maxGuests)
-				debouncer.start();*/
-		}
-		else
-		{
-			logMessage = _chatBot->formatGuestConnection(guest, state, status);
-			broadcastChatMessage(logMessage);
-			_chatLog.logCommand(logMessage);
-		}
-
-		if (state == GUEST_CONNECTED) {
-			GuestData data = GuestData(guest.name, guest.userID);
-
-			// Is this guest pretending to be someone else?
-			if (!Cache::cache.verifiedList.Verify(data)) {
+	// Handle bans/kicks that needs to be processed before the normal GUEST_CONNECTED statement
+	// Return:ing prevents normal GUEST_CONNECTED statement from running
+	if (state == GUEST_CONNECTED || state == GUEST_CONNECTING) {
+		if (isBanned) {
+			// Yes, but did this person try to ban a SODA COP!? Continue to normal GUEST_CONNECTED after
+			if (Cache::cache.isSodaCop(guest.userID)) {
+				GuestData unbannedGuest;
+				Cache::cache.banList.unban(guest.userID, [&unbannedGuest](GuestData& guest) {
+					unbannedGuest = guest;
+					});
+			}
+			else {
 				ParsecHostKickGuest(_parsec, guest.id);
-				broadcastChatMessage(Config::cfg.chatbotName + "Kicked a fake guest: " + guest.name);
-				_chatLog.logCommand(Config::cfg.chatbotName + "Kicked a fake guest: " + guest.name);
-			} else {
-
-				// Add to guest history
-				_guestHistory.add(data);
-				MetadataCache::addActiveGuest(guest);
-
-				// Show welcome message
-				addNewGuest(guest);
-
+				return;
 			}
-
 		}
-		else {
-			
-			// Were extra spots made?
-			if (MetadataCache::preferences.extraSpots > 0) {
-				_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
-				MetadataCache::preferences.extraSpots--;
-				ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
-			}
 
-			// Remove from active guests list
-			MetadataCache::removeActiveGuest(guest);
+		// Is this a fake MickeyUK?
+		if (guest.name == "MickeyUK" && guest.userID != 1693946) {
+			ParsecHostKickGuest(_parsec, guest.id);
+			broadcastChatMessage(Config::cfg.chatbotName + "Kicked a fake MickeyUK! (lol)");
+			_chatLog.logMessage(Config::cfg.chatbotName + "Kicked a fake MickeyUK! (lol)");
+			return;
+		}
 
-			// Hotseat mode
-			if (Config::cfg.hotseat.enabled) {
-				Hotseat::instance.pauseUser(guest.userID);
-			}
+		// Is this guest pretending to be someone else?
+		else if (!Cache::cache.verifiedList.Verify(guestData)) {
+			ParsecHostKickGuest(_parsec, guest.id);
+			broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + "Kicked a fake guest: " + guest.name);
+			return;
+		}
+	}
 
-			_guestList.deleteMetrics(guest.id);
-			int droppedPads = 0;
-			CommandFF command(guest, _gamepadClient, _hotseat);
-			command.run();
-			if (droppedPads > 0) {
-				logMessage = command.replyMessage();
-				broadcastChatMessage(logMessage);
-				_chatLog.logCommand(logMessage);
-			}
 
+	if (state == GUEST_FAILED) {
+		broadcastChatMessageAndLogCommand(_chatBot->formatGuestConnection(guest, state, status));
+	}
+
+	else if (state == GUEST_CONNECTED) {
+		if (Cache::cache.modList.isModded(guest.userID)) {
+			_tierList.setTier(guest.userID, Tier::MOD);
+			logMessage = _chatBot->formatModGuestMessage(guest);
+		}
+		else logMessage = _chatBot->formatGuestConnection(guest, state, status);
+		broadcastChatMessageAndLogCommand(logMessage);
+
+		// Is the connecting guest the host?
+		if (_host.userID == guest.userID) {
+			_tierList.setTier(guest.userID, Tier::GOD);
+		}
+
+		// Add to guest history
+		_guestHistory.add(guestData);
+		MetadataCache::addActiveGuest(guest);
+
+		// Show welcome message
+		addNewGuest(guest);
+	}
+
+	else if (state == GUEST_DISCONNECTED) {
+		if (isBanned) logMessage = _chatBot->formatBannedGuestMessage(guest);
+		else logMessage = _chatBot->formatGuestConnection(guest, state, status);
+		broadcastChatMessageAndLogCommand(logMessage);
+
+		// Were extra spots made?
+		if (MetadataCache::preferences.extraSpots > 0) {
+			_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
+			MetadataCache::preferences.extraSpots--;
+			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+		}
+
+		// Remove from active guests list
+		MetadataCache::removeActiveGuest(guest);
+
+		// Hotseat mode
+		if (Config::cfg.hotseat.enabled) {
+			Hotseat::instance.pauseUser(guest.userID);
+		}
+
+		_guestList.deleteMetrics(guest.id);
+		int droppedPads = 0;
+		CommandFF command(guest, _gamepadClient, _hotseat);
+		command.run();
+		if (droppedPads > 0) {
+			broadcastChatMessageAndLogCommand(command.replyMessage());
+		}
+
+		// Only play if room wasn't full
+		if (status != CONNECT_WRN_NO_ROOM) {
 			try {
 				PlaySound(TEXT("./SFX/guest_leave.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
 			}
 			catch (const std::exception&) {}
-			
 		}
 	}
+
 }
 
 bool Hosting::removeGame(string name) {

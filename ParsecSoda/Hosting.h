@@ -62,6 +62,7 @@ public:
 	Hosting();
 	void applyHostConfig();
 	void broadcastChatMessage(string message);
+	void broadcastChatMessageAndLogCommand(string message);
 	void init();
 	void release();
 	bool isReady();
@@ -143,7 +144,6 @@ private:
 	bool _kioskModeEnabled = false;
 
 	void initAllModules();
-	void submitSilence();
 	void liveStreamMedia();
 	void mainLoopControl();
 	void pollEvents();

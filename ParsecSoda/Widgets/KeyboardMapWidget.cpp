@@ -203,12 +203,13 @@ bool KeyboardMapWidget::drawCustomKey(int32_t& gamePadKeyType, uint16_t& key,int
 
 }
 
-bool KeyboardMapWidget::render()
+bool KeyboardMapWidget::render(bool &showWindow)
 {
     KeyboardMap& hostingKeyMap = _hosting.getGamepadClient().getKeyMap();
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(100, 50), ImVec2(3840, 2160));
-    ImGui::Begin("Keyboard Mapper");
+    ImGui::Begin("Keyboard Mapper", &showWindow);
+    if (!showWindow) Config::cfg.widgets.keyMapper = showWindow;
     AppStyle::pushLabel();
 
     static ImVec2 size;

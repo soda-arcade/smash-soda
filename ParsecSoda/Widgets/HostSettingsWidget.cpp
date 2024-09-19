@@ -77,12 +77,13 @@ bool HostSettingsWidget::validateSettings() {
 /// <summary>
 /// Renders the host settings widget.
 /// </summary>
-bool HostSettingsWidget::render(HWND& hwnd) {
-    
+bool HostSettingsWidget::render(bool &showWindow, HWND& hwnd) {
+
     AppStyle::pushTitle();
     ImGui::SetNextWindowPos(ImVec2(464, 5), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(600, 700));
-    ImGui::Begin("Hosting", (bool*)0);
+    ImGui::Begin("Hosting", &showWindow);
+    if (!showWindow) Config::cfg.widgets.host = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();
@@ -173,6 +174,8 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         AppStyle::pushInput();
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 		ImGui::TextWrapped(_gameNameError.c_str());
+        ImGui::PopStyleColor();
+        AppStyle::pop();
     }
 
     if (!Config::cfg.room.privateRoom) {
@@ -191,11 +194,14 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
             AppStyle::pushInput();
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
             ImGui::TextWrapped(_descriptionError.c_str());
+            ImGui::PopStyleColor();
+            AppStyle::pop();
         }
 
         if (Arcade::instance.artwork.size() > 0) {
             AppStyle::pushLabel();
             ImGui::Text("CUSTOM ARTWORK");
+            AppStyle::pop();
             AppStyle::pushInput();
             ImGui::SetNextItemWidth(size.x);
 
@@ -226,6 +232,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
                 }
                 ImGui::EndCombo();
             }
+            AppStyle::pop();
             AppStyle::pushLabel();
             ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
             AppStyle::pop();
@@ -234,6 +241,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
         AppStyle::pushLabel();
         ImGui::Text("POST THEME");
+        AppStyle::pop();
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x);
         if (ImGui::BeginCombo("### Post theme picker combo", _postThemes[_selectedTheme].c_str(), ImGuiComboFlags_HeightLarge)) {
@@ -249,6 +257,7 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
             }
             ImGui::EndCombo();
         }
+        AppStyle::pop();
         AppStyle::pushLabel();
         ImGui::TextWrapped("This lets you change the colour theme of your room poster on Soda Arcade.");
         AppStyle::pop();
@@ -347,17 +356,19 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::Indent(15);
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.kioskMode.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
         // Can only start kiosk mode when a game is selected
-        if (!Config::cfg.kioskMode.enabled && _libraryID == -1) {
-            return;
+        if (_libraryID == -1) {
+            Config::cfg.kioskMode.enabled = false;
         }
-        
-        Config::cfg.kioskMode.enabled = !Config::cfg.kioskMode.enabled;
-        if (_hosting.isRunning()) {
-            if (Config::cfg.kioskMode.enabled && _libraryID != -1) {
-                ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
-			} else {
-				ProcessMan::instance.stop();
-			}
+        else {
+            Config::cfg.kioskMode.enabled = !Config::cfg.kioskMode.enabled;
+            if (_hosting.isRunning()) {
+                if (Config::cfg.kioskMode.enabled && _libraryID != -1) {
+                    ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
+                }
+                else {
+                    ProcessMan::instance.stop();
+                }
+            }
         }
     }
     TitleTooltipWidget::render("Kiosk Mode", "Kiosk mode can only be started when you have selected a game from your library.");
@@ -494,57 +505,51 @@ void HostSettingsWidget::renderAudio() {
 
     if (!_hosting.isRunning() && _hosting.isReady())
     {
-        if (Config::cfg.audio.micEnabled) _audioIn.captureAudio();
+        _audioIn.captureAudio();
         _audioOut.captureAudio();
     }
 
     static int previousMicVolume, previousSpeakersVolume;
     static bool isVolumeChanged = false;
-    static float targetPreview;
+    previousMicVolume = _micVolume;
+    previousSpeakersVolume = _speakersVolume;
 
-    AppStyle::pushLabel();
-    ImGui::Text("SPEAKERS");
+    // ====================================================
+    // Microphone
+    // ====================================================
+    static float micPreview, targetPreview;
+    _micVolume = (int)(100.0f * _audioIn.volume);
+    targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
+    micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
 
+    const static auto volumeReleaseCallback = [&]() {
+        savePreferences();
+    };
+
+    if (AudioControlWidget::render("Microphone", &_micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff, volumeReleaseCallback))
+    {
+        _audioIn.isEnabled = !_audioIn.isEnabled;
+        savePreferences();
+    }
+    _audioIn.volume = (float)_micVolume / 100.0f;
+
+    // ====================================================
+    // Speakers
+    // ====================================================
     static float speakersPreview;
-    _speakersVolume = (int)(100.0f * _audioOut.volume);
+    _speakersVolume = (int)(100.0f *_audioOut.volume);
     targetPreview = AudioTools::decibelToFloat(_audioOut.popPreviewDecibel());
     speakersPreview = lerp(speakersPreview, targetPreview, easing(targetPreview - speakersPreview));
-    if (AudioControlWidget::render("Speakers", &_speakersVolume, _audioOut.isEnabled, speakersPreview, AppIcons::speakersOn, AppIcons::speakersOff))
+    if (AudioControlWidget::render("Speakers", &_speakersVolume, _audioOut.isEnabled, speakersPreview, AppIcons::speakersOn, AppIcons::speakersOff, volumeReleaseCallback))
     {
         _audioOut.isEnabled = !_audioOut.isEnabled;
         savePreferences();
     }
     _audioOut.volume = (float)_speakersVolume / 100.0f;
 
-    static Debouncer debouncer(DEBOUNCE_TIME_MS, [&]() { savePreferences(); });
-    if (_micVolume != previousMicVolume || _speakersVolume != previousSpeakersVolume)
-    {
-        debouncer.start();
-    }
-
-    AppStyle::pushLabel();
-    ImGui::Text("MICROPHONE");
-
-    if (Config::cfg.audio.micEnabled)
-    {
-
-        previousMicVolume = _micVolume;
-        previousSpeakersVolume = _speakersVolume;
-
-        static float micPreview;
-        _micVolume = (int)(100.0f * _audioIn.volume);
-        targetPreview = AudioTools::decibelToFloat(_audioIn.popPreviewDecibel());
-        micPreview = lerp(micPreview, targetPreview, easing(targetPreview - micPreview));
-        if (AudioControlWidget::render("Microphone", &_micVolume, _audioIn.isEnabled, micPreview, AppIcons::micOn, AppIcons::micOff))
-        {
-            _audioIn.isEnabled = !_audioIn.isEnabled;
-            savePreferences();
-        }
-        _audioIn.volume = (float)_micVolume / 100.0f;
-
-    }
-
-    ImGui::Dummy(ImVec2(0.0f, 20.0f));
+    AppStyle::pop();
+    ImGui::End();
+    AppStyle::pop();
 
 }
 

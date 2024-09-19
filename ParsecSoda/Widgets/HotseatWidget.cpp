@@ -11,11 +11,12 @@ HotseatWidget::HotseatWidget(Hosting& hosting)
     _minResetTime = Config::cfg.hotseat.minResetTime;
 }
 
-bool HotseatWidget::render() {
+bool HotseatWidget::render(bool& showWindow) {
 
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Hotseat", (bool*)0);
+    ImGui::Begin("Hotseat", &showWindow);
+    if (!showWindow) Config::cfg.widgets.hotseat = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();

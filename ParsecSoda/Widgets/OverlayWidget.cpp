@@ -17,12 +17,13 @@ OverlayWidget::OverlayWidget(Hosting& hosting)
     _show_latency = Config::cfg.overlay.guests.showLatency;
 }
 
-bool OverlayWidget::render() {
+bool OverlayWidget::render(bool& showWindow) {
 
     // Widget top
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Overlay", (bool*)0);
+    ImGui::Begin("Overlay", &showWindow);
+    if (!showWindow) Config::cfg.widgets.overlay = showWindow;
     AppStyle::pushInput();
     
     ImVec2 size = ImGui::GetContentRegionAvail();
@@ -49,6 +50,7 @@ bool OverlayWidget::render() {
         }
         ImGui::EndCombo();
     }
+    AppStyle::pop();
     AppStyle::pushLabel();
     ImGui::TextWrapped("The monitor where the overlay will be displayed.");
     AppStyle::pop();
@@ -102,6 +104,8 @@ bool OverlayWidget::render() {
     AppStyle::pushLabel();
     AppStyle::pushPositive();
     ImGui::Text("CHAT WIDGET");
+    AppStyle::pop();
+    AppStyle::pop();
     ImGui::Dummy(ImVec2(0, 10.0f));
     AppStyle::pushInput();
 
@@ -117,6 +121,7 @@ bool OverlayWidget::render() {
         Config::cfg.Save();
     }
 
+    AppStyle::pop();
     AppStyle::pushLabel();
     ImGui::Text("POSITION");
     AppStyle::pop();
@@ -147,6 +152,8 @@ bool OverlayWidget::render() {
     AppStyle::pushLabel();
     AppStyle::pushPositive();
     ImGui::Text("GAMEPADS WIDGET");
+    AppStyle::pop();
+    AppStyle::pop();
     ImGui::Dummy(ImVec2(0, 10.0f));
     AppStyle::pushInput();
 
@@ -156,6 +163,7 @@ bool OverlayWidget::render() {
         Config::cfg.Save();
     }
 
+    AppStyle::pop();
     AppStyle::pushLabel();
     ImGui::Text("POSITION");
     AppStyle::pop();
@@ -186,6 +194,8 @@ bool OverlayWidget::render() {
     AppStyle::pushLabel();
     AppStyle::pushPositive();
     ImGui::Text("GUESTS WIDGET");
+    AppStyle::pop();
+    AppStyle::pop();
     ImGui::Dummy(ImVec2(0, 10.0f));
     AppStyle::pushInput();
 
@@ -201,6 +211,7 @@ bool OverlayWidget::render() {
         Config::cfg.Save();
     }
 
+    AppStyle::pop();
     AppStyle::pushLabel();
     ImGui::Text("POSITION");
     AppStyle::pop();

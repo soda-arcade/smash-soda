@@ -18,7 +18,7 @@ class KeyboardMapWidget
 {
 	public:
 		KeyboardMapWidget(Hosting& hosting);
-		bool render();
+		bool render(bool &showWindow);
 		
 	private:
 		Hosting& _hosting;

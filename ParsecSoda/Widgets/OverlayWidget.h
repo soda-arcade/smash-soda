@@ -15,7 +15,7 @@ class OverlayWidget
 public:
 
 	OverlayWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 
