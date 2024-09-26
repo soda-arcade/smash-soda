@@ -65,6 +65,10 @@ public:
 	bool updated = false;
 
 private:
+	int numUsers = 0;
+	int bonusMinutes = 0;
+	StopwatchTimer* rewardTimer = new StopwatchTimer();
+
 	thread hotseatThread;
 	bool running = false;
 

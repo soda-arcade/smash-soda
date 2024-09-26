@@ -122,6 +122,7 @@ public:
 		int playTime = 15;
 		int resetTime = 30;
 		int minResetTime = 5;
+		bool multiBonus = true;
 	};
 	
 	class KioskMode {
@@ -194,7 +195,7 @@ public:
 
 	class Socket {
 		public:
-		bool enabled = true;
+		bool enabled = false;
 		int port = 9002;
 	};
 

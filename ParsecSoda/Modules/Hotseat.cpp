@@ -22,6 +22,40 @@ void Hotseat::Start() {
 		hotseatThread = std::thread([&] {
 
 			while (running) {
+				//check if bonus time should be awarded for multiplayer
+				if (rewardTimer->isFinished() && Config::cfg.hotseat.multiBonus)
+				{
+					rewardTimer->start(12);
+					numUsers = 0;
+					for (size_t i = 0; i < g_hosting.getGamepads().size(); ++i)
+					{
+						if (g_hosting.getGamepads()[i]->isOwned())
+						{
+							numUsers += 1;
+						}
+					}
+					if (numUsers > 1)
+					{
+						for (HotseatUser& user : users) {
+
+							if (numUsers < 5)
+							{
+								bonusMinutes = static_cast<int>(12 * (numUsers - 1) / numUsers);
+							}
+							else
+							{
+								bonusMinutes = 9;
+							}
+							if (user.inSeat)	extendUser(user.userId, bonusMinutes);
+							
+							
+						}
+						Log("MP Bonus: All users in hotseat have been granted " + to_string(bonusMinutes) + " extra minutes.");
+					}
+				}
+				rewardTimer->getRemainingSec();
+
+
 
 				// Get current timestamp
 				std::time_t currentTime = getCurrentTimestamp();
@@ -47,8 +81,15 @@ void Hotseat::Start() {
 							// Strip pads
 							g_hosting.getGamepadClient().strip(user.userId);
 
-							// Log user removed
+							//check if the cooldown time would zero out before play time runs out
 							int minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
+							if ((Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) < Config::cfg.hotseat.minResetTime)
+							{
+								user.timeLastPlayed = currentTime - (Config::cfg.hotseat.resetTime - Config::cfg.hotseat.minResetTime) * 60;
+							}
+
+							// Log user removed
+							minutesSinceLastPlayed = getMinutesDifference(user.timeLastPlayed, currentTime);
 							Log("User " + user.userName + " has been removed from the hotseat. They must wait " + to_string(Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) + " minutes.");
 
 							user.checkThisOnce = false;
@@ -88,6 +129,8 @@ void Hotseat::Stop() {
 	for (HotseatUser& user : users) {
 		user.inSeat = false;
 		user.stopwatch->stop();
+		rewardTimer->start(0);
+		rewardTimer->stop();
 	}
 
 }
@@ -141,7 +184,8 @@ bool Hotseat::checkUser(int id, string name) {
 			
 			//check if the cooldown time would zero out before play time runs out
 			int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
-			if ((Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) < (user->stopwatch->getRemainingSec() / 60 + Config::cfg.hotseat.minResetTime))
+
+			if ((Config::cfg.hotseat.resetTime - minutesSinceLastPlayed) < (user->stopwatch->getRemainingSec()/60 + Config::cfg.hotseat.minResetTime))
 			{
 				user->timeLastPlayed = currentTime - Config::cfg.hotseat.resetTime * 60 + user->stopwatch->getRemainingSec() + Config::cfg.hotseat.minResetTime * 60;
 			}
@@ -259,11 +303,7 @@ void Hotseat::pauseUser(int id) {
 			user->stopwatch->pause();
 
 			// Remove user from seat
-			user->inSeat = false;
-
-			// Record time last played - DIO note: if you did !ff, this would make a cooldown be artifically larger, due to cooldown time being the reset time minus the time since last played
-			//user->timeLastPlayed = currentTime;
-			
+			user->inSeat = false;	
 
 			// Did the user have time remaining?
 			if (user->stopwatch->getRemainingMs() > 0) {
@@ -502,7 +542,7 @@ int Hotseat::getCoolDownTime(int id) {
 		}
 
 		std::time_t currentTime = getCurrentTimestamp();
-		int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime); //Currenttime - timelastplayed
+		int minutesSinceLastPlayed = getMinutesDifference(user->timeLastPlayed, currentTime);
 		if (minutesSinceLastPlayed < Config::cfg.hotseat.resetTime) {
 			return Config::cfg.hotseat.resetTime - minutesSinceLastPlayed;
 		}

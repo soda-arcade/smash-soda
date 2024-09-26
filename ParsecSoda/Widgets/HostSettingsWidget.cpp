@@ -338,6 +338,8 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.hotseat.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
         Config::cfg.hotseat.enabled = !Config::cfg.hotseat.enabled;
     }
+    TitleTooltipWidget::render("HOTSEAT", "WARNING: Must be on before you start hosting to work.");
+
     ImGui::EndChild();
 
     ImGui::SameLine();
