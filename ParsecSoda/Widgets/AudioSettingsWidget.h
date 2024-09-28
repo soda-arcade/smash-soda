@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../imgui/imgui.h"
+#include "../imgui/implot.h"
 #include "../Hosting.h"
 #include "../AudioTools.h"
 #include "../globals/AppIcons.h"
@@ -21,13 +22,11 @@ class AudioSettingsWidget
 {
 public:
 	AudioSettingsWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 	
 	const ImVec2 DEFAULT_BUTTON_SIZE = ImVec2(40, 40);
 
 private:
-	int frequencyToCombo(Frequency frequency);
-	Frequency comboToFrequency(int index);
 	float lerp(float val1, float val2, float t = 0.11f);
 	float easing(float t);
 
@@ -36,6 +35,6 @@ private:
 	AudioIn& _audioIn;
 	AudioOut& _audioOut;
 
-	vector<AudioInDevice> _inputs;
-	vector<AudioOutDevice> _outputs;
+	vector<AudioSourceDevice> _inputs;
+	vector<AudioSourceDevice> _outputs;
 };

@@ -16,6 +16,12 @@ using namespace std;
 class Config {
 	
 public:
+	class Hotkey {
+	public:
+		string command = "";
+		int key = 0;
+	};
+
 	class General {
 	public:
 		unsigned int theme = 4;
@@ -25,6 +31,7 @@ public:
 		bool parsecLogs = false;
 		bool hotkeyBB = true;
 		bool hotkeyLock = true;
+		bool blockVPN = false;
 	};
 	
 	class Audio {
@@ -96,6 +103,7 @@ public:
 		string welcomeMessage = "";
 		bool bonkEnabled = true;
 		bool hostBonkProof = false;
+		bool messageNotification = false;
 	};
 
 	class Widgets {
@@ -199,6 +207,13 @@ public:
 		int port = 9002;
 	};
 
+	class Hotkeys {
+
+		public:
+			bool enabled = true;
+			vector<Hotkey> keys = {};
+	};
+
 	General general;
 	Audio audio;
 	Video video;
@@ -212,6 +227,7 @@ public:
 	Permissions permissions;
 	Arcade arcade;
 	Socket socket;
+	Hotkeys hotkeys;
 
 	// Supported resolutions
 	struct Resolution {
@@ -278,6 +294,10 @@ public:
 	// Overlay theme names loaded from the themes folder
 	vector<string> overlayThemes = vector<string>();
 
+	bool mapHotkey = false;
+	string pendingHotkeyCommand = "";
+	int pendingHotkey = -1;
+
 	// Constructor
 	Config() {
 
@@ -316,6 +336,10 @@ public:
 		}
 		return originalValue;
 	}
+
+	void SetHotkey();
+	void AddHotkey(string command, int key);
+	void RemoveHotkey(string command);
 private:
 	void static LoadOverlayThemes();
 };

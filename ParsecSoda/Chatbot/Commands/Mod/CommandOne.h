@@ -39,7 +39,6 @@ public:
 	}
 
 protected:
-
 	Guest& _sender;
 	GamepadClient& _gamepadClient;
 };

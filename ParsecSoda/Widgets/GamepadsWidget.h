@@ -17,7 +17,7 @@ class GamepadsWidget
 {
 public:
 	GamepadsWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 	// Dependency injection

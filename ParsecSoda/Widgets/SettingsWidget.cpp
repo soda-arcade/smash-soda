@@ -15,6 +15,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _hostBonkProof = Config::cfg.chat.hostBonkProof;
     _ipBan = Config::cfg.general.ipBan;
     _parsecLogs = Config::cfg.general.parsecLogs;
+    _blockVPN = Config::cfg.general.blockVPN;
 
     _microphoneEnabled = Config::cfg.audio.micEnabled;
 
@@ -77,20 +78,15 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     }
 }
 
-bool SettingsWidget::render()
+bool SettingsWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Settings", (bool*)0);
+    ImGui::Begin("Settings", &showWindow);
+    if (!showWindow) Config::cfg.widgets.settings = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();
-
-    ImGui::BeginChild("Settings List", ImVec2(size.x, size.y));
-
-    ImGui::SetNextItemWidth(size.x - 42);
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(0, 5));
 
     if (ImGui::BeginTabBar("Settings Tabs", ImGuiTabBarFlags_None))
     {
@@ -98,23 +94,33 @@ bool SettingsWidget::render()
         AppColors::pushTitle();
         if (ImGui::BeginTabItem("General"))
         {
+            ImGui::BeginChild("innerscroll");
             renderGeneral();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Chat")) {
+            ImGui::BeginChild("innerscroll");
             renderChatbot();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Permissions")) {
+            ImGui::BeginChild("innerscroll");
             renderPermissions();
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Hotkeys")) {
+            ImGui::BeginChild("innerscroll");
+            renderHotkeys();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         AppColors::pop();
         AppFonts::pop();
         ImGui::EndTabBar();
     }
-
-    ImGui::EndChild();
 
     AppStyle::pop();
     ImGui::End();
@@ -187,12 +193,6 @@ void SettingsWidget::renderGeneral() {
 
     ImGui::Dummy(ImVec2(0, 20.0f));
 
-    if (ImForm::InputCheckbox("Enable Microphone", _microphoneEnabled,
-        "When enabled, the microphone cause audio issues in some games.")) {
-        Config::cfg.audio.micEnabled = _microphoneEnabled;
-		Config::cfg.Save();
-    }
-
     if (ImForm::InputCheckbox("Disable Guide Button", _disableGuideButton,
         "The guide button by default often brings up overlays in software, which can cause issues when hosting.")) {
         Config::cfg.input.disableGuideButton = _disableGuideButton;
@@ -207,7 +207,7 @@ void SettingsWidget::renderGeneral() {
         _hosting._disableKeyboard = _disableKeyboard;
     }
 
-    if (ImForm::InputCheckbox("Enable !bb hotkey (CTRL+B)", _hotkeyBB,
+    /*if (ImForm::InputCheckbox("Enable !bb hotkey (CTRL+B)", _hotkeyBB,
         "Disable this if you have hotkeys that conflict with this.")) {
         Config::cfg.general.hotkeyBB = _hotkeyBB;
         if (_hotkeyBB) {
@@ -227,7 +227,7 @@ void SettingsWidget::renderGeneral() {
             UnregisterHotKey(NULL, 2);
         }
         Config::cfg.Save();
-    }
+    }*/
 
     if (ImForm::InputCheckbox("Auto Index Gamepads", _autoIndex,
         "XInput indices will be identified automatically. Beware, this may cause BSOD crashes for some users!")) {
@@ -256,6 +256,12 @@ void SettingsWidget::renderGeneral() {
     if (ImForm::InputNumber("WebSocket Port", _socketPort, 0, 65535,
         "The port the WebSocket server will run on.")) {
         Config::cfg.socket.port = _socketPort;
+        Config::cfg.Save();
+    }
+
+    if (ImForm::InputCheckbox("Block VPNs", _blockVPN,
+        "It is advisable to only enable this if you are having issues with trolls, as some users use VPNs legitimately.")) {
+        Config::cfg.general.blockVPN = _blockVPN;
         Config::cfg.Save();
     }
 
@@ -388,6 +394,92 @@ void SettingsWidget::renderPermissions() {
     if (ImForm::InputCheckbox("Can change keyboard controls", _modControls)) {
         Config::cfg.permissions.moderator.changeControls = _modControls;
         Config::cfg.Save();
+    }
+
+}
+
+/// <summary>
+/// Renders the chatbot options tab.
+/// </summary>
+void SettingsWidget::renderHotkeys() {
+
+    ImGui::Dummy(ImVec2(0, 10.0f));
+
+    // Mapping key
+    if (Config::cfg.mapHotkey) {
+
+        AppStyle::pushTitle();
+        ImGui::TextWrapped("Press a key to map to the command: %s", Config::cfg.pendingHotkeyCommand.c_str());
+        AppStyle::pop();
+
+    }
+
+    // Show hotkey form
+    else if (_showHotkeyForm) {
+        
+        if (ImForm::InputText("CHAT COMMAND", _hotkeyCommand,
+            "What is the command you would like to map to this key.")) {
+            Config::cfg.pendingHotkeyCommand = _hotkeyCommand;
+        }
+
+        ImGui::BeginGroup();
+        ImGui::Indent(10);
+        AppColors::pushButtonSolid();
+        if (ImGui::Button("Set Key") && Config::cfg.pendingHotkeyCommand != "") {
+            Config::cfg.SetHotkey();
+            _showHotkeyForm = false;
+        }
+        ImGui::PopStyleColor(4);
+        //AppColors::pushButton();
+        ImGui::Unindent(10);
+        ImGui::EndGroup();
+
+    }
+    else {
+
+        ImGui::BeginGroup();
+        ImGui::Indent(10);
+        AppColors::pushButtonSolid();
+        if (ImGui::Button("Add Hotkey")) {
+            _showHotkeyForm = true;
+        }
+        ImGui::PopStyleColor(4);
+        //AppColors::pushButton();
+        ImGui::Unindent(10);
+        ImGui::EndGroup();
+
+        ImGui::Dummy(ImVec2(0, 10));
+        ImGui::Separator();
+        ImGui::Dummy(ImVec2(0, 10));
+
+        ImGui::BeginChild("hotkeylist");
+
+        // List hotkeys
+        for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+
+            IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30));
+            if (ImGui::IsItemActive()) {
+                Config::cfg.RemoveHotkey(Config::cfg.hotkeys.keys[i].command);
+            }
+
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+            ImGui::Indent(10);
+            AppStyle::pushInput();
+            ImGui::Text("%s", Config::cfg.hotkeys.keys[i].command.c_str());
+            AppStyle::pop();
+            AppStyle::pushLabel();
+            //ImGui::Text("%s", path.c_str());
+            AppStyle::pop();
+            ImGui::Unindent(10);
+            ImGui::EndGroup();
+
+            ImGui::Dummy(ImVec2(0, 5));
+
+        }
+
+        ImGui::EndChild();
+
     }
 
 }

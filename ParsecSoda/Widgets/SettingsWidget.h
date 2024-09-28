@@ -17,10 +17,11 @@ class SettingsWidget
 {
 public:
 	SettingsWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 	void renderGeneral();
 	void renderChatbot();
 	void renderPermissions();
+	void renderHotkeys();
 
 private:
 	// Dependency injection
@@ -41,8 +42,10 @@ private:
 	bool _parsecLogs = false;
 	bool _ipBan = true;
 	bool _socketEnabled = true;
+	bool _blockVPN = false;
 	unsigned int _latencyLimitThreshold = 0;
 	unsigned int _theme = 0;
+	char _hotkeyCommand[128] = "";
 	char _discord[HOST_NAME_LEN] = "";
 	char _chatbot[HOST_NAME_LEN] = "";
 	char _welcomeMessage[256] = "";
@@ -56,6 +59,7 @@ private:
 	bool _saveChat;
 	bool _hotkeyBB;
 	bool _hotkeyLock;
+	bool _showHotkeyForm;
 
 	bool _guestBB = false;
 	bool _vipBB = false;

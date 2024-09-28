@@ -28,7 +28,7 @@ class HostSettingsWidget
 {
 public:
 	HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback);
-	bool render(HWND& hwnd);
+	bool render(bool& showWindow, HWND& hwnd);
 	void renderGeneral(HWND& hwnd);
 	void renderAudio();
 	void renderHotseat();

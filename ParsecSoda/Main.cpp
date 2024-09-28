@@ -8,6 +8,7 @@
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_colors.h"
+#include "ImGui/implot.h"
 #include <d3d11.h>
 #include <tchar.h>
 #include <Windows.h>
@@ -107,6 +108,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -132,7 +134,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
 
     HostSettingsWidget hostSettingsWindow(g_hosting, [&hwnd](bool isRunning) {
         SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Smash Soda" : L"Smash Soda");
-    });
+        });
     LoginWidget loginWindow(g_hosting, hostSettingsWindow);
     LogWidget logWindow(g_hosting);
     GuestListWidget guestsWindow(g_hosting);
@@ -162,7 +164,14 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
         if (Config::cfg.general.flashWindow) {
             FlashWindowEx(&fi);
         };
-        });
+
+        if (Config::cfg.chat.messageNotification) {
+            try {
+                PlaySound(TEXT("./SFX/new_message.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+            }
+            catch (const std::exception&) {}
+        }
+    });
 
     //ITaskbarList3* m_pTaskBarlist;
     //CoCreateInstance(
@@ -206,8 +215,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     //  Soda Arcade
     // =====================================================================
     if (Config::cfg.arcade.token != "") {
-		Arcade::instance.checkToken(Config::cfg.arcade.token);
-	}
+        Arcade::instance.checkToken(Config::cfg.arcade.token);
+    }
 
     if (Cache::cache.checkForUpdates()) {
         versionWidget.showUpdate = true;
@@ -222,8 +231,9 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // =====================================================================
     //  Register Hotkeys
     // =====================================================================
-    if (Config::cfg.general.hotkeyBB) RegisterHotKey(NULL, 1, MOD_CONTROL, 0x42); // !bb command
-    if (Config::cfg.general.hotkeyLock) RegisterHotKey(NULL, 2, MOD_CONTROL, 0x4C); // !lockall command
+    for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+        RegisterHotKey(hwnd, i, MOD_CONTROL|MOD_NOREPEAT, Config::cfg.hotkeys.keys[i].key);
+    }
 
     // =====================================================================
 
@@ -246,17 +256,12 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
 
             // Hotkeys
             if (msg.message == WM_HOTKEY) {
-                switch (msg.wParam) {
-
-                case 1: // !bb command
-                    g_hosting.sendHostMessage("!bb");
-                    break;
-
-                case 2: // !lockall command
-                    g_hosting.sendHostMessage("!lockall");
-                    break;
-
-                }
+                // Loop through Config::cfg.hotkey.keys (index is the hotkey id)
+                for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+                    if (msg.wParam == i) {
+						g_hosting.sendHostMessage(Config::cfg.hotkeys.keys[i].command.c_str());
+					}
+				}
             }
 
         }
@@ -292,25 +297,25 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
         }
         else
         {
-            if (showHostSettings)       hostSettingsWindow.render(hwnd);
-            if (showChat)               chatWindow.render();
-            if (showLog)                logWindow.render();
-            if (showGuests)             guestsWindow.render();
-            if (showGamepads)           gamepadsWindow.render();
-            if (showMasterOfPuppets)    masterOfPuppets.render();
-            if (showAudio)              audioSettingswidget.render();
-            if (showVideo)              videoWidget.render();
-            if (showInfo)               InfoWidget::render();
-            if (showSettings)           settingsWidget.render();
-            if (showButtonLock)         buttonLockWidget.render();
-            if (showLibrary)            libraryWidget.render();
-            if (showOverlay)            overlayWidget.render();
-            if (showHotseat)            hotseatWidget.render();
-            if (showTournament)         tournamentWidget.render();
+            if (showHostSettings)       hostSettingsWindow.render(showHostSettings, hwnd);
+            if (showChat)               chatWindow.render(showChat);
+            if (showLog)                logWindow.render(showLog);
+            if (showGuests)             guestsWindow.render(showGuests);
+            if (showGamepads)           gamepadsWindow.render(showGamepads);
+            if (showMasterOfPuppets)    masterOfPuppets.render(showMasterOfPuppets);
+            if (showAudio)              audioSettingswidget.render(showAudio);
+            if (showVideo)              videoWidget.render(showVideo);
+            if (showInfo)               InfoWidget::render(showInfo);
+            if (showSettings)           settingsWidget.render(showSettings);
+            if (showButtonLock)         buttonLockWidget.render(showButtonLock);
+            if (showLibrary)            libraryWidget.render(showLibrary);
+            if (showOverlay)            overlayWidget.render(showOverlay);
+            if (showHotseat)            hotseatWidget.render(showHotseat);
+            if (showTournament)         tournamentWidget.render(showTournament);
 
             //-- CodeSomnia Add Start--
             if (showKeyMap)
-                keyMapWidget.render();
+                keyMapWidget.render(showKeyMap);
             //-- CodeSomnia Add End--
             // 
             //-- CodeSomnia Moidified Start--
@@ -354,6 +359,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // Cleanup
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     // Make sure all pads completely removed
@@ -362,6 +368,11 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
     ::UnregisterClass(wc.lpszClassName, wc.hInstance);
+
+    // Unregister Hotkeys
+    for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+		UnregisterHotKey(hwnd, i+1);
+	}
 
     return 0;
 }

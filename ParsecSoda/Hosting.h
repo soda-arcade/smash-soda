@@ -62,6 +62,7 @@ public:
 	Hosting();
 	void applyHostConfig();
 	void broadcastChatMessage(string message);
+	void broadcastChatMessageAndLogCommand(string message);
 	void init();
 	void release();
 	bool isReady();
@@ -128,6 +129,8 @@ public:
 	bool isHotseatEnabled();
 	void startKioskMode();
 
+	bool isVPN(const std::string& ip);
+
 	AudioIn audioIn;
 	AudioOut audioOut;
 	HWND mainWindow;
@@ -141,7 +144,6 @@ private:
 	bool _kioskModeEnabled = false;
 
 	void initAllModules();
-	void submitSilence();
 	void liveStreamMedia();
 	void mainLoopControl();
 	void pollEvents();
@@ -160,6 +162,9 @@ private:
 
 	static void LogCallback(ParsecLogLevel level, const char *msg, void *opaque);
 	ImVec2 stickShortToFloat(SHORT lx, SHORT ly, float& distance);
+
+	uint32_t ipToUint(const std::string& ip);
+	bool isIPInRange(const std::string& ip, const std::string& cidr);
 
 	// Attributes
 	AudioMix _audioMix;
