@@ -402,3 +402,5 @@ ParsecSoda/sfx/custom/
 
 # Mickey stuff
 colorpicker.html
+/ParsecSoda/Chatbot/Commands/Custom
+/ParsecSoda/Chatbot/ChatBotCustom.cpp

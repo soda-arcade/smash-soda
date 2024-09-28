@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Core/Config.h"
-#include "ACommand.h"
+#include "../../Core/Config.h"
+#include "Base/ACommand.h"
 
 using namespace std;
 

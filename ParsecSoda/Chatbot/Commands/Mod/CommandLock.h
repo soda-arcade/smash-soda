@@ -31,12 +31,15 @@ public:
 		}
 
 		
-		AGamepad* pad = _gamepadClient.getGamepad(_intArg);
+		AGamepad* pad = _gamepadClient.getGamepad(_intArg - 1);
 		if (pad) {
 			pad->setLocked(!pad->isLocked());
 
 			std::ostringstream reply;
-			SetReply("Gamepad " + std::to_string(_intArg) + " was locked by " + _sender.name + "\0");
+			if(pad->isLocked())
+				SetReply("Gamepad " + std::to_string(_intArg) + " was locked by " + _sender.name + "\0");
+			else
+				SetReply("Gamepad " + std::to_string(_intArg) + " was unlocked by " + _sender.name + "\0");
 		}
 		return true;
 	}
@@ -53,7 +56,7 @@ public:
 protected:
 	static vector<const char*> internalPrefixes()
 	{
-		return vector<const char*> { "!lock " };
+		return vector<const char*> { "!lock ", "!unlock " };
 	}
 	string _msg;
 	Guest& _sender;
