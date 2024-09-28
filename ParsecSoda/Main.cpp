@@ -132,7 +132,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
 
     HostSettingsWidget hostSettingsWindow(g_hosting, [&hwnd](bool isRunning) {
         SetWindowTextW(hwnd, isRunning ? L"⚫ [LIVE] Smash Soda" : L"Smash Soda");
-    });
+        });
     LoginWidget loginWindow(g_hosting, hostSettingsWindow);
     LogWidget logWindow(g_hosting);
     GuestListWidget guestsWindow(g_hosting);
@@ -162,7 +162,14 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
         if (Config::cfg.general.flashWindow) {
             FlashWindowEx(&fi);
         };
-        });
+
+        if (Config::cfg.chat.messageNotification) {
+            try {
+                PlaySound(TEXT("./SFX/new_message.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+            }
+            catch (const std::exception&) {}
+        }
+    });
 
     //ITaskbarList3* m_pTaskBarlist;
     //CoCreateInstance(
@@ -206,8 +213,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     //  Soda Arcade
     // =====================================================================
     if (Config::cfg.arcade.token != "") {
-		Arcade::instance.checkToken(Config::cfg.arcade.token);
-	}
+        Arcade::instance.checkToken(Config::cfg.arcade.token);
+    }
 
     if (Cache::cache.checkForUpdates()) {
         versionWidget.showUpdate = true;
@@ -222,8 +229,9 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // =====================================================================
     //  Register Hotkeys
     // =====================================================================
-    if (Config::cfg.general.hotkeyBB) RegisterHotKey(NULL, 1, MOD_CONTROL, 0x42); // !bb command
-    if (Config::cfg.general.hotkeyLock) RegisterHotKey(NULL, 2, MOD_CONTROL, 0x4C); // !lockall command
+    for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+        RegisterHotKey(hwnd, i, MOD_CONTROL|MOD_NOREPEAT, Config::cfg.hotkeys.keys[i].key);
+    }
 
     // =====================================================================
 
@@ -246,17 +254,12 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
 
             // Hotkeys
             if (msg.message == WM_HOTKEY) {
-                switch (msg.wParam) {
-
-                case 1: // !bb command
-                    g_hosting.sendHostMessage("!bb");
-                    break;
-
-                case 2: // !lockall command
-                    g_hosting.sendHostMessage("!lockall");
-                    break;
-
-                }
+                // Loop through Config::cfg.hotkey.keys (index is the hotkey id)
+                for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+                    if (msg.wParam == i) {
+						g_hosting.sendHostMessage(Config::cfg.hotkeys.keys[i].command.c_str());
+					}
+				}
             }
 
         }
@@ -362,6 +365,11 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
     ::UnregisterClass(wc.lpszClassName, wc.hInstance);
+
+    // Unregister Hotkeys
+    for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
+		UnregisterHotKey(hwnd, i+1);
+	}
 
     return 0;
 }

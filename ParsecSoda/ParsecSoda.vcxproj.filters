@@ -327,6 +327,9 @@
     <ClCompile Include="Modules\WebSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Chatbot\ChatBotCustom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioIn.h">
@@ -864,6 +867,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Modules\WebSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Mod\CommandDCAll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\ChatBotCustom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Mod\CommandUnbanLastIP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

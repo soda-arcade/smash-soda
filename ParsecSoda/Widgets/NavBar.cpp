@@ -69,7 +69,10 @@ void NavBar::render(
 	//-- CodeSomnia Add Start --
 
 	if (ToggleIconButtonWidget::render(AppIcons::keymap, AppIcons::keymap, showKeyMap, iconSize))
+	{
 		showKeyMap = !showKeyMap;
+		Config::cfg.widgets.keyMapper = showKeyMap;
+	}
 	renderNavtooltip("KeyboardMap", showKeyMap);
 
 	//-- CodeSomnia Add End --
@@ -92,7 +95,11 @@ void NavBar::render(
 	}
 	renderNavtooltip("Library", showLibrary);
 
-	if (ToggleIconButtonWidget::render(AppIcons::overlay, AppIcons::overlay, showOverlay, iconSize))	showOverlay = !showOverlay;
+	if (ToggleIconButtonWidget::render(AppIcons::overlay, AppIcons::overlay, showOverlay, iconSize))
+	{
+		showOverlay = !showOverlay;
+		Config::cfg.widgets.overlay = showOverlay;
+	}
 	renderNavtooltip("Overlay", showOverlay);
 
 	if (ToggleIconButtonWidget::render(AppIcons::hotseat, AppIcons::hotseat, showHotseat, iconSize)) {
@@ -105,7 +112,10 @@ void NavBar::render(
 	renderNavtooltip("Tournament", showTournament);*/
 
 	if (ToggleIconButtonWidget::render(AppIcons::log, AppIcons::log, showLog, iconSize)) showLog = !showLog;
-	renderNavtooltip("Log", showLog);
+	{
+		renderNavtooltip("Log", showLog);
+		Config::cfg.widgets.log = showLog;
+	}
 
 	if (ToggleIconButtonWidget::render(AppIcons::speakersOn, AppIcons::speakersOn, showAudio, iconSize)) {
 		showAudio = !showAudio;

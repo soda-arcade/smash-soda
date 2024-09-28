@@ -7,11 +7,11 @@
   <p align="center">
     Unofficial Tool for Hosting on Parsec
     <br />
-    <a href="https://github.com/MickeyUK/SmashSoda/releases">Latest Release</a>
+    <a href="https://github.com/MonaJava/crystal-soda/releases">Latest Release</a>
     ·
-    <a href="https://github.com/MickeyUK/SmashSoda/issues">Report Bug</a>
+    
     ·
-    <a href="https://github.com/MickeyUK/SmashSoda/issues">Request Feature</a>
+    
   </p>
 </p>
 

@@ -32,7 +32,8 @@ public:
 		// SFX enabled?
 		if (tier == Tier::PLEB && !Config::cfg.permissions.guest.useSFX ||
 			tier == Tier::MOD && !Config::cfg.permissions.moderator.useSFX ||
-			tier == Tier::GOD && !Config::cfg.permissions.vip.useSFX) {
+			tier == Tier::GOD && !Config::cfg.permissions.vip.useSFX ||
+			tier == Tier::NOOB) {
 			SetReply("Sound effects are disabled.\0");
 			return false;
 		}

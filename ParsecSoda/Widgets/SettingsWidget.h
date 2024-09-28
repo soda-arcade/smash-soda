@@ -21,6 +21,7 @@ public:
 	void renderGeneral();
 	void renderChatbot();
 	void renderPermissions();
+	void renderHotkeys();
 
 private:
 	// Dependency injection
@@ -41,8 +42,10 @@ private:
 	bool _parsecLogs = false;
 	bool _ipBan = true;
 	bool _socketEnabled = true;
+	bool _blockVPN = false;
 	unsigned int _latencyLimitThreshold = 0;
 	unsigned int _theme = 0;
+	char _hotkeyCommand[128] = "";
 	char _discord[HOST_NAME_LEN] = "";
 	char _chatbot[HOST_NAME_LEN] = "";
 	char _welcomeMessage[256] = "";
@@ -56,6 +59,7 @@ private:
 	bool _saveChat;
 	bool _hotkeyBB;
 	bool _hotkeyLock;
+	bool _showHotkeyForm;
 
 	bool _guestBB = false;
 	bool _vipBB = false;
@@ -68,6 +72,10 @@ private:
 	bool _guestControls = false;
 	bool _vipControls = false;
 	bool _modControls = false;
+
+	int _noobNum = 156;
+	bool _kickNoob = false;
+	bool _limitNoob = true;
 
 	string themes[5] = { "Midnight", "Parsec Soda", "Parsec Soda V", "Mini", "Arcade" };
 	Countries _countries;

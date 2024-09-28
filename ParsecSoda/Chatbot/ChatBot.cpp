@@ -15,6 +15,12 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		if (msgIsEqual(msg, CommandVersion::prefixes()))		return new CommandVersion(sender);
 	}
 
+	// Is this a custom command?
+	ACommand* custom = _chatBotCustom->isCustomCommand(msg, sender, isHost, tier, previous);
+	if (custom->isBotCommand) {
+		return custom;
+	}
+
 	/*
 	REGULAR USER COMMANDS
 	Any user can use these commands. Regular users have the "PLEB" tier
@@ -49,25 +55,28 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 	if (tier >= Tier::ADMIN || isHost) {
 
 		if (msgStartsWith(msg, CommandBan::prefixes()))			return new CommandBan(msg, sender, _parsec, _guests, _guestHistory);
-		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender, _hotseat);
-		if (msgStartsWith(msg, CommandDC::prefixes()))			return new CommandDC(msg, _gamepadClient);
+		if (msgStartsWith(msg, CommandHotseat::prefixes()))		return new CommandHotseat(sender, _hotseat, _gamepadClient);
+		if (msgIsEqual(msg, CommandDC::prefixes()))				return new CommandDC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandDecrease::prefixes()))	return new CommandDecrease(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandDecreaseCD::prefixes()))	return new CommandDecreaseCD(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandExtend::prefixes()))		return new CommandExtend(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandExtendCD::prefixes()))	return new CommandExtendCD(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandKick::prefixes()))		return new CommandKick(msg, sender, _parsec, _guests, isHost);
 		if (msgStartsWith(msg, CommandLimit::prefixes()))		return new CommandLimit(msg, _guests, _gamepadClient);
-		//if (msgIsEqual(msg, CommandLock::prefixes()))			return new CommandLock(msg, sender, _gamepadClient);
-		if (msgStartsWith(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
+		if (msgStartsWith(msg, CommandLock::prefixes()))		return new CommandLock(msg, sender, _gamepadClient);
+		if (msgIsEqual(msg, CommandLockAll::prefixes()))		return new CommandLockAll(_gamepadClient);
 		if (msgStartsWith(msg, CommandMute::prefixes()))		return new CommandMute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandRC::prefixes()))			return new CommandRC(msg, _gamepadClient);
 		if (msgStartsWith(msg, CommandRestart::prefixes()))		return new CommandRestart();
 		//if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient, _hotseat);
 		if (msgStartsWith(msg, CommandStripAll::prefixes()))	return new CommandStripAll(msg, _gamepadClient);
-		if (msgStartsWith(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _guestHistory);
+		if (msgIsEqual(msg, CommandUnban::prefixes()))			return new CommandUnban(msg, sender, _guestHistory);
+		if (msgIsEqual(msg, CommandUnbanLastIP::prefixes()))	return new CommandUnbanLastIP(msg);
 		if (msgStartsWith(msg, CommandUnmute::prefixes()))		return new CommandUnmute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandVerify::prefixes()))		return new CommandVerify(msg, sender, _guests, _guestHistory);
+		if (msgIsEqual(msg, CommandDCAll::prefixes()))			return new CommandDCAll(_gamepadClient);
+
 	}
 
 	/*
