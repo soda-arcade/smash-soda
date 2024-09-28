@@ -7,7 +7,7 @@ GamepadsWidget::GamepadsWidget(Hosting& hosting)
 {
 }
 
-bool GamepadsWidget::render()
+bool GamepadsWidget::render(bool& showWindow)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 5));
 
@@ -22,7 +22,8 @@ bool GamepadsWidget::render()
     AppStyle::pushTitle();
     ImGui::SetNextWindowPos(ImVec2(974, 5), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 150), ImVec2(800, 1100));
-    ImGui::Begin("Virtual Gamepads", (bool*)0, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
+    ImGui::Begin("Virtual Gamepads", &showWindow, isWindowLocked ? (ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize) : 0);
+    if (!showWindow) Config::cfg.widgets.gamepads = showWindow;
     AppStyle::pushInput();
     
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));

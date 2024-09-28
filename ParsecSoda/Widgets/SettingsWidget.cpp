@@ -82,20 +82,15 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     }
 }
 
-bool SettingsWidget::render()
+bool SettingsWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Settings", (bool*)0);
+    ImGui::Begin("Settings", &showWindow);
+    if (!showWindow) Config::cfg.widgets.settings = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();
-
-    ImGui::BeginChild("Settings List", ImVec2(size.x, size.y));
-
-    ImGui::SetNextItemWidth(size.x - 42);
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(0, 5));
 
     if (ImGui::BeginTabBar("Settings Tabs", ImGuiTabBarFlags_None))
     {
@@ -103,15 +98,27 @@ bool SettingsWidget::render()
         AppColors::pushTitle();
         if (ImGui::BeginTabItem("General"))
         {
+            ImGui::BeginChild("innerscroll");
             renderGeneral();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Chat")) {
+            ImGui::BeginChild("innerscroll");
             renderChatbot();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Permissions")) {
+            ImGui::BeginChild("innerscroll");
             renderPermissions();
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Hotkeys")) {
+            ImGui::BeginChild("innerscroll");
+            renderHotkeys();
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Hotkeys")) {
@@ -122,8 +129,6 @@ bool SettingsWidget::render()
         AppFonts::pop();
         ImGui::EndTabBar();
     }
-
-    ImGui::EndChild();
 
     AppStyle::pop();
     ImGui::End();
@@ -195,12 +200,6 @@ void SettingsWidget::renderGeneral() {
     AppStyle::pop();
 
     ImGui::Dummy(ImVec2(0, 20.0f));
-
-    if (ImForm::InputCheckbox("Enable Microphone", _microphoneEnabled,
-        "When enabled, the microphone cause audio issues in some games.")) {
-        Config::cfg.audio.micEnabled = _microphoneEnabled;
-		Config::cfg.Save();
-    }
 
     if (ImForm::InputCheckbox("Disable Guide Button", _disableGuideButton,
         "The guide button by default often brings up overlays in software, which can cause issues when hosting.")) {
@@ -404,29 +403,6 @@ void SettingsWidget::renderPermissions() {
         Config::cfg.permissions.moderator.changeControls = _modControls;
         Config::cfg.Save();
     }
-
-    AppStyle::pushTitle();
-    ImGui::Text("Noobs");
-    AppStyle::pop();
-
-    if (ImForm::InputNumber("Noob number (in tens of thousands)", _noobNum, 1, 9999,
-        "Any one with an id higher than this is considered a noob")) {
-        Config::cfg.permissions.noobNum = _noobNum;
-        _noobNum = Config::cfg.permissions.noobNum;
-        Config::cfg.Save();
-    }
-
-    if (ImForm::InputCheckbox("Can join room", _kickNoob)) {
-        Config::cfg.permissions.noob.kick = !_kickNoob;
-        Config::cfg.Save();
-    }
-
-    if (ImForm::InputCheckbox("Can grab pads", _limitNoob)) {
-        Config::cfg.permissions.noob.limit = !_limitNoob;
-        Config::cfg.Save();
-    }
-
-
 }
 
 /// <summary>

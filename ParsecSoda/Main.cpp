@@ -8,6 +8,7 @@
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_colors.h"
+#include "ImGui/implot.h"
 #include <d3d11.h>
 #include <tchar.h>
 #include <Windows.h>
@@ -107,6 +108,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -295,25 +297,25 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
         }
         else
         {
-            if (showHostSettings)       hostSettingsWindow.render(hwnd);
-            if (showChat)               chatWindow.render();
-            if (showLog)                logWindow.render();
-            if (showGuests)             guestsWindow.render();
-            if (showGamepads)           gamepadsWindow.render();
-            if (showMasterOfPuppets)    masterOfPuppets.render();
-            if (showAudio)              audioSettingswidget.render();
-            if (showVideo)              videoWidget.render();
-            if (showInfo)               InfoWidget::render();
-            if (showSettings)           settingsWidget.render();
-            if (showButtonLock)         buttonLockWidget.render();
-            if (showLibrary)            libraryWidget.render();
-            if (showOverlay)            overlayWidget.render();
-            if (showHotseat)            hotseatWidget.render();
-            if (showTournament)         tournamentWidget.render();
+            if (showHostSettings)       hostSettingsWindow.render(showHostSettings, hwnd);
+            if (showChat)               chatWindow.render(showChat);
+            if (showLog)                logWindow.render(showLog);
+            if (showGuests)             guestsWindow.render(showGuests);
+            if (showGamepads)           gamepadsWindow.render(showGamepads);
+            if (showMasterOfPuppets)    masterOfPuppets.render(showMasterOfPuppets);
+            if (showAudio)              audioSettingswidget.render(showAudio);
+            if (showVideo)              videoWidget.render(showVideo);
+            if (showInfo)               InfoWidget::render(showInfo);
+            if (showSettings)           settingsWidget.render(showSettings);
+            if (showButtonLock)         buttonLockWidget.render(showButtonLock);
+            if (showLibrary)            libraryWidget.render(showLibrary);
+            if (showOverlay)            overlayWidget.render(showOverlay);
+            if (showHotseat)            hotseatWidget.render(showHotseat);
+            if (showTournament)         tournamentWidget.render(showTournament);
 
             //-- CodeSomnia Add Start--
             if (showKeyMap)
-                keyMapWidget.render();
+                keyMapWidget.render(showKeyMap);
             //-- CodeSomnia Add End--
             // 
             //-- CodeSomnia Moidified Start--
@@ -357,6 +359,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // Cleanup
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     // Make sure all pads completely removed

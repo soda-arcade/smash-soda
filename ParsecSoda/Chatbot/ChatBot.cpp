@@ -71,7 +71,7 @@ ACommand * ChatBot::identifyUserDataMessage(const char* msg, Guest &sender, bool
 		//if (msgStartsWith(msg, CommandSpot::prefixes()))		return new CommandSpot(msg, _hostConfig);
 		if (msgStartsWith(msg, CommandStrip::prefixes()))		return new CommandStrip(msg, sender, _gamepadClient, _hotseat);
 		if (msgStartsWith(msg, CommandStripAll::prefixes()))	return new CommandStripAll(msg, _gamepadClient);
-		if (msgIsEqual(msg, CommandUnban::prefixes()))			return new CommandUnban(msg, sender, _guestHistory);
+		if (msgIsEqual(msg, CommandUnban::prefixes()))		return new CommandUnban(msg, sender, _guestHistory);
 		if (msgIsEqual(msg, CommandUnbanLastIP::prefixes()))	return new CommandUnbanLastIP(msg);
 		if (msgStartsWith(msg, CommandUnmute::prefixes()))		return new CommandUnmute(msg, sender, _guests, _host);
 		if (msgStartsWith(msg, CommandVerify::prefixes()))		return new CommandVerify(msg, sender, _guests, _guestHistory);
@@ -125,13 +125,16 @@ const std::string ChatBot::formatGuestConnection(Guest guest, ParsecGuestState s
 	{
 		switch (status)
 		{
-		case 5:
+		case HOST_WRN_KICKED:
 			reply << "!kick \t\t " << guest.name << " #" << guest.userID << "\0";
 			break;
-		case -12007:
+		case CONNECT_WRN_NO_ROOM:
+			reply << "!full \t\t " << guest.name << " #" << guest.userID << "\0";
+			break;
+		case NETWORK_ERR_BG_TIMEOUT:
 			reply << "!timeout \t\t " << guest.name << " #" << guest.userID << "\0";
 			break;
-		case -13014:
+		case SERVER_ERR_CLIENT_ABORT:
 			reply << "!quit \t\t " << guest.name << " #" << guest.userID << "\0";
 			break;
 		default:

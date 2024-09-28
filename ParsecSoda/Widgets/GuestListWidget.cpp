@@ -5,12 +5,13 @@ GuestListWidget::GuestListWidget(Hosting& hosting)
 {
 }
 
-bool GuestListWidget::render()
+bool GuestListWidget::render(bool& showWindow)
 {
     AppStyle::pushTitle();
     ImGui::SetNextWindowPos(ImVec2(45, 418), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(800, 900));
-    ImGui::Begin("Guests", (bool*)0);
+    ImGui::Begin("Guests", &showWindow);
+    if (!showWindow) Config::cfg.widgets.guests = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();

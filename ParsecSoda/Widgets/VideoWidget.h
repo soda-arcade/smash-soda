@@ -16,7 +16,7 @@ class VideoWidget
 {
 public:
 	VideoWidget(Hosting& hosting);
-	bool render();
+	bool render(bool& showWindow);
 
 private:
 	// Dependency injection

@@ -7,7 +7,7 @@
 class InfoWidget
 {
 public:
-	static bool render();
+	static bool render(bool& showWindow);
 
 private:
 	static bool renderSugoiButton(const char* text, const wchar_t* link);
