@@ -4,24 +4,37 @@
  * Gets the path to the Smash Soda config.json file.
  */
 string PathHelper::GetConfigPath() {
-	
+	static string cachedConfigPath = "";
+	if (!cachedConfigPath.empty()) return cachedConfigPath;
+
+	string dirPath = "";
+	string appDir = "\\SmashSodaTwo\\";
+
 	// If running in portable mode
 	string currentPath = PathHelper::GetCurrentPath();
-	if (MTY_FileExists((currentPath + "\\portable.txt").c_str())) {
-		return currentPath;
+	if (MTY_FileExists(string(currentPath + "\\portable.txt").c_str())) {
+		dirPath = currentPath + appDir;
 	} else {
 
 		// Get the appdata path
 		string appDataPath = PathHelper::GetAppDataPath();
-		if (appDataPath != "") {
-			return appDataPath;
+		if (!appDataPath.empty()) {
+			dirPath = appDataPath + appDir;
 		} else {
 			return "";
 		}
-
 	}
 
-	return "";
+	bool isDirOk = false;
+	if (!MTY_FileExists(dirPath.c_str())) {
+		if (MTY_Mkdir(dirPath.c_str())) {
+			isDirOk = true;
+		}
+	}
+	else isDirOk = true;
+	if (isDirOk) cachedConfigPath = dirPath;
+
+	return dirPath;
 }
 
 /**
@@ -38,30 +51,14 @@ string PathHelper::GetCurrentPath() {
 }
 
 /**
- * Get the path to the Smash Soda appdata directory.
+ * Get the path to AppData directory. (Not AppData/SmashSoda/)
  */
 string PathHelper::GetAppDataPath() {
-	string appDir = "\\SmashSodaTwo\\";
-
 	TCHAR tAppdata[1024];
 	if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata))) {
 		wstring wAppdata(tAppdata);
-		string appdata(wAppdata.begin(), wAppdata.end());
-		string dirPath = appdata + appDir;
-
-		bool isDirOk = false;
-
-		if (!MTY_FileExists(dirPath.c_str())) {
-			if (MTY_Mkdir(dirPath.c_str())) {
-				isDirOk = true;
-			}
-		} else {
-			isDirOk = true;
-		}
-
-		if (isDirOk) {
-			return dirPath;
-		}
+		string dirPath(wAppdata.begin(), wAppdata.end());
+		return dirPath;
 	}
 }
 
