@@ -9,6 +9,8 @@
 #include "GuestList.h"
 #include "MetadataCache.h"
 #include "Helpers/Clock.h"
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
 
 #define SESSION_LIFETIME (uint32_t)(HOURS(1) + MINUTES(25))
 
