@@ -176,12 +176,12 @@ const ParsecSession::SessionStatus ParsecSession::pollSession(ParsecSession::Aut
 const bool ParsecSession::fetchSession(const char* email, const char* password, const char* tfa)
 {
 	// Body
-	ostringstream ss;
-	ss << "{"
-		<< "\"" << "email" << "\":\"" << email << "\","
-		<< "\"" << "password" << "\":\"" << password << "\","
-		<< "\"" << "tfa" << "\":\"" << tfa << "\"}";
-	const string bodyString = ss.str();
+	json jsonBody = {
+		{"email", email},
+		{"password", password},
+		{"tfa", tfa}
+	};
+	const string bodyString = jsonBody.dump();
 	const char* body = bodyString.c_str();
 	size_t bodySize = sizeof(char) * bodyString.length();
 

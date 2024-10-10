@@ -10,7 +10,7 @@ Config Config::cfg;
 void Config::Load() {
 
 	// Get the config path
-	string configPath = PathHelper::GetConfigPath() + "\\config.json";
+	string configPath = PathHelper::GetConfigPath() + "config.json";
 	if (MTY_FileExists(configPath.c_str())) {
 
 		try {
@@ -379,7 +379,7 @@ void Config::Save() {
 	if (configPath != "") {
 
 		// Filepath
-		string filePath = configPath + "\\config.json";
+		string filePath = configPath + "config.json";
 
 		string configString = j.dump(4);
 		bool success = MTY_WriteTextFile(filePath.c_str(), "%s", configString.c_str());
