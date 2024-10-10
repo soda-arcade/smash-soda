@@ -23,7 +23,6 @@ void Hotseat::Start() {
 
 			while (running) {
 				//check if bonus time should be awarded for multiplayer
-				if (!(rewardTimer->isRunning()))	rewardTimer->start(12);
 				if (rewardTimer->isFinished() && Config::cfg.hotseat.multiBonus)
 				{
 					rewardTimer->start(12);
