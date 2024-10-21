@@ -15,7 +15,7 @@ Arcade::Arcade() {
 
 	// Easy toggle for dev/prod
 	_dev = false;
-	_staging = true;
+	_staging = false;
 
 	// Which domain to use
 	if (_dev) {
