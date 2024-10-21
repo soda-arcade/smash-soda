@@ -164,9 +164,9 @@ bool Arcade::getArtwork() {
 		return true;
 	}
 	else {
-		//Config::cfg.arcade.token = "";
-		//Config::cfg.arcade.showLogin = true;
-		//Config::cfg.Save();
+		Config::cfg.arcade.token = "";
+		Config::cfg.arcade.showLogin = true;
+		Config::cfg.Save();
 		return false;
 	}
 }
