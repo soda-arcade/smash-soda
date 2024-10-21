@@ -15,12 +15,18 @@ Arcade::Arcade() {
 
 	// Easy toggle for dev/prod
 	_dev = false;
+	_staging = true;
 
 	// Which domain to use
 	if (_dev) {
 		_domain = _devDomain;
 		_secure = false;
-	} else {
+	} 
+	else if (_staging) {
+		_domain = _stagingDomain;
+		_secure = true;
+	}
+	else {
 		_domain = _prodDomain;
 		_secure = true;
 	}
@@ -147,20 +153,20 @@ bool Arcade::getArtwork() {
 
 		json result = json::parse(responseStr);
 		artwork.clear();
-
 		for (auto& item : result["data"]) {
 			Artwork art;
 			art.id = item["id"];
 			art.title = item["title"];
 			artwork.push_back(art);
 		}
+		g_hosting.logMessage(to_string(artwork.size()) + " artwork found.");
 
 		return true;
 	}
 	else {
-		Config::cfg.arcade.token = "";
-		Config::cfg.arcade.showLogin = true;
-		Config::cfg.Save();
+		//Config::cfg.arcade.token = "";
+		//Config::cfg.arcade.showLogin = true;
+		//Config::cfg.Save();
 		return false;
 	}
 }
@@ -223,10 +229,11 @@ bool Arcade::createPost() {
 	}
 	else {
 		g_hosting.logMessage("Failed to post on the arcade, for some reason. Please login again. Error Code: " + to_string(_status));
-		Config::cfg.arcade.token = "";
+		g_hosting.logMessage(responseStr);
+		/*Config::cfg.arcade.token = "";
 		Config::cfg.arcade.username = "";
 		Config::cfg.arcade.showLogin = true;
-		Config::cfg.Save();
+		Config::cfg.Save();*/
 	}
 	return false;
 }

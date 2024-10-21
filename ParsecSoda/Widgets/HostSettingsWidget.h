@@ -66,7 +66,7 @@ private:
 	bool _publicGame;
 	bool _latencyLimiter;
 	int32_t _latencyLimit;
-	int _selectedArtwork = 0;
+	int _selectedArtwork = -1;
 	int _selectedTheme = 0;
 
 	// Hotseat
