@@ -229,11 +229,10 @@ bool Arcade::createPost() {
 	}
 	else {
 		g_hosting.logMessage("Failed to post on the arcade, for some reason. Please login again. Error Code: " + to_string(_status));
-		g_hosting.logMessage(responseStr);
-		/*Config::cfg.arcade.token = "";
+		Config::cfg.arcade.token = "";
 		Config::cfg.arcade.username = "";
 		Config::cfg.arcade.showLogin = true;
-		Config::cfg.Save();*/
+		Config::cfg.Save();
 	}
 	return false;
 }
