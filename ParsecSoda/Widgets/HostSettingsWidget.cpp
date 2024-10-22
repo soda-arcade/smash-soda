@@ -1,5 +1,7 @@
 ﻿#include "HostSettingsWidget.h"
 #include "../ImGui/imform.h"
+#include "../Hosting.h"
+extern Hosting g_hosting;
 
 HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback)
     : _hosting(hosting), _audioIn(_hosting.audioIn), _audioOut(_hosting.audioOut), _onHostRunningStatusCallback(onHostRunningStatusCallback)
@@ -345,8 +347,24 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
     ImGui::Text("HOTSEAT");
     ImGui::Indent(8);
     if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.hotseat.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+        if (!Config::cfg.hotseat.enabled) {
+            Hotseat::instance.Start();
+            for (size_t i = 0; i < g_hosting.getGamepads().size(); ++i)
+            {
+                if (g_hosting.getGamepads()[i]->isOwned())
+                {
+                    Guest guest = g_hosting.getGamepads()[i]->owner.guest;
+                    Hotseat::instance.checkUser(guest.userID, guest.name);
+                }
+            }
+        }
+        else
+        {
+            Hotseat::instance.Stop();
+        }      
         Config::cfg.hotseat.enabled = !Config::cfg.hotseat.enabled;
     }
+
     ImGui::EndChild();
 
     ImGui::SameLine();

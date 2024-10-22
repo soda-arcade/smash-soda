@@ -981,7 +981,7 @@ void Hosting::addNewGuest(Guest guest) {
 
 	NewGuest newGuest;
 	newGuest.guest = guest;
-	newGuest.timer.setDuration(newGuestList.size() * 2000);
+	newGuest.timer.setDuration(newGuestList.size() * 2000 + 500);
 	newGuest.timer.start();
 	newGuestList.push_back(newGuest);
 
@@ -1003,7 +1003,6 @@ void Hosting::handleNewGuests() {
 
 		// Ready to process
 		if (newGuestList.front().timer.isFinished()) {
-
 			// Welcome message
 			string msg = Config::cfg.chat.welcomeMessage;
 			msg = regex_replace(msg, regex("_PLAYER_"), newGuest.guest.name);

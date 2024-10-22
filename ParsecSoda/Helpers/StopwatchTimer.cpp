@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="minutes"></param>
 void StopwatchTimer::start(int minutes) {
-    _totalMin = minutes; //35 minutes
+    _totalMin = minutes;
     _remainingTime = minutes * 60 * 1000;
     _timeChange = 0;
     _startTime = steady_clock::now();
@@ -30,7 +30,7 @@ void StopwatchTimer::pause() {
     _isRunning = false;
 
     auto elapsedTime = duration_cast<milliseconds>(_pauseTime - _startTime);
-    _remainingTime = std::max(0, _totalMin * 60 * 1000 - static_cast<int>(elapsedTime.count()));
+    _remainingTime = std::max(0, _totalMin * 60 * 1000 - static_cast<int>(elapsedTime.count()) + _timeChange);
 
 }
 

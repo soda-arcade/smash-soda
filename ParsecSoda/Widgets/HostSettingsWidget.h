@@ -22,6 +22,7 @@
 #include <chrono>
 #include <functional>
 #include "../Core/Cache.h"
+#include "../../Modules/Hotseat.h"
 
 class HostSettingsWidget
 {
