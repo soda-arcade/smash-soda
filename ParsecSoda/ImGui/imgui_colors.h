@@ -355,7 +355,7 @@ namespace ImGui {
 		colors[ImGuiCol_Header] = AppColors::secondary;
 		colors[ImGuiCol_HeaderHovered] = pink2;
 		colors[ImGuiCol_HeaderActive] = ImVec4(0.12f, 0.59f, 0.92f, 1.00f);
-		colors[ImGuiCol_Separator] = ImVec4(0.32f, 0.32f, 0.32f, 1.00f);
+		colors[ImGuiCol_Separator] = pink2;
 		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.60f, 0.60f, 0.70f, 1.00f);
 		colors[ImGuiCol_SeparatorActive] = ImVec4(0.70f, 0.70f, 0.90f, 1.00f);
 		colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);

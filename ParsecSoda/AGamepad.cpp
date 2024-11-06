@@ -122,8 +122,8 @@ void AGamepad::copyOwner(AGamepad* pad)
 	if (pad != nullptr) owner.copy(pad->owner);
 }
 
-void AGamepad::clearOwner()
-{
+void AGamepad::clearOwner() {
+	Hotseat::instance.pauseUser(owner.guest.userID);
 	owner = GuestDevice();
 }
 

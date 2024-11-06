@@ -1,52 +1,66 @@
 #pragma once
 
 #include <sstream>
-#include "../Base/ACommandIntegerArg.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
-class CommandDC : public ACommandIntegerArg
+class CommandDC : public ACommand
 {
 public:
 
 	/**
 	 * @brief Construct a new CommandDC object
-	 * 
+	 *
 	 * @param msg
 	 * @param gamepadClient
 	 */
-	CommandDC(const char* msg, GamepadClient& gamepadClient)
-		: ACommandIntegerArg(msg, internalPrefixes()), _gamepadClient(gamepadClient)
+	CommandDC(const char* msg, Guest& sender, GamepadClient& gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
 	 * @brief Run the command
-	 * 
+	 *
 	 * @return true
 	 * @return false
 	 */
 	bool run() override {
-		size_t maxIndex = _gamepadClient.gamepads.size();
+		size_t nGamepads = _gamepadClient.gamepads.size();
 
-		if ( !ACommandIntegerArg::run() ) {
-			SetReply("Usage: !dc <integer in range [1, " + to_string(maxIndex) + "]>\nExample: !dc 1\0");
+		if (nGamepads == 0) {
+			setReply("No gamepads available.\0");
 			return false;
 		}
 
-		if (_intArg < 1 || _intArg > maxIndex) {
-			SetReply("Wrong index: " + to_string(_intArg) + " is not in range [1, " + to_string(maxIndex) + "].\0");
+		if (getArgs().size() == 0) {
+			setReply("Usage: !dc <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !dc 4\0");
+			return false;
 		}
 
-		if (_gamepadClient.disconnect(_intArg - 1)) {
-			SetReply("Gamepad " + to_string(_intArg) + " disconnected.\0");
-		} else{
-			SetReply("Gamepad " + to_string(_intArg) + " fail to disconnect.\0");
+		int slot = 1;
+		try {
+			slot = std::stoi(getArgs()[0]);
 		}
+		catch (std::invalid_argument) {
+			setReply("Usage: !dc <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !dc 4\0");
+			return false;
+		}
+
+		// In range [1, nGamepads]
+		if (slot < 1 || slot > nGamepads) {
+			setReply("Usage: !dc <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !dc 4\0");
+			return false;
+		}
+
+		_gamepadClient.disconnect(slot-1);
+		setReply("Disconnected gamepad " + std::to_string(slot) + ".\0");
+
 		return true;
 	}
 
 	/**
 	 * @brief Get the prefixes object
-	 * 
+	 *
 	 * @return std::vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
@@ -58,6 +72,6 @@ private:
 		return vector<const char*> { "!dc " };
 	}
 
-	GamepadClient &_gamepadClient;
+	GamepadClient& _gamepadClient;
 
 };

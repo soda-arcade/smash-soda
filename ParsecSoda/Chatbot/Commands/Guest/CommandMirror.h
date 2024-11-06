@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
 class CommandMirror : public ACommand
@@ -13,8 +13,8 @@ public:
 	 * @param sender 
 	 * @param gamepadClient 
 	 */
-	CommandMirror(Guest &sender, GamepadClient &gamepadClient)
-		: _sender(sender), _gamepadClient(gamepadClient)
+	CommandMirror(const char* msg, Guest& sender, GamepadClient &gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -23,7 +23,7 @@ public:
 	 */
 	bool run() override {
 		bool isMirrored = _gamepadClient.toggleMirror(_sender.userID);
-		SetReply(_sender.name + " toggled mirror mode:\t" + (isMirrored ? "ON" : "OFF") + "\0");
+		setReply(_sender.name + " toggled mirror mode:\t" + (isMirrored ? "ON" : "OFF") + "\0");
 		return true;
 	}
 
@@ -36,7 +36,5 @@ public:
 	}
 
 protected:
-
-	Guest& _sender;
 	GamepadClient& _gamepadClient;
 };

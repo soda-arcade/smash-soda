@@ -1,14 +1,16 @@
 #pragma once
 
 #include "../../../Core/Cache.h"
-#include "../Base/ACommandSearchUserHistory.h"
+#include "../../ACommand.h"
 #include "parsec-dso.h"
 
 using namespace std;
 
-class CommandBan : public ACommandSearchUserHistory
+class CommandBan : public ACommand
 {
 public:
+
+	std::string usage = "Usage: !ban <username>\nExample: !ban MK10\0";
 
 	/**
 	 * @brief Construct a new CommandBan object
@@ -20,7 +22,7 @@ public:
 	 * @param guestHistory 
 	 */
 	CommandBan(const char* msg, Guest& sender, ParsecDSO* parsec, GuestList &guests, GuestDataList &guestHistory)
-		: ACommandSearchUserHistory(msg, internalPrefixes(), guests, guestHistory), _sender(sender), _parsec(parsec)
+		: ACommand(msg, sender), _parsec(parsec), guests(guests), _guestHistory(guestHistory)
 	{
 	}
 
@@ -31,34 +33,35 @@ public:
 	 * @return false 
 	 */
 	bool run() override {
-		ACommandSearchUserHistory::run();
-		
-		bool rv = false;
 
-		switch (_searchResult)
-		{
-		case SEARCH_USER_HISTORY_RESULT::NOT_FOUND:
-			SetReply(_sender.name + ", I cannot find the user you want to ban.\0");
-			break;
-
-		case SEARCH_USER_HISTORY_RESULT::ONLINE:
-			
-			handleGuest(GuestData(_onlineGuest.name, _onlineGuest.userID), true, _onlineGuest.id);
-			_guestHistory.pop(_onlineGuest.userID);
-			break;
-		
-		case SEARCH_USER_HISTORY_RESULT::OFFLINE:
-			handleGuest(_offlineGuest, false);
-			_guestHistory.pop(_offlineGuest.userID);
-			break;
-
-		case SEARCH_USER_HISTORY_RESULT::FAILED:
-		default:
-			SetReply("Usage: !ban <username>\nExample: !ban MK10\0");
-			break;
+		// Was a guest specified?
+		if (getArgs().size() == 0) {
+			setReply(usage);
+			return false;
 		}
 
-		return rv;
+		// Find the guest
+		if (findGuest()) {
+			GuestData targetData(target.name, target.userID);
+			targetData.fake = target.fake;
+			return handleGuest(targetData, true, target.id);
+		}
+
+		// Find offline guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+		bool found = false;
+		try {
+			found = _guestHistory.find(guest, [&](GuestData& guest) { _offlineGuest = guest; });
+		}
+		catch (const std::exception&) {}
+		if (found) {
+			return handleGuest(_offlineGuest, false);
+		}
+		return false;
+
 	}
 
 	/**
@@ -76,7 +79,44 @@ private:
 	}
 
 	ParsecDSO* _parsec;
-	Guest& _sender;
+	Guest target;
+	GuestList guests;
+	GuestDataList& _guestHistory;
+	GuestData _offlineGuest;
+
+	/**
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	*
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
+
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
+				}
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * @brief Handle the guest
@@ -91,13 +131,13 @@ private:
 		bool result = false;
 
 		if (_sender.userID == target.userID) {
-			SetReply("Thou shall not ban thyself, " + _sender.name + " ...\0");
+			setReply("Thou shall not ban thyself, " + _sender.name + " ...\0");
 		} 
 		
 		else if (Cache::cache.isSodaCop(target.userID)) {
-			SetReply("Nice try bub, but you can't ban a Soda Cop!\0");
+			setReply("Nice try bub, but you can't ban a Soda Cop!\0");
 		} else {
-			SetReply(
+			setReply(
 				Cache::cache.isSodaCop(_sender.userID) ?
 				_sender.name + " laid down the law as a Soda Cop and banned " + target.name + "!\0"
 				: _sender.name + " kicked " + target.name + "!\0"
@@ -105,7 +145,18 @@ private:
 
 			if (Cache::cache.banList.ban(target)) {
 				if (isOnline) {
-					ParsecHostKickGuest(_parsec, guestID);
+
+					if (target.fake) {
+						vector<Guest>::iterator i;
+						for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+							if ((*i).userID == target.userID) {
+								guests.getGuests().erase(i);
+								break;
+							}
+						}
+					} else {
+						ParsecHostKickGuest(_parsec, guestID);
+					}
 				}
 
 				try {

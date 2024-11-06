@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../DX11.h"
 
 class CommandVideoFix : public ACommand
@@ -12,8 +12,8 @@ public:
 	 * 
 	 * @param dx11
 	 */
-	CommandVideoFix(DX11 &dx11)
-		: _dx11(dx11)
+	CommandVideoFix(const char* msg, Guest& sender, DX11 &dx11)
+		: ACommand(msg, sender), _dx11(dx11)
 	{}
 
 	/**
@@ -23,7 +23,7 @@ public:
 	 * @return false
 	 */
 	bool run() override {
-		SetReply("Refreshing Directx11...\0");
+		setReply("Refreshing Directx11...\0");
 		_dx11.recover();
 		return true;
 	}

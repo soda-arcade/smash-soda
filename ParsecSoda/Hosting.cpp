@@ -19,8 +19,7 @@ using namespace std;
 // 
 // ============================================================
 
-Hosting::Hosting()
-{
+Hosting::Hosting() {
 
 	// Create a random 8 character string
 	_roomToken = "";
@@ -168,17 +167,6 @@ void Hosting::init() {
 
 	// Parsec Logs
 	ParsecSetLogCallback(_parsec, Hosting::LogCallback, this);
-
-	// A way to test chat and guest managment features
-	// without hosting the room
-	_isTestMode = false;
-	if (_isTestMode) {
-
-		// Add (n) number of fake guests
-		//srand(time(NULL));
-		//addFakeGuests(8);
-		
-	}
 	
 }
 
@@ -242,6 +230,26 @@ void Hosting::fetchAccountData(bool sync)
 ParsecHostConfig& Hosting::getHostConfig()
 {
 	return _hostConfig;
+}
+
+bool Hosting::resizeRoom(uint32_t maxGuests) {
+	if (isRunning()) {
+
+		if (maxGuests > 20) {
+			maxGuests = 20;
+		}
+		if (maxGuests < 1) {
+			maxGuests = 1;
+		}
+
+		_hostConfig.maxGuests = maxGuests;
+		Config::cfg.room.guestLimit = maxGuests;
+		Config::cfg.Save();
+		ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+		Arcade::instance.createPost();
+		return true;
+	}
+	return false;
 }
 
 DX11& Hosting::getDX11()
@@ -455,7 +463,7 @@ void Hosting::startHosting() {
 
 				// Hotseat mode
 				if (Config::cfg.hotseat.enabled) {
-					Hotseat::instance.Start();
+					Hotseat::instance.start();
 				}
 
 				// Overlay
@@ -493,7 +501,7 @@ void Hosting::stopHosting() {
 
 	// Stop hotseat mode
 	if (Config::cfg.hotseat.enabled) {
-		Hotseat::instance.Stop();
+		Hotseat::instance.stop();
 	}
 
 	// Stop kiosk mode
@@ -526,6 +534,10 @@ void Hosting::setOwner(AGamepad& gamepad, Guest newOwner, int padId)
 
 void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool isHidden, bool outside) {
 	
+	if (!isRunning() && !Config::cfg.general.devMode) {
+		return;
+	}
+
 	// Has the user been muted?
 	if (AutoMod::instance.isMuted(guest.userID)) {
 		return;
@@ -542,10 +554,10 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 		defaultMessage.run();
 		_chatBot->setLastUserId(guest.userID);
 
-		if (!defaultMessage.replyMessage().empty() && !isHidden) {
-			broadcastChatMessage(defaultMessage.replyMessage());
+		if (!defaultMessage.getReply().empty() && !isHidden) {
+			broadcastChatMessage(defaultMessage.getReply());
 
-			string adjustedMessage = defaultMessage.replyMessage();
+			string adjustedMessage = defaultMessage.getReply();
 			Stringer::replacePatternOnce(adjustedMessage, "%", "%%");
 			_chatLog.logMessage(adjustedMessage);
 			if (WebSocket::instance.isRunning()) {
@@ -565,14 +577,16 @@ void Hosting::handleMessage(const char* message, Guest& guest, bool isHost, bool
 	}
 
 	// Chatbot's command reply
-	if (!command->replyMessage().empty() && command->isBotCommand) {
-		broadcastChatMessage(command->replyMessage());
-		_chatLog.logCommand(command->replyMessage());
+	if (!command->getReply().empty() && command->isBotCommand) {
+		if (isRunning()) {
+			broadcastChatMessage(command->getReply());
+		}
+		_chatLog.logCommand(command->getReply());
 		_chatBot->setLastUserId();
 		if (WebSocket::instance.isRunning()) {
 			json j;
 			j["event"] = "chat:log";
-			j["data"]["message"] = command->replyMessage();
+			j["data"]["message"] = command->getReply();
 			WebSocket::instance.sendMessageToAll(j.dump());
 		}
 	}
@@ -1163,9 +1177,7 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			// Yes, but did this person try to ban a SODA COP!? Continue to normal GUEST_CONNECTED after
 			if (Cache::cache.isSodaCop(guest.userID)) {
 				GuestData unbannedGuest;
-				Cache::cache.banList.unban(guest.userID, [&unbannedGuest](GuestData& guest) {
-					unbannedGuest = guest;
-					});
+				Cache::cache.banList.unban(guest.userID);
 			}
 			else {
 				ParsecHostKickGuest(_parsec, guest.id);
@@ -1187,32 +1199,37 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 			broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + "Kicked a fake guest: " + guest.name);
 			return;
 		}
+
+		if (state == GUEST_CONNECTED) {
+			if (Cache::cache.modList.isModded(guest.userID)) {
+				_tierList.setTier(guest.userID, Tier::MOD);
+				logMessage = _chatBot->formatModGuestMessage(guest);
+			}
+			else logMessage = _chatBot->formatGuestConnection(guest, state, status);
+			broadcastChatMessageAndLogCommand(logMessage);
+
+			// Is the connecting guest the host?
+			if (_host.userID == guest.userID) {
+				_tierList.setTier(guest.userID, Tier::GOD);
+			}
+
+			// Add to guest history
+			_guestHistory.add(guestData);
+			MetadataCache::addActiveGuest(guest);
+
+			// Show welcome message
+			addNewGuest(guest);
+
+			// Update the guest count on Soda Arcade
+			if (!Config::cfg.room.privateRoom) {
+				Arcade::instance.updateGuestCount(_guestList.getGuests().size());
+			}
+		}
 	}
 
 
-	if (state == GUEST_FAILED) {
+	else if (state == GUEST_FAILED) {
 		broadcastChatMessageAndLogCommand(_chatBot->formatGuestConnection(guest, state, status));
-	}
-
-	else if (state == GUEST_CONNECTED) {
-		if (Cache::cache.modList.isModded(guest.userID)) {
-			_tierList.setTier(guest.userID, Tier::MOD);
-			logMessage = _chatBot->formatModGuestMessage(guest);
-		}
-		else logMessage = _chatBot->formatGuestConnection(guest, state, status);
-		broadcastChatMessageAndLogCommand(logMessage);
-
-		// Is the connecting guest the host?
-		if (_host.userID == guest.userID) {
-			_tierList.setTier(guest.userID, Tier::GOD);
-		}
-
-		// Add to guest history
-		_guestHistory.add(guestData);
-		MetadataCache::addActiveGuest(guest);
-
-		// Show welcome message
-		addNewGuest(guest);
 	}
 
 	else if (state == GUEST_DISCONNECTED) {
@@ -1237,19 +1254,24 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 
 		_guestList.deleteMetrics(guest.id);
 		int droppedPads = 0;
-		CommandFF command(guest, _gamepadClient, _hotseat);
+		/*CommandFF command(guest, _gamepadClient, _hotseat);
 		command.run();
 		if (droppedPads > 0) {
 			broadcastChatMessageAndLogCommand(command.replyMessage());
-		}
+		}*/
 
-		// Only play if room wasn't full
+		// Was the guest in the room?
 		if (status != CONNECT_WRN_NO_ROOM) {
 			try {
 				PlaySound(TEXT("./SFX/guest_leave.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
 			}
 			catch (const std::exception&) {}
+
+			if (!Config::cfg.room.privateRoom) {
+				Arcade::instance.updateGuestCount(_guestList.getGuests().size());
+			}
 		}
+
 	}
 
 }
@@ -1275,6 +1297,11 @@ void Hosting::logMessage(string message) {
 	}
 }
 
+void Hosting::messageFromExternalSource(string source, string user, string message) {
+	_chatLog.logCommand("[" + source + "] " + user + ": " + message);
+	broadcastChatMessage("[" + source + "] " + user + ": " + message);
+}
+
 /// <summary>
 /// 
 /// </summary>
@@ -1288,18 +1315,27 @@ bool Hosting::isHotseatEnabled() {
 /// </summary>
 /// <param name="count"></param>
 void Hosting::addFakeGuests(int count) {
-
-	_guestList.getGuests().reserve(_guestList.getGuests().size() + count);
+	srand(time(NULL));
 	for (int i = 0; i < count; ++i) {
 		Guest guest = Guest(
 			randomString(5),
-			i+1, i+1
+			_guestList.getGuests().size(), (i + 1) * 1000 + 1
 		);
+		guest.fake = true;
 
 		_guestList.getGuests().push_back(guest);
 		MetadataCache::addActiveGuest(guest);
 	}
 
+}
+
+void Hosting::removeFakeGuest(int userID) {
+	for (int i = 0; i < _guestList.getGuests().size(); ++i) {
+		if (_guestList.getGuests()[i].userID == userID) {
+			_guestList.getGuests().erase(_guestList.getGuests().begin() + i);
+			break;
+		}
+	}
 }
 
 /// <summary>
@@ -1370,4 +1406,12 @@ ImVec2 Hosting::stickShortToFloat(SHORT lx, SHORT ly, float& distance) {
     }
 
     return stick;
+}
+
+/// <summary>
+/// Gets the hotseat instance.
+/// </summary>
+/// <returns></returns>
+Hotseat& Hosting::getHotseat() {
+	return _hotseat;
 }

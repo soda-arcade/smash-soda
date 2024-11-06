@@ -7,7 +7,7 @@ void TierList::setTier(uint32_t userID, Tier tier)
     {
         if (userID == (*it).userID)
         {
-            if (tier != Tier::PLEB)
+            if (tier != Tier::GUEST)
             {
                 (*it).tier = tier;
             }
@@ -22,7 +22,7 @@ void TierList::setTier(uint32_t userID, Tier tier)
         }
     }
 
-    if (tier != Tier::PLEB)
+    if (tier != Tier::GUEST)
     {
         _guestTiers.push_back(GuestTier(userID, tier));
         saveTiers();
@@ -39,7 +39,7 @@ Tier TierList::getTier(uint32_t userID) {
         }
     }
 
-    return Tier::PLEB;
+    return Tier::GUEST;
 }
 
 void TierList::loadTiers() {

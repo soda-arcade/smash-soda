@@ -28,6 +28,7 @@ public:
 
 	char _email[256];
 	char _password[256];
+	char _2fa[256];
 
 	ImGui::MarkdownConfig mdConfig;
 	

@@ -18,6 +18,7 @@ class HostInfoWidget
 public:
 	HostInfoWidget(Hosting& hosting);
 	void render();
+	void renderArcade();
 
 private:
 	Hosting& _hosting;

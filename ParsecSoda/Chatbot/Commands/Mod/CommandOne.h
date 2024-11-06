@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
 class CommandOne : public ACommand
@@ -13,8 +13,8 @@ public:
 	 * @param sender
 	 * @param gamepadClient
 	 */
-	CommandOne(Guest &sender, GamepadClient &gamepadClient)
-		: _sender(sender), _gamepadClient(gamepadClient)
+	CommandOne(const char* msg, Guest& sender, GamepadClient &gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -25,7 +25,7 @@ public:
 	 */
 	bool run() override {
 		bool isOne = _gamepadClient.toggleIgnoreDeviceID(_sender.userID);
-		SetReply(_sender.name + " toggled ignore device ID mode:\t" + (isOne ? "ON" : "OFF"));
+		setReply(_sender.name + " toggled ignore device ID mode:\t" + (isOne ? "ON" : "OFF"));
 		return true;
 	}
 
@@ -39,6 +39,5 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 	GamepadClient& _gamepadClient;
 };

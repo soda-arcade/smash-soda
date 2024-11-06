@@ -163,8 +163,7 @@ void GamepadClient::disconnectAllGamepads()
 	});
 }
 
-void GamepadClient::sortGamepads()
-{
+void GamepadClient::sortGamepads() {
 	std::vector<AGamepad*> sorted = gamepads;
 	std::sort(
 		sorted.begin(),
@@ -178,8 +177,7 @@ void GamepadClient::sortGamepads()
 	gamepads = sorted;
 }
 
-void GamepadClient::resize(size_t xboxCount, size_t dualshockCount)
-{
+void GamepadClient::resize(size_t xboxCount, size_t dualshockCount) {
 	if (_isBusy) return;
 
 	size_t xi = 0, di = 0;
@@ -319,9 +317,7 @@ bool GamepadClient::clearOwner(int gamepadIndex)
 {
 	if (gamepadIndex >= 0 || gamepadIndex < gamepads.size()) {
 
-		if (Config::cfg.hotseat.enabled && gamepads[gamepadIndex]->isOwned()) {
-			Hotseat::instance.pauseUser(gamepads[gamepadIndex]->owner.guest.userID);
-		}
+		Hotseat::instance.pauseUser(gamepads[gamepadIndex]->owner.guest.userID);
 		gamepads[gamepadIndex]->clearOwner();
 		
 		return true;
@@ -712,17 +708,21 @@ bool GamepadClient::mapKeyboard(uint32_t userID, string button) {
 	return true;
 }
 
-bool GamepadClient::sendKeyboardMessage(ParsecKeyboardMessage& keyboard, Guest& guest, int& slots, GuestPreferences prefs)
-{
+bool GamepadClient::sendKeyboardMessage(ParsecKeyboardMessage& keyboard, Guest& guest, int& slots, GuestPreferences prefs) {
 
 	// Is user mapping a button and mappingName matches the current user
 	if (_isMapping && _mappingID == guest.userID) {
 		_isMapping = false;
 		if (keyboard.pressed) {
+
+			Keymap keymap = Keymap();
+			string keyName = keymap.findKeyByValue(keyboard.code);
+
 			_keyboardMap.mapButton(guest.name, guest.userID, _mappingButton, keyboard.code);
-			g_hosting.logMessage(guest.name + " mapped " + _mappingButton + " to " + std::to_string(keyboard.code));
-			g_hosting.broadcastChatMessage(guest.name + " mapped " + _mappingButton + " to " + std::to_string(keyboard.code));
+			g_hosting.logMessage(guest.name + " mapped " + _mappingButton + " to " + keyName);
+			g_hosting.broadcastChatMessage(guest.name + " mapped " + _mappingButton + " to " + keyName);
 			return false;
+
 		}
 	}
 
@@ -772,6 +772,9 @@ bool GamepadClient::tryAssignGamepad(Guest guest, uint32_t deviceID, int current
 	return reduceUntilFirst([&](AGamepad* gamepad) {
 		if (!(isPuppetMaster && gamepad->isPuppet) && (!gamepad->isLocked() && gamepad->isAttached() && !gamepad->owner.guest.isValid())) {
 			if (!Config::cfg.hotseat.enabled || Hotseat::instance.checkUser(guest.userID, guest.name)) {
+				if (Config::cfg.hotseat.enabled) {
+					Hotseat::instance.seatUser(guest.userID, guest.name);
+				}
 				gamepad->setOwner(guest, deviceID, isKeyboard);
 			}
 			return true;

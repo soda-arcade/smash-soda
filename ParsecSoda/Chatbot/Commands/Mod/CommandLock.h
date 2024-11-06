@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../Base/ACommandIntegerArg.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
-class CommandLock : public ACommandIntegerArg
+class CommandLock : public ACommand
 {
 public:
 
@@ -15,7 +15,7 @@ public:
 	 * @param gamepadClient
 	 */
 	CommandLock(const char* msg, Guest& sender, GamepadClient& gamepadClient)
-		: ACommandIntegerArg(msg, internalPrefixes()), _sender(sender), _gamepadClient(gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -25,18 +25,44 @@ public:
 	 * @return false
 	 */
 	bool run() override {
-		if (!ACommandIntegerArg::run()) {
-			SetReply("Usage: !lock <integer in range [1, 4]>\nExample: !lock 4\0");
+
+		int nGamepads = _gamepadClient.gamepads.size();
+
+		if (nGamepads == 0) {
+			setReply("No gamepads available.\0");
 			return false;
 		}
 
-		
-		AGamepad* pad = _gamepadClient.getGamepad(_intArg);
-		if (pad) {
-			pad->setLocked(!pad->isLocked());
+		if (getArgs().size() == 0) {
+			setReply("Usage: !swap <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !swap 4\0");
+			return false;
+		}
 
-			std::ostringstream reply;
-			SetReply("Gamepad " + std::to_string(_intArg) + " was locked by " + _sender.name + "\0");
+		int slot = 1;
+		try {
+			slot = std::stoi(getArgs()[0]);
+		}
+		catch (std::invalid_argument) {
+			setReply("Usage: !swap <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !swap 4\0");
+			return false;
+		}
+
+		// In range [1, nGamepads]
+		if (slot < 1 || slot > nGamepads) {
+			setReply("Usage: !swap <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !swap 4\0");
+			return false;
+		}
+
+		AGamepad* pad = _gamepadClient.getGamepad(slot-1);
+		if (pad) {
+
+			if (pad->isLocked()) {
+				setReply("Gamepad " + std::to_string(slot) + " locked!\0");
+			}
+			else {
+				setReply("Gamepad " + std::to_string(slot) + " unlocked!\0");
+			}
+			pad->setLocked(!pad->isLocked());
 		}
 		return true;
 	}
@@ -55,7 +81,5 @@ protected:
 	{
 		return vector<const char*> { "!lock " };
 	}
-	string _msg;
-	Guest& _sender;
 	GamepadClient& _gamepadClient;
 };

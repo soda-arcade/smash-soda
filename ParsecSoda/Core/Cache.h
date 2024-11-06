@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../GuestList.h"
 #include "../Lists/VerifiedList.h"
 #include "../Lists/BanList.h"
 #include "../Lists/ModList.h"

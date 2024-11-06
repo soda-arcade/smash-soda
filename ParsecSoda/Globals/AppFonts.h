@@ -21,6 +21,7 @@ public:
 	static void pushLabel();
 	static void pushTitle();
 	static void pushInput();
+	static void pushLarge();
 	static void pushInputArrow();
 	static void pushSugoiDekai();
 	static void pop();
@@ -28,6 +29,7 @@ public:
 	static ImFont* label;
 	static ImFont* title;
 	static ImFont* input;
+	static ImFont* large;
 	static ImFont* inputArrow;
 	static ImFont* sugoidekai;
 };

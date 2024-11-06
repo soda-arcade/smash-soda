@@ -43,6 +43,7 @@
 #include "Widgets/HotseatWidget.h"
 #include "Widgets/TournamentWidget.h"
 #include "Widgets/KeyboardMapWidget.h"
+#include "Widgets/DeveloperWidget.h"
 
 using namespace std;
 
@@ -150,6 +151,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     HotseatWidget hotseatWidget(g_hosting);
     TournamentWidget tournamentWidget(g_hosting);
     VersionWidget versionWidget;
+    DeveloperWidget developerWidget(g_hosting);
 
     //ChatWidget chatWindow(g_hosting);
     KeyboardMapWidget keyMapWidget(g_hosting); //-- CodeSomnia Add Start--
@@ -201,6 +203,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     bool showHotseat = Config::cfg.widgets.hotseat;
     bool showTournament = false;
     bool showKeyMap = Config::cfg.widgets.keyMapper; //-- CodeSomnia Add --
+    bool showDevTools = Config::cfg.widgets.devTools;
 
     ParsecSession& g_session = g_hosting.getSession();
 
@@ -214,11 +217,11 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // =====================================================================
     //  Soda Arcade
     // =====================================================================
-    if (Config::cfg.arcade.token != "") {
-        Arcade::instance.checkToken(Config::cfg.arcade.token);
+    if (Arcade::instance.loadCredentials()) {
+        Arcade::instance.checkToken(Arcade::instance.credentials.token);
     }
 
-    if (Cache::cache.checkForUpdates()) {
+    if (!Config::cfg.developer.skipUpdateCheck && Cache::cache.checkForUpdates()) {
         versionWidget.showUpdate = true;
         Config::cfg.overlay.update = Cache::cache.update.overlay;
         Config::cfg.Save();
@@ -312,6 +315,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
             if (showOverlay)            overlayWidget.render(showOverlay);
             if (showHotseat)            hotseatWidget.render(showHotseat);
             if (showTournament)         tournamentWidget.render(showTournament);
+            if (showDevTools)           developerWidget.render(showDevTools);
 
             //-- CodeSomnia Add Start--
             if (showKeyMap)
@@ -324,7 +328,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
                 g_hosting,
                 showLogin, showHostSettings, showGamepads, showMasterOfPuppets, showChat,
                 showGuests, showLog, showAudio, showVideo, showInfo, showSettings,
-                showButtonLock, showLibrary, showOverlay, showHotseat, showTournament, showKeyMap
+                showButtonLock, showLibrary, showOverlay, showHotseat, showTournament, 
+                showKeyMap, showDevTools
             );
 
             //-- CodeSomnia Moidified End--

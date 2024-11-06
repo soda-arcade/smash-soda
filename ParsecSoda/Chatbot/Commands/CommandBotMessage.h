@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Base/ACommand.h"
+#include "../ACommand.h"
 
 class CommandBotMessage : public ACommand
 {
@@ -11,8 +11,8 @@ public:
 	 * 
 	 * @param msg
 	 */
-	CommandBotMessage(const char* msg)
-		: _msg(msg)
+	CommandBotMessage(const char* msg, Guest& sender)
+		: ACommand(msg, sender)
 	{
 		isBotCommand = true;
 	}
@@ -24,10 +24,9 @@ public:
 	 * @return false
 	 */
 	bool run() override {
-		SetReply(_msg.c_str());
+		//setReply(_msg.c_str());
 		return true;
 	}
 
 protected:
-	string _msg;
 };

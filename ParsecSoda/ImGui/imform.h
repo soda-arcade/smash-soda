@@ -101,7 +101,7 @@ public:
         AppStyle::pop();
         AppStyle::pushInput();
         ImGui::SetNextItemWidth(size.x - 20);
-        if (ImGui::InputTextMultiline(inputLabel.c_str(), buffer, 256)) {
+        if (ImGui::InputTextMultiline(inputLabel.c_str(), buffer, 500)) {
             response = true;
         }
         else {
@@ -219,5 +219,26 @@ public:
         return response;
 
     }
+
+    /// <summary>
+    /// Creates a button.
+    /// </summary>
+    /// <param name="label">Label for the button.</param>
+    /// <returns>boolean</returns>
+    static bool Button(std::string label) {
+
+        ImGui::BeginGroup();
+        ImGui::Indent(10);
+        AppColors::pushButtonSolid();
+        if (ImGui::Button(label.c_str())) {
+            return true;
+        }
+        ImGui::PopStyleColor(4);
+        ImGui::Unindent(10);
+        ImGui::EndGroup();
+
+        return false;
+
+	}
 
 };

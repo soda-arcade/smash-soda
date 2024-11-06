@@ -82,7 +82,12 @@ ID3D11ShaderResourceView* AppIcons::crown;
 ID3D11ShaderResourceView* AppIcons::star;
 ID3D11ShaderResourceView* AppIcons::eye;
 
+ID3D11ShaderResourceView* AppIcons::developer;
+
 ID3D11ShaderResourceView* AppIcons::sodaArcadeLogo;
+
+ID3D11ShaderResourceView* AppIcons::arcadeIcon;
+ID3D11ShaderResourceView* AppIcons::parsecIcon;
 
 Texture AppIcons::_play;
 Texture AppIcons::_stop;
@@ -161,11 +166,16 @@ Texture AppIcons::_overlay;
 Texture AppIcons::_hotseat;
 Texture AppIcons::_tournament;
 
+Texture AppIcons::_developer;
+
 Texture AppIcons::_crown;
 Texture AppIcons::_star;
 Texture AppIcons::_eye;
 
 Texture AppIcons::_sodaArcadeLogo;
+
+Texture AppIcons::_arcadeIcon;
+Texture AppIcons::_parsecIcon;
 
 void AppIcons::init(ID3D11Device* pd3dDevice)
 {
@@ -250,7 +260,12 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
 	_star.loadFromFile(pd3dDevice, "./Icons/star.png");
 	_eye.loadFromFile(pd3dDevice, "./Icons/eye.png");
 
+    _developer.loadFromFile(pd3dDevice, "./Icons/developer.png");
+
 	_sodaArcadeLogo.loadFromFile(pd3dDevice, "./Icons/soda_arcade_logo.png");
+
+    _arcadeIcon.loadFromFile(pd3dDevice, "./Icons/arcade.png");
+    _parsecIcon.loadFromFile(pd3dDevice, "./Icons/parsec.png");
 
     play = _play.texture;
     stop = _stop.texture;
@@ -333,5 +348,10 @@ void AppIcons::init(ID3D11Device* pd3dDevice)
 	star = _star.texture;
 	eye = _eye.texture;
 
+	developer = _developer.texture;
+
 	sodaArcadeLogo = _sodaArcadeLogo.texture;
+
+    arcadeIcon = _arcadeIcon.texture;
+	parsecIcon = _parsecIcon.texture;
 }

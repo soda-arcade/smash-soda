@@ -27,32 +27,44 @@ bool BanList::ban(GuestData user)
 	return added;
 }
 
-const bool BanList::unban(const uint32_t userID, function<void(GuestData&)> callback)
-{
-	bool found = GuestDataList::pop(userID, callback);
-	if (found) {
-        SaveToFile();
+const bool BanList::unban(const uint32_t userID) {
 
-        // Unban the user's IP address
-        std::string ip = Cache::cache.getUserIpAddress(userID);
-        if (ip != "") {
-            Cache::cache.unbanIPAddress(ip);
-        }
+    vector<GuestData>::iterator gi = _guests.begin();
+	for (; gi != _guests.end(); ++gi) {
+		if ((*gi).userID == userID) {
+			_guests.erase(gi);
+			SaveToFile();
+			return true;
+		}
 	}
-	return found;
+
+	return false;
+	
 }
 
-const bool BanList::unban(string guestName, function<void(GuestData&)> callback) {
-	bool found = GuestDataList::pop(guestName, callback);
-	if (found) {
-        SaveToFile();
+const bool BanList::unban(string guestName) {
+
+    vector<GuestData>::iterator gi = _guests.begin();
+	for (; gi != _guests.end(); ++gi) {
+		if ((*gi).name == guestName) {
+			_guests.erase(gi);
+			SaveToFile();
+			return true;
+		}
 	}
-	return found;
+
+	return false;
+
 }
 
 const bool BanList::isBanned(const uint32_t userID)
 {
 	return find(userID);
+}
+
+const bool BanList::isBanned(const string guestName)
+{
+	return find(guestName);
 }
 
 vector<GuestData>& BanList::getGuests()

@@ -8,11 +8,12 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
     try
     {
         strcpy_s(_gameID, cfg.gameID);
-        strcpy_s(_gameName, Config::cfg.room.game.c_str());
-		strcpy_s(_description, Config::cfg.room.details.c_str());
+        strcpy_s(_gameName, (Config::cfg.room.game.size() < 255 ? Config::cfg.room.game.c_str() : ""));
+		strcpy_s(_description, (Config::cfg.room.details.size() < 500 ? Config::cfg.room.details.c_str() : ""));
         strcpy_s(_secret, cfg.secret);
         strcpy_s(_kioskApplication, "");
         strcpy_s(_kioskParam, "");
+        strcpy_s(_streamUrl, (Config::cfg.room.streamUrl.size() < 255 ? Config::cfg.room.streamUrl.c_str() : ""));
     }
     catch (const std::exception&)
     {
@@ -24,9 +25,11 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
             strcpy_s(_secret, "");
             strcpy_s(_kioskApplication, "");
             strcpy_s(_kioskParam, "");
+            strcpy_s(_streamUrl, "");
         } catch (const std::exception&) {}
     }
     _maxGuests = Config::cfg.room.guestLimit;
+    _repThreshold = Config::cfg.room.repThreshold;
     
     _micVolume = Config::cfg.audio.micVolume;
     _audioIn.volume = (float)_micVolume / 100.0f;
@@ -58,15 +61,18 @@ HostSettingsWidget::HostSettingsWidget(Hosting& hosting, function<void(bool)> on
 /// <returns></returns>
 bool HostSettingsWidget::validateSettings() {
 
-    // Game must be between 3 and 255 characters
 	if (strlen(_gameName) < 3 || strlen(_gameName) > 255) {
-		_gameNameError = "Game name must be between 3 and 255 characters.";
+		_validateError = "Game name must be between 3 and 255 characters.";
+        _showErrorPopup = true;
+        ImGui::OpenPopup("ERROR");
 		return false;
 	}
 
-	// Details can't be longer than 255 characters
-	if (strlen(_description) > 255) {
-		_descriptionError = "Description can't be longer than 255 characters.";
+	// Details can't be longer than 500 characters
+	if (strlen(_description) > 500) {
+        _validateError = "Description can't be longer than 500 characters.";
+        _showErrorPopup = true;
+        ImGui::OpenPopup("ERROR");
 		return false;
 	}
 
@@ -74,36 +80,154 @@ bool HostSettingsWidget::validateSettings() {
     
 }
 
-/// <summary>
-/// Renders the host settings widget.
-/// </summary>
-bool HostSettingsWidget::render(bool &showWindow, HWND& hwnd) {
+bool HostSettingsWidget::render(bool& showWindow, HWND& hwnd) {
 
     AppStyle::pushTitle();
     ImGui::SetNextWindowPos(ImVec2(464, 5), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(600, 700));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 500), ImVec2(800, 1000));
     ImGui::Begin("Hosting", &showWindow);
     if (!showWindow) Config::cfg.widgets.host = showWindow;
     AppStyle::pushInput();
 
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    ImGui::BeginChild("Hosting List", ImVec2(size.x, size.y));
-
-    AppStyle::pushLabel();
-    AppStyle::pop();
-    ImGui::SetNextItemWidth(size.x - 10);
-
-    renderGeneral(hwnd);
-
+    ImGui::BeginChild("content", ImVec2(size.x, size.y - 60.0f));
+    if (ImGui::BeginTabBar("Hosting Tabs", ImGuiTabBarFlags_None)) {
+        AppFonts::pushInput();
+        AppColors::pushTitle();
+        if (ImGui::BeginTabItem("General")) {
+            ImGui::BeginChild("innerscroll");
+            renderGeneral(hwnd);
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        if (!Config::cfg.room.privateRoom) {
+            if (ImGui::BeginTabItem("Advanced")) {
+                ImGui::BeginChild("innerscroll");
+                renderAdvanced();
+                ImGui::EndChild();
+                ImGui::EndTabItem();
+            }
+        }
+        AppColors::pop();
+        AppFonts::pop();
+        ImGui::EndTabBar();
+    }
     ImGui::EndChild();
 
-    AppStyle::pop();
+    static float indentSize = 0;
+    static ImVec2 dummySize = ImVec2(0.0f, 5.0f);
+    static ImVec2 cursor;
+    static ImVec2 pos;
+
+    size = ImGui::GetContentRegionAvail();
+    pos = ImGui::GetWindowPos();
+
+    ImGui::Dummy(dummySize);
+
+    ImGui::Separator();
+
+    ImGui::Dummy(ImVec2(0, 5.0f));
+
+    static bool showPopup = false;
+    static std::string popupTitle = "";
+    popupTitle = (_hosting.isRunning() ? "Stop hosting?" : "Start hosting?");
+
+    if (!_hosting.isRunning()) {
+        ImGui::BeginGroup();
+        AppFonts::pushLarge();
+        AppColors::pushButtonSolid();
+        if (ImGui::Button("START HOSTING")) {
+            showPopup = true;
+            ImGui::OpenPopup(popupTitle.c_str());
+
+            savePreferences();
+        }
+        AppColors::popButton();
+        AppFonts::pop();
+        ImGui::EndGroup();
+    }
+    else {
+
+        ImGui::BeginGroup();
+        AppColors::pushButtonDanger();
+        AppFonts::pushLarge();
+        if (ImGui::Button("STOP HOSTING")) {
+            showPopup = true;
+            ImGui::OpenPopup(popupTitle.c_str());
+        }
+        AppFonts::pop();
+        AppColors::popButton();
+        ImGui::EndGroup();
+
+        ImGui::SameLine();
+
+        if (isDirty()) {
+            cursor = ImGui::GetCursorPos();
+            ImGui::SetCursorPos(ImVec2(size.x - 60, cursor.y));
+            ImGui::BeginGroup();
+            AppColors::pushButtonSecondary();
+            AppFonts::pushLarge();
+            if (ImGui::Button("UPDATE")) {
+
+                // Apply settings for Parsec
+                _hosting.setHostConfig("", _gameID, _maxGuests, false, _secret);
+                _hosting.applyHostConfig();
+
+                savePreferences();
+
+                // Update on Soda Arcade
+                if (!Config::cfg.room.privateRoom) {
+                    Arcade::instance.createPost();
+                }
+
+                _updated = false;
+            }
+            AppFonts::pop();
+            AppColors::popButton();
+            ImGui::EndGroup();
+        }
+
+    }
+
+    //// ================================================================================
+
+    // Center to the screen
+    ImGui::SetCursorPos(ImVec2(0.5f * size.x - 130.0f, (ImGui::GetCursorPos().y / 2) - 80));
+
+    if (ConfirmPopupWidget::render(popupTitle.c_str(), showPopup)) {
+        // Was clicked and is already running (must stop)
+        if (_hosting.isRunning()) {
+            _hosting.stopHosting();
+            if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(false);
+            _updated = false;
+        }
+
+        // Was clicked and is not running (must start)
+        else if (Config::cfg.room.privateRoom || validateSettings()) {
+            savePreferences();
+
+            _hosting.setHostConfig("", _gameID, _maxGuests, false, _secret);
+            _hosting.applyHostConfig();
+            _hosting.startHosting();
+            if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(true);
+
+            // Start kiosk mode
+            if (Config::cfg.kioskMode.enabled) {
+                ProcessMan::instance.stop();
+                std::vector<GameData> games = Cache::cache.gameList.getGames();
+                ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
+            }
+        }
+    }
+
+    // Errors
+    ImGui::SetCursorPos(ImVec2(0.5f * size.x - 130.0f, (ImGui::GetCursorPos().y / 2) - 80));
+    ConfirmPopupWidget::render("ERROR", _showErrorPopup, _validateError);
+
     ImGui::End();
-    AppStyle::pop();
 
     return true;
-
 }
 
 /// <summary>
@@ -119,6 +243,8 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     size = ImGui::GetContentRegionAvail();
     pos = ImGui::GetWindowPos();
+
+    ImGui::Dummy(dummySize);
 
     // Vector of themes
     AppStyle::pushLabel();
@@ -170,107 +296,13 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
         }
 
     }
-    if (_gameNameError.length() > 0) {
-        AppStyle::pushInput();
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-		ImGui::TextWrapped(_gameNameError.c_str());
-        ImGui::PopStyleColor();
-        AppStyle::pop();
-    }
-
-    if (!Config::cfg.room.privateRoom) {
-        if (ImForm::InputText("DETAILS", _description,
-            "Any additional details about the game or your room. This will be displayed when somebody clicks your post.")) {
-
-            // Can't be longer than 255 characters
-            if (strlen(_description) > 255) {
-                string desc = _description;
-                desc = desc.substr(0, 255);
-                strcpy_s(_description, desc.c_str());
-			}
-
-        }
-        if (_descriptionError.length() > 0) {
-            AppStyle::pushInput();
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-            ImGui::TextWrapped(_descriptionError.c_str());
-            ImGui::PopStyleColor();
-            AppStyle::pop();
-        }
-
-        if (Arcade::instance.artwork.size() > 0) {
-            AppStyle::pushLabel();
-            ImGui::Text("CUSTOM ARTWORK");
-            AppStyle::pop();
-            AppStyle::pushInput();
-            ImGui::SetNextItemWidth(size.x);
-
-            std::string defaultValue = "None";
-            if (_selectedArtwork != -1) {
-                defaultValue = Arcade::instance.artwork[_selectedArtwork].title;
-            }
-
-            if (ImGui::BeginCombo("### Artwork picker combo", defaultValue.c_str(), ImGuiComboFlags_HeightLarge)) {
-
-                if (ImGui::Selectable("None", (_selectedArtwork == -1))) {
-                    _selectedArtwork = -1;
-                    Arcade::instance.artworkID = -1;
-                }
-                if (_selectedArtwork == -1) {
-                    ImGui::SetItemDefaultFocus();
-                }
-
-                for (size_t i = 0; i < Arcade::instance.artwork.size(); ++i) {
-                    bool isSelected = (i == _selectedArtwork);
-                    if (ImGui::Selectable(Arcade::instance.artwork[i].title.c_str(), isSelected)) {
-                        _selectedArtwork = i;
-                        Arcade::instance.artworkID = Arcade::instance.artwork[i].id;
-                    }
-                    if (isSelected) {
-                        ImGui::SetItemDefaultFocus();
-                    }
-                }
-                ImGui::EndCombo();
-            }
-            AppStyle::pop();
-            AppStyle::pushLabel();
-            ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
-            AppStyle::pop();
-            ImGui::Dummy(ImVec2(0, 10.0f));
-        }
-
-        AppStyle::pushLabel();
-        ImGui::Text("POST THEME");
-        AppStyle::pop();
-        AppStyle::pushInput();
-        ImGui::SetNextItemWidth(size.x);
-        if (ImGui::BeginCombo("### Post theme picker combo", _postThemes[_selectedTheme].c_str(), ImGuiComboFlags_HeightLarge)) {
-
-            for (size_t i = 0; i < 6; ++i) {
-                bool isSelected = (i == _selectedTheme);
-                if (ImGui::Selectable(_postThemes[i].c_str(), isSelected)) {
-                    _selectedTheme = i;
-                }
-                if (isSelected) {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-            ImGui::EndCombo();
-        }
-        AppStyle::pop();
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("This lets you change the colour theme of your room poster on Soda Arcade.");
-        AppStyle::pop();
-        ImGui::Dummy(ImVec2(0, 10.0f));
-
-    }
 
     char link[256];
     if (Config::cfg.room.privateRoom) {
         strcpy_s(link, _secretLink);
 	}
     else {
-		string arcadeLink = "https://soda-arcade.com/invite/" + Config::cfg.arcade.username + "/room";
+		string arcadeLink = "https://soda-arcade.com/invite/" + Arcade::instance.credentials.username + "/room";
         strcpy_s(link, arcadeLink.c_str());
 	}
 
@@ -291,208 +323,251 @@ void HostSettingsWidget::renderGeneral(HWND& hwnd) {
 
     AppStyle::pushLabel();
 
-    ImGui::BeginChild("##Guest slot child", ImVec2(size.x / 3, 50.0f));
-    ImGui::Text("GUEST SLOTS");
-    if (IntRangeWidget::render("guest count", _maxGuests, 0, 20, 0.025f)) {
-		Config::cfg.room.guestLimit = _maxGuests;
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("##Public room child", ImVec2(size.x / 3, 50.0f));
-    ImGui::Text("PUBLIC ROOM");
-    ImGui::Indent(20);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, !Config::cfg.room.privateRoom, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-
-		// If public game is false, check we have authenticated with Soda Arcade
-		if (Config::cfg.room.privateRoom) {
-			if (Config::cfg.arcade.token == "") {
-				Config::cfg.arcade.showLogin = true;
-			}
-			else {
-				Config::cfg.room.privateRoom = false;
-			}
-		}
-		else {
-			Config::cfg.room.privateRoom = true;
-		}
-
-        //_publicGame = !_publicGame;
-        //Config::cfg.room.publicRoom = _publicGame;
-        //updateSecretLink();
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("##Latency child", ImVec2(size.x / 3, 50.0f));
-    ImGui::Text("LATENCY LIMITER");
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _latencyLimiter, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        _latencyLimiter = !_latencyLimiter;
-    }
-    ImGui::SameLine();
-
-    if (IntRangeWidget::render("latency limit", _latencyLimit, 0, 64, 0.025f)) {
-    }
-    ImGui::EndChild();
-
-    ImGui::Dummy(dummySize);
-    cursor = ImGui::GetCursorPos();
-	ImGui::Indent(0);
-
-    ImGui::BeginChild("##Hotseat child", ImVec2(size.x / 3, 50.0f));
-    ImGui::Text("HOTSEAT");
-    ImGui::Indent(8);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.hotseat.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        Config::cfg.hotseat.enabled = !Config::cfg.hotseat.enabled;
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("##Kiosk child", ImVec2(size.x / 3, 50.0f));
-    ImGui::Text("KIOSK MODE");
-    ImGui::Indent(15);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.kioskMode.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        // Can only start kiosk mode when a game is selected
-        if (_libraryID == -1) {
-            Config::cfg.kioskMode.enabled = false;
-        }
-        else {
-            Config::cfg.kioskMode.enabled = !Config::cfg.kioskMode.enabled;
+    ImGui::BeginChild("##Button group", ImVec2(size.x, 120.0f));
+        ImGui::BeginChild("##Guest slot child", ImVec2(size.x / 3, 50.0f));
+        ImGui::Text("GUEST SLOTS");
+        if (IntRangeWidget::render("guest count", _maxGuests, 0, 20, 0.025f)) {
+		    Config::cfg.room.guestLimit = _maxGuests;
             if (_hosting.isRunning()) {
-                if (Config::cfg.kioskMode.enabled && _libraryID != -1) {
-                    ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
-                }
-                else {
-                    ProcessMan::instance.stop();
-                }
+                _updated = true;
             }
         }
-    }
-    TitleTooltipWidget::render("Kiosk Mode", "Kiosk mode can only be started when you have selected a game from your library.");
+        ImGui::EndChild();
 
-    ImGui::EndChild();
+        ImGui::SameLine();
 
-    ImGui::SameLine();
+        ImGui::BeginChild("##Public room child", ImVec2(size.x / 3, 50.0f));
+        ImGui::Text("PUBLIC ROOM");
+        ImGui::Indent(20);
+        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, !Config::cfg.room.privateRoom, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+		    // If public game is false, check we have authenticated with Soda Arcade
+		    if (Config::cfg.room.privateRoom) {
+			    if (Arcade::instance.credentials.token.empty()) {
+				    Config::cfg.arcade.showLogin = true;
+			    }
+			    else {
+				    Config::cfg.room.privateRoom = false;
+			    }
+		    }
+		    else {
+			    Config::cfg.room.privateRoom = true;
+		    }
 
-    ImGui::BeginChild("##Overlay child", ImVec2(size.x / 3, 50.0f));
-    ImGui::Indent(20);
-    ImGui::Text("OVERLAY");
-    ImGui::Indent(8);
-    if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.overlay.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
-        if (_hosting.isRunning()) {
-            if (Config::cfg.overlay.enabled) {
-                WebSocket::instance.closeOverlay();
+            if (_hosting.isRunning()) {
+                _updated = true;
+            }
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::BeginChild("##Latency child", ImVec2(size.x / 3, 50.0f));
+        ImGui::Text("LATENCY LIMITER");
+        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, _latencyLimiter, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+            _latencyLimiter = !_latencyLimiter;
+            if (_hosting.isRunning()) {
+                _updated = true;
+            }
+        }
+        ImGui::SameLine();
+
+        if (IntRangeWidget::render("latency limit", _latencyLimit, 0, 64, 0.025f)) {
+            Config::cfg.room.latencyLimitThreshold = _latencyLimit;
+            if (_hosting.isRunning()) {
+				_updated = true;
+			}
+        }
+        ImGui::EndChild();
+
+        ImGui::Dummy(dummySize);
+        cursor = ImGui::GetCursorPos();
+	    ImGui::Indent(0);
+
+        ImGui::BeginChild("##Hotseat child", ImVec2(size.x / 3, 50.0f));
+        ImGui::Text("HOTSEAT");
+        ImGui::Indent(8);
+        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.hotseat.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+            Config::cfg.hotseat.enabled = !Config::cfg.hotseat.enabled;
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::BeginChild("##Kiosk child", ImVec2(size.x / 3, 50.0f));
+        ImGui::Text("KIOSK MODE");
+        ImGui::Indent(15);
+        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.kioskMode.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+            // Can only start kiosk mode when a game is selected
+            if (_libraryID == -1) {
+                Config::cfg.kioskMode.enabled = false;
             }
             else {
-                WebSocket::instance.launchOverlay();
+                Config::cfg.kioskMode.enabled = !Config::cfg.kioskMode.enabled;
+                if (_hosting.isRunning()) {
+                    if (Config::cfg.kioskMode.enabled && _libraryID != -1) {
+                        ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
+                    }
+                    else {
+                        ProcessMan::instance.stop();
+                    }
+                }
             }
         }
-        Config::cfg.overlay.enabled = !Config::cfg.overlay.enabled;
-    }
+        TitleTooltipWidget::render("Kiosk Mode", "Kiosk mode can only be started when you have selected a game from your library.");
+
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::BeginChild("##Overlay child", ImVec2(size.x / 3, 50.0f));
+        ImGui::Indent(20);
+        ImGui::Text("OVERLAY");
+        ImGui::Indent(8);
+        if (ToggleIconButtonWidget::render(AppIcons::yes, AppIcons::no, Config::cfg.overlay.enabled, AppColors::positive, AppColors::negative, ImVec2(22, 22))) {
+            if (_hosting.isRunning()) {
+                if (Config::cfg.overlay.enabled) {
+                    WebSocket::instance.closeOverlay();
+                }
+                else {
+                    WebSocket::instance.launchOverlay();
+                }
+            }
+            Config::cfg.overlay.enabled = !Config::cfg.overlay.enabled;
+        }
+        ImGui::EndChild();
     ImGui::EndChild();
 
     AppStyle::pop();
 
+}
+
+/// <summary>
+/// Renders the audio settings panel.
+/// </summary>
+void HostSettingsWidget::renderAdvanced() {
+
+    static float indentSize = 0;
+    static ImVec2 dummySize = ImVec2(0.0f, 10.0f);
+    static ImVec2 cursor;
+    static ImVec2 size;
+    static ImVec2 pos;
+
+    size = ImGui::GetContentRegionAvail();
+    pos = ImGui::GetWindowPos();
+
     ImGui::Dummy(dummySize);
 
-    static bool showPopup = false;
-    static string popupTitle = "";
-    popupTitle = (_hosting.isRunning() ? "Stop hosting?" : "Start hosting?");
-
-    indentSize = 0.5f * size.x - 60.0f;
-    ImGui::Indent(indentSize);
-    if (ToggleIconButtonWidget::render(
-        AppIcons::stop, AppIcons::play, _hosting.isRunning(),
-        AppColors::negative, AppColors::positive, ImVec2(100, 100)
-    ))
-    {
-        showPopup = true;
-        ImGui::OpenPopup(popupTitle.c_str());
-
-        savePreferences();
-    }
-    ImGui::Unindent(indentSize);
-
-    if (_hosting.isRunning())   TitleTooltipWidget::render("Stop hosting", "Close current room.");
-    else                        TitleTooltipWidget::render("Start hosting", "Open a new room using these settings.");
-
-    // ================================================================================
-
-    if (ConfirmPopupWidget::render(popupTitle.c_str(), showPopup))
-    {
-        // Was clicked and is already running (must stop)
-        if (_hosting.isRunning()) {
-            _hosting.stopHosting();
-            if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(false);
-        }
-
-        // Was clicked and is not running (must start)
-        else if (Config::cfg.room.privateRoom || validateSettings()) {
-            savePreferences();
-
-            _hosting.setHostConfig("", _gameID, _maxGuests, false, _secret);
-            _hosting.applyHostConfig();
-            _hosting.startHosting();
-            if (_onHostRunningStatusCallback != nullptr) _onHostRunningStatusCallback(true);
-
-            // Start kiosk mode
-            if (Config::cfg.kioskMode.enabled) {
-				ProcessMan::instance.start(games[_libraryID].path, games[_libraryID].parameters);
-			}
-        }
-    }
-
-    if (_hosting.isRunning()) {
-
-        ImGui::Dummy(dummySize);
-        indentSize = 0.5f * size.x - 65.0f;
-        ImGui::Indent(indentSize);
-
-        AppColors::pushInput();
-        AppFonts::pushTitle();
-        ImGui::PushStyleColor(ImGuiCol_Button, AppColors::primary);
-        
-        // Parsec settings were changed
-        if (isDirty()) {
-
-            if (ImGui::Button("Update Settings")) {
-                // Apply settings for Parsec
-                _hosting.setHostConfig("", "1wdoHfhhZH5lPuZCwGBete0HIAj", _maxGuests, false, _secret);
-                _hosting.applyHostConfig();
-
-                savePreferences();
-
-                // Update on Soda Arcade
-                if (!Config::cfg.room.privateRoom) {
-                    Arcade::instance.createPost();
-                }
-            }
-            TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");
-
-        } else 
-
-        // Soda Arcade settings were changed
-        if (_gameName != Config::cfg.room.game || _description != Config::cfg.room.details) {
-            if (ImGui::Button("Update Settings")) {
-                savePreferences();
-
-                // Update on Soda Arcade
-                if (!Config::cfg.room.privateRoom) {
-                    Arcade::instance.createPost();
-                }
-            }
-            TitleTooltipWidget::render("Update Room Settings", "The room will be instantly updated with your new settings.");
-        }
-
-        ImGui::PopStyleColor();
+    if (Arcade::instance.artwork.size() > 0) {
+        AppStyle::pushLabel();
+        ImGui::Text("CUSTOM ARTWORK");
         AppStyle::pop();
+        AppStyle::pushInput();
+        ImGui::SetNextItemWidth(size.x);
+
+        std::string defaultValue = "None";
+        if (_selectedArtwork != -1) {
+            defaultValue = Arcade::instance.artwork[_selectedArtwork].title;
+        }
+
+        if (ImGui::BeginCombo("### Artwork picker combo", defaultValue.c_str(), ImGuiComboFlags_HeightLarge)) {
+
+            if (ImGui::Selectable("None", (_selectedArtwork == -1))) {
+                _selectedArtwork = -1;
+                Arcade::instance.artworkID = -1;
+            }
+            if (_selectedArtwork == -1) {
+                ImGui::SetItemDefaultFocus();
+            }
+
+            for (size_t i = 0; i < Arcade::instance.artwork.size(); ++i) {
+                bool isSelected = (i == _selectedArtwork);
+                if (ImGui::Selectable(Arcade::instance.artwork[i].title.c_str(), isSelected)) {
+                    _selectedArtwork = i;
+                    Arcade::instance.artworkID = Arcade::instance.artwork[i].id;
+                    if (_hosting.isRunning()) {
+                        _updated = true;
+                    }
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        AppStyle::pop();
+        AppStyle::pushLabel();
+        ImGui::TextWrapped("If you have any custom artwork uploaded to Soda Arcade, you can select it here.");
+        AppStyle::pop();
+        ImGui::Dummy(ImVec2(0, 10.0f));
+    }
+
+    AppStyle::pushLabel();
+    ImGui::Text("POST THEME");
+    AppStyle::pop();
+    AppStyle::pushInput();
+    ImGui::SetNextItemWidth(size.x);
+    if (ImGui::BeginCombo("### Post theme picker combo", _postThemes[_selectedTheme].c_str(), ImGuiComboFlags_HeightLarge)) {
+
+        for (size_t i = 0; i < 6; ++i) {
+            bool isSelected = (i == _selectedTheme);
+            if (ImGui::Selectable(_postThemes[i].c_str(), isSelected)) {
+                _selectedTheme = i;
+                if (_hosting.isRunning()) {
+                    _updated = true;
+                }
+            }
+            if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    AppStyle::pop();
+    AppStyle::pushLabel();
+    ImGui::TextWrapped("This lets you change the colour theme of your room poster on Soda Arcade.");
+    AppStyle::pop();
+    ImGui::Dummy(ImVec2(0, 10.0f));
+
+    if (ImForm::InputTextArea("DETAILS", _description,
+        "Any additional details about the game or your room. This will be displayed when somebody clicks your post.")) {
+        if (strlen(_description) > 500) {
+            string desc = _description;
+            desc = desc.substr(0, 500);
+            strcpy_s(_description, desc.c_str());
+        }
+
+        Config::cfg.room.details = _description;
+
+        if (_hosting.isRunning()) {
+            _updated = true;
+        }
+    }
+
+    if (ImForm::InputText("STREAM CHANNEL URL", _streamUrl, "Here you can enter your Twitch or Kick channel URL if you want to display your stream on your room post.")) {
+
+        // Can't be longer than 255 characters
+        if (strlen(_gameName) > 255) {
+            string streamUrl = _streamUrl;
+            streamUrl = streamUrl.substr(0, 255);
+            strcpy_s(_streamUrl, streamUrl.c_str());
+        }
+
+        Config::cfg.room.streamUrl = _streamUrl;
+
+        if (_hosting.isRunning()) {
+            _updated = true;
+        }
 
     }
 
-    ImGui::Dummy(ImVec2(0.0f, 20.0f));
+    if (ImForm::InputNumber("REP THRESHOLD", _repThreshold, 10, 100,
+        "Users with reputation below this level won't see your room on the arcade.")) {
+        Config::cfg.room.repThreshold = _repThreshold;
+
+        if (_hosting.isRunning()) {
+            _updated = true;
+        }
+    }
 
 }
 
@@ -601,19 +676,25 @@ void HostSettingsWidget::updateSecretLink() {
 /// then these settings are "dirty".
 /// </summary>
 bool HostSettingsWidget::isDirty() {
-    ParsecHostConfig cfg = _hosting.getHostConfig();
+    if (_updated) {
+        return true;
+    } 
+    return false;
+
+    /*ParsecHostConfig cfg = _hosting.getHostConfig();
 
     if (
-        _publicGame != cfg.publicGame ||
         _maxGuests != cfg.maxGuests ||
         _latencyLimiter != Config::cfg.room.latencyLimit ||
         _latencyLimit != Config::cfg.room.latencyLimitThreshold ||
-        (strcmp("", cfg.name) != 0) ||
-        (strcmp(_gameID, cfg.gameID) != 0) ||
-        (strcmp(_secret, cfg.secret) != 0)
+        _hotseat != Config::cfg.hotseat.enabled ||
+        _kioskMode != Config::cfg.kioskMode.enabled ||
+        _selectedArtwork != Config::cfg.room.artworkID ||
+        _gameName != Config::cfg.room.game ||
+        _repThreshold != Config::cfg.room.repThreshold
     ) return true;
 
-    return false;
+    return false;*/
 }
 
 /// <summary>

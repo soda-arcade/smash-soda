@@ -1,7 +1,8 @@
 #pragma once
 
+#include "../../../Modules/Arcade.h"
 #include "parsec-dso.h"
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include <iostream>
 
 class CommandPrivate : public ACommand
@@ -13,8 +14,8 @@ public:
 	 * 
 	 * @param config The host config
 	 */
-	CommandPrivate(ParsecHostConfig& config)
-		: _config(config)
+	CommandPrivate(const char* msg, Guest& sender, ParsecHostConfig& config)
+		: ACommand(msg, sender), _config(config)
 	{}
 
 	/**
@@ -22,8 +23,19 @@ public:
 	 * @return true if the command was successful
 	 */
 	bool run() override {
-		_replyMessage = Config::cfg.chatbotName + "Room set to private.\0";
+
+		if (Config::cfg.room.privateRoom) {
+			setReply("The room is already private.");
+			return false;
+		}
+
+		setReply("The room is now private.");
 		_config.publicGame = false;
+		Config::cfg.room.privateRoom = true;
+
+		Config::cfg.Save();
+		Arcade::instance.deletePost();
+
 		return true;
 	}
 

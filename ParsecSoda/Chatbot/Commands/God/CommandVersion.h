@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../Core/Cache.h"
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 
 using namespace std;
 
@@ -14,8 +14,8 @@ public:
 	 * 
 	 * @param sender 
 	 */
-	CommandVersion(Guest& sender)
-		: _sender(sender)
+	CommandVersion(const char* msg, Guest& sender)
+		: ACommand(msg, sender)
 	{}
 
 	/**
@@ -24,7 +24,7 @@ public:
 	 */
 	bool run() override {
 		
-		SetReply(Cache::cache.version.c_str());
+		setReply(Cache::cache.version.c_str());
 
 		return true;
 	}
@@ -38,5 +38,4 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 };

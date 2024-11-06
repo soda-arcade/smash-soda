@@ -1,12 +1,17 @@
 #pragma once
 
 #include "parsec-dso.h"
-#include "../Base/ACommandStringArg.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
-class CommandKeyboard : public ACommandStringArg
+class CommandKeyboard : public ACommand
 {
 public:
+
+	/**
+	 * Example of how to use the command
+	 */
+	std::string usage = "See instructions at https ://github.com/soda-arcade/smash-soda/wiki/keyboard";
 
 	/**
 	 * @brief Construct a new CommandKeyboard object
@@ -16,7 +21,7 @@ public:
 	 * @param gamepadClient 
 	 */
 	CommandKeyboard(const char* msg, Guest& sender, GamepadClient& gamepadClient)
-		: ACommandStringArg(msg, internalPrefixes()), _sender(sender), _gamepadClient(gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -26,13 +31,24 @@ public:
 	bool run() override {
 
 		// Valid button check
-		if (!ACommandStringArg::run() || _gamepadClient.getKeyMap().isValidButtonName(toLower(_stringArg)) == false) {
-			SetReply("See instructions at https://github.com/mickeyuk/smash-soda/wiki/keyboard");
+		/*if (!ACommandStringArg::run() || _gamepadClient.getKeyMap().isValidButtonName(toLower(_stringArg)) == false) {
+			setReply("See instructions at https://github.com/mickeyuk/smash-soda/wiki/keyboard");
+			return false;
+		}*/
+
+		if (getArgs().size() < 1) {
+			setReply(usage);
 			return false;
 		}
 
-		_gamepadClient.mapKeyboard(_sender.userID, toLower(_stringArg));
-		SetReply(_sender.name + ", exit the chat window and press a key to map to " + toUpper(_stringArg) + ".\0");
+		string btn = getArgs()[0];
+		if (_gamepadClient.getKeyMap().isValidButtonName(toLower(btn)) == false) {
+			setReply(usage);
+			return false;
+		}
+
+		_gamepadClient.mapKeyboard(_sender.userID, toLower(btn));
+		setReply(_sender.name + ", exit the chat, double click the Parsec window and press a key to map to " + toUpper(btn) + ".\0");
 
 		return true;
 
@@ -47,19 +63,7 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 	GamepadClient& _gamepadClient;
-
-	// Split msg into vector of strings by space
-	vector<string> splitMsg() {
-		vector<string> result;
-		stringstream ss(_msg);
-		string item;
-		while (getline(ss, item, ' ')) {
-			result.push_back(item);
-		}
-		return result;
-	}
 
 	// Convert string to lowercase
 	string toLower(string str) {

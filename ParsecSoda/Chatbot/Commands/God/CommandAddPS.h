@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
 class CommandAddPS : public ACommand
@@ -13,8 +13,8 @@ public:
 	 * 
 	 * @param gamepadClient The gamepad client
 	 */
-	CommandAddPS(GamepadClient& gamepadClient)
-		: _gamepadClient(gamepadClient)
+	CommandAddPS(const char* msg, Guest& sender, GamepadClient& gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -23,7 +23,7 @@ public:
 	 */
 	bool run() override {
 		_gamepadClient.createGamepad(AGamepad::Type::DUALSHOCK, true);
-		SetReply("Added playstation controller.\0");
+		setReply("Added playstation controller.\0");
 		return true;
 	}
 

@@ -85,6 +85,22 @@ void WebSocket::onMessage(websocketpp::connection_hdl hdl, server::message_ptr m
         j.at("data").get_to(message);
 
         g_hosting.sendHostMessage(message.c_str());
+    } 
+    else if (j["event"] == "chat:external") {
+        string source;
+        string message;
+        string user;
+
+        j.at("data").at("user").at("display-name").get_to(user);
+        j.at("data").at("message").get_to(message);
+        try {
+			j.at("data").at("source").get_to(source);
+        }
+        catch (json::out_of_range& e) {
+			source = "Twitch";
+		}
+
+        g_hosting.messageFromExternalSource(source, user, message);
     }
 }
 

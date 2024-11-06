@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Base/ACommand.h"
+#include "../ACommand.h"
 #include "../../Guest.h"
 #include "../../Tier.h"
 #include "../../Helpers/Stringer.h"
@@ -20,7 +20,7 @@ public:
 	 * @param isHost
 	 */
 	CommandDefaultMessage(const char* msg, Guest& sender, uint32_t lastUserID, Tier tier, bool isHost = false)
-		: _msg(msg), _sender(sender), _lastUserID(lastUserID), _tier(tier), _isHost(isHost)
+		: ACommand(msg, sender), _lastUserID(lastUserID), _tier(tier), _isHost(isHost)
 	{
 		isBotCommand = false;
 	}
@@ -37,7 +37,7 @@ public:
 		{
 			static string role = "";
 			if (_isHost || _tier == Tier::GOD) role = "#  ";
-			else if (_tier == Tier::ADMIN || _tier == Tier::MOD) role = "$  ";
+			else if (_tier == Tier::MOD) role = "$  ";
 			else role = ">  ";
 
 			if (_sender.isValid())
@@ -66,8 +66,6 @@ public:
 	}
 
 protected:
-	string _msg;
-	Guest& _sender;
 	uint32_t _lastUserID;
 	Tier _tier;
 	bool _isHost;

@@ -31,6 +31,8 @@ public:
 	static void pushWarning();
 	static void pushButton();
 	static void pushButtonSolid();
+	static void pushButtonSecondary();
+	static void pushButtonDanger();
 	static void popButton();
 
 	static ImVec4 title;

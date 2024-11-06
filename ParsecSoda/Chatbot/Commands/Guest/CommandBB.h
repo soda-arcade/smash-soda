@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../Core/Cache.h"
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 #include "../../../Modules/Macro.h"
 
@@ -10,14 +10,19 @@ class CommandBB : public ACommand
 public:
 
 	/**
+	 * Example of how to use the command
+	 */
+	std::string usage = "Usage: !bb";
+
+	/**
 	 * @brief Construct a new CommandBB object
 	 * 
 	 * @param gamepadClient 
 	 * @param macro 
 	 * @param sender 
 	 */
-	CommandBB(GamepadClient& gamepadClient, Macro& macro, Guest& sender)
-		: _gamepadClient(gamepadClient), _macro(macro), _sender(sender)
+	CommandBB(const char* msg, Guest& sender, GamepadClient& gamepadClient, Macro& macro)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient), _macro(macro), _sender(sender)
 	{}
 
 	/**
@@ -26,14 +31,13 @@ public:
 	 */
 	bool run() override {
 
-		Tier tier = Cache::cache.tierList.getTier(_sender.userID);
-		if (tier == Tier::ADMIN || tier == Tier::MOD || tier == Tier::GOD || Cache::cache.vipList.isVIP(_sender.userID)) {
+		if (hasPermission()) {
 			_macro.pressButtonForAll(ParsecGamepadButton::GAMEPAD_BUTTON_B);
 			_macro.pressButtonForAll(ParsecGamepadButton::GAMEPAD_BUTTON_B);
-			SetReply("Everybody's B button was pressed twice!\0");
+			setReply("Everybody's B button was pressed twice!\0");
 		}
 		else {
-			SetReply("Only mods and VIPs can use this command!\0");
+			setReply("Only mods and VIPs can use this command!\0");
 		}
 		
 		return true;
@@ -51,4 +55,14 @@ protected:
 	GamepadClient& _gamepadClient;
 	Macro& _macro;
 	Guest& _sender;
+
+	bool hasPermission() {
+		Tier tier = Cache::cache.tierList.getTier(_sender.userID);
+		if (tier == Tier::MOD || tier == Tier::GOD ||
+			Cache::cache.vipList.isVIP(_sender.userID)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 };

@@ -1,112 +1,141 @@
 #pragma once
 
 #include "../../../Core/Cache.h"
-#include "../Base/ACommandSearchUserHistory.h"
-#include <iostream>
-#include <Windows.h>
-#include <mmsystem.h>
+#include "../../ACommand.h"
 #include "parsec-dso.h"
 
 using namespace std;
 
-class CommandMod : public ACommandSearchUserHistory
+class CommandMod : public ACommand
 {
 public:
 
+	std::string usage = "Usage: !mod <username>\nExample: !mod RefffiK\0";
+
 	/**
-	 * @brief Construct a new CommandMod object
-	 * 
-	 * @param msg The message to parse
-	 * @param sender The sender of the message
-	 * @param parsec The parsec instance
-	 * @param guests The list of online guests
-	 * @param guestHistory The list of offline guests
+	 * @brief Construct a new CommandBan object
+	 *
+	 * @param msg
+	 * @param sender
+	 * @param parsec
+	 * @param guests
+	 * @param guestHistory
 	 */
-	CommandMod(const char* msg, Guest& sender, ParsecDSO* parsec, GuestList& guests, GuestDataList& guestHistory)
-		: ACommandSearchUserHistory(msg, internalPrefixes(), guests, guestHistory), _sender(sender), _parsec(parsec)
+	CommandMod(const char* msg, Guest& sender, GuestList& guests, GuestDataList& guestHistory)
+		: ACommand(msg, sender), guests(guests), _guestHistory(guestHistory)
 	{
 	}
 
 	/**
 	 * @brief Run the command
-	 * @return true if the command was successful
+	 *
+	 * @return true
+	 * @return false
 	 */
 	bool run() override {
-		ACommandSearchUserHistory::run();
 
-		bool rv = false;
-
-		switch (_searchResult)
-		{
-		case SEARCH_USER_HISTORY_RESULT::NOT_FOUND:
-			SetReply(_sender.name + ", I cannot find the user you want to make a mod.\0");
-			break;
-
-		case SEARCH_USER_HISTORY_RESULT::ONLINE:
-			handleGuest(GuestData(_onlineGuest.name, _onlineGuest.userID), true, _onlineGuest.id);
-			_guestHistory.pop(_onlineGuest.userID);
-			break;
-
-		case SEARCH_USER_HISTORY_RESULT::OFFLINE:
-			handleGuest(_offlineGuest, false);
-			_guestHistory.pop(_offlineGuest.userID);
-			break;
-
-		case SEARCH_USER_HISTORY_RESULT::FAILED:
-		default:
-			SetReply("Usage: !mod <username>\nExample: !mod Call_Me_Troy\0");
-			break;
+		// Was a guest specified?
+		if (getArgs().size() == 0) {
+			setReply(usage);
+			return false;
 		}
 
-		return rv;
+		// Find the guest
+		if (findGuest()) {
+			GuestData targetData(target.name, target.userID);
+			return handleGuest(targetData, true, target.id);
+		}
+
+		// Find offline guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+		bool found = false;
+		try {
+			found = _guestHistory.find(guest, [&](GuestData& guest) { _offlineGuest = guest; });
+		}
+		catch (const std::exception&) {}
+		if (found) {
+			return handleGuest(_offlineGuest, false);
+		}
+		return false;
+
 	}
 
 	/**
-	 * @brief Get the prefixes
-	 * @return The prefixes
+	 * @brief Get the prefixes object
+	 *
+	 * @return vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!mod", "!moderator" };
+		return vector<const char*> { "!ban", "!block" };
 	}
 
 private:
-	static vector<const char*> internalPrefixes()
-	{
-		return vector<const char*> { "!mod ", "!moderator " };
+	static vector<const char*> internalPrefixes() {
+		return vector<const char*> { "!ban ", "!block " };
 	}
 
 	ParsecDSO* _parsec;
-	Guest& _sender;
+	Guest target;
+	GuestList guests;
+	GuestDataList& _guestHistory;
+	GuestData _offlineGuest;
 
 	/**
-	 * @brief Handle the guest
-	 * 
-	 * @param target The guest to handle
-	 * @param isOnline True if the guest is online
-	 * @param guestID The guest ID
-	 * @return true if the guest was handled
-	 */
-	bool handleGuest(GuestData target, bool isOnline, uint32_t guestID = -1) {
-		bool result = false;
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	*
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
 
-		if (_sender.userID == target.userID) {
-			SetReply("You don't need to be a mod...you're head honcho, " + _sender.name + "!\0");
-		} else {
-			SetReply(_sender.name + " has made " + target.name + " a mod!\0");
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
 
-			if (Cache::cache.modList.mod(target)) {
-				
-				Cache::cache.tierList.setTier(target.userID, Tier::MOD);
-
-				try {
-					PlaySound(TEXT("./SFX/mod.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
 				}
-				catch (const std::exception&) {}
-
-				result = true;
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
 			}
 		}
 
-		return result;
+		return false;
+	}
+
+	/**
+	 * @brief Handle the guest
+	 *
+	 * @param target
+	 * @param isOnline
+	 * @param guestID
+	 * @return true
+	 * @return false
+	 */
+	bool handleGuest(GuestData target, bool isOnline, uint32_t guestID = -1) {
+		if (!Cache::cache.modList.isModded(target.userID)) {
+			if (Cache::cache.modList.mod(target)) {
+				setReply("Made " + target.name + " a mod!\0");
+				return true;
+			}
+		}
+		else {
+			setReply(target.name + " is already a mod!\0");
+			return false;
+		}
 	}
 };

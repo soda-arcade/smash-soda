@@ -1,11 +1,14 @@
 #pragma once
 
+#include "../../../Modules/Arcade.h"
 #include "parsec-dso.h"
-#include "../Base/ACommandStringArg.h"
+#include "../../ACommand.h"
 
-class CommandName : public ACommandStringArg
+class CommandName : public ACommand
 {
 public:
+
+	std::string usage = "Usage: !name <name>\nExample: !name Smash Bros Ultimate";
 	
 	/**
 	 * @brief Construct a new CommandName object
@@ -13,8 +16,8 @@ public:
 	 * @param msg
 	 * @param config
 	 */
-	CommandName(const char* msg, ParsecHostConfig &config)
-		: ACommandStringArg(msg, internalPrefixes()), _config(config)
+	CommandName(const char* msg, Guest& sender, ParsecHostConfig &config)
+		: ACommand(msg, sender), _config(config)
 	{}
 
 	/**
@@ -24,24 +27,20 @@ public:
 	 * @return false
 	 */
 	bool run() override {
-		if ( !ACommandStringArg::run() ) {
-			SetReply("Usage: !name <roomname>\nExample: !name Let's Play Gauntlet!\0");
+
+		if (getArgs().size() < 1) {
+			setReply(usage);
 			return false;
 		}
+		
+		std::string name = getArgs()[0];
 
-		// Replaces \ + n with \n
-		size_t index = 0;
-		while (true) {
-			index = _stringArg.find("\\n", index);
-			if (index == std::string::npos) break;
+		Config::cfg.room.game = name;
+		strcpy_s(_config.name, name.c_str());
 
-			_stringArg.replace(index, 2, "\n");
-			index++;
-		}
+		Config::cfg.Save();
+		Arcade::instance.createPost();
 
-		strcpy_s(_config.name, _stringArg.c_str());
-
-		SetReply("Room name changed:\n" + _stringArg + "\0");
 		return true;
 	}
 

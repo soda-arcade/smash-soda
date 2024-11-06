@@ -34,22 +34,6 @@ void GuestList::clear()
 	_guests.clear();
 }
 
-const bool GuestList::find(uint32_t targetGuestID, Guest* result)
-{
-	vector<Guest>::iterator i;
-	for (i = _guests.begin(); i != _guests.end(); ++i)
-	{
-		if ((*i).userID == targetGuestID)
-		{
-			*result = *i;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
 const int GuestList::findIndex(uint32_t targetGuestID) {
 	for (int i = 0; i != _guests.size(); ++i) {
 		if (_guests[i].userID == targetGuestID)
@@ -59,13 +43,19 @@ const int GuestList::findIndex(uint32_t targetGuestID) {
 	return -1;
 }
 
-const bool GuestList::find(const char* targetName, Guest* result)
-{
-	return find(string(targetName), result);
+const bool GuestList::find(uint32_t targetGuestID, Guest* result) {
+	vector<Guest>::iterator i;
+	for (i = _guests.begin(); i != _guests.end(); ++i) {
+		if ((*i).userID == targetGuestID) {
+			*result = *i;
+			return true;
+		}
+	}
+
+	return false;
 }
 
-const bool GuestList::find(string targetName, Guest* result)
-{
+const bool GuestList::find(string targetName, Guest* result) {
 	static const uint64_t MINIMUM_MATCH = 3;
 	uint64_t closestDistance = STRINGER_MAX_DISTANCE;
 	uint64_t distance = STRINGER_MAX_DISTANCE;
@@ -284,4 +274,13 @@ void GuestList::toggleSpectator(uint32_t id) {
 	if (it != _guests.end()) {
 		it->spectator = !it->spectator;
 	}
+}
+
+bool GuestList::pop(uint32_t userID) {
+	auto it = find_if(_guests.begin(), _guests.end(), [userID](Guest& guest) { return guest.userID == userID; });
+	if (it != _guests.end()) {
+		_guests.erase(it);
+		return true;
+	}
+	return false;
 }

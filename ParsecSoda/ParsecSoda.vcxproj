@@ -77,11 +77,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\SDK\cplusplus\asio-1.24.0\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -138,12 +135,14 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x86\SDL2.dll" "$(TargetDir)SDL2.dll"
       <AdditionalIncludeDirectories>$(SolutionDir)external;$(SolutionDir)Dependencies\parsecsdk;$(SolutionDir)Dependencies\matoya;$(SolutionDir)Dependencies\vigem\include;$(SolutionDir)Dependencies\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\lib\debug\x64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec.lib;libucrtd.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libucrt.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -165,9 +164,10 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x86\SDL2.dll" "$(TargetDir)SDL2.dll"
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\parsecsdk\windows;$(SolutionDir)Dependencies\matoya\64;$(SolutionDir)Dependencies\vigem\lib\release\x64;$(SolutionDir)Dependencies\sdl\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>parsec.lib;libucrt.lib;matoya.lib;Winhttp.lib;Crypt32.lib;Secur32.lib;libvcruntime.lib;libcmt.lib;kernel32.lib;gdi32.lib;winmm.lib;imm32.lib;shell32.lib;advapi32.lib;ole32.lib;oleaut32.lib;opengl32.lib;user32.lib;uuid.lib;version.lib;setupapi.lib;hid.lib;dxgi.lib;ws2_32.lib;bcrypt.lib;windowscodecs.lib;xinput9_1_0.lib;d3d9.lib;shlwapi.lib;d3d11.lib;ViGEmClient.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)ParsecSoda\fonts\" "$(TargetDir)fonts\" /E /Y
@@ -179,9 +179,9 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AudioSource.cpp" />
+    <ClCompile Include="Chatbot\ChatBot.cpp" />
     <ClCompile Include="Chatbot\ChatBotCustom.cpp" />
     <ClCompile Include="Chatbot\Commands\Guest\CommandBonk.cpp" />
-    <ClCompile Include="Chatbot\Commands\Mod\CommandDecreaseCD.h" />
     <ClCompile Include="Core\Cache.cpp" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="ImGui\implot.cpp" />
@@ -205,6 +205,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="Lists\VIPList.cpp" />
     <ClCompile Include="Modules\WebSocket.cpp" />
     <ClCompile Include="Widgets\ButtonLockWidget.cpp" />
+    <ClCompile Include="Widgets\DeveloperWidget.cpp" />
     <ClCompile Include="Widgets\HotseatWidget.cpp" />
     <ClCompile Include="Widgets\KeyboardMapWidget.cpp" />
     <ClCompile Include="Widgets\LibraryWidget.cpp" />
@@ -238,7 +239,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClCompile Include="AudioOut.cpp" />
     <ClCompile Include="Lists\BanList.cpp" />
     <ClCompile Include="Helpers\Bitwise.cpp" />
-    <ClCompile Include="Chatbot\ChatBot.cpp" />
     <ClCompile Include="ChatLog.cpp" />
     <ClCompile Include="Lists\TierList.cpp" />
     <ClCompile Include="Widgets\HostInfoWidget.cpp" />
@@ -293,44 +293,48 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="ButtonLock.h" />
     <ClInclude Include="Chatbot\ChatBotCustom.h" />
     <ClInclude Include="Chatbot\Commands\CommandBotMessage.h" />
+    <ClInclude Include="Chatbot\Commands\Guest\Command8Ball.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandDC.h" />
     <ClInclude Include="Chatbot\Commands\CommandDefaultMessage.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandVersion.h" />
-    <ClInclude Include="Chatbot\Commands\Guest\Command8Ball.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandAddPS.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandAddXbox.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandBB.h" />
+    <ClInclude Include="Chatbot\Commands\Guest\CommandFF.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandDCAll.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandDecrease.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandDiscord.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandExtend.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandExtendCD.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandCooldown.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandFortune.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandHotseat.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandKeyboard.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandKick.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandLock.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandLockAll.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandMod.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandMute.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandPing.h" />
-    <ClInclude Include="Chatbot\Commands\Guest\CommandPlayTime.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandRollCall.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandRC.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandRestart.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandRPG.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandSpectate.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandSpot.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandStripAll.h" />
     <ClInclude Include="Chatbot\Commands\CommandTemplate.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandTriangle.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandUnmod.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandUnban.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandUnbanLastIP.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandUnmute.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandUnVIP.h" />
+    <ClInclude Include="Chatbot\Commands\God\CommandUnVIP.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandVerify.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandVIP.h" />
+    <ClInclude Include="Chatbot\Commands\God\CommandVIP.h" />
+    <ClInclude Include="Chatbot\Commands\Mod\CommandWarmup.h" />
     <ClInclude Include="Core\Cache.h" />
     <ClInclude Include="GameData.h" />
     <ClInclude Include="Helpers\Countries.h" />
+    <ClInclude Include="Helpers\Keymap.h" />
     <ClInclude Include="ImGui\implot.h" />
     <ClInclude Include="ImGui\implot_internal.h" />
     <ClInclude Include="Lists\GameDataList.h" />
@@ -339,6 +343,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="ImGui\imform.h" />
     <ClInclude Include="KeyboardMapsUtil.h" />
     <ClInclude Include="Core\Config.h" />
+    <ClInclude Include="Models\CommandInfo.h" />
     <ClInclude Include="Modules\Arcade.h" />
     <ClInclude Include="Modules\AutoMod.h" />
     <ClInclude Include="Modules\Hotseat.h" />
@@ -353,6 +358,7 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Lists\VIPList.h" />
     <ClInclude Include="Modules\WebSocket.h" />
     <ClInclude Include="Widgets\ButtonLockWidget.h" />
+    <ClInclude Include="Widgets\DeveloperWidget.h" />
     <ClInclude Include="Widgets\HotseatWidget.h" />
     <ClInclude Include="Widgets\KeyboardMapWidget.h" />
     <ClInclude Include="Widgets\LibraryWidget.h" />
@@ -372,7 +378,6 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Helpers\Clock.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandSFX.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandOne.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommandSearchUserHistory.h" />
     <ClInclude Include="CompilerDirectives.h" />
     <ClInclude Include="Helpers\Debouncer.h" />
     <ClInclude Include="Helpers\Stopwatch.h" />
@@ -411,34 +416,21 @@ copy /Y "$(SolutionDir)Dependencies\sdl\lib\x64\SDL2.dll" "$(TargetDir)SDL2.dll"
     <ClInclude Include="Widgets\GamepadsWidget.h" />
     <ClInclude Include="Widgets\GuestListWidget.h" />
     <ClInclude Include="Widgets\LogWidget.h" />
-    <ClInclude Include="Chatbot\Commands\Guest\CommandAFK.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandDC.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandSwap.h" />
-    <ClInclude Include="Chatbot\Commands\Guest\CommandFF.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandPads.h" />
+    <ClInclude Include="Chatbot\Commands\Guest\CommandPads.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandMirror.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandUnban.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandBan.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommandSearchUserIntArg.h" />
     <ClInclude Include="AudioIn.h" />
     <ClInclude Include="AudioMix.h" />
     <ClInclude Include="AudioOut.h" />
     <ClInclude Include="Lists\BanList.h" />
     <ClInclude Include="Chatbot\ChatBot.h" />
-    <ClInclude Include="Chatbot\Commands\God\CommandSetConfig.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandPublic.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandLimit.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandSpeakers.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandName.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommandPrefix.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommandStringArg.h" />
-    <ClInclude Include="Chatbot\Commands\Mod\CommandKick.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommandSearchUser.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommandIntegerArg.h" />
-    <ClInclude Include="Chatbot\Commands\God\CommandGuests.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandBonk.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandQuit.h" />
-    <ClInclude Include="Chatbot\Commands\Base\ACommand.h" />
+    <ClInclude Include="Chatbot\ACommand.h" />
     <ClInclude Include="Chatbot\Commands\Guest\CommandHelp.h" />
     <ClInclude Include="Chatbot\Commands\Mod\CommandVideoFix.h" />
     <ClInclude Include="Chatbot\Commands\God\CommandPrivate.h" />

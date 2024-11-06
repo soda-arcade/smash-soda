@@ -293,6 +293,14 @@ public:
 		}
 
 		if (isValidButtonName(buttonName)) {
+
+			// Is this key already mapped to another button?
+			for (int i = 0; i < profile->keyMap.size(); i++) {
+				if (profile->keyMap[i] == key) {
+					profile->keyMap[i] = -1;
+				}
+			}
+
 			int index = find(buttonNamesLower.begin(), buttonNamesLower.end(), buttonName) - buttonNamesLower.begin();
 			profile->keyMap[index] = key;
 			return true;

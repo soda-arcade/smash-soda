@@ -1,21 +1,21 @@
 #pragma once
 
 #include <iostream>
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
 class CommandAddXbox : public ACommand
 {
 public:
 
-	CommandAddXbox(GamepadClient& gamepadClient)
-		: _gamepadClient(gamepadClient)
+	CommandAddXbox(const char* msg, Guest& sender, GamepadClient& gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	bool run() override {
 
 		_gamepadClient.createGamepad(AGamepad::Type::XBOX, true);
-		SetReply("Added xbox controller.\0");
+		setReply("Added xbox controller.\0");
 		return true;
 	}
 

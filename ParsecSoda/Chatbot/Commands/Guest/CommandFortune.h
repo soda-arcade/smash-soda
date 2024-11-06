@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 
 using namespace std;
 
@@ -9,12 +9,17 @@ class CommandFortune : public ACommand
 public:
 
 	/**
+	 * Example of how to use the command
+	 */
+	std::string usage = "Usage: !cookie";
+
+	/**
 	 * @brief Construct a new CommandFortune object
 	 * 
 	 * @param sender 
 	 */
-	CommandFortune(Guest& sender)
-		: _sender(sender)
+	CommandFortune(const char* msg, Guest& sender)
+		: ACommand(msg, sender)
 	{}
 
 	/**
@@ -25,6 +30,7 @@ public:
 
 		srand(time(NULL));
 		_replyMessage = "[FORTUNE] " + cookies[(rand() % 254)] + "\0";
+		isBotCommand = true;
 
 		return true;
 
@@ -39,7 +45,6 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 
 	string cookies[254] = {
 		"With integrity and consistency -- your credits are piling up.",

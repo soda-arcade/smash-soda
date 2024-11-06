@@ -18,7 +18,8 @@ void NavBar::render(
 	bool& showOverlay,
 	bool& showHotseat,
 	bool& showTournament,
-	bool& showKeyMap
+	bool& showKeyMap,
+	bool& showDevTools
 )//-- CodeSomnia Moidified -- showKeyMap Added
 {
 	static ImVec2 iconSize = ImVec2(24, 24);
@@ -133,8 +134,19 @@ void NavBar::render(
 	}
 	renderNavtooltip("Settings", showSettings);
 
-	if (ToggleIconButtonWidget::render(AppIcons::info, AppIcons::info, showInfo, iconSize)) showInfo = !showInfo;
-	renderNavtooltip("About", showInfo);
+	if (Config::cfg.general.devMode) {
+		if (ToggleIconButtonWidget::render(AppIcons::developer, AppIcons::developer, showDevTools, iconSize)) {
+			showDevTools = !showDevTools;
+			Config::cfg.widgets.devTools = showDevTools;
+		}
+		renderNavtooltip("Developer Tools", showDevTools);
+	}
+	else {
+
+		if (ToggleIconButtonWidget::render(AppIcons::info, AppIcons::info, showInfo, iconSize)) showInfo = !showInfo;
+		renderNavtooltip("About", showInfo);
+
+	}
 
 
 	if (IconButton::render(AppIcons::logoff, AppColors::primary, iconSize))

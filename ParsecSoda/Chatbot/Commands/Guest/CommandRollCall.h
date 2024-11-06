@@ -2,7 +2,7 @@
 
 #include "../../../MetadataCache.h"
 #include "../../../Core/Config.h"
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GuestList.h"
 
 using namespace std;
@@ -18,7 +18,7 @@ public:
 	 * @param guestList 
 	 */
 	CommandRollCall(const char* msg, Guest& sender, GuestList& guestList)
-		: _sender(sender), _guestList(guestList) {}
+		: ACommand(msg, sender), _guestList(guestList) {}
 
 	/**
 	 * @brief Run the command
@@ -39,6 +39,7 @@ public:
 		}
 
 		_replyMessage = reponse;
+		isBotCommand = true;
 
 		return true;
 
@@ -53,8 +54,6 @@ public:
 	}
 
 protected:
-
-	Guest& _sender;
 	GuestList& _guestList;
 
 	static vector<const char*> internalPrefixes() {

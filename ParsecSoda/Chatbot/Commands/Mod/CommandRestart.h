@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../Modules/ProcessMan.h"
 
 using namespace std;
@@ -14,7 +14,8 @@ public:
 	 * @brief Construct a new CommandRestart object
 	 * 
 	 */
-	CommandRestart() {}
+	CommandRestart(const char* msg, Guest& sender) : 
+		ACommand(msg, sender) {}
 
 	/**
 	 * @brief Run the command
@@ -25,13 +26,11 @@ public:
 	bool run() override {
 
 		if (Config::cfg.kioskMode.enabled) {
-
-			SetReply("The application is restarting...wait!");
+			setReply("The application is restarting...wait!");
 			ProcessMan::instance.restart();
-
 		}
 		else {
-			SetReply("The host does not have kiosk mode enabled.");
+			setReply("The host does not have kiosk mode enabled.");
 		}
 		
 		return true;

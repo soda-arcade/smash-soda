@@ -29,9 +29,8 @@ public:
 	HostSettingsWidget(Hosting& hosting, function<void(bool)> onHostRunningStatusCallback);
 	bool render(bool& showWindow, HWND& hwnd);
 	void renderGeneral(HWND& hwnd);
+	void renderAdvanced();
 	void renderAudio();
-	void renderHotseat();
-	void renderKiosk();
 	void updateSecretLink();
 
 	const ImVec2 DEFAULT_BUTTON_SIZE = ImVec2(40, 40);
@@ -53,6 +52,8 @@ private:
 	ToggleIconButtonWidget _publicRoomBtn, _playBtn;
 
 	// Attributes
+	bool _updated = false;
+
 	char _gameID[GAME_ID_LEN];
 	char _gameName[255];
 	char _description[140];
@@ -62,11 +63,13 @@ private:
 	char _kioskApplication[256];
 	char _kioskParam[256];
 	char _shareLink[256];
+	char _streamUrl[256];
 	int32_t _maxGuests;
+	int32_t _repThreshold;
 	bool _publicGame;
 	bool _latencyLimiter;
 	int32_t _latencyLimit;
-	int _selectedArtwork = 0;
+	int _selectedArtwork = -1;
 	int _selectedTheme = 0;
 
 	// Hotseat
@@ -84,12 +87,12 @@ private:
 	int _libraryID = -1;
 
 	// Errors
-	string _gameNameError = "";
-	string _descriptionError = "";
+	string _validateError = "";
+	bool _showErrorPopup = false;
 
 	const unsigned int DEBOUNCE_TIME_MS = 1000;
 	function<void(bool)> _onHostRunningStatusCallback;
 
-	string _postThemes[6] = { "Default", "Black", "Blue", "Green", "Red"};
+	string _postThemes[6] = { "Default", "Dark", "Blue", "Green", "Red", "FullImage"};
 };
 

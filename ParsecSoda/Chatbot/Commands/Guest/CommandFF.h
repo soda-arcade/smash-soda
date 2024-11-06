@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 #include "../../../Guest.h"
 
@@ -9,14 +9,19 @@ class CommandFF : public ACommand
 public:
 
 	/**
+	 * Example of how to use the command
+	 */
+	std::string usage = "Usage: !ff";
+
+	/**
 	 * @brief Construct a new CommandFF object
 	 * 
 	 * @param sender 
 	 * @param gamepadClient 
 	 * @param hotseat 
 	 */
-	CommandFF(Guest &sender, GamepadClient &gamepadClient, Hotseat &hotseat)
-		: _sender(sender), _gamepadClient(gamepadClient), _droppedPadCount(0), _hotseat(hotseat)
+	CommandFF(const char* msg, Guest& sender, GamepadClient &gamepadClient, Hotseat &hotseat)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient), _droppedPadCount(0), _hotseat(hotseat)
 	{}
 
 	/**
@@ -31,9 +36,9 @@ public:
 
 		_droppedPadCount = _gamepadClient.onQuit(_sender);
 		if (_droppedPadCount > 0) {
-			SetReply(_sender.name + " has dropped " + std::to_string(_droppedPadCount) + " gamepad(s)!\0");
+			setReply(_sender.name + " has dropped " + std::to_string(_droppedPadCount) + " gamepad(s)!\0");
 		} else {
-			SetReply(_sender.name + " has no gamepads to drop.\0");
+			setReply(_sender.name + " has no gamepads to drop.\0");
 		}
 
 		return true;
@@ -56,7 +61,6 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 	GamepadClient &_gamepadClient;
 	Hotseat& _hotseat;
 	int _droppedPadCount;

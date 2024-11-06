@@ -8,6 +8,7 @@ VersionWidget::VersionWidget() {
 	error = "";
     strcpy_s(_email, "");
     strcpy_s(_password, "");
+    strcpy_s(_2fa, "");
 }
 
 bool VersionWidget::render() {
@@ -24,8 +25,8 @@ bool VersionWidget::render() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0));
 
-    ImGui::SetNextWindowPos(ImVec2(res.x - 160, res.y - 107));
-    ImGui::SetNextWindowSize(ImVec2(160, 52));
+    ImGui::SetNextWindowPos(ImVec2(10, res.y - 30));
+    ImGui::SetNextWindowSize(ImVec2(240, 52));
     ImGui::Begin("##Version", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
     AppStyle::pushInput();
     ImGui::Text("FPS: ");
@@ -34,6 +35,8 @@ bool VersionWidget::render() {
     AppStyle::pushPositive();
     ImGui::Text("%.0f", ImGui::GetIO().Framerate);
     AppStyle::pop();
+
+    ImGui::SameLine();
 
     AppStyle::pushInput();
     std::string versionString = "Smash Soda v. ";
@@ -68,7 +71,7 @@ bool VersionWidget::renderLoginWindow() {
     AppStyle::pushTitle();
 
     static ImVec2 res;
-    static ImVec2 size = ImVec2(400, 500);
+    static ImVec2 size = ImVec2(400, 580);
 
     res = ImGui::GetMainViewport()->Size;
 
@@ -104,9 +107,8 @@ bool VersionWidget::renderLoginWindow() {
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.5f - 96);
 
     if (ImGui::Button("I don't want to use Soda Arcade")) {
-		Config::cfg.room.privateRoom = true;
-		Config::cfg.arcade.token = "";
 		Config::cfg.arcade.showLogin = false;
+        Config::cfg.room.privateRoom = true;
 		Config::cfg.Save();
     }
 
@@ -124,6 +126,10 @@ bool VersionWidget::renderLoginWindow() {
 
 	}
 
+    if (ImForm::InputText("2FA CODE", _2fa, "2FA code if you have it enabled on your account.")) {
+
+    }
+
 	ImGui::Spacing();
 
     if (ImGui::Button("Login")) {
@@ -132,8 +138,9 @@ bool VersionWidget::renderLoginWindow() {
 
 		std::string email = _email;
 		std::string password = _password;
+        std::string twoFactor = _2fa;
 
-        if (Arcade::instance.login(email, password)) {
+        if (Arcade::instance.login(email, password, twoFactor)) {
             Config::cfg.arcade.showLogin = false;
             Config::cfg.Save();
 		} else {

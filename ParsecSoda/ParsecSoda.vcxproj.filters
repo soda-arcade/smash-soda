@@ -24,9 +24,6 @@
     <ClCompile Include="AudioOut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Chatbot\ChatBot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Helpers\Dice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -312,9 +309,6 @@
     <ClCompile Include="Modules\Arcade.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Chatbot\Commands\Mod\CommandDecreaseCD.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Lists\VerifiedList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -340,6 +334,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\implot_items.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Chatbot\ChatBot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\DeveloperWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -383,7 +383,7 @@
     <ClInclude Include="Lists\BanList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommand.h">
+    <ClInclude Include="Chatbot\ACommand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Models\GuestData.h">
@@ -401,31 +401,10 @@
     <ClInclude Include="Chatbot\Commands\Guest\CommandBonk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\God\CommandGuests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommandIntegerArg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommandSearchUser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandKick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommandStringArg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommandPrefix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Chatbot\Commands\Mod\CommandName.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chatbot\Commands\God\CommandSpeakers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandLimit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chatbot\Commands\God\CommandPrivate.h">
@@ -434,16 +413,7 @@
     <ClInclude Include="Chatbot\Commands\God\CommandPublic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\God\CommandSetConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommandSearchUserIntArg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Chatbot\Commands\Mod\CommandBan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandUnban.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers\Bitwise.h">
@@ -452,19 +422,10 @@
     <ClInclude Include="Chatbot\Commands\Guest\CommandMirror.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandPads.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Guest\CommandFF.h">
+    <ClInclude Include="Chatbot\Commands\Guest\CommandPads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chatbot\Commands\Guest\CommandSwap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandDC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Guest\CommandAFK.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyboardMaps.h">
@@ -611,9 +572,6 @@
     <ClInclude Include="GuestDataList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Base\ACommandSearchUserHistory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Widgets\HostInfoWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -746,9 +704,6 @@
     <ClInclude Include="Chatbot\Commands\Mod\CommandDecrease.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Guest\Command8Ball.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\imform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -764,13 +719,10 @@
     <ClInclude Include="Lists\VIPList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandVIP.h">
+    <ClInclude Include="Chatbot\Commands\God\CommandVIP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandUnVIP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandSpot.h">
+    <ClInclude Include="Chatbot\Commands\God\CommandUnVIP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Modules\Hotseat.h">
@@ -848,10 +800,7 @@
     <ClInclude Include="Modules\Arcade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Mod\CommandExtendCD.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chatbot\Commands\Guest\CommandPlayTime.h">
+    <ClInclude Include="Chatbot\Commands\Mod\CommandCooldown.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chatbot\Commands\Mod\CommandVerify.h">
@@ -897,6 +846,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\implot_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Keymap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Mod\CommandUnban.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Guest\CommandFF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Mod\CommandKick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Mod\CommandDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Guest\Command8Ball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\CommandInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\DeveloperWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chatbot\Commands\Mod\CommandWarmup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

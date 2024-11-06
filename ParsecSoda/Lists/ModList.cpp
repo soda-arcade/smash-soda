@@ -17,22 +17,34 @@ bool ModList::mod(GuestData user)
 	return added;
 }
 
-const bool ModList::unmod(const uint32_t userID, function<void(GuestData&)> callback)
-{
-	bool found = GuestDataList::pop(userID, callback);
-	if (found) {
-        SaveToFile();
-	}
-	return found;
+const bool ModList::unmod(const uint32_t userID) {
+    
+    vector<GuestData>::iterator gi = _guests.begin();
+    for (; gi != _guests.end(); ++gi) {
+        if ((*gi).userID == userID) {
+            _guests.erase(gi);
+            SaveToFile();
+            return true;
+        }
+    }
+
+    return false;
+
 }
 
-const bool ModList::unmod(string guestName, function<void(GuestData&)> callback)
-{
-	bool found = GuestDataList::pop(guestName, callback);
-	if (found) {
-        SaveToFile();
-	}
-	return found;
+const bool ModList::unmod(string guestName) {
+
+    vector<GuestData>::iterator gi = _guests.begin();
+    for (; gi != _guests.end(); ++gi) {
+        if ((*gi).name == guestName) {
+            _guests.erase(gi);
+            SaveToFile();
+            return true;
+        }
+    }
+
+    return false;
+
 }
 
 const bool ModList::isModded(const uint32_t userID) {

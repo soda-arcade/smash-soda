@@ -1,54 +1,66 @@
 #pragma once
 
-#include "../Base/ACommandIntegerArg.h"
+#include <sstream>
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
-class CommandRC : public ACommandIntegerArg
+class CommandRC : public ACommand
 {
 public:
 
 	/**
-	 * @brief Construct a new CommandRC object
-	 * 
+	 * @brief Construct a new CommandDC object
+	 *
 	 * @param msg
 	 * @param gamepadClient
 	 */
-	CommandRC(const char* msg, GamepadClient& gamepadClient)
-		: ACommandIntegerArg(msg, internalPrefixes()), _gamepadClient(gamepadClient)
+	CommandRC(const char* msg, Guest& sender, GamepadClient& gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
 	 * @brief Run the command
-	 * 
+	 *
 	 * @return true
 	 * @return false
 	 */
 	bool run() override {
-		size_t maxIndex = _gamepadClient.gamepads.size();
+		size_t nGamepads = _gamepadClient.gamepads.size();
 
-		if (!ACommandIntegerArg::run()) {
-			SetReply("Usage: !rc <integer in range [1, " + to_string(maxIndex) + "]>\nExample: !rc 1\0");
+		if (nGamepads == 0) {
+			setReply("No gamepads available.\0");
 			return false;
 		}
 
-		std::ostringstream reply;
-		if (_intArg < 1 || _intArg > maxIndex) {
-			SetReply("Wrong index: " + to_string(_intArg) + " is not in range [1, " + to_string(maxIndex) + "].\0");
+		if (getArgs().size() == 0) {
+			setReply("Usage: !rc <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !rc 4\0");
+			return false;
 		}
 
-		if (_gamepadClient.connect(_intArg - 1)) {
-			SetReply("Gamepad " + to_string(_intArg) + " connected.\0");
-		} else {
-			SetReply("Gamepad " + to_string(_intArg) + " failed to connect.\0");
+		int slot = 1;
+		try {
+			slot = std::stoi(getArgs()[0]);
+		}
+		catch (std::invalid_argument) {
+			setReply("Usage: !rc <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !rc 4\0");
+			return false;
 		}
 
-		_replyMessage = reply.str();
+		// In range [1, nGamepads]
+		if (slot < 1 || slot > nGamepads) {
+			setReply("Usage: !rc <integer in range [1, " + std::to_string(nGamepads) + "]>\nExample: !rc 4\0");
+			return false;
+		}
+
+		_gamepadClient.connect(slot - 1);
+		setReply("Reconnected gamepad " + std::to_string(slot) + ".\0");
+
 		return true;
 	}
 
 	/**
 	 * @brief Get the prefixes object
-	 * 
+	 *
 	 * @return std::vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
@@ -56,8 +68,7 @@ public:
 	}
 
 private:
-	static vector<const char*> internalPrefixes()
-	{
+	static vector<const char*> internalPrefixes() {
 		return vector<const char*> { "!rc " };
 	}
 

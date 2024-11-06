@@ -12,6 +12,7 @@
 #include "TitleTooltipWidget.h"
 #include "TooltipWidget.h"
 #include "IntRangeWidget.h"
+#include "../Helpers/Keymap.h"
 
 class SettingsWidget
 {
@@ -43,6 +44,7 @@ private:
 	bool _ipBan = true;
 	bool _socketEnabled = true;
 	bool _blockVPN = false;
+	bool _devMode = false;
 	unsigned int _latencyLimitThreshold = 0;
 	unsigned int _theme = 0;
 	char _hotkeyCommand[128] = "";
@@ -75,4 +77,5 @@ private:
 
 	string themes[5] = { "Midnight", "Parsec Soda", "Parsec Soda V", "Mini", "Arcade" };
 	Countries _countries;
+	Keymap _keymap = Keymap();
 };

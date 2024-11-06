@@ -1,82 +1,80 @@
 #pragma once
 
-#include "../Base/ACommandSearchUser.h"
+#include "../../ACommand.h"
 #include "parsec-dso.h"
 
 
-class CommandKick : public ACommandSearchUser
+class CommandKick : public ACommand
 {
 public:
 
+	std::string usage = "Usage: !kick <username>\nExample: !kick bigboi83";
+
 	/**
 	 * @brief Construct a new CommandKick object
-	 * 
+	 *
 	 * @param msg
 	 * @param sender
 	 * @param parsec
 	 * @param guests
 	 * @param isHost
 	 */
-	CommandKick(const char* msg, Guest& sender, ParsecDSO* parsec, GuestList &guests, bool isHost = false)
-		:ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _parsec(parsec), _isHost(isHost)
+	CommandKick(const char* msg, Guest& sender, ParsecDSO* parsec, GuestList& guests, bool isHost = false)
+		: ACommand(msg, sender), _parsec(parsec), _isHost(isHost), guests(guests), sender(sender)
 	{}
 
 	/**
 	 * @brief Run the command
-	 * 
+	 *
 	 * @return true
 	 * @return false
 	 */
 	bool run() override {
-		ACommandSearchUser::run();
-		
-		switch (_searchResult)
-		{
-		case SEARCH_USER_RESULT::NOT_FOUND:
-			{
-				SetReply(_sender.name + ", I cannot find the user you want to kick.");
-			}
-			break;
 
-		case SEARCH_USER_RESULT::FOUND:
-
-			if (_sender.userID == _targetGuest.userID) {
-				SetReply(_sender.name + " kicked themselves in confusion!");
-				ParsecHostKickGuest(_parsec, _targetGuest.id);
-			}
-			
-			else if (Cache::cache.isSodaCop(_targetGuest.userID)) {
-				SetReply("Nice try bub, but you can't kick a Soda Cop!\0");
-			} else {
-				SetReply(
-					Cache::cache.isSodaCop(_sender.userID) ?
-					_sender.name + " laid down the law as a Soda Cop and kicked " + _targetGuest.name + "!\0"
-					: _sender.name + " kicked " + _targetGuest.name + "!\0"
-				);
-				ParsecHostKickGuest(_parsec, _targetGuest.id);
-				
-				//try
-				//{
-				//	PlaySound(TEXT("./SFX/kick.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				//}
-				//catch (const std::exception&) {}
-
-				return true;
-			}
-			break;
-		
-		case SEARCH_USER_RESULT::FAILED:
-		default:
-			SetReply("Usage: !kick <username>\nExample: !kick MickeyUK");
-			break;
+		// Was a guest specified?
+		if (getArgs().size() == 0) {
+			setReply(usage);
+			return false;
 		}
 
-		return false;
+		// Find the guest
+		if (!findGuest()) {
+			setReply("Can't find the guest you want to kick!\0");
+			return false;
+		}
+
+		// Kicked themselves...?
+		if (sender.userID == target.userID) {
+			setReply(sender.name + " kicked themselves in confusion!");
+			kickGuest();
+			return true;
+		}
+
+		// Can't kick a Soda Cop
+		if (Cache::cache.isSodaCop(target.userID)) {
+			setReply("Nice try bub, but you can't kick a Soda Cop!\0");
+			return false;
+		}
+
+		// Kick the guest
+		setReply(
+			Cache::cache.isSodaCop(sender.userID) ?
+			sender.name + " laid down the law as a Soda Cop and kicked " + target.name + "!\0"
+			: sender.name + " kicked " + target.name + "!\0"
+		);
+		kickGuest();
+
+		try {
+			PlaySound(TEXT("./SFX/kick.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+		}
+		catch (const std::exception&) {}
+
+		return true;
 	}
 
 	/**
 	 * @brief Get the prefixes object
-	 * 
+	 *
 	 * @return vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
@@ -88,8 +86,56 @@ protected:
 		return vector<const char*> { "!kick " };
 	}
 
-	Guest& _sender;
+	void kickGuest() {
+		if (target.fake) {
+			for (int i = 0; i < guests.getGuests().size(); ++i) {
+				if (guests.getGuests()[i].userID == target.userID) {
+					guests.getGuests().erase(guests.getGuests().begin() + i);
+					break;
+				}
+			}
+			return;
+		}
+		ParsecHostKickGuest(_parsec, target.id);
+	}
+
+	/**
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	*
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
+
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
+				}
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	Guest target;
+	Guest& sender;
+	GuestList guests;
 	ParsecDSO* _parsec;
 	bool _isHost;
 };
-

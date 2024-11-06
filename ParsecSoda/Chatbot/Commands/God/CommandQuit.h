@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 
 class CommandQuit : public ACommand
 {
@@ -11,8 +11,8 @@ public:
 	 * 
 	 * @param hostingLoopController The hosting loop controller
 	 */
-	CommandQuit(bool & hostingLoopController)
-		: _hostingLoopController(hostingLoopController)
+	CommandQuit(const char* msg, Guest& sender, bool & hostingLoopController)
+		: ACommand(msg, sender), _hostingLoopController(hostingLoopController)
 	{}
 
 	/**
@@ -20,7 +20,7 @@ public:
 	 * @return true if the command was successful
 	 */
 	bool run() override {
-		_replyMessage = Config::cfg.chatbotName + "Closing stream...\0";
+		setReply("Goodbye!");
 		_hostingLoopController = false;
 		return true;
 	}

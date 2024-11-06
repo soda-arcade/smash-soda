@@ -17,6 +17,7 @@
 #include "GuestList.h"
 #include "MetadataCache.h"
 #include "Modules/Hotseat.h"
+#include "Helpers/Keymap.h"
 
 using namespace std;
 

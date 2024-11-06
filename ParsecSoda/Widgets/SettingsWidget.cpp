@@ -4,6 +4,7 @@
 SettingsWidget::SettingsWidget(Hosting& hosting)
     : _hosting(hosting)
 {
+
     _disableGuideButton = Config::cfg.input.disableGuideButton;
     _disableKeyboard = Config::cfg.input.disableKeyboard;
     _latencyLimitEnabled = Config::cfg.room.latencyLimit;
@@ -16,6 +17,7 @@ SettingsWidget::SettingsWidget(Hosting& hosting)
     _ipBan = Config::cfg.general.ipBan;
     _parsecLogs = Config::cfg.general.parsecLogs;
     _blockVPN = Config::cfg.general.blockVPN;
+    _devMode = Config::cfg.general.devMode;
 
     _microphoneEnabled = Config::cfg.audio.micEnabled;
 
@@ -265,6 +267,12 @@ void SettingsWidget::renderGeneral() {
         Config::cfg.Save();
     }
 
+    if (ImForm::InputCheckbox("Developer Mode", _devMode,
+        "Enables extra developer options for testing Smash Soda. Only for those who know what they are doing!")) {
+        Config::cfg.general.devMode = _devMode;
+        Config::cfg.Save();
+    }
+
     AppStyle::pop();
 
 }
@@ -324,11 +332,11 @@ void SettingsWidget::renderChatbot() {
 	    ImGui::Unindent(10);
 	ImGui::EndGroup();
 
-    // if (ImForm::InputCheckbox("Host can't be bonked", _hostBonkProof,
-    //     "You DARE bonk the host!?")) {
-    //     Config::cfg.chat.hostBonkProof = _hostBonkProof;
-    //     Config::cfg.Save();
-    // }
+     if (ImForm::InputCheckbox("Host can't be bonked", _hostBonkProof,
+         "You DARE bonk the host!?")) {
+         Config::cfg.chat.hostBonkProof = _hostBonkProof;
+         Config::cfg.Save();
+     }
 
 }
 
@@ -457,9 +465,8 @@ void SettingsWidget::renderHotkeys() {
         // List hotkeys
         for (int i = 0; i < Config::cfg.hotkeys.keys.size(); i++) {
 
-            IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30));
-            if (ImGui::IsItemActive()) {
-                Config::cfg.RemoveHotkey(Config::cfg.hotkeys.keys[i].command);
+            if (IconButton::render(AppIcons::trash, AppColors::primary, ImVec2(30, 30))) {
+                Config::cfg.RemoveHotkey(i);
             }
 
             ImGui::SameLine();
@@ -469,7 +476,7 @@ void SettingsWidget::renderHotkeys() {
             ImGui::Text("%s", Config::cfg.hotkeys.keys[i].command.c_str());
             AppStyle::pop();
             AppStyle::pushLabel();
-            //ImGui::Text("%s", path.c_str());
+            ImGui::Text("%s", "CTRL + " + Config::cfg.hotkeys.keys[i].keyName);
             AppStyle::pop();
             ImGui::Unindent(10);
             ImGui::EndGroup();

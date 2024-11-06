@@ -4,24 +4,39 @@
  * Gets the path to the Smash Soda config.json file.
  */
 string PathHelper::GetConfigPath() {
-	
+	static string cachedConfigPath = "";
+	if (!cachedConfigPath.empty()) return cachedConfigPath;
+
+	string dirPath = "";
+	string appDir = "\\SmashSodaTwo\\";
+
 	// If running in portable mode
 	string currentPath = PathHelper::GetCurrentPath();
-	if (MTY_FileExists((currentPath + "\\portable.txt").c_str())) {
-		return currentPath;
-	} else {
+	if (MTY_FileExists(string(currentPath + "\\portable.txt").c_str())) {
+		dirPath = currentPath + appDir;
+	}
+	else {
 
 		// Get the appdata path
 		string appDataPath = PathHelper::GetAppDataPath();
-		if (appDataPath != "") {
-			return appDataPath;
-		} else {
+		if (!appDataPath.empty()) {
+			dirPath = appDataPath + appDir;
+		}
+		else {
 			return "";
 		}
-
 	}
 
-	return "";
+	bool isDirOk = false;
+	if (!MTY_FileExists(dirPath.c_str())) {
+		if (MTY_Mkdir(dirPath.c_str())) {
+			isDirOk = true;
+		}
+	}
+	else isDirOk = true;
+	if (isDirOk) cachedConfigPath = dirPath;
+
+	return dirPath;
 }
 
 /**
@@ -38,73 +53,57 @@ string PathHelper::GetCurrentPath() {
 }
 
 /**
- * Get the path to the Smash Soda appdata directory.
+ * Get the path to AppData directory. (Not AppData/SmashSoda/)
  */
 string PathHelper::GetAppDataPath() {
-	string appDir = "\\SmashSodaTwo\\";
-
 	TCHAR tAppdata[1024];
 	if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata))) {
 		wstring wAppdata(tAppdata);
-		string appdata(wAppdata.begin(), wAppdata.end());
-		string dirPath = appdata + appDir;
-
-		bool isDirOk = false;
-
-		if (!MTY_FileExists(dirPath.c_str())) {
-			if (MTY_Mkdir(dirPath.c_str())) {
-				isDirOk = true;
-			}
-		} else {
-			isDirOk = true;
-		}
-
-		if (isDirOk) {
-			return dirPath;
-		}
+		string dirPath(wAppdata.begin(), wAppdata.end());
+		return dirPath;
 	}
 }
 
 std::string PathHelper::ConvertTCHARToString(const TCHAR* tcharStr) {
 #ifdef UNICODE
-    std::wstring wstr(tcharStr);
-    return std::string(wstr.begin(), wstr.end());
+	std::wstring wstr(tcharStr);
+	return std::string(wstr.begin(), wstr.end());
 #else
-    return std::string(tcharStr);
+	return std::string(tcharStr);
 #endif
 }
 
 std::wstring PathHelper::ConvertStringToWString(const std::string& str) {
-    return std::wstring(str.begin(), str.end());
+	return std::wstring(str.begin(), str.end());
 }
 
 std::vector<std::string> PathHelper::GetFilenames(const std::string& directoryPath, bool includeExtension) {
-    std::vector<std::string> filenames;
-    WIN32_FIND_DATA findFileData;
+	std::vector<std::string> filenames;
+	WIN32_FIND_DATA findFileData;
 #ifdef UNICODE
-    std::wstring wDirectoryPath = ConvertStringToWString(directoryPath);
-    HANDLE hFind = FindFirstFile((wDirectoryPath + L"\\*").c_str(), &findFileData);
+	std::wstring wDirectoryPath = ConvertStringToWString(directoryPath);
+	HANDLE hFind = FindFirstFile((wDirectoryPath + L"\\*").c_str(), &findFileData);
 #else
-    HANDLE hFind = FindFirstFile((directoryPath + "\\*").c_str(), &findFileData);
+	HANDLE hFind = FindFirstFile((directoryPath + "\\*").c_str(), &findFileData);
 #endif
 
-    if (hFind == INVALID_HANDLE_VALUE) {
-        std::cerr << "Failed to open directory: " << directoryPath << std::endl;
-        return filenames;
-    }
+	if (hFind == INVALID_HANDLE_VALUE) {
+		std::cerr << "Failed to open directory: " << directoryPath << std::endl;
+		return filenames;
+	}
 
-    do {
-        const std::string fileOrDirName = ConvertTCHARToString(findFileData.cFileName);
-        if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-            std::string filename = fileOrDirName;
-            if (!includeExtension) {
-                size_t lastDot = fileOrDirName.find_last_of(".");
-                filename = (lastDot == std::string::npos) ? fileOrDirName : fileOrDirName.substr(0, lastDot);
-            }
-            filenames.push_back(filename);
-        }
-    } while (FindNextFile(hFind, &findFileData) != 0);
+	do {
+		const std::string fileOrDirName = ConvertTCHARToString(findFileData.cFileName);
+		if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+			std::string filename = fileOrDirName;
+			if (!includeExtension) {
+				size_t lastDot = fileOrDirName.find_last_of(".");
+				filename = (lastDot == std::string::npos) ? fileOrDirName : fileOrDirName.substr(0, lastDot);
+			}
+			filenames.push_back(filename);
+		}
+	} while (FindNextFile(hFind, &findFileData) != 0);
 
-    FindClose(hFind);
-    return filenames;
+	FindClose(hFind);
+	return filenames;
 }

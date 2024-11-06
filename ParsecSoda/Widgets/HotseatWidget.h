@@ -26,6 +26,7 @@ private:
 	int _playTime = 0;
 	int _resetTime = 0;
 	int _minResetTime = 0;
+	int _reminderInterval = 0;
 
 	// Dependency injection
 	Hosting& _hosting;

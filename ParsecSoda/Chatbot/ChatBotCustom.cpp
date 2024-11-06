@@ -16,10 +16,21 @@
 **/
 ACommand* ChatBotCustom::isCustomCommand(const char* msg, Guest& sender, bool isHost, Tier tier, uint32_t previous) {
 
-	//if (msgIsEqual(msg, YourCommandClass::prefixes()))	return new YourCommandClass(sender, _gamepadClient, _macro);
+	/*if (isCommand(msg, YourCommandClass::prefixes())) {
+		return new YourCommandClass(msg, sender, _parsec, _guests, _guestHistory);
+	}*/
 
 	// Returns a default message if no custom command is found, so the bot can still respond.
 	return new CommandDefaultMessage(msg, sender, previous, tier, isHost);
+}
+
+/*
+Add all the help/descriptions for the commands.
+*/
+void ChatBotCustom::addHelp() {
+
+	//addCmdHelp("!yourcommand", "Description", Tier::GUEST);
+
 }
 
 /**
@@ -58,4 +69,46 @@ bool ChatBotCustom::msgIsEqual(const char* msg, vector<const char*> patterns) {
 		}
 	}
 	return false;
+}
+
+std::vector<std::string> ChatBotCustom::split(const std::string& str, char delimiter) {
+	std::vector<std::string> tokens;
+	std::stringstream ss(str);
+	std::string token;
+
+	while (std::getline(ss, token, delimiter)) {
+		tokens.push_back(token);
+	}
+
+	return tokens;
+}
+
+
+bool ChatBotCustom::isCommand(const char* msg, vector<const char*> patterns) {
+	// Split the message by spaces
+	vector<string> tokens = split(msg, ' ');
+
+	// Does the first token match any of the patterns?
+	vector<const char*>::iterator pi = patterns.begin();
+	for (; pi != patterns.end(); ++pi) {
+		if (tokens[0] == *pi) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Get the arguments of a command
+vector<string> ChatBotCustom::getArguments(const char* msg) {
+	vector<string> tokens = split(msg, ' ');
+	tokens.erase(tokens.begin());
+	return tokens;
+}
+
+/*
+Add a command's help/description.
+*/
+void ChatBotCustom::addCmdHelp(std::string command, std::string desc, Tier tier) {
+	commands.push_back(CommandInfo(command, desc, tier));
 }

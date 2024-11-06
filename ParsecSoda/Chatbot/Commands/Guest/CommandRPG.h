@@ -3,7 +3,7 @@
 #include "../../../Core/Config.h"
 #include <string>
 #include <unordered_map>
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GuestList.h"
 
 using namespace std;
@@ -30,13 +30,15 @@ public:
 	 * @param guestList
 	 */
 	CommandRPG(const char* msg, Guest& sender, GuestList& guestList)
-	: _sender(sender), _guestList(guestList) {}
+	: ACommand(msg, sender), _guestList(guestList) {}
 
 	/**
 	 * @brief Run the command
 	 * @return true if the command was successful
 	 */
 	bool run() override {
+
+		isBotCommand = true;
 
 		// Are we making an RPG sentence, opening a chest, or having a battle?
 		int choice = rand() % 3;
@@ -117,7 +119,6 @@ public:
 
 protected:
 
-	Guest& _sender;
 	GuestList& _guestList;
 
 	/**

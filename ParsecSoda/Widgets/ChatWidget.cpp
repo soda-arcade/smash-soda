@@ -224,10 +224,11 @@ bool ChatWidget::isDirty()
 }
 
 
-void ChatWidget::sendMessage()
-{
-    if (_hosting.isRunning() && strlen(_sendBuffer) > 0)
-    {
+void ChatWidget::sendMessage() {
+    /*if (_hosting.isRunning() && strlen(_sendBuffer) > 0) {
+        _hosting.sendHostMessage(_sendBuffer);
+    }*/
+    if (strlen(_sendBuffer) > 0) {
         _hosting.sendHostMessage(_sendBuffer);
     }
 

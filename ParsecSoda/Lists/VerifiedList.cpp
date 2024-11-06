@@ -32,18 +32,44 @@ bool VerifiedList::Add(GuestData user) {
 
 /**
  * @brief Remove a user from the list
+ *
+ * @param userID
+ * @param callback
+ * @return true
+ * @return false
+ */
+const bool VerifiedList::Remove(const uint32_t userID) {
+    vector<GuestData>::iterator gi = _guests.begin();
+    for (; gi != _guests.end(); ++gi) {
+        if ((*gi).userID == userID) {
+            _guests.erase(gi);
+            SaveToFile();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief Remove a user from the list
  * 
  * @param userID 
  * @param callback 
  * @return true 
  * @return false 
  */
-const bool VerifiedList::Remove(const uint32_t userID, function<void(GuestData&)> callback) {
-	bool found = GuestDataList::pop(userID, callback);
-	if (found) {
-		SaveToFile();
-	}
-	return found;
+const bool VerifiedList::Remove(string guestName) {
+    vector<GuestData>::iterator gi = _guests.begin();
+    for (; gi != _guests.end(); ++gi) {
+        if ((*gi).name == guestName) {
+            _guests.erase(gi);
+            SaveToFile();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**

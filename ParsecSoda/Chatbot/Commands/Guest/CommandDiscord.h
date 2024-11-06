@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 
 using namespace std;
 
@@ -9,12 +9,17 @@ class CommandDiscord : public ACommand
 public:
 
 	/**
+	 * Example of how to use the command
+	 */
+	std::string usage = "Usage: !discord";
+
+	/**
 	 * @brief Construct a new CommandDiscord object
 	 * 
 	 * @param sender 
 	 */
-	CommandDiscord(Guest& sender)
-		: _sender(sender)
+	CommandDiscord(const char* msg, Guest& sender)
+		: ACommand(msg, sender)
 	{}
 
 	/**
@@ -24,7 +29,8 @@ public:
 	bool run() override {
 		
 		if (Config::cfg.chat.discord != "") {
-			SetReply(Config::cfg.chat.discord.c_str());
+			_replyMessage = Config::cfg.chat.discord.c_str();
+			isBotCommand = true;
 		}
 
 		return true;
@@ -39,6 +45,5 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 };
 

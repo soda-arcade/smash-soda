@@ -6,6 +6,78 @@ HostInfoWidget::HostInfoWidget(Hosting& hosting)
 	_loginTime = Clock::now();
 }
 
+void HostInfoWidget::renderArcade() {
+
+	static ImVec2 windowSize = ImVec2(250, 55);
+	static ImVec2 windowPos = ImVec2(0, 0);
+	static ImVec2 padding = ImVec2(8, 6);
+	static ImVec2 viewportSize;
+	viewportSize = ImGui::GetMainViewport()->GetCenter();
+	viewportSize.x *= 2;
+	viewportSize.y *= 2;
+	windowPos.x = viewportSize.x - windowSize.x;
+	windowPos.y = (viewportSize.y - windowSize.y) - 55;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
+	ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 0);
+
+	ImGui::Begin(
+		"##ArcadeInfoWidget", (bool*)0,
+		ImGuiWindowFlags_NoDecoration |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoNav |
+		ImGuiWindowFlags_NoBringToFrontOnFocus
+	);
+
+	ImGui::SetWindowSize(windowSize);
+	ImGui::SetWindowPos(windowPos);
+
+	ImGui::BeginGroup();
+		ImGui::Image(AppIcons::arcadeIcon, ImVec2(42, 42));
+		ImGui::SameLine();
+		AppStyle::pushInput();
+		ImGui::BeginGroup();
+			if (!Arcade::instance.credentials.token.empty() &&
+			!Arcade::instance.credentials.username.empty()) {
+				AppColors::pushPrimary();
+				AppFonts::pushInput();
+				AppColors::pushPositive();
+				ImGui::Text(Arcade::instance.credentials.username.c_str());
+				AppColors::pop();
+				AppFonts::pop();
+				AppColors::pop();
+				AppColors::pushButtonSecondary();
+				if (ImGui::Button("LOGOUT")) {
+					Arcade::instance.logout();
+				}
+				AppFonts::pop();
+				AppColors::popButton();
+			}
+			else {
+				AppFonts::pushInput();
+				AppColors::pushLabel();
+				ImGui::Text("Not logged in");
+				AppColors::pop();
+				AppFonts::pop();
+				AppColors::pushButtonSecondary();
+				if (ImGui::Button("LOGIN")) {
+					Config::cfg.arcade.showLogin = true;
+				}
+				AppColors::popButton();
+			}	
+		ImGui::EndGroup();
+		AppStyle::pop();
+	ImGui::EndGroup();
+
+	ImGui::End();
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+
+}
+
 void HostInfoWidget::render()
 {
 	static bool isSessionExpired = false;
@@ -104,18 +176,21 @@ void HostInfoWidget::render()
 	}
 
 	ImGui::BeginGroup();
-	if (_hosting.getHost().isValid())
-	{
-		AppStyle::pushLabel();
-		ImGui::TextWrapped("(# %d)\t", _hosting.getHost().userID);
-		AppStyle::pop();
-		AppColors::pushPrimary();
-		AppFonts::pushInput();
-		AppColors::pushPositive();
-		ImGui::TextWrapped(_hosting.getHost().name.c_str());
-		AppColors::pop();
-		AppFonts::pop();
-		AppColors::pop();
+	if (_hosting.getHost().isValid()) {
+		ImGui::Image(AppIcons::parsecIcon, ImVec2(42, 42));
+		ImGui::SameLine();
+		ImGui::BeginGroup();
+			AppStyle::pushLabel();
+			ImGui::TextWrapped("(# %d)\t", _hosting.getHost().userID);
+			AppStyle::pop();
+			AppColors::pushPrimary();
+			AppFonts::pushInput();
+			AppColors::pushPositive();
+			ImGui::TextWrapped(_hosting.getHost().name.c_str());
+			AppColors::pop();
+			AppFonts::pop();
+			AppColors::pop();
+		ImGui::EndGroup();
 	}
 	else if (isSessionExpired)
 	{
@@ -158,4 +233,6 @@ void HostInfoWidget::render()
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
+
+	renderArcade();
 }

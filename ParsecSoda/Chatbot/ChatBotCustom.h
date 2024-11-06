@@ -16,8 +16,9 @@
 #include "../Modules/Macro.h"
 #include "../Modules/Hotseat.h"
 #include "../Modules/Tournament.h"
+#include "../Models/CommandInfo.h"
 
-#include "Commands/Base/ACommand.h"
+#include "ACommand.h"
 #include "Commands/CommandBotMessage.h"
 #include "Commands/CommandDefaultMessage.h"
 
@@ -38,6 +39,13 @@ public:
 		//_basicVersion = Config::cfg.general.basicVersion;
 	}
 	ACommand* isCustomCommand(const char* msg, Guest& sender, bool isHost, Tier tier, uint32_t previous);
+
+	std::vector<CommandInfo> commands = {};
+	std::vector<std::string> split(const std::string& str, char delimiter);
+	std::vector<std::string> getArguments(const char* msg);
+	bool isCommand(const char* msg, vector<const char*> patterns);
+	void addHelp();
+	void addCmdHelp(std::string command, std::string desc, Tier tier);
 private:
 	// Dependency Injection
 	ParsecDSO* _parsec;

@@ -13,6 +13,7 @@
 #include "KeyboardMaps.h"
 #include "GuestDevice.h"
 #include "Helpers/Dice.h"
+#include "Modules/Hotseat.h"
 
 using namespace std;
 

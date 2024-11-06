@@ -1,22 +1,29 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include <iostream>
 #include "../../../Helpers/Dice.h"
 
 using namespace std;
 
-class Command8Ball : public ACommand
-{
+/**
+ * @brief Command to get a random 8ball response
+ */
+class Command8Ball : public ACommand {
 public:
 
 	/**
-	 * @brief Construct a new Command8Ball object
-	 * 
-	 * @param sender 
+	 * Example of how to use the command
 	 */
-	Command8Ball(Guest& sender)
-		: _sender(sender)
+	std::string usage = "!8ball <question>\nExample: !8ball Will I win at smash?";
+
+	/**
+	 * @brief Construct a new Command8Ball object
+	 *
+	 * @param sender
+	 */
+	Command8Ball(const char* msg, Guest& sender)
+		: ACommand(msg, sender), _sender(sender)
 	{}
 
 	/**
@@ -27,21 +34,24 @@ public:
 
 		srand(time(NULL));
 
-		if (Dice::roll(50)) {
-			_replyMessage = "[8BALL] " + _yes[(rand() % 10)] + "\0";
-		} 
-		else {
-
-			if (Dice::roll(50)) {
-				_replyMessage = "[8BALL] " + _maybe[(rand() % 5)] + "\0";
-			}
-			else {
-				_replyMessage = "[8BALL] " + _no[(rand() % 5)] + "\0";
-			}
-
+		// Check if the user has provided a question
+		if (getArgs().size() < 1) {
+			setReply(usage);
+			return false;
 		}
 
-		_replyMessage += ", " + _sender.name + ".";
+		// Randomly select a category (0 for yes, 1 for maybe, 2 for no)
+		int category = rand() % 3;
+
+		// Randomly select a response from the chosen category
+		int responseIndex = rand() % 10;
+
+		// Ensure we don't pick an empty string for maybe and no categories
+		while (responses[category][responseIndex].empty()) {
+			responseIndex = rand() % 10;
+		}
+
+		setReply(responses[category][responseIndex] + ", " + _sender.name + ".");
 
 		return true;
 
@@ -49,7 +59,7 @@ public:
 
 	/**
 	 * @brief Get the prefixes object
-	 * @return vector<const char*> 
+	 * @return vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
 		return vector<const char*> { "!8ball" };
@@ -58,32 +68,42 @@ public:
 protected:
 	Guest& _sender;
 
-	string _yes[10] = {
-		"As I see it, yes",
-		"It is certain",
-		"It is decidedly so",
-		"Most likely",
-		"Outlook good",
-		"Signs point to yes",
-		"Without a doubt",
-		"Yes",
-		"Yes - definitely",
-		"You may rely on it"
-	};
-
-	string _maybe[5] = {
-		"Reply hazy, try again",
-		"Ask again later",
-		"Better not tell you now",
-		"Cannot predict now",
-		"Concentrate and ask again"
-	};
-
-	string _no[5] = {
-		"Don't count on it",
-		"My reply is no",
-		"My sources say no",
-		"Outlook not so good",
-		"Very doubtful"
+	string responses[3][10] = {
+		{
+			"As I see it, yes",
+			"It is certain",
+			"It is decidedly so",
+			"Most likely",
+			"Outlook good",
+			"Signs point to yes",
+			"Without a doubt",
+			"Yes",
+			"Yes - definitely",
+			"You may rely on it"
+		},
+		{
+			"Reply hazy, try again",
+			"Ask again later",
+			"Better not tell you now",
+			"Cannot predict now",
+			"Concentrate and ask again",
+			"Maybe",
+			"Dunno",
+			"Beats me",
+			"Stranger things have happened",
+			"Who knows"
+		},
+		{
+			"Don't count on it",
+			"My reply is no",
+			"My sources say no",
+			"Outlook not so good",
+			"Very doubtful",
+			"Unlikely",
+			"Absolutely not",
+			"Definitely not",
+			"No",
+			"lol nope"
+		}
 	};
 };

@@ -32,7 +32,8 @@ public:
         bool& showOverlay,
         bool& showHotseat,
 		bool& showTournament,
-        bool& showKeyMap
+        bool& showKeyMap,
+        bool& showDevTools
     );//-- CodeSomnia Moidified --
       // CodeSomnia : showKeyMap Added
 

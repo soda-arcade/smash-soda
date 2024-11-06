@@ -1,94 +1,102 @@
 #pragma once
 
-#include "../../../Core/Config.h"
-#include "../Base/ACommandSearchUser.h"
+#include "../../ACommand.h"
 #include "../../../Modules/AutoMod.h"
 
-class CommandUnmute : public ACommandSearchUser
+class CommandUnmute : public ACommand
 {
 public:
 
+	std::string usage = "Usage: !unmute <username> \nExample: !unmute MickeyUK\0";
+
 	/**
-	 * @brief Construct a new CommandUnmute object
-	 * 
+	 * @brief Construct a new CommandMute object
+	 *
 	 * @param msg
 	 * @param sender
 	 * @param guests
 	 * @param host
 	 */
 	CommandUnmute(const char* msg, Guest& sender, GuestList& guests, Guest& host)
-		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _host(host)
+		: ACommand(msg, sender), _sender(sender), _host(host), guests(guests)
 	{}
 
 	/**
 	 * @brief Run the command
-	 * 
+	 *
 	 * @return true
 	 * @return false
 	 */
 	bool run() override {
 
-		ACommandSearchUser::run();
-
-		if (_searchResult != SEARCH_USER_RESULT::FOUND)
-		{
-			try
-			{
-				if (_host.userID == stoul(_targetUsername))
-				{
-					_targetGuest = _host;
-					_searchResult = SEARCH_USER_RESULT::FOUND;
-				}
-			}
-			catch (const std::exception&) {}
-
-			if (_searchResult != SEARCH_USER_RESULT::FOUND && _targetUsername.compare(_host.name) == 0)
-			{
-				_targetGuest = _host;
-				_searchResult = SEARCH_USER_RESULT::FOUND;
-			}
+		// Was a guest specified?
+		if (getArgs().size() == 0) {
+			setReply(usage);
+			return false;
 		}
 
-
-		bool rv = false;
-
-		switch (_searchResult)
-		{
-		case SEARCH_USER_RESULT::NOT_FOUND:
-			SetReply(_targetUsername + " is not in the chat.\0");
-
-		case SEARCH_USER_RESULT::FOUND:
-			rv = true;
-			if (_sender.userID == _targetGuest.userID) {
-				SetReply(_sender.name + " tried to mute...themselves?\0");
-			}
-			else {
-				AutoMod::instance.UnmuteUser(_targetGuest.userID);
-			}
-			break;
-
-		case SEARCH_USER_RESULT::FAILED:
-		default:
-			_replyMessage = "Usage: !unmute <username>\nExample: !unmute bigboi83\0";
-			break;
+		// Find the guest
+		if (!findGuest()) {
+			setReply("Can't find the guest you want to mute!\0");
+			return false;
 		}
 
-		return rv;
+		AutoMod::instance.UnmuteUser(target.id);
+		setReply(target.name + " has been unmuted\0");
+
+		return true;
 	}
 
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <returns></returns>
+	/**
+	 * @brief Get the prefixes object
+	 *
+	 * @return std::vector<const char*>
+	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!unmute" };
+		return vector<const char*> { "!mute" };
 	}
 
 protected:
 	static vector<const char*> internalPrefixes() {
-		return vector<const char*> { "!unmute " };
+		return vector<const char*> { "!mute " };
 	}
 
+	/**
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	*
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
+
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
+				}
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	Guest target;
+	GuestList guests;
 	Guest& _sender;
 	Guest& _host;
 };

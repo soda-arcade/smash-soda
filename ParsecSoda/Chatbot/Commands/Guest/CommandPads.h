@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 #include <sstream>
 
@@ -13,8 +13,8 @@ public:
 	 * 
 	 * @param gamepadClient
 	 */
-	CommandPads(GamepadClient &gamepadClient)
-		: _gamepadClient(gamepadClient)
+	CommandPads(const char* msg, Guest& sender, GamepadClient &gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -62,6 +62,7 @@ public:
 		reply << "\0";
 
 		_replyMessage = reply.str();
+		isBotCommand = true;
 		return true;
 	}
 

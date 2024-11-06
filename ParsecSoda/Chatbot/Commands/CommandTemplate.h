@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Core/Config.h"
-#include "Base/ACommand.h"
+#include "../ACommand.h"
 
 using namespace std;
 
@@ -18,7 +18,7 @@ public:
 	-- EXAMPLES ----------------
 
 	// ACommand
-	#include "ACommand.h"
+	#include "../ACommand.h"
 
 	class CommandTemplate : public ACommand {
 		public:
@@ -56,7 +56,8 @@ public:
 	}
 	----------------------------
 	*/
-	CommandTemplate(const char* msg) {}
+	CommandTemplate(const char* msg, Guest& sender) :
+	ACommand(msg, sender) {}
 
 	/**
 	 * @brief Run the command

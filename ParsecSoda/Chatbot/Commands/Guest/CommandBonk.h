@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../Core/Config.h"
-#include "../Base/ACommandSearchUser.h"
+#include "../../ACommand.h"
 #include <Windows.h>
 #include <mmsystem.h>
 #include <iostream>
@@ -10,20 +10,25 @@
 #include "../../../Helpers/Dice.h"
 #include "../../../Helpers/Stopwatch.h"
 
-class CommandBonk : public ACommandSearchUser
+class CommandBonk : public ACommand
 {
 public:
 
 	/**
-	 * @brief Construct a new CommandBonk object
+	 * Example of how to use the command
+	 */
+	std::string usage = "!bonk <username>\nExample: !bonk melon";
+
+	/**
+	 * Construct a new CommandBonk object
 	 * 
 	 * @param msg 
 	 * @param sender 
 	 * @param guests 
 	 * @param host 
 	 */
-	CommandBonk(const char* msg, Guest& sender, GuestList& guests, Guest& host)
-		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _host(host)
+	CommandBonk(const char* msg, Guest& sender, GuestList& guestList, Guest& host)
+		: ACommand(msg, sender), sender(sender), host(host), guests(guestList)
 	{}
 
 	/**
@@ -34,104 +39,65 @@ public:
 
 		// Bonk enabled?
 		if (Config::cfg.chat.bonkEnabled == false) {
-			SetReply("Bonk command is disabled.\0");
+			setReply("Bonk command is disabled.\0");
 			return false;
 		}
 
 		if (!_stopwatch.isFinished()) {
-			SetReply("Bonk command is on cooldown: " + std::to_string(_stopwatch.getRemainingTime() / 1000) + " seconds left.\0");
+			setReply("Bonk command is on cooldown: " + std::to_string(_stopwatch.getRemainingTime() / 1000) + " seconds left.\0");
 			return false;
 		}
 
-		ACommandSearchUser::run();
-
-		if (_searchResult != SEARCH_USER_RESULT::FOUND)
-		{
-			try
-			{
-				if (_host.userID == stoul(_targetUsername))
-				{
-					_targetGuest = _host;
-					_searchResult = SEARCH_USER_RESULT::FOUND;
-					if (Config::cfg.chat.hostBonkProof) {
-						
-						srand(time(NULL));
-						std::string message = _hostBonkProof[rand() % 3];
-						
-						std::string::size_type pos = message.find("%s");
-						if (pos != std::string::npos)
-							message.replace(pos, 2, _sender.name);
-
-						SetReply(message);
-
-						try {
-							PlaySound(TEXT("./SFX/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-						}
-						catch (const std::exception&) {}
-					}
-				}
-			}
-			catch (const std::exception&) {}
-
-			if (_searchResult != SEARCH_USER_RESULT::FOUND && _targetUsername.compare(_host.name) == 0)
-			{
-				_targetGuest = _host;
-				_searchResult = SEARCH_USER_RESULT::FOUND;
-			}
+		// Was a guest specified?
+		if (getArgs().size() == 0) {
+			setReply(usage);
+			return false;
 		}
 
+		// Find the guest
+		if (!findGuest()) {
+			setReply("Bonk who? They're not here!\0");
+			return false;
+		}
 
-		bool rv = false;
+		srand(time(NULL));
 		static uint8_t BONK_CHANCE = 50;
 
-		switch (_searchResult)
-		{
-		case SEARCH_USER_RESULT::NOT_FOUND:
-			if (Dice::roll(BONK_CHANCE))
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " dreams of bonking but the target out of reach.\0";
-			else
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " yearns for bonking but the victim is not here.\0";
-			break;
-
-		case SEARCH_USER_RESULT::FOUND:
-			_stopwatch.reset();
-			rv = true;
-			if (_sender.userID == _targetGuest.userID)
-			{
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " self-bonked. *Bonk!*\0";
-				try
-				{
-					PlaySound(TEXT("./SFX/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
-			}
-			else if (Dice::roll(BONK_CHANCE))
-			{
-				_replyMessage = std::string() + "[ChatBot] | " + _sender.name + " bonked " + _targetGuest.name + ". *Bonk!*\0";
-				try
-				{
-					PlaySound(TEXT("./SFX/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
-			}
-			else
-			{
-				_replyMessage = std::string() + "[ChatBot] | " + _targetGuest.name + " dodged " + _sender.name + "'s bonk. *Swoosh!*\0";
-				try
-				{
-					PlaySound(TEXT("./SFX/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
-				}
-				catch (const std::exception&) {}
-			}
-			break;
-
-		case SEARCH_USER_RESULT::FAILED:
-		default:
-			_replyMessage = "[ChatBot] | Usage: !bonk <username>\nExample: !bonk melon\0";
-			break;
+		// Did we bonk ourselves?
+		if (target.userID == sender.userID) {
+			playHitSound();
+			setReply(target.name + " bonked themselves, because they are just so silly.");
+			return true;
 		}
 
-		return rv;
+		// Did we ACTUALLY try to bonk host?
+		if (target.userID == host.userID && Config::cfg.chat.hostBonkProof) {
+			
+			// Pick a random bonk-proof message
+			std::string message = _hostBonkProof[rand() % 4];
+
+			// Replace %s with the sender's name
+			std::string::size_type pos = message.find("%s");
+			if (pos != std::string::npos) {
+				message.replace(pos, 2, sender.name);
+			}
+			setReply(message);
+			playDodgeSound();
+
+			return true;
+		}
+
+		// Did we bonk the target?
+		if (Dice::roll(BONK_CHANCE)) {
+			playHitSound();
+			setReply(sender.name + " bonked " + target.name + ". *Bonk!*");
+		}
+		else {
+			playDodgeSound();
+			setReply(target.name + " dodged " + sender.name + "'s bonk. *Swoosh!*");
+		}
+
+		return true;
 	}
 
 	/**
@@ -152,17 +118,68 @@ protected:
 		return vector<const char*> { "!bonk " };
 	}
 
-	static Stopwatch _stopwatch;
+	void playHitSound() {
+		try {
+			PlaySound(TEXT("./SFX/bonk-hit.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+		}
+		catch (const std::exception&) {}
+	}
 
-	Guest& _sender;
-	Guest& _host;
+	void playDodgeSound() {
+		try {
+			PlaySound(TEXT("./SFX/bonk-dodge.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+		}
+		catch (const std::exception&) {}
+	}
+
+	/**
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	* 
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
+
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
+				}
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	Guest target;
+	Guest& sender;
+	Guest& host;
+	GuestList guests;
+
+	static Stopwatch _stopwatch;
 
 	/**
 	 * @brief Bonk-proof messages
 	 */
-	string _hostBonkProof[3] = {
+	string _hostBonkProof[4] = {
 		"%s tried to bonk the host, but the host laughs at your puny efforts.\0",
 		"%s tried to bonk the host, but the host's power level is 9000!!!!\0",
-		"%s tried to bonk the host, but the host is just too good for you, so don't even try.\0"
+		"%s tried to bonk the host, but the host is just too good for you, so don't even try.\0",
+		"The host effortlessly sidesteps %s's bonk attempt.\0",
 	};
 };

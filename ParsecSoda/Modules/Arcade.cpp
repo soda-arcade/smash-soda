@@ -12,19 +12,6 @@ Arcade::Arcade() {
 
 	// Custom artwork
 	artwork = vector<Artwork>();
-
-	// Easy toggle for dev/prod
-	_dev = false;
-
-	// Which domain to use
-	if (_dev) {
-		_domain = _devDomain;
-		_secure = false;
-	} else {
-		_domain = _prodDomain;
-		_secure = true;
-	}
-
 }
 
 /**
@@ -33,12 +20,26 @@ Arcade::Arcade() {
  * @param password	Password
  * @return bool
  */
-bool Arcade::login(string email, string password) {
+bool Arcade::login(string email, string password, string twoFactor = "") {
+
+	// Which domain to use
+	if (Config::cfg.developer.useDevDomain) {
+		_domain = Config::cfg.developer.devDomain;
+		_secure = false;
+	}
+	else if (Config::cfg.developer.useStagingDomain) {
+		_domain = Config::cfg.developer.stagingDomain;
+		_secure = true;
+	} else {
+		_domain = _prodDomain;
+		_secure = true;
+	}
 
 	// Create the JSON object
 	json j;
 	j["email"] = email;
 	j["password"] = password;
+	j["code"] = twoFactor;
 
 	string data = j.dump();
 	size_t bodySize = sizeof(char) * data.length();
@@ -63,8 +64,28 @@ bool Arcade::login(string email, string password) {
 
 		json result = json::parse(responseStr);
 
-		Config::cfg.arcade.token = result["token"];
-		Config::cfg.arcade.username = result["user"]["name"];
+		Arcade::instance.credentials.token = result["token"];
+		Arcade::instance.credentials.username = result["user"]["name"];
+
+		// Save the file
+		string configPath = PathHelper::GetConfigPath();
+		if (configPath != "") {
+			string filepath = configPath + "arcade.json";
+			
+			json j;
+			j["token"] = Arcade::instance.credentials.token;
+			j["username"] = Arcade::instance.credentials.username;
+
+			string jsonStr = j.dump();
+			std::ofstream file(filepath, std::ios::binary);
+			if (file.is_open()) {
+				std::string jsonStr = j.dump();
+				xorEncryptDecrypt(jsonStr, _key);
+				file.write(jsonStr.c_str(), jsonStr.size());
+				file.close();
+			}
+
+		}
 
 		//MTY_Free(&response);
 		return true;
@@ -75,12 +96,75 @@ bool Arcade::login(string email, string password) {
 	return false;
 }
 
+bool Arcade::loadCredentials() {
+
+	string configPath = PathHelper::GetConfigPath();
+	if (configPath != "") {
+		string filepath = configPath + "arcade.json";
+		if (MTY_FileExists(filepath.c_str())) {
+			try {
+				std::ifstream file(filepath, std::ios::binary); 
+				if (file.is_open()) {
+					std::ifstream file(filepath, std::ios::binary);
+					std::stringstream buffer; 
+					buffer << file.rdbuf(); 
+					std::string encryptedStr = buffer.str(); 
+					xorEncryptDecrypt(encryptedStr, _key);
+
+					// Parse the json
+					json j = json::parse(encryptedStr);
+
+					Arcade::instance.credentials.token = j["token"];
+					Arcade::instance.credentials.username = j["username"];
+				}
+
+				return true;
+
+			}
+			catch (exception e) {
+				g_hosting.logMessage("Failed to load arcade credentials");
+				return false;
+			}
+		}
+		
+	}
+
+	return false;
+}
+
+bool Arcade::deleteCredentials() {
+
+	string configPath = PathHelper::GetConfigPath();
+	if (configPath != "") {
+		string filepath = configPath + "arcade.json";
+		if (MTY_FileExists(filepath.c_str())) {
+			MTY_DeleteFile(filepath.c_str());
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /**
  * Check if the token is valid
  * @param token	Token to check
  * @return bool
  */
 bool Arcade::checkToken(string token) {
+
+	// Which domain to use
+	if (Config::cfg.developer.useDevDomain) {
+		_domain = Config::cfg.developer.devDomain;
+		_secure = false;
+	}
+	else if (Config::cfg.developer.useStagingDomain) {
+		_domain = Config::cfg.developer.stagingDomain;
+		_secure = true;
+	} else {
+		_domain = _prodDomain;
+		_secure = true;
+	}
 
 	// Build the JSON string
 	string data = "";
@@ -106,12 +190,13 @@ bool Arcade::checkToken(string token) {
 
 		// Get the user's artwork
 		getArtwork();
+		g_hosting.logMessage("Logged in to Soda Arcade!");
 
 		return true;
 	} else {
-		Config::cfg.arcade.token = "";
 		Config::cfg.arcade.showLogin = true;
 		Config::cfg.Save();
+		deleteCredentials();
 		return false;
 	}
 
@@ -122,6 +207,20 @@ bool Arcade::checkToken(string token) {
  * @return bool
  */
 bool Arcade::getArtwork() {
+
+	// Which domain to use
+	if (Config::cfg.developer.useDevDomain) {
+		_domain = Config::cfg.developer.devDomain;
+		_secure = false;
+	}
+	else if (Config::cfg.developer.useStagingDomain) {
+		_domain = Config::cfg.developer.stagingDomain;
+		_secure = true;
+	}
+	else {
+		_domain = _prodDomain;
+		_secure = true;
+	}
 
 	// Build the JSON string
 	string data = "";
@@ -158,9 +257,7 @@ bool Arcade::getArtwork() {
 		return true;
 	}
 	else {
-		Config::cfg.arcade.token = "";
-		Config::cfg.arcade.showLogin = true;
-		Config::cfg.Save();
+		g_hosting.logMessage("A fatal error occured when trying to retrieve your custom artwork. If the issues persists, log out of Soda Arcade and back in.");
 		return false;
 	}
 }
@@ -170,6 +267,20 @@ bool Arcade::getArtwork() {
  * @return bool
  */
 bool Arcade::createPost() {
+
+	// Which domain to use
+	if (Config::cfg.developer.useDevDomain) {
+		_domain = Config::cfg.developer.devDomain;
+		_secure = false;
+	}
+	else if (Config::cfg.developer.useStagingDomain) {
+		_domain = Config::cfg.developer.stagingDomain;
+		_secure = true;
+	}
+	else {
+		_domain = _prodDomain;
+		_secure = true;
+	}
 
 	// Parsec session
 	string peer_id = g_hosting.getSession().hostPeerId;
@@ -187,7 +298,11 @@ bool Arcade::createPost() {
 	j["game"] = Config::cfg.room.game;
 	j["guest_limit"] = Config::cfg.room.guestLimit;
 	j["details"] = Config::cfg.room.details;
-	j["theme"] = Config::cfg.room.theme;
+	j["rep"] = Config::cfg.room.repThreshold;
+	j["stream_url"] = Config::cfg.room.streamUrl;
+	string theme = Config::cfg.room.theme;
+	std::transform(theme.begin(), theme.end(), theme.begin(), ::tolower);
+	j["theme"] = theme;
 	if (artworkID != -1) {
 		j["artwork_id"] = artworkID;
 	}
@@ -223,10 +338,6 @@ bool Arcade::createPost() {
 	}
 	else {
 		g_hosting.logMessage("Failed to post on the arcade, for some reason. Please login again. Error Code: " + to_string(_status));
-		Config::cfg.arcade.token = "";
-		Config::cfg.arcade.username = "";
-		Config::cfg.arcade.showLogin = true;
-		Config::cfg.Save();
 	}
 	return false;
 }
@@ -236,6 +347,20 @@ bool Arcade::createPost() {
  * @return bool
  */
 bool Arcade::deletePost() {
+
+	// Which domain to use
+	if (Config::cfg.developer.useDevDomain) {
+		_domain = Config::cfg.developer.devDomain;
+		_secure = false;
+	}
+	else if (Config::cfg.developer.useStagingDomain) {
+		_domain = Config::cfg.developer.stagingDomain;
+		_secure = true;
+	}
+	else {
+		_domain = _prodDomain;
+		_secure = true;
+	}
 	
 	// Build the JSON string
 	string data = "";
@@ -257,11 +382,79 @@ bool Arcade::deletePost() {
 	);
 
 	const char* responseStr = (const char*)response;
-	if (responseSize > 0 && _status == 200) {
-		//MTY_Free(&response);
+	if (_status == 200) {
 		return true;
 	}
+	else {
+		return false;
+	}
 	return false;
+}
+
+/**
+ * Delete a post on the arcade
+ * @return bool
+ */
+bool Arcade::updateGuestCount(int guestCount) {
+
+	// Which domain to use
+	if (Config::cfg.developer.useDevDomain) {
+		_domain = Config::cfg.developer.devDomain;
+		_secure = false;
+	}
+	else if (Config::cfg.developer.useStagingDomain) {
+		_domain = Config::cfg.developer.stagingDomain;
+		_secure = true;
+	}
+	else {
+		_domain = _prodDomain;
+		_secure = true;
+	}
+
+	// Create the JSON object
+	json j;
+	j["guest_count"] = guestCount;
+
+	// Build the JSON string
+	string data = j.dump();
+	size_t bodySize = sizeof(char) * data.length();
+
+	// Prepare the response
+	void* response = nullptr;
+	size_t responseSize = 0;
+
+	// Send the request
+	string path = "/api/room/guest/count";
+	string method = "POST";
+
+	const bool success = MTY_HttpRequest(
+		_domain.c_str(), 0, _secure, method.c_str(), path.c_str(),
+		createHeaders(bodySize).c_str(),
+		data.c_str(), bodySize, 20000,
+		&response, &responseSize, &_status
+	);
+
+	const char* responseStr = (const char*)response;
+	if (_status == 200) {
+		g_hosting.logMessage("Updated guest count to " + to_string(guestCount));
+		return true;
+	}
+	else {
+		return false;
+	}
+	return false;
+}
+
+/**
+ * Logout of the arcade
+ * @return bool
+ */
+bool Arcade::logout() {
+	Config::cfg.room.privateRoom = true;
+	Config::cfg.Save();
+	credentials.token = "";
+	credentials.username = "";
+	return deleteCredentials();
 }
 
 /**
@@ -274,9 +467,15 @@ string Arcade::createHeaders(size_t size) {
 	headers += "Content-Length: " + to_string(size) + "\r\n";
 
 	// Include token if set
-	if (!Config::cfg.arcade.token.empty()) {
-		headers += "Authorization: Bearer " + Config::cfg.arcade.token + "\r\n";
+	if (!Arcade::instance.credentials.token.empty()) {
+		headers += "Authorization: Bearer " + Arcade::instance.credentials.token + "\r\n";
 	}
 
 	return headers;
 };
+
+void Arcade::xorEncryptDecrypt(std::string& data, const std::string& key) {
+	for (size_t i = 0; i < data.size(); ++i) {
+		data[i] ^= key[i % key.size()];
+	}
+}

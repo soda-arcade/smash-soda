@@ -64,6 +64,10 @@ void ProcessMan::start(string path, string args) {
 /// Stops the application.
 /// </summary>
 void ProcessMan::stop(bool kill) {
+	if (!isRunning) {
+		return;
+	}
+
 	isRunning = false;
 	// Terminate the process
 	if (kill) {

@@ -14,7 +14,8 @@ public:
 	VerifiedList(const std::vector<GuestData> verifiedUsers);
 	bool Add(const GuestData user);
 	bool Verify(const GuestData user);
-	const bool Remove(const uint32_t userID, function<void(GuestData&)> callback);
+	const bool Remove(const uint32_t userID);
+	const bool Remove(const string userName);
 	const bool inList(const uint32_t userID);
 	vector<GuestData>& getGuests();
 	static vector<GuestData> LoadFromFile();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../Core/Config.h"
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
 using namespace std;
@@ -15,8 +15,8 @@ public:
 	 * @param msg
 	 * @param gamepadClient
 	 */
-	CommandStripAll(const char* msg, GamepadClient& gamepadClient)
-		: _gamepadClient(gamepadClient) {}
+	CommandStripAll(const char* msg, Guest& sender, GamepadClient& gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient) {}
 
 	/**
 	 * @brief Run the command

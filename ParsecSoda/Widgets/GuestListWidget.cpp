@@ -103,6 +103,7 @@ void GuestListWidget::renderOnlineGuests()
     {
         name = _guests[i].name;
         userID = _guests[i].userID;
+
         m = _hosting.getMetrics(_guests[i].id);
 
         filterTextStr = _filterText;
@@ -188,7 +189,7 @@ void GuestListWidget::renderOnlineGuests()
 			ImGui::Image(AppIcons::eye, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.70f, 0.41f, 0.80f, 1.00f));
         }
         ImGui::SameLine();
-        if (Config::cfg.hotseat.enabled) {
+        if (Config::cfg.hotseat.enabled && Hotseat::instance.inSeat(userID)) {
             ImGui::Dummy(ImVec2(10, 0));
             ImGui::SameLine();
             ImGui::Image(AppIcons::hotseat, ImVec2(16, 16), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0.84f, 0.00f, 0.00f, 1.00f));
@@ -219,9 +220,7 @@ void GuestListWidget::renderOnlineGuests()
             AppStyle::pushPositive();
 
             if (ImGui::Selectable("Make VIP")) {
-                _hosting.sendHostMessage((
-                    string("!vip ") + to_string(userID)
-                    ).c_str(), true);
+                Cache::cache.vipList.VIP(GuestData(name, userID));
             }
 
             ImGui::Dummy(ImVec2(0.0f, 2.0f));
@@ -243,9 +242,7 @@ void GuestListWidget::renderOnlineGuests()
 			ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
 			if (ImGui::Selectable("Ban Guest")) {
-                _hosting.sendHostMessage((
-                    string("!ban ") + to_string(userID)
-                    ).c_str(), true);
+                Cache::cache.banList.ban(GuestData(name, userID));
 			}
 
             if (ImGui::Selectable("Create Keyboard Profile")) {
@@ -346,9 +343,7 @@ void GuestListWidget::renderBannedGuests()
                 ("Unban\n#" + to_string(userID) + "\n"+ name).c_str()
             ))
             {
-                _hosting.sendHostMessage((
-                    string("!unban ") + to_string(userID)
-                ).c_str(), true);
+                Cache::cache.banList.unban(userID);
             }
         }
 
@@ -530,9 +525,7 @@ void GuestListWidget::renderModdedGuests() {
                 ("Unmod\n#" + to_string(userID) + "\n" + name).c_str()
             ))
             {
-                _hosting.sendHostMessage((
-                    string("!unmod ") + to_string(userID)
-                    ).c_str(), true);
+                Cache::cache.modList.unmod(userID);
             }
         }
 
@@ -625,9 +618,7 @@ void GuestListWidget::renderVIPGuests() {
                 ("Unvip\n#" + to_string(userID) + "\n" + name).c_str()
             ))
             {
-                _hosting.sendHostMessage((
-                    string("!unvip ") + to_string(userID)
-                    ).c_str(), true);
+                Cache::cache.vipList.unVIP(userID);
             }
         }
 

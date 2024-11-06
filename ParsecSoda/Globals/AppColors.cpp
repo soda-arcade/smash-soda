@@ -108,6 +108,20 @@ void AppColors::pushButtonSolid() {
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, primary);
 }
 
+void AppColors::pushButtonSecondary() {
+	pushColor(black);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(.90f, .90f, .90f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(.90f, .90f, .90f, 1.00f));
+}
+
+void AppColors::pushButtonDanger() {
+	pushColor(black);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.32f, 0.27f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.70f, 0.35f, 0.32f, 1.00f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.35f, 0.32f, 1.00f));
+}
+
 void AppColors::popButton() {
 	ImGui::PopStyleColor(4);
 }

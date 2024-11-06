@@ -1,11 +1,13 @@
 #pragma once
 
-#include "../Base/ACommandSearchUser.h"
+#include "../../ACommand.h"
 #include "../../../Modules/AutoMod.h"
 
-class CommandMute : public ACommandSearchUser
+class CommandMute : public ACommand
 {
 public:
+
+	std::string usage = "Usage: !mute <username> <minutes>\nExample: !mute Call_Me_Troy 5\0";
 
 	/**
 	 * @brief Construct a new CommandMute object
@@ -16,7 +18,7 @@ public:
 	 * @param host
 	 */
 	CommandMute(const char* msg, Guest& sender, GuestList& guests, Guest& host)
-		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _host(host)
+		: ACommand(msg, sender), _sender(sender), _host(host), guests(guests)
 	{}
 
 	/**
@@ -27,50 +29,34 @@ public:
 	 */
 	bool run() override {
 
-		ACommandSearchUser::run();
-
-		if (_searchResult != SEARCH_USER_RESULT::FOUND)
-		{
-			try
-			{
-				if (_host.userID == stoul(_targetUsername))
-				{
-					_targetGuest = _host;
-					_searchResult = SEARCH_USER_RESULT::FOUND;
-				}
-			}
-			catch (const std::exception&) {}
-
-			if (_searchResult != SEARCH_USER_RESULT::FOUND && _targetUsername.compare(_host.name) == 0)
-			{
-				_targetGuest = _host;
-				_searchResult = SEARCH_USER_RESULT::FOUND;
-			}
+		// Was a guest specified?
+		if (getArgs().size() < 2) {
+			setReply(usage);
+			return false;
 		}
 
-
-		bool rv = false;
-
-		switch (_searchResult)
-		{
-		case SEARCH_USER_RESULT::NOT_FOUND:
-			SetReply(_targetGuest.name + " shut up and left.");
-
-		case SEARCH_USER_RESULT::FOUND:
-			rv = true;
-			if (_sender.userID == _targetGuest.userID) {
-				SetReply(_sender.name + " tried to mute...themselves?");
-			} else {
-				AutoMod::instance.MuteUser(_targetGuest.userID, _targetGuest.name, 5);
-			}
-			break;
-
-		case SEARCH_USER_RESULT::FAILED:
-		default:
-			SetReply("Usage: !mute <username>\nExample: !mute bigboi83\0");
-			break;
+		// Find the guest
+		if (!findGuest()) {
+			setReply("Can't find the guest you want to mute!\0");
+			return false;
 		}
-		return rv;
+
+		if (_sender.userID == target.userID) {
+			setReply(_sender.name + " tried to mute...themselves?");
+		}
+		else {
+			int duration = 5;
+			try {
+				duration = stoi(getArgs()[1]);
+			}
+			catch (const std::exception&) {
+				setReply(usage);
+				return false;
+			}
+			AutoMod::instance.MuteUser(target.userID, target.name, duration);
+			setReply("Shhh, "+ target.name + "! They have been muted for " + to_string(duration) + " minutes.");
+		}
+		return true;
 	}
 
 	/**
@@ -87,6 +73,42 @@ protected:
 		return vector<const char*> { "!mute " };
 	}
 
+	/**
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	*
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
+
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
+				}
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	Guest target;
+	GuestList guests;
 	Guest& _sender;
 	Guest& _host;
 };

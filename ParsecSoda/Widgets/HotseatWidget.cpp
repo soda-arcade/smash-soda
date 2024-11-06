@@ -8,7 +8,7 @@ HotseatWidget::HotseatWidget(Hosting& hosting)
 {
 	_playTime = Config::cfg.hotseat.playTime;
 	_resetTime = Config::cfg.hotseat.resetTime;
-    _minResetTime = Config::cfg.hotseat.minResetTime;
+    _reminderInterval = Config::cfg.hotseat.reminderInterval;
 }
 
 bool HotseatWidget::render(bool& showWindow) {
@@ -100,13 +100,24 @@ void HotseatWidget::renderOverview() {
             //ImGui::Text(user.status.c_str());
 
             // Get the time remaining for the user (in minutes)
-            if (user.stopwatch->isRunning()) {
+            if (user.stopwatch->isRunning() && !user.cooldown) {
+                AppColors::pushLabel();
+                ImGui::Text("REMAINING ");
+                AppColors::pop();
+                ImGui::SameLine();
+                AppColors::pushInput();
 				ImGui::Text(user.stopwatch->getRemainingTime().c_str());
+                AppColors::pop();
 			}
 			else {
-                int cooldownTime = Hotseat::instance.getCoolDownTime(user.userId);
-                if (cooldownTime > 0) {
-					ImGui::Text("%d minute(s) to wait", cooldownTime);
+                if (user.cooldown) {
+                    AppColors::pushPrimary();
+                    ImGui::Text("COOLDOWN ");
+                    AppColors::pop();
+                    ImGui::SameLine();
+                    AppColors::pushInput();
+                    ImGui::Text(Hotseat::instance.getCooldownRemaining(user.userId).c_str());
+                    AppColors::pop();
 				}
 				else {
                     ImGui::Text(user.stopwatch->getRemainingTime().c_str());
@@ -146,31 +157,18 @@ void HotseatWidget::renderSettings() {
         "This is how much time a user is allowed to play every reset (in minutes).")) {
         Config::cfg.hotseat.playTime = _playTime;
         _playTime = Config::cfg.hotseat.playTime;
-        Config::cfg.Save();
     }
 
-    if (ImForm::InputNumber("RESET TIME", _resetTime, 0, 999,
+    if (ImForm::InputNumber("RESET TIME", _resetTime, _playTime, 999,
 		"This is how often play time resets for each user (in minutes).")) {
-        if (_resetTime < 0) {
-            _resetTime = 0;
-        }
-        else {
-            Config::cfg.hotseat.resetTime = _resetTime;
-            _resetTime = Config::cfg.hotseat.resetTime;
-            Config::cfg.Save();
-        }
+        Config::cfg.hotseat.resetTime = _resetTime;
+        _resetTime = Config::cfg.hotseat.resetTime;
 	}
 
-    if (ImForm::InputNumber("MINIMUM RESET TIME", _minResetTime, 0, 999,
-        "This is the time a user must wait by default each time their play time runs out (in minutes).")) {
-        if (_minResetTime < 0) {
-            _minResetTime = 0;
-        }
-        else {
-            Config::cfg.hotseat.minResetTime = _minResetTime;
-            _minResetTime = Config::cfg.hotseat.minResetTime;
-            Config::cfg.Save();
-        }
+    if (ImForm::InputNumber("REMINDER INTERVAL", _reminderInterval, 0, _playTime-1,
+        "Print remaining hotseat time in chat every (x) minutes. 0 for no reminders.")) {
+        Config::cfg.hotseat.reminderInterval = _reminderInterval;
+        _reminderInterval = Config::cfg.hotseat.reminderInterval;
     }
 
     ImGui::EndGroup();

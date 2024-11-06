@@ -3,9 +3,9 @@
 #include "../../../Core/Config.h"
 #include "../../../Core/Cache.h"
 #include "parsec-dso.h"
-#include "../Base/ACommandStringArg.h"
+#include "../../ACommand.h"
 
-class CommandSFX : public ACommandStringArg
+class CommandSFX : public ACommand
 {
 public:
 	
@@ -15,7 +15,7 @@ public:
 	 * @param sender 
 	 */
 	CommandSFX(const char* msg, Guest& sender)
-		: ACommandStringArg(msg, internalPrefixes()), _sender(sender)
+		: ACommand(msg, sender), _sender(sender)
 	{}
 
 	/**
@@ -30,39 +30,39 @@ public:
 		Tier tier = Cache::cache.tierList.getTier(_sender.userID);
 
 		// SFX enabled?
-		if (tier == Tier::PLEB && !Config::cfg.permissions.guest.useSFX ||
+		if (tier == Tier::GUEST && !Config::cfg.permissions.guest.useSFX ||
 			tier == Tier::MOD && !Config::cfg.permissions.moderator.useSFX ||
-			tier == Tier::GOD && !Config::cfg.permissions.vip.useSFX) {
-			SetReply("Sound effects are disabled.\0");
+			Cache::cache.vipList.isVIP(_sender.userID) && !Config::cfg.permissions.vip.useSFX) {
+			setReply("You do not have permission to use this command.\0");
 			return false;
 		}
 
 		if (Cache::cache.sfxList.size() <= 0) {
-			SetReply("No sound effects available.\0");
+			setReply("No sound effects available.\0");
 			return false;
 		}
 
-		if ( !ACommandStringArg::run() ) {
+		// Was a sfx given specified?
+		if (getArgs().size() == 0) {
 			std:string reply =
 				string("Usage: !sfx <sound name> | Example: !sfx bruh\n") +
 				string("List of available sound names:\n") +
 				Cache::cache.sfxList.loadedTags() +
 				string("\0");
-			SetReply(reply);
+			setReply(reply);
 			return false;
 		}
 
-		SFXList::SFXPlayResult result = Cache::cache.sfxList.play(_stringArg);
+		SFXList::SFXPlayResult result = Cache::cache.sfxList.play(getArgs()[0]);
 
-		switch (result)
-		{
+		switch (result) {
 		case SFXList::SFXPlayResult::COOLDOWN:
-			SetReply(string(" | Command !sfx is on cooldown: ") +
+			setReply(string(" | Command !sfx is on cooldown: ") +
 				to_string(Cache::cache.sfxList.getRemainingCooldown()) +
 				string(" seconds left."));
 			break;
 		case SFXList::SFXPlayResult::NOT_FOUND:
-				SetReply(string(" | Command !sfx is on cooldown: ") +
+				setReply(string(" | Command !sfx is on cooldown: ") +
 				to_string(Cache::cache.sfxList.getRemainingCooldown()) +
 				string(" seconds left."));
 			break;
@@ -85,8 +85,9 @@ public:
 	}
 
 protected:
+	Guest& _sender;
+
 	static vector<const char*> internalPrefixes() {
 		return vector<const char*> { "!sfx " };
 	}
-	Guest& _sender;
 };

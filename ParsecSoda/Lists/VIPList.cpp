@@ -19,22 +19,30 @@ bool VIPList::VIP(GuestData user)
 	return added;
 }
 
-const bool VIPList::unVIP(const uint32_t userID, function<void(GuestData&)> callback)
-{
-	bool found = GuestDataList::pop(userID, callback);
-	if (found) {
-        SaveToFile();
-	}
-	return found;
+const bool VIPList::unVIP(const uint32_t userID) {
+    vector<GuestData>::iterator gi = _guests.begin();
+    for (; gi != _guests.end(); ++gi) {
+        if ((*gi).userID == userID) {
+            _guests.erase(gi);
+            SaveToFile();
+            return true;
+        }
+    }
+
+    return false;
 }
 
-const bool VIPList::unVIP(string guestName, function<void(GuestData&)> callback)
-{
-	bool found = GuestDataList::pop(guestName, callback);
-	if (found) {
-		SaveToFile();
-	}
-	return found;
+const bool VIPList::unVIP(string guestName) {
+    vector<GuestData>::iterator gi = _guests.begin();
+    for (; gi != _guests.end(); ++gi) {
+        if ((*gi).name == guestName) {
+            _guests.erase(gi);
+            SaveToFile();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 const bool VIPList::isVIP(const uint32_t userID)

@@ -32,7 +32,7 @@ bool ConfirmPopupWidget::render(const char* title, bool& showPopup, std::string 
             cursor = ImGui::GetCursorPos();
             ImGui::SetCursorPos(ImVec2(cursor.x + 10, cursor.y + 10));
             AppStyle::pushInput();
-            ImGui::Text(textString.c_str());
+            ImGui::TextWrapped(textString.c_str());
             AppStyle::pop();
         }
 

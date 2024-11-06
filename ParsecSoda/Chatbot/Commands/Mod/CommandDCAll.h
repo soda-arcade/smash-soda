@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../GamepadClient.h"
 
 class CommandDCAll : public ACommand
@@ -12,8 +12,8 @@ public:
 	 *
 	 * @param gamepadClient
 	 */
-	CommandDCAll(GamepadClient& gamepadClient)
-		: _gamepadClient(gamepadClient)
+	CommandDCAll(const char* msg, Guest& sender, GamepadClient& gamepadClient)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient)
 	{}
 
 	/**
@@ -33,6 +33,7 @@ public:
 				(*gi)->connect();
 			}
 		}
+		setReply("All gamepads disconnected");
 
 		return true;
 

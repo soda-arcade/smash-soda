@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 #include "../../../Guest.h"
 
 using namespace std;
@@ -14,8 +14,8 @@ public:
 	 * 
 	 * @param sender 
 	 */
-	CommandHelp(Guest& sender)
-		: _sender(sender)
+	CommandHelp(const char* msg, Guest& sender, vector<CommandInfo> commandList)
+		: ACommand(msg, sender), sender(sender), commands(commandList)
 	{}
 
 	/**
@@ -23,7 +23,52 @@ public:
 	 * @return true if the command was successful
 	 */
 	bool run() override {
-		_replyMessage = Config::cfg.chatbotName + "For a full list of commands, visit: https://bit.ly/smash-soda";
+		//_replyMessage = Config::cfg.chatbotName + "For a full list of commands, visit: https://bit.ly/smash-soda";
+
+		vector<CommandInfo> filteredCommands;
+		vector<CommandInfo> pageCommands;
+		int page = 0;
+		if (getArgs().size() > 0) {
+			try {
+				page = stoi(getArgs()[0]);
+			}
+			catch (const std::exception&) {
+				_replyMessage = "Invalid page number.";
+				return false;
+			}
+		}
+
+		// Filter commands based on tier
+		Tier tier = Cache::cache.tierList.getTier(sender.userID);
+		for (CommandInfo& cmd : commands) {
+			if (cmd.tier <= tier) {
+				filteredCommands.push_back(cmd);
+			}
+		}
+
+		// Check if page is out of bounds
+		if (page < 1) {
+			page = 1;
+		}
+		else if (page > (filteredCommands.size() + perPage - 1) / perPage) {
+			page = (filteredCommands.size() + perPage - 1) / perPage;
+		}
+
+		// Calculate total pages (round up)
+		int totalPages = (filteredCommands.size() + perPage - 1) / perPage;
+
+		// Get commands for this page
+		for (int i = (page - 1) * perPage; i < page * perPage && i < filteredCommands.size(); i++) {
+			pageCommands.push_back(filteredCommands[i]);
+		}
+
+		std::string help = "```\n";
+		for (CommandInfo& cmd : pageCommands) {
+			help += cmd.command + " - " + cmd.desc + "\n";
+		}
+		help += "``` PAGE " + to_string(page) + "/" + to_string(totalPages) + " ```";
+		_replyMessage = help;
+
 		return true;
 	}
 
@@ -36,6 +81,8 @@ public:
 	}
 
 protected:
-	Guest& _sender;
+	vector<CommandInfo> commands;
+	Guest& sender;
+	int perPage = 10;
 };
 

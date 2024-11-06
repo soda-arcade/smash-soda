@@ -23,6 +23,7 @@ typedef struct MyMetrics
 class GuestList
 {
 public:
+
 	void setGuests(ParsecGuest* guests, int guestCount);
 	vector<Guest> &getGuests();
 	vector<Guest> &getPlayingGuests();
@@ -39,6 +40,7 @@ public:
 	MyMetrics getMetrics(uint32_t id);
 	void deleteMetrics(uint32_t id);
 	void updateMetrics(ParsecGuest* guests, int guestCount);
+	bool pop(uint32_t userID);
 
 	const char* guestNames[GUESTLIST_MAX_GUESTS];
 private:

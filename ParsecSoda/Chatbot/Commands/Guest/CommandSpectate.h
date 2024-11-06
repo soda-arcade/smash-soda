@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../../../Core/Cache.h"
-#include "../Base/ACommandSearchUser.h"
+#include "../../ACommand.h"
 #include "../../../Modules/Hotseat.h"
 
 using namespace std;
 
-class CommandSpectate : public ACommandSearchUser
+class CommandSpectate : public ACommand
 {
 public:
 
@@ -20,7 +20,7 @@ public:
 	 * @param hotseat 
 	 */
 	CommandSpectate(const char* msg, Guest& sender, GuestList& guests, GamepadClient& gamepadClient, Hotseat& hotseat)
-		: ACommandSearchUser(msg, internalPrefixes(), guests), _sender(sender), _gamepadClient(gamepadClient), _hotseat(hotseat)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient), _hotseat(hotseat), guests(guests), sender(sender)
 	{}
 
 	/**
@@ -31,32 +31,16 @@ public:
 	 */
 	bool run() override {
 
-		ACommandSearchUser::run();
-		
-		switch (_searchResult)
-		{
-		case SEARCH_USER_RESULT::NOT_FOUND:
-			if (Cache::cache.tierList.getTier(_sender.userID) != Tier::PLEB) {
-				_replyMessage = std::string() + Config::cfg.chatbotName + _sender.name + ", I cannot find the user you want to set to spectator.\0";
-			}
-			break;
-
-		case SEARCH_USER_RESULT::FOUND:
-
-			if (Cache::cache.tierList.getTier(_sender.userID) != Tier::PLEB) {
-				addGuestToSpectators(_targetGuest);
-			}
-			
-			break;
-		
-		case SEARCH_USER_RESULT::FAILED:
-		default:
-			
+		// If guest name not provided
+		if (getArgs().size() == 0) {
 			addGuestToSpectators(_sender);
-
-			break;
+		} else {
+			if (findGuest()) {
+				addGuestToSpectators(target);
+			}
 		}
 
+		isBotCommand = true;
 		return true;
 	}
 
@@ -105,7 +89,43 @@ protected:
 		return vector<const char*> { "!spectate " };
 	}
 
-	Guest& _sender;
+	/**
+	* Get the guest referenced in the command. Returns nullptr
+	* if no guest is found
+	*
+	* @param guestList The guest list
+	*/
+	bool findGuest() {
+
+		// Get the guest
+		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		if (guest == "") {
+			return false;
+		}
+
+		try {
+			uint32_t id = stoul(guest);
+			vector<Guest>::iterator i;
+			for (i = guests.getGuests().begin(); i != guests.getGuests().end(); ++i) {
+				if ((*i).userID == id) {
+					target = *i;
+					return true;
+				}
+			}
+		}
+		catch (const std::exception&) {
+			bool found = guests.find(guest, &target);
+			if (found) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	Guest target;
+	Guest& sender;
+	GuestList guests;
 	GamepadClient& _gamepadClient;
 	Hotseat& _hotseat;
 };

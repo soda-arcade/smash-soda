@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 
 using namespace std;
 
@@ -15,8 +15,8 @@ public:
 	 * @param gamepadClient 
 	 * @param macro 
 	 */
-	CommandTriangle(Guest& sender, GamepadClient& gamepadClient, Macro& macro)
-		: _sender(sender), _gamepadClient(gamepadClient), _macro(macro)
+	CommandTriangle(const char* msg, Guest& sender, GamepadClient& gamepadClient, Macro& macro)
+		: ACommand(msg, sender), _gamepadClient(gamepadClient), _macro(macro)
 	{}
 
 	/**
@@ -32,12 +32,12 @@ public:
 
 		int randomNumber = 1 + (rand() % 10);
 		
-		SetReply("Triangle button pressed " + to_string(randomNumber) + " times!");
-
-		/*for (int i = 0; i < randomNumber; i++) {
+		setReply("Triangle button pressed " + to_string(randomNumber) + " times!");
+		for (int i = 0; i < randomNumber; i++) {
 			_macro.pressButtonForGuest(_sender.userID, ParsecGamepadButton::GAMEPAD_BUTTON_Y);
-		}*/
+		}
 
+		isBotCommand = true;
 		return true;
 
 	}
@@ -52,7 +52,6 @@ public:
 	}
 
 protected:
-	Guest& _sender;
 	GamepadClient& _gamepadClient;
 	Macro& _macro;
 };

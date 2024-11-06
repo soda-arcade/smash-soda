@@ -1,14 +1,15 @@
 #pragma once
 
 #include "../../../Core/Cache.h"
-#include "../Base/ACommand.h"
+#include "../../ACommand.h"
 
 using namespace std;
 
 class CommandUnbanLastIP : public ACommand {
 public:
 
-	CommandUnbanLastIP(const char* msg) {}
+	CommandUnbanLastIP(const char* msg, Guest& sender) :
+	ACommand(msg, sender) {}
 
 	/**
 	 * @brief Run the command
@@ -19,10 +20,10 @@ public:
 	bool run() override {
 
 		if (Cache::cache.isBannedIPAddress(Cache::cache.lastIpAddress)) {
-			_replyMessage = "Unbanning the last IP address.";
+			setReply("Unbanning the last IP address.");
 			Cache::cache.unbanIPAddress(Cache::cache.lastIpAddress);
 		} else {
-			_replyMessage = "The last IP address is not banned.";
+			setReply("The last IP address is not banned.");
 		}
 
 		return true;
