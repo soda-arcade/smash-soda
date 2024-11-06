@@ -10,6 +10,12 @@ string PathHelper::GetConfigPath() {
 	string dirPath = "";
 	string appDir = "\\SmashSodaTwo\\";
 
+	static string cachedConfigPath = "";
+	if (!cachedConfigPath.empty()) return cachedConfigPath;
+
+	string dirPath = "";
+	string appDir = "\\SmashSodaTwo\\";
+
 	// If running in portable mode
 	string currentPath = PathHelper::GetCurrentPath();
 	if (MTY_FileExists(string(currentPath + "\\portable.txt").c_str())) {
@@ -36,6 +42,16 @@ string PathHelper::GetConfigPath() {
 	else isDirOk = true;
 	if (isDirOk) cachedConfigPath = dirPath;
 
+	bool isDirOk = false;
+	if (!MTY_FileExists(dirPath.c_str())) {
+		if (MTY_Mkdir(dirPath.c_str())) {
+			isDirOk = true;
+		}
+	}
+	else isDirOk = true;
+	if (isDirOk) cachedConfigPath = dirPath;
+
+	return dirPath;
 	return dirPath;
 }
 
@@ -54,11 +70,14 @@ string PathHelper::GetCurrentPath() {
 
 /**
  * Get the path to AppData directory. (Not AppData/SmashSoda/)
+ * Get the path to AppData directory. (Not AppData/SmashSoda/)
  */
 string PathHelper::GetAppDataPath() {
 	TCHAR tAppdata[1024];
 	if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, NULL, 0, tAppdata))) {
 		wstring wAppdata(tAppdata);
+		string dirPath(wAppdata.begin(), wAppdata.end());
+		return dirPath;
 		string dirPath(wAppdata.begin(), wAppdata.end());
 		return dirPath;
 	}

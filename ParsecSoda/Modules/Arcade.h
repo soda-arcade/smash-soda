@@ -39,7 +39,7 @@ public:
 	static Arcade instance;
 	vector<Artwork> artwork = vector<Artwork>();
 	Countries countries = Countries();
-	int artworkID = -1;	/// The ID of the artwork associated with the room
+	int artworkID = -1;	// The ID of the artwork associated with the room
 
 	Arcade();
 	

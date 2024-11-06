@@ -246,13 +246,13 @@ bool Arcade::getArtwork() {
 
 		json result = json::parse(responseStr);
 		artwork.clear();
-
 		for (auto& item : result["data"]) {
 			Artwork art;
 			art.id = item["id"];
 			art.title = item["title"];
 			artwork.push_back(art);
 		}
+		g_hosting.logMessage(to_string(artwork.size()) + " artwork found.");
 
 		return true;
 	}

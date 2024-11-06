@@ -649,7 +649,7 @@ void HostSettingsWidget::savePreferences() {
     Config::cfg.room.theme = theme;
 
     // Artwork
-    Config::cfg.room.artworkID = Config::cfg.artwork[_selectedArtwork].id;
+    //Config::cfg.room.artworkID = Config::cfg.artwork[_selectedArtwork].id;
 
     Config::cfg.Save();
 }
