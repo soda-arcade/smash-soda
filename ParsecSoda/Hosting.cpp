@@ -123,7 +123,7 @@ void Hosting::init() {
 	_gamepadClient.setParsec(_parsec);
 	_gamepadClient.init();
 
-	//MetadataCache::Preferences preferences = MetadataCache::loadPreferences();
+	MetadataCache::Preferences preferences = MetadataCache::loadPreferences();
 
 	_createGamepadsThread = thread([&]() {
 		_gamepadClient.createAllGamepads();
@@ -150,8 +150,8 @@ void Hosting::init() {
 	audioIn.captureAudio();
 	audioIn.volume = Config::cfg.audio.micVolume;
 
-	//preferences.isValid = true;
-	//MetadataCache::savePreferences(preferences);
+	preferences.isValid = true;
+	MetadataCache::savePreferences(preferences);
 	_parsecSession.loadSessionCache();
 
 	fetchAccountData();
