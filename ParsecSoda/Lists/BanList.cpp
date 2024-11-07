@@ -18,10 +18,10 @@ bool BanList::ban(GuestData user)
         SaveToFile();
 
         // Ban the user's IP address
-		std::string ip = Cache::cache.getUserIpAddress(user.userID);
+		/*std::string ip = Cache::cache.getUserIpAddress(user.userID);
 		if (ip != "") {
 			Cache::cache.banIPAddress(ip);
-		}
+		}*/
 
 	}
 	return added;
