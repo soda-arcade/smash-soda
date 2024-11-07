@@ -53,22 +53,22 @@ public:
 			return false;
 		}
 
-		SFXList::SFXPlayResult result = Cache::cache.sfxList.play(getArgs()[0]);
+		std::string sound = getArgString();
+		std::transform(sound.begin(), sound.end(), sound.begin(), ::tolower);
+		SFXList::SFXPlayResult result = Cache::cache.sfxList.play(sound);
 
 		switch (result) {
 		case SFXList::SFXPlayResult::COOLDOWN:
-			setReply(string(" | Command !sfx is on cooldown: ") +
+			setReply(string("Command !sfx is on cooldown: ") +
 				to_string(Cache::cache.sfxList.getRemainingCooldown()) +
 				string(" seconds left."));
 			break;
 		case SFXList::SFXPlayResult::NOT_FOUND:
-				setReply(string(" | Command !sfx is on cooldown: ") +
-				to_string(Cache::cache.sfxList.getRemainingCooldown()) +
-				string(" seconds left."));
+				setReply("Sound effect not found.");
 			break;
 		case SFXList::SFXPlayResult::OK:
 		default:
-			_replyMessage = "";
+			setReply("Playing sound effect: " + sound);
 			break;
 		}
 

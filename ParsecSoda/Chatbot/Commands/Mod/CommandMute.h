@@ -82,7 +82,7 @@ protected:
 	bool findGuest() {
 
 		// Get the guest
-		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		string guest = getArgString();
 		if (guest == "") {
 			return false;
 		}

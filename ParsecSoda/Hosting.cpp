@@ -1317,9 +1317,9 @@ bool Hosting::isHotseatEnabled() {
 void Hosting::addFakeGuests(int count) {
 	srand(time(NULL));
 	for (int i = 0; i < count; ++i) {
+		int id = rand() % 1000 + 1;
 		Guest guest = Guest(
-			randomString(5),
-			_guestList.getGuests().size(), (i + 1) * 1000 + 1
+			randomString(5), id, id
 		);
 		guest.fake = true;
 

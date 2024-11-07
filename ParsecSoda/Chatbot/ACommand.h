@@ -64,6 +64,21 @@ public:
 	}
 
 	/**
+	* Get only the arguments, minus the command
+	*/
+	string getArgString() {
+		std::string str = _msg;
+		size_t pos = str.find(" ");
+		if (pos != std::string::npos) {
+			str = str.substr(pos + 1);
+		} else {
+			str = "";
+		}
+
+		return str;
+	}
+
+	/**
 	* Returns usage example if command is invalid
 	*/
 	bool error() {

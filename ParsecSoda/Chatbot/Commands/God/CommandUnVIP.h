@@ -47,7 +47,7 @@ public:
 		}
 
 		// Find offline guest
-		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		string guest = getArgString();
 		if (guest == "") {
 			return false;
 		}
@@ -92,7 +92,7 @@ private:
 	bool findGuest() {
 
 		// Get the guest
-		string guest = getArgs().size() > 0 ? getArgs()[0] : "";
+		string guest = getArgString();
 		if (guest == "") {
 			return false;
 		}
