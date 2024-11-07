@@ -123,7 +123,7 @@ void Hosting::init() {
 	_gamepadClient.setParsec(_parsec);
 	_gamepadClient.init();
 
-	MetadataCache::Preferences preferences = MetadataCache::loadPreferences();
+	//MetadataCache::Preferences preferences = MetadataCache::loadPreferences();
 
 	_createGamepadsThread = thread([&]() {
 		_gamepadClient.createAllGamepads();
@@ -151,7 +151,7 @@ void Hosting::init() {
 	audioIn.volume = Config::cfg.audio.micVolume;
 
 	preferences.isValid = true;
-	MetadataCache::savePreferences(preferences);
+	//MetadataCache::savePreferences(preferences);
 	_parsecSession.loadSessionCache();
 
 	fetchAccountData();
@@ -402,10 +402,10 @@ void Hosting::setHostConfig(string roomName, string gameId, uint8_t maxGuests, b
 }
 
 void Hosting::setHostVideoConfig(uint32_t fps, uint32_t bandwidth) {
-	if (Config::cfg.video.resolutionIndex > 0) {
+	/*if (Config::cfg.video.resolutionIndex > 0) {
 		_hostConfig.video->resolutionX = Config::cfg.resolutions[Config::cfg.video.resolutionIndex].width;
 		_hostConfig.video->resolutionY = Config::cfg.resolutions[Config::cfg.video.resolutionIndex].height;
-	}
+	}*/
 	_hostConfig.video->encoderFPS = fps;
 	_hostConfig.video->encoderMaxBitrate = bandwidth;
 	Config::cfg.video.fps = fps;

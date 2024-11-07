@@ -276,6 +276,9 @@ bool DX11::init()
 		return false;
 
 	fetchScreenList();
+	if (_screens.empty() || _currentScreen >= _screens.size()) {
+		_currentScreen = 0;
+	}
 
 	// Get DXGI device
 	IDXGIDevice* lDxgiDevice;
