@@ -56,7 +56,7 @@ private:
 
 	char _gameID[GAME_ID_LEN];
 	char _gameName[255];
-	char _description[140];
+	char _description[512];
 	char _secret[HOST_SECRET_LEN];
 	char _secretLink[128];
 	bool _kioskMode;

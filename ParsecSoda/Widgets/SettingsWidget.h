@@ -50,7 +50,7 @@ private:
 	char _hotkeyCommand[128] = "";
 	char _discord[HOST_NAME_LEN] = "";
 	char _chatbot[HOST_NAME_LEN] = "";
-	char _welcomeMessage[256] = "";
+	char _welcomeMessage[512] = "";
 
 	char _prependRegion[128] = "";
 
