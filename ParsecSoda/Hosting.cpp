@@ -150,7 +150,7 @@ void Hosting::init() {
 	audioIn.captureAudio();
 	audioIn.volume = Config::cfg.audio.micVolume;
 
-	preferences.isValid = true;
+	//preferences.isValid = true;
 	//MetadataCache::savePreferences(preferences);
 	_parsecSession.loadSessionCache();
 

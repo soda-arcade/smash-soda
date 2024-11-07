@@ -530,12 +530,6 @@ void HostSettingsWidget::renderAdvanced() {
 
     if (ImForm::InputTextArea("DETAILS", _description,
         "Any additional details about the game or your room. This will be displayed when somebody clicks your post.")) {
-        if (strlen(_description) > 500) {
-            string desc = _description;
-            desc = desc.substr(0, 500);
-            strcpy_s(_description, desc.c_str());
-        }
-
         Config::cfg.room.details = _description;
 
         if (_hosting.isRunning()) {
