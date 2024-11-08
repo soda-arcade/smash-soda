@@ -9,11 +9,18 @@ WebSocket::WebSocket() {
 }
 
 void WebSocket::createServer(uint16_t port) {
-    server_.init_asio();
+    if (!_asioInited) {
+        server_.init_asio();
+        _asioInited = true;
+    }
+    else
+    {
+        server_.reset();
+    }
     server_.set_open_handler(std::bind(&WebSocket::onOpen, this, std::placeholders::_1));
     server_.set_close_handler(std::bind(&WebSocket::onClose, this, std::placeholders::_1));
     server_.set_message_handler(std::bind(&WebSocket::onMessage, this, std::placeholders::_1, std::placeholders::_2));
-
+    
     serverThread_ = std::thread([this, port]() {
         try {
             server_.listen(port);
@@ -40,6 +47,9 @@ void WebSocket::stopServer() {
     server_.stop();
     if (serverThread_.joinable()) {
         serverThread_.join();
+    }
+    if (Config::cfg.overlay.enabled) {
+        closeOverlay();
     }
     isRunning_ = false;
 }

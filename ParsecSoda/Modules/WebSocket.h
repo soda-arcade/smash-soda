@@ -42,6 +42,7 @@ private:
     std::mutex clientsMutex_;
     bool isRunning_ = false;
     DWORD overlayPID = 0;
+    bool _asioInited = false;
 };
 
 #endif // WEBSOCKET_H
