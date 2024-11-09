@@ -71,7 +71,7 @@ void XBoxGamepad::clearState()
 {
 	_keyboard.clear();
 	ZeroMemory(&_currentState, sizeof(XINPUT_STATE));
-	vigem_target_x360_update(_client, _pad, *reinterpret_cast<XUSB_REPORT*>(&_currentState.Gamepad));
+	if (_isConnected) vigem_target_x360_update(_client, _pad, *reinterpret_cast<XUSB_REPORT*>(&_currentState.Gamepad));
 }
 
 void XBoxGamepad::clearOwner()
