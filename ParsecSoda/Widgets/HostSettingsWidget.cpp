@@ -225,7 +225,9 @@ bool HostSettingsWidget::render(bool& showWindow, HWND& hwnd) {
     ImGui::SetCursorPos(ImVec2(0.5f * size.x - 130.0f, (ImGui::GetCursorPos().y / 2) - 80));
     ConfirmPopupWidget::render("ERROR", _showErrorPopup, _validateError);
 
+    AppStyle::pop();
     ImGui::End();
+    AppStyle::pop();
 
     return true;
 }

@@ -1254,11 +1254,11 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 
 		_guestList.deleteMetrics(guest.id);
 		int droppedPads = 0;
-		/*CommandFF command(guest, _gamepadClient, _hotseat);
+		CommandFF command("", guest, _gamepadClient, _hotseat);
 		command.run();
 		if (droppedPads > 0) {
-			broadcastChatMessageAndLogCommand(command.replyMessage());
-		}*/
+			broadcastChatMessageAndLogCommand(command.getReply());
+		}
 
 		// Was the guest in the room?
 		if (status != CONNECT_WRN_NO_ROOM) {
