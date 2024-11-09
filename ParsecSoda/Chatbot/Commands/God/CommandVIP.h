@@ -130,7 +130,9 @@ private:
 		if (!Cache::cache.vipList.isVIP(target.userID)) {
 			if (Cache::cache.vipList.VIP(target)) {
 				setReply("Made " + target.name + " a VIP!\0");
+				return true;
 			}
 		}
+		return false;
 	}
 };
