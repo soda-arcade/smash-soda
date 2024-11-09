@@ -51,7 +51,6 @@ void HostInfoWidget::renderArcade() {
 				if (ImGui::Button("LOGOUT")) {
 					Arcade::instance.logout();
 				}
-				AppFonts::pop();
 				AppColors::popButton();
 			}
 			else {
