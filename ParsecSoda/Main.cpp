@@ -445,6 +445,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return true;
     switch (msg)
     {
+    case WM_MOVE:
+        if (g_hosting.mainWindow == hWnd) {
+			RECT windowRect;
+            if (GetWindowRect(hWnd, &windowRect))
+            {
+				Config::cfg.video.windowX = windowRect.left;
+				Config::cfg.video.windowY = windowRect.top;
+			}
+		}
+		break;
     case WM_SIZE:
         if (g_pd3dDevice != NULL && wParam != SIZE_MINIMIZED)
         {
@@ -452,6 +462,15 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             g_pSwapChain->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
             CreateRenderTarget();
         }
+
+        if (g_hosting.mainWindow == hWnd) {
+			RECT windowRect;
+            if (GetWindowRect(hWnd, &windowRect))
+            {
+				Config::cfg.video.windowW = windowRect.right - windowRect.left;
+				Config::cfg.video.windowH = windowRect.bottom - windowRect.top;
+			}
+		}
         return 0;
     case WM_SYSCOMMAND:
         if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
@@ -461,14 +480,15 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         g_hosting.release();
         RECT windowRect;
-        if (GetWindowRect(hWnd, &windowRect))
+        /*if (GetWindowRect(hWnd, &windowRect))
         {
             Config::cfg.video.windowX = windowRect.left;
             Config::cfg.video.windowY = windowRect.top;
             Config::cfg.video.windowW = windowRect.right - windowRect.left;
             Config::cfg.video.windowH = windowRect.bottom - windowRect.top;
             Config::cfg.Save();
-        }
+        }*/
+        Config::cfg.Save();
         Sleep(1000);
         ::PostQuitMessage(0);
         return 0;
