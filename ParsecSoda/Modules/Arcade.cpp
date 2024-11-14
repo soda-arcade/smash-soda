@@ -436,7 +436,7 @@ bool Arcade::updateGuestCount(int guestCount) {
 
 	const char* responseStr = (const char*)response;
 	if (_status == 200) {
-		g_hosting.logMessage("Updated guest count to " + to_string(guestCount));
+		//g_hosting.logMessage("Updated guest count to " + to_string(guestCount));
 		return true;
 	}
 	else {
