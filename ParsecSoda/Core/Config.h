@@ -189,7 +189,7 @@ public:
 			PermissionGroup(bool useBB, bool useSFX, bool changeControls) {
 				this->useBB = useBB;
 				this->useSFX = useSFX;
-				this->changeControls = useBB;
+				this->changeControls = changeControls;
 			};
 		};
 
