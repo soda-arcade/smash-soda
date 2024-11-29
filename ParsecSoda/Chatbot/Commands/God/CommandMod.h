@@ -69,12 +69,12 @@ public:
 	 * @return vector<const char*>
 	 */
 	static vector<const char*> prefixes() {
-		return vector<const char*> { "!ban", "!block" };
+		return vector<const char*> { "!mod" };
 	}
 
 private:
 	static vector<const char*> internalPrefixes() {
-		return vector<const char*> { "!ban ", "!block " };
+		return vector<const char*> { "!mod " };
 	}
 
 	ParsecDSO* _parsec;
