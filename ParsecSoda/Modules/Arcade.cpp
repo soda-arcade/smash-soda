@@ -329,7 +329,10 @@ bool Arcade::createPost() {
 	const char* responseStr = (const char*)response;
 	if (responseSize > 0 && (_status >= 200 && _status < 300)) {
 
+		// Set the post ID
 		json result = json::parse(responseStr);
+		postID = result["id"];
+
 		g_hosting.logMessage("Your room has been posted on https://soda-arcade.com");
 
 		//MTY_Free(&response);
@@ -361,6 +364,9 @@ bool Arcade::deletePost() {
 		_domain = _prodDomain;
 		_secure = true;
 	}
+
+	// Delete the post ID
+	postID = -1;
 	
 	// Build the JSON string
 	string data = "";

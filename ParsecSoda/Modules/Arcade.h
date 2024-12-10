@@ -12,7 +12,6 @@ using namespace std;
 class Arcade {
 private:
 	bool _dev = false;		/// Whether or not to use the dev server
-	int _postID = -1;		/// The ID of the post associated with the room
 	bool _secure = false;	/// Whether or not to use HTTPS
 	uint16_t _status = 0;	/// The HTTP status code of the last request
 	string _key = "AllWorkAndNoPlayMakesMickeyADullBoy**";
@@ -39,7 +38,8 @@ public:
 	static Arcade instance;
 	vector<Artwork> artwork = vector<Artwork>();
 	Countries countries = Countries();
-	int artworkID = -1;	// The ID of the artwork associated with the room
+	int postID = -1;		// The ID of the post associated with the room
+	int artworkID = -1;		// The ID of the artwork associated with the room
 
 	Arcade();
 	

@@ -75,7 +75,7 @@ public:
 
 private:
 	static vector<const char*> internalPrefixes() {
-		return vector<const char*> { "!ban ", "!block " };
+		return vector<const char*> { "!ban " };
 	}
 
 	ParsecDSO* _parsec;

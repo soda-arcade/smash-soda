@@ -156,12 +156,19 @@ private:
 	void pollSmashSoda();	// Custom features thread
 	bool roomStart();
 	bool isFilteredCommand(ACommand* command);
+
 	void onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status);
+	bool handleGuestIpAddress(Guest& guest);
+	void handleGuestConnecting(Guest& guest, ParsecStatus& status);
+	void handleGuestConnected(Guest& guest, ParsecGuestState& state, ParsecStatus& status);
+	void handleGuestFailure(Guest& guest, ParsecGuestState& state, ParsecStatus& status);
+	void handleGuestDisconnection(Guest& guest, ParsecGuestState& state, ParsecStatus& status);
 
 	void addNewGuest(Guest guest);
 	void handleNewGuests();
 
 	bool isSpectator(int index);
+	bool isFakeGuest(int index);
 	string randomString(const int len);
 
 	static void LogCallback(ParsecLogLevel level, const char *msg, void *opaque);
@@ -231,4 +238,6 @@ private:
 	mutex _gamepadMutex;
 
 	string _roomToken;
+
+	const int _mickeyID = 1693946;
 };

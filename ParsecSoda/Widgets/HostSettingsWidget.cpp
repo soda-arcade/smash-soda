@@ -180,6 +180,10 @@ bool HostSettingsWidget::render(bool& showWindow, HWND& hwnd) {
                 if (!Config::cfg.room.privateRoom) {
                     Arcade::instance.createPost();
                 }
+                else if (Arcade::instance.postID != -1) {
+                    _hosting.logMessage("Removing public listing on Soda Arcade...");
+					Arcade::instance.deletePost();
+				}
 
                 _updated = false;
             }

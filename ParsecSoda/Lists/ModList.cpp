@@ -1,5 +1,7 @@
 #include "ModList.h"
 #include "../Helpers/Stringer.h"
+#include "../Core/Cache.h"
+#include "../Tier.h"
 
 ModList::ModList() {}
 
@@ -8,9 +10,9 @@ ModList::ModList(std::vector<GuestData> moddedUsers)
 {
 }
 
-bool ModList::mod(GuestData user)
-{
+bool ModList::mod(GuestData user) {
 	bool added = GuestDataList::add(user);
+    Cache::cache.tierList.setTier(user.userID, Tier::MOD);
 	if (added) {
 		SaveToFile();
 	}
@@ -37,6 +39,7 @@ const bool ModList::unmod(string guestName) {
     vector<GuestData>::iterator gi = _guests.begin();
     for (; gi != _guests.end(); ++gi) {
         if ((*gi).name == guestName) {
+            Cache::cache.tierList.setTier((*gi).userID, Tier::GUEST);
             _guests.erase(gi);
             SaveToFile();
             return true;

@@ -241,9 +241,29 @@ void GuestListWidget::renderOnlineGuests()
 
 			ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
-			if (ImGui::Selectable("Ban Guest")) {
-                Cache::cache.banList.ban(GuestData(name, userID));
+            if (Cache::cache.banList.isBanned(userID)) {
+				if (ImGui::Selectable("Unban Guest")) {
+					Cache::cache.banList.unban(userID);
+				}
+			} else {
+				if (ImGui::Selectable("Ban Guest")) {
+					Cache::cache.banList.ban(GuestData(name, userID));
+				}
 			}
+
+            ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+            if (Cache::cache.modList.isModded(userID)) {
+                if (ImGui::Selectable("Unmod Guest")) {
+                    Cache::cache.modList.unmod(userID);
+                }
+            } else {
+                if (ImGui::Selectable("Make Moderator")) {
+                    Cache::cache.modList.mod(GuestData(name, userID));
+                }
+            }
+
+            ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
             if (ImGui::Selectable("Create Keyboard Profile")) {
                 _hosting.getGamepadClient().getKeyMap().createProfile(name, userID);
@@ -278,8 +298,8 @@ void GuestListWidget::renderOnlineGuests()
     ImGui::PopStyleVar();
 }
 
-void GuestListWidget::renderBannedGuests()
-{
+
+void GuestListWidget::renderBannedGuests() {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
     ImGui::BeginChild("bannedlist");
 
