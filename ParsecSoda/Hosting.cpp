@@ -1153,24 +1153,130 @@ bool Hosting::isVPN(const std::string& ip) {
  */
 void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecStatus& status) {
 
-	// Handle IP address bans
-	if (!handleGuestIpAddress(guest)) {
-		return;
+	static string logMessage;
+	GuestData guestData = GuestData(guest.name, guest.userID);
+	bool isBanned = Cache::cache.banList.isBanned(guest.userID);
+
+	// Try to determine the user's IP address
+	if (Cache::cache.pendingIpAddress.size() > 0) {
+
+		// Is this IP address banned?
+		if (Config::cfg.general.ipBan && Cache::cache.isBannedIPAddress(Cache::cache.pendingIpAddress)) {
+			broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + "Kicked a guest for using a banned IP address.");
+			ParsecHostKickGuest(_parsec, guest.id);
+		}
+		else {
+			// Is the user behind a VPN?
+			if (isVPN(Cache::cache.pendingIpAddress)) {
+				broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + " " + guest.name + " is behind a VPN.");
+				if (Config::cfg.general.blockVPN) {
+					ParsecHostKickGuest(_parsec, guest.id);
+				}
+			}
+
+			Cache::cache.userIpMap[guest.userID] = Cache::cache.pendingIpAddress;
+		}
+		Cache::cache.pendingIpAddress.clear();
+
 	}
 
-	switch (state) {
-		case GUEST_CONNECTING:
-			handleGuestConnecting(guest, status);
-			break;
-		case GUEST_CONNECTED:
-			handleGuestConnected(guest, state, status);
-			break;
-		case GUEST_FAILED:
-			handleGuestFailure(guest, state, status);
-			break;
-		case GUEST_DISCONNECTED:
-			handleGuestDisconnection(guest, state, status);
-			break;
+
+	// Handle bans/kicks that needs to be processed before the normal GUEST_CONNECTED statement
+	// Return:ing prevents normal GUEST_CONNECTED statement from running
+	if (state == GUEST_CONNECTED || state == GUEST_CONNECTING) {
+		if (isBanned) {
+			// Yes, but did this person try to ban a SODA COP!? Continue to normal GUEST_CONNECTED after
+			if (Cache::cache.isSodaCop(guest.userID)) {
+				GuestData unbannedGuest;
+				Cache::cache.banList.unban(guest.userID);
+			}
+			else {
+				ParsecHostKickGuest(_parsec, guest.id);
+				return;
+			}
+		}
+
+		// Is this a fake MickeyUK?
+		if (guest.name == "MickeyUK" && guest.userID != 1693946) {
+			ParsecHostKickGuest(_parsec, guest.id);
+			broadcastChatMessage(Config::cfg.chatbotName + "Kicked a fake MickeyUK! (lol)");
+			_chatLog.logMessage(Config::cfg.chatbotName + "Kicked a fake MickeyUK! (lol)");
+			return;
+		}
+
+		// Is this guest pretending to be someone else?
+		else if (!Cache::cache.verifiedList.Verify(guestData)) {
+			ParsecHostKickGuest(_parsec, guest.id);
+			broadcastChatMessageAndLogCommand(Config::cfg.chatbotName + "Kicked a fake guest: " + guest.name);
+			return;
+		}
+	}
+
+
+	if (state == GUEST_FAILED) {
+		broadcastChatMessageAndLogCommand(_chatBot->formatGuestConnection(guest, state, status));
+	}
+
+	else if (state == GUEST_CONNECTED) {
+		if (Cache::cache.modList.isModded(guest.userID)) {
+			_tierList.setTier(guest.userID, Tier::MOD);
+			logMessage = _chatBot->formatModGuestMessage(guest);
+		}
+		else logMessage = _chatBot->formatGuestConnection(guest, state, status);
+		broadcastChatMessageAndLogCommand(logMessage);
+
+		// Is the connecting guest the host?
+		if (_host.userID == guest.userID) {
+			_tierList.setTier(guest.userID, Tier::GOD);
+		}
+
+		// Add to guest history
+		_guestHistory.add(guestData);
+		MetadataCache::addActiveGuest(guest);
+
+		// Show welcome message
+		addNewGuest(guest);
+	}
+
+	else if (state == GUEST_DISCONNECTED) {
+		if (isBanned) logMessage = _chatBot->formatBannedGuestMessage(guest);
+		else logMessage = _chatBot->formatGuestConnection(guest, state, status);
+		broadcastChatMessageAndLogCommand(logMessage);
+
+		// Were extra spots made?
+		if (MetadataCache::preferences.extraSpots > 0) {
+			_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
+			MetadataCache::preferences.extraSpots--;
+			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
+		}
+
+		// Remove from active guests list
+		MetadataCache::removeActiveGuest(guest);
+
+		// Hotseat mode
+		if (Config::cfg.hotseat.enabled) {
+			Hotseat::instance.pauseUser(guest.userID);
+		}
+
+		_guestList.deleteMetrics(guest.id);
+		/*int droppedPads = 0;
+		CommandFF command(guest, _gamepadClient, _hotseat);
+		command.run();
+		if (droppedPads > 0) {
+			broadcastChatMessageAndLogCommand(command.replyMessage());
+		}*/
+		int droppedPadCount = _gamepadClient.onQuit(guest);
+		if (droppedPadCount > 0) {
+			broadcastChatMessageAndLogCommand("Dropped " + to_string(droppedPadCount) + " gamepads for " + guest.name);
+		}
+
+		// Only play if room wasn't full
+		if (status != CONNECT_WRN_NO_ROOM) {
+			try {
+				PlaySound(TEXT("./SFX/guest_leave.wav"), NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+			}
+			catch (const std::exception&) {}
+		}
 	}
 
 }

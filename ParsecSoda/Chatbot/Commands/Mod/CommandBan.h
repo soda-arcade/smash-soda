@@ -140,7 +140,7 @@ private:
 			setReply(
 				Cache::cache.isSodaCop(_sender.userID) ?
 				_sender.name + " laid down the law as a Soda Cop and banned " + target.name + "!\0"
-				: _sender.name + " kicked " + target.name + "!\0"
+				: _sender.name + " banned " + target.name + "!\0"
 			);
 
 			if (Cache::cache.banList.ban(target)) {
