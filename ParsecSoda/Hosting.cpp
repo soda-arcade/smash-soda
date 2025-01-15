@@ -778,7 +778,7 @@ void Hosting::pollEvents()
 			//logMessage("event: " + to_string(event.type) + " guest: " + guest.name + " state: " + to_string(state) + " status: " + to_string(event.guestStateChange.status));
 
 			// Is room full?
-			if (event.guestStateChange.status == 1 && 
+			if (event.guestStateChange.status == 11 && 
 			(Cache::cache.modList.isModded(guest.userID) || Cache::cache.vipList.isVIP(guest.userID)) &&
 				guestCount >= _hostConfig.maxGuests) {
 				logMessage("VIP user " + guest.name + " is trying to join, making room for them.");
@@ -1242,13 +1242,6 @@ void Hosting::onGuestStateChange(ParsecGuestState& state, Guest& guest, ParsecSt
 		if (isBanned) logMessage = _chatBot->formatBannedGuestMessage(guest);
 		else logMessage = _chatBot->formatGuestConnection(guest, state, status);
 		broadcastChatMessageAndLogCommand(logMessage);
-
-		// Were extra spots made?
-		if (MetadataCache::preferences.extraSpots > 0) {
-			_hostConfig.maxGuests = _hostConfig.maxGuests - 1;
-			MetadataCache::preferences.extraSpots--;
-			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
-		}
 
 		// Remove from active guests list
 		MetadataCache::removeActiveGuest(guest);
