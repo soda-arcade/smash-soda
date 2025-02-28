@@ -20,6 +20,9 @@
   <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
   <ol>
     <li>
+      <a href="#important-note">Important Note</a>
+    </li>
+    <li>
       <a href="#about-the-project">About The Project</a>
     </li>
     <li><a href="#features">Features</a></li>
