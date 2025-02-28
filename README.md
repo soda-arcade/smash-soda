@@ -36,7 +36,7 @@
 
 ## Important Note
 
-Parsec Soda is no longer in development, and Smash Soda is now the only working version of Parsec Soda. When Parsec shut down their arcade service, Smash Soda needed to be modified in a way that means builds of it can no longer be shared, due to Parsec's terms with their software development kit. This means you now have to compile Smash Soda yourself...which sucks, I know, but I made a build guide here: https://mickeyuk.com/smash-soda-build-guide
+Parsec Soda is no longer in development, and Smash Soda is now the only working version of Parsec Soda. When Parsec shut down their arcade service, Smash Soda needed to be modified in a way that means builds of it can no longer be shared, due to Parsec's terms with their software development kit. This means you now have to compile Smash Soda yourself...which sucks, I know, but I made a build guide here: [https://mickeyuk.com/smash-soda-build-guide](https://mickeyuk.com/blog/smash-soda-build-guide)
 
 ## About the Project
 
