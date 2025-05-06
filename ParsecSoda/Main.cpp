@@ -53,6 +53,7 @@ static ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
 static IDXGISwapChain* g_pSwapChain = NULL;
 static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
 Hosting g_hosting;
+bool appShutdown = false;
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND hWnd);
@@ -95,8 +96,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     g_hosting.mainWindow = hwnd;
 
     // Initialize Direct3D
-    if (!CreateDeviceD3D(hwnd))
-    {
+    if (!CreateDeviceD3D(hwnd)) {
         CleanupDeviceD3D();
         ::UnregisterClass(wc.lpszClassName, wc.hInstance);
         return 1;
@@ -242,8 +242,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
 
     // Main loop
     bool done = false;
-    while (!done)
-    {
+    while (!done) {
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -362,6 +361,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     }
 
     // Cleanup
+	appShutdown = true;
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImPlot::DestroyContext();
@@ -446,10 +446,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_MOVE:
-        if (g_hosting.mainWindow == hWnd) {
+        // Dunno, this is me being thorough because something going wrong with window x,y,w,h and I don't know what
+        if (g_hosting.mainWindow == hWnd && wParam != SIZE_MINIMIZED && wParam != SIZE_MAXIMIZED
+            && wParam != SIZE_MAXSHOW && wParam != SIZE_MAXHIDE && wParam != SIZE_RESTORED
+            && !appShutdown) {
 			RECT windowRect;
-            if (GetWindowRect(hWnd, &windowRect))
-            {
+            if (GetWindowRect(hWnd, &windowRect)) {
 				Config::cfg.video.windowX = windowRect.left;
 				Config::cfg.video.windowY = windowRect.top;
 			}
@@ -463,10 +465,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             CreateRenderTarget();
         }
 
-        if (g_hosting.mainWindow == hWnd) {
+		// Dunno, this is me being thorough because something going wrong with window x,y,w,h and I don't know what
+		if (g_hosting.mainWindow == hWnd && wParam != SIZE_MINIMIZED && wParam != SIZE_MAXIMIZED 
+			&& wParam != SIZE_MAXSHOW && wParam != SIZE_MAXHIDE && wParam != SIZE_RESTORED
+			&& !appShutdown) {
 			RECT windowRect;
-            if (GetWindowRect(hWnd, &windowRect))
-            {
+            if (GetWindowRect(hWnd, &windowRect)) {
 				Config::cfg.video.windowW = windowRect.right - windowRect.left;
 				Config::cfg.video.windowH = windowRect.bottom - windowRect.top;
 			}
@@ -480,14 +484,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         g_hosting.release();
         RECT windowRect;
-        /*if (GetWindowRect(hWnd, &windowRect))
-        {
-            Config::cfg.video.windowX = windowRect.left;
-            Config::cfg.video.windowY = windowRect.top;
-            Config::cfg.video.windowW = windowRect.right - windowRect.left;
-            Config::cfg.video.windowH = windowRect.bottom - windowRect.top;
-            Config::cfg.Save();
-        }*/
         Config::cfg.Save();
         Sleep(1000);
         ::PostQuitMessage(0);

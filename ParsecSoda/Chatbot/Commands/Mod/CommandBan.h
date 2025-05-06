@@ -45,22 +45,24 @@ public:
 			GuestData targetData(target.name, target.userID);
 			targetData.fake = target.fake;
 			return handleGuest(targetData, true, target.id);
-		}
+		} else {
 
-		// Find offline guest
-		string guest = getArgString();
-		if (guest == "") {
+			// Find offline guest
+			string guest = getArgString();
+			if (guest == "") {
+				return false;
+			}
+			bool found = false;
+			try {
+				found = _guestHistory.find(guest, [&](GuestData& guest) { _offlineGuest = guest; });
+			}
+			catch (const std::exception&) {}
+			if (found) {
+				return handleGuest(_offlineGuest, false);
+			}
 			return false;
+
 		}
-		bool found = false;
-		try {
-			found = _guestHistory.find(guest, [&](GuestData& guest) { _offlineGuest = guest; });
-		}
-		catch (const std::exception&) {}
-		if (found) {
-			return handleGuest(_offlineGuest, false);
-		}
-		return false;
 
 	}
 

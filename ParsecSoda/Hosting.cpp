@@ -87,6 +87,7 @@ void Hosting::LogCallback(ParsecLogLevel level, const char *msg, void *opaque) {
                 ipStart += 7; // Skip "::ffff:"
                 std::string ipAddress = ipAddressWithPrefix.substr(ipStart);
                 Cache::cache.pendingIpAddress = ipAddress;
+				Cache::cache.lastIpAddress = ipAddress;
             }
         }
     }

@@ -18,10 +18,10 @@ bool BanList::ban(GuestData user)
         SaveToFile();
 
         // Ban the user's IP address
-		/*std::string ip = Cache::cache.getUserIpAddress(user.userID);
+		std::string ip = Cache::cache.getUserIpAddress(user.userID);
 		if (ip != "") {
-			Cache::cache.banIPAddress(ip);
-		}*/
+			Cache::cache.banIPAddress(ip, user.userID);
+		}
 
 	}
 	return added;
@@ -34,6 +34,7 @@ const bool BanList::unban(const uint32_t userID) {
 		if ((*gi).userID == userID) {
 			_guests.erase(gi);
 			SaveToFile();
+			Cache::cache.unbanIPAddressById(userID);
 			return true;
 		}
 	}
@@ -49,6 +50,7 @@ const bool BanList::unban(string guestName) {
 		if ((*gi).name == guestName) {
 			_guests.erase(gi);
 			SaveToFile();
+			Cache::cache.unbanIPAddressById((*gi).userID);
 			return true;
 		}
 	}

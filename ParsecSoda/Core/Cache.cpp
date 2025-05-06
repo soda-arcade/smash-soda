@@ -10,7 +10,7 @@ Cache Cache::cache = Cache();
 Cache::Cache() {
 
 	// Set the version
-	version = "6.0.2";
+	version = "6.0.3";
 
     // Load verified users
     vector<GuestData> verified = VerifiedList::LoadFromFile();
@@ -132,26 +132,25 @@ bool Cache::checkForUpdates() {
  * @brief Ban an IP address
  * @param ip The IP address to ban
  */
-void Cache::banIPAddress(std::string ip) {
+void Cache::banIPAddress(std::string ip, uint32_t id) {
 
     // If the ip address is already banned do nothing
-	for (auto& bannedIP : bannedIPs) {
-		if (bannedIP == ip) {
-			return;
-		}
+	if (isBannedIPAddress(ip)) {
+		return;
 	}
 
 	// Add the ip address to the list
-	bannedIPs.push_back(ip);
+	IpBan bannedIP = IpBan(ip, id);
+	bannedIPs.push_back(bannedIP);
 
-	// Save the banned ip addresses
-	json j;
-	for (auto& ip : bannedIPs) {
-		j.push_back(ip);
+	// Save the banned IP addresses
+	json j = json::array();
+	for (const auto& bannedIP : bannedIPs) {
+		j.push_back({ {"ip", bannedIP.ip}, {"userId", bannedIP.userId} });
 	}
 
 	// Save the file
-	string ipPath = PathHelper::GetConfigPath() + "banned_ip.json";
+	string ipPath = PathHelper::GetConfigPath() + "banned_ip_addresses.json";
 	string ipString = j.dump(4);
 	bool success = MTY_WriteTextFile(ipPath.c_str(), "%s", ipString.c_str());
 
@@ -161,21 +160,48 @@ void Cache::banIPAddress(std::string ip) {
  * @brief Unban an IP address
  * @param ip The IP address to unban
  */
-void Cache::unbanIPAddress(std::string ip) {
-    for (auto& bannedIP : bannedIPs) {
-		if (bannedIP == ip) {
-			bannedIPs.erase(std::remove(bannedIPs.begin(), bannedIPs.end(), ip), bannedIPs.end());
+void Cache::unbanIPAddressByIp(std::string ip) {
+	// Remove the ip address from the list
+	for (auto& bannedIP : bannedIPs) {
+		if (bannedIP.ip == ip) {
+			bannedIPs.erase(std::remove(bannedIPs.begin(), bannedIPs.end(), bannedIP), bannedIPs.end());
+			break;
 		}
 	}
 
 	// Save the banned ip addresses
-	json j;
+	json j = json::array();
 	for (auto& ip : bannedIPs) {
-		j.push_back(ip);
+		j.push_back({ {"ip", ip.ip}, {"userId", ip.userId} });
 	}
 
 	// Save the file
-	string ipPath = PathHelper::GetConfigPath() + "banned_ip.json";
+	string ipPath = PathHelper::GetConfigPath() + "banned_ip_addresses.json";
+	string ipString = j.dump(4);
+	bool success = MTY_WriteTextFile(ipPath.c_str(), "%s", ipString.c_str());
+}
+
+/**
+ * @brief Unban an IP address
+ * @param ip The IP address to unban
+ */
+void Cache::unbanIPAddressById(uint32_t id) {
+	// Remove the ip address from the list
+	for (auto& bannedIP : bannedIPs) {
+		if (bannedIP.userId == id) {
+			bannedIPs.erase(std::remove(bannedIPs.begin(), bannedIPs.end(), bannedIP), bannedIPs.end());
+			break;
+		}
+	}
+
+	// Save the banned ip addresses
+	json j = json::array();
+	for (auto& ip : bannedIPs) {
+		j.push_back({ {"ip", ip.ip}, {"userId", ip.userId} });
+	}
+
+	// Save the file
+	string ipPath = PathHelper::GetConfigPath() + "banned_ip_addresses.json";
 	string ipString = j.dump(4);
 	bool success = MTY_WriteTextFile(ipPath.c_str(), "%s", ipString.c_str());
 }
@@ -187,7 +213,7 @@ void Cache::unbanLastIPAddress() {
 	// Was the last IP address banned?
 	if (isBannedIPAddress(lastIpAddress)) {
 		// Unban the IP address
-		unbanIPAddress(lastIpAddress);
+		unbanIPAddressByIp(lastIpAddress);
 	}
 }
 
@@ -197,7 +223,13 @@ void Cache::unbanLastIPAddress() {
  * @return True if the IP address is banned, false otherwise
  */
 bool Cache::isBannedIPAddress(std::string ip) {
-    return std::find(bannedIPs.begin(), bannedIPs.end(), ip) != bannedIPs.end();
+	// Check if the IP address is in the banned list
+	for (const auto& bannedIP : bannedIPs) {
+		if (bannedIP.ip == ip) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -215,7 +247,7 @@ std::string Cache::getUserIpAddress(uint32_t userId) {
 void Cache::LoadBannedIpAddresses() {
 
     // Load banned IP addresses
-	string ipPath = PathHelper::GetConfigPath() + "banned_ip.json";
+	string ipPath = PathHelper::GetConfigPath() + "banned_ip_addresses.json";
 	if (MTY_FileExists(ipPath.c_str())) {
 
 		try {
@@ -228,7 +260,10 @@ void Cache::LoadBannedIpAddresses() {
 
 			// Set the banned IP addresses
 			for (auto& element : j) {
-				bannedIPs.push_back(element.get<string>());
+				IpBan ipBan = IpBan("", 0);
+				ipBan.ip = element["ip"].get<string>();
+				ipBan.userId = element["userId"].get<uint32_t>();
+				bannedIPs.push_back(ipBan);
 			}
 
 		} catch (json::exception &e) {

@@ -59,6 +59,19 @@ public:
 		string title = "";
 	};
 
+	class IpBan {
+	public:
+		string ip;
+		uint32_t userId;
+
+		IpBan(string ip, uint32_t userId) : ip(ip), userId(userId) {}
+
+        // Equality operator
+        bool operator==(const IpBan& other) const {
+            return ip == other.ip && userId == other.userId;
+        }
+	};
+
 	vector<Artwork> artwork = vector<Artwork>(); // List of artwork IDs and titles
 
     static Cache cache;
@@ -77,7 +90,7 @@ public:
 	std::string pendingIpAddress; // This holds the last recorded IP address of a user
     std::string lastIpAddress; // This holds the last recorded IP address of a user
     std::unordered_map<uint32_t, std::string> userIpMap; // Map of user IDs to IP addresses
-    vector<string> bannedIPs = vector<string>(); // List of banned IP addresses
+    vector<IpBan> bannedIPs = vector<IpBan>(); // List of banned IP addresses
     vector<string> cidrRanges = vector<string>(); // List of CIDR ranges for VPNs
 
     vector<uint32_t> sodaCops = vector<uint32_t>(); // List of Soda cops! These users have mod powers in any room
@@ -85,8 +98,9 @@ public:
 
     bool checkForUpdates();
     
-    void banIPAddress(std::string ip);
-	void unbanIPAddress(std::string ip);
+    void banIPAddress(std::string ip, uint32_t id);
+	void unbanIPAddressByIp(std::string ip);
+	void unbanIPAddressById(uint32_t id);
     void unbanLastIPAddress();
 	bool isBannedIPAddress(std::string ip);
 	std::string getUserIpAddress(uint32_t userId);

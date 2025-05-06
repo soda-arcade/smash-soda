@@ -21,7 +21,7 @@ public:
 
 		if (Cache::cache.isBannedIPAddress(Cache::cache.lastIpAddress)) {
 			setReply("Unbanning the last IP address.");
-			Cache::cache.unbanIPAddress(Cache::cache.lastIpAddress);
+			Cache::cache.unbanIPAddressByIp(Cache::cache.lastIpAddress);
 		} else {
 			setReply("The last IP address is not banned.");
 		}

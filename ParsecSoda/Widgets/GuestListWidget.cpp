@@ -248,6 +248,9 @@ void GuestListWidget::renderOnlineGuests()
 			} else {
 				if (ImGui::Selectable("Ban Guest")) {
 					Cache::cache.banList.ban(GuestData(name, userID));
+                    _hosting.sendHostMessage((
+                        string("!kick ") + to_string(userID)
+                        ).c_str(), true);
 				}
 			}
 
