@@ -196,6 +196,8 @@ private:
 	bool _isLatencyThreadRunning = false;
 	bool _isSmashSodaThreadRunning = false;
 	bool _isGamepadThreadRunning = false;
+	bool _snapshotModeActive = false;
+	std::chrono::steady_clock::time_point _lastSnapshotUpload = (std::chrono::steady_clock::time_point::min)();
 
 	Stopwatch _mediaClock;
 	Stopwatch _welcomeClock;

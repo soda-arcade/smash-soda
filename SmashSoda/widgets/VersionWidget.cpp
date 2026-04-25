@@ -139,7 +139,7 @@ bool VersionWidget::renderLoginWindow() {
             elParagraph("Soda Arcade is a free service for advertising your Parsec room. You will need to create a account to use this service.");
         } else {
 			ImGui::PushStyleColor(ImGuiCol_Text, AppColors::negative);
-			ImGui::TextWrapped(error.c_str());
+			ImGui::TextWrapped("%s", error.c_str());
             ImGui::PopStyleColor();
             ImGui::Dummy(ImVec2(0, 10.0f * uiScale));
 		}
@@ -325,7 +325,7 @@ bool VersionWidget::renderUpdateWindow() {
     ImGui::PushStyleColor(ImGuiCol_Text, theme->positive);
 	ImGui::Text("Version: ");
     ImGui::SameLine();
-    ImGui::Text(Cache::cache.update.version.c_str());
+	ImGui::Text("%s", Cache::cache.update.version.c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 

@@ -12,16 +12,18 @@ using namespace std;
 class Arcade {
 private:
 	bool _secure = true;	/// Whether or not to use HTTPS
+	uint16_t _port = 0;	/// Optional custom port (0 = default)
 	uint16_t _status = 0;	/// The HTTP status code of the last request
 	string _key = "AllWorkAndNoPlayMakesMickeyADullBoy**";	/// The encryption key for credentials
 
-	string createHeaders(size_t size);
+	string createHeaders(size_t size, const string& contentType = "application/json");
 	void xorEncryptDecrypt(std::string& data, const std::string& key);
 public:
 	class Artwork {
 	public:
 		int id = 0;
 		string title = "";
+		string url = "";
 	};
 
 	class Credentials {
@@ -53,6 +55,7 @@ public:
 	bool deletePost();
 
 	bool updateGuestCount(int count);
+	bool uploadSnapshot();
 
 	bool getArtwork();
 };

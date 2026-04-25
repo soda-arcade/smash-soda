@@ -333,6 +333,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPrevInstance, _In
     // =====================================================================
     if (Arcade::instance.loadCredentials()) {
         Arcade::instance.checkToken(Arcade::instance.credentials.token);
+        // Populate artwork on startup so custom preview is ready when Host Settings opens.
+        Arcade::instance.getArtwork();
     }
 
     if (!Config::cfg.developer.skipUpdateCheck && Cache::cache.checkForUpdates()) {

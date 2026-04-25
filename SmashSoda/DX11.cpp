@@ -275,19 +275,28 @@ bool DX11::init()
 
 bool DX11::captureScreen(ParsecDSO* ps)
 {
-	bool useWGC = (_captureMethod == CaptureMethod::GraphicsCapture) ||
-	              (_captureMethod == CaptureMethod::Auto && WGCapture::isSupported());
-
-	if (useWGC)
+	if (_captureMethod == CaptureMethod::GraphicsCapture)
 	{
-		if (captureScreenWGC(ps))
-			return true;
-
-		if (_captureMethod == CaptureMethod::GraphicsCapture)
-			return false;
+		return captureScreenWGC(ps);
 	}
 
-	return captureScreenDupl(ps);
+	if (_captureMethod == CaptureMethod::DesktopDupl)
+	{
+		return captureScreenDupl(ps);
+	}
+
+	// Auto mode prefers DXGI duplication and only falls back to WGC when needed.
+	if (captureScreenDupl(ps))
+	{
+		return true;
+	}
+
+	if (WGCapture::isSupported())
+	{
+		return captureScreenWGC(ps);
+	}
+
+	return false;
 }
 
 bool DX11::captureScreenWGC(ParsecDSO* ps)

@@ -113,7 +113,7 @@ private:
 	bool _lanczosEnabled = true;
 
 	// Windows Graphics Capture
-	CaptureMethod _captureMethod = CaptureMethod::Auto;
+	CaptureMethod _captureMethod = CaptureMethod::DesktopDupl;
 	WGCapture _wgCapture;
 };
 

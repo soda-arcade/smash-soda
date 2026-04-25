@@ -726,6 +726,9 @@ void Hosting::stopHosting() {
 		ProcessMan::instance.stop();
 	}
 
+	// Ensure overlay is closed when hosting ends.
+	OverlayService::instance().stop();
+
 	// Stop web socket server
 	if (WebSocket::instance.isRunning()) {
 		WebSocket::instance.stopServer();
@@ -1178,6 +1181,9 @@ void Hosting::pollLatency() {
 void Hosting::pollSmashSoda() {
 	_smashSodaMutex.lock();
 	_isSmashSodaThreadRunning = true;
+	const auto snapshotInterval = std::chrono::minutes(10);
+	_lastSnapshotUpload = std::chrono::steady_clock::now() - snapshotInterval;
+	_snapshotModeActive = false;
 	while (_isRunning) {
 
 		Sleep(100);
@@ -1190,6 +1196,26 @@ void Hosting::pollSmashSoda() {
 			ParsecHostSetConfig(_parsec, &_hostConfig, _parsecSession.sessionId.c_str());
 			Config::cfg.roomChanged = false;
 		}
+
+		// Upload periodic room snapshots when snapshot preview mode is active.
+		const bool shouldUploadSnapshots =
+			!Config::cfg.room.privateRoom &&
+			Config::cfg.room.previewType == "snapshot" &&
+			!Arcade::instance.credentials.token.empty();
+
+		auto now = std::chrono::steady_clock::now();
+		if (shouldUploadSnapshots) {
+			if (!_snapshotModeActive) {
+				// Trigger an immediate snapshot when snapshot mode becomes active.
+				_lastSnapshotUpload = now - snapshotInterval;
+			}
+
+			if (now - _lastSnapshotUpload >= snapshotInterval) {
+				Arcade::instance.uploadSnapshot();
+				_lastSnapshotUpload = now;
+			}
+		}
+		_snapshotModeActive = shouldUploadSnapshots;
 
 		// Poll inputs
 		if (WebSocket::instance.isRunning()) {

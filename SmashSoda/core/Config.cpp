@@ -139,6 +139,12 @@ void Config::Load() {
 			cfg.room.game = setValue(cfg.room.game, j["Room"]["game"].get<string>());
 			cfg.room.privateRoom = setValue(cfg.room.privateRoom, j["Room"]["privateRoom"].get<bool>());
 			cfg.room.guestLimit = setValue(cfg.room.guestLimit, j["Room"]["guestLimit"].get<unsigned int>());
+			if (j.contains("Room") && j["Room"].contains("previewType") && j["Room"]["previewType"].is_string()) {
+				cfg.room.previewType = setValue(cfg.room.previewType, j["Room"]["previewType"].get<string>());
+			}
+			if (cfg.room.previewType != "auto" && cfg.room.previewType != "snapshot" && cfg.room.previewType != "custom") {
+				cfg.room.previewType = "auto";
+			}
 			cfg.room.isValid = setValue(cfg.room.isValid, j["Room"]["isValid"].get<bool>());
 			cfg.room.secret = setValue(cfg.room.secret, j["Room"]["secret"].get<string>());
 			cfg.room.streamUrl = setValue(cfg.room.streamUrl, j["Room"]["streamUrl"].get<string>());
@@ -146,6 +152,9 @@ void Config::Load() {
 			cfg.room.latencyLimit = setValue(cfg.room.latencyLimit, j["Room"]["latencyLimit"].get<bool>());
 			cfg.room.latencyLimitThreshold = setValue(cfg.room.latencyLimitThreshold, j["Room"]["latencyLimitThreshold"].get<unsigned int>());
 			cfg.room.anonymous = setValue(cfg.room.anonymous, j["Room"]["anonymous"].get<bool>());
+			if (j.contains("Room") && j["Room"].contains("tags") && j["Room"]["tags"].is_array()) {
+				cfg.room.tags = j["Room"]["tags"].get<std::vector<std::string>>();
+			}
 
 			// Set Chat properties
 			cfg.chat.discord = setValue(cfg.chat.discord, j["Chat"]["discord"].get<string>());
@@ -399,13 +408,15 @@ void Config::Save() {
 		{"game", cfg.room.game},
 		{"privateRoom", cfg.room.privateRoom},
 		{"guestLimit", cfg.room.guestLimit},
+		{"previewType", cfg.room.previewType},
 		{"isValid", cfg.room.isValid},
 		{"secret", cfg.room.secret},
 		{"latencyLimit", cfg.room.latencyLimit},
 		{"latencyLimitThreshold", cfg.room.latencyLimitThreshold},
 		{"streamUrl", cfg.room.streamUrl},
 		{"repThreshold", cfg.room.repThreshold},
-		{"anonymous", cfg.room.anonymous}
+		{"anonymous", cfg.room.anonymous},
+		{"tags", cfg.room.tags}
 	};
 
 	// Chat

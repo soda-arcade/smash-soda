@@ -406,7 +406,8 @@ void GuestListWidget::renderBannedGuests() {
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_Text, AppColors::formHelpText);
             ImGui::Text("#%d", _bannedGuests[i].userID);
-            ImGui::Text(_bannedGuests[i].reason.c_str());
+			// Render guest-provided text via a fixed format string to avoid format-string crashes.
+			ImGui::Text("%s", _bannedGuests[i].reason.c_str());
             ImGui::PopStyleColor();
 
         ImGui::EndGroup();
