@@ -24,7 +24,7 @@ bool TitleTooltipWidget::render(const char* title, const char* description, bool
 
 		ImGui::PopFont();
 		ImGui::PopStyleVar(2);
-		ImGui::PopStyleColor(2);
+		ImGui::PopStyleColor(4);
 
 		return true;
 	}
