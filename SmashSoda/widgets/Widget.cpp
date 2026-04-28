@@ -1,4 +1,5 @@
 #include "Widget.h"
+#include "../imgui/imgui_internal.h"
 #include <algorithm>
 
 namespace {
@@ -314,7 +315,13 @@ void Widget::endWidget() {
     isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) || isPopupOpen;
 	ImGui::End();
     ImGui::PopFont();
-    ImGui::PopStyleColor(9);
+    // Defensive: only pop as many colors as are actually on the stack (some inner widget may
+    // have left the global ImGui color stack imbalanced). Avoids access violations in Release.
+    ImGuiContext* ctx = ImGui::GetCurrentContext();
+    int toPop = (ctx && ctx->ColorStack.Size < 9) ? ctx->ColorStack.Size : 9;
+    if (toPop > 0) {
+        ImGui::PopStyleColor(toPop);
+    }
 }
 
 void Widget::elLabel(std::string label) {
