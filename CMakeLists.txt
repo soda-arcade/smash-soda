@@ -9,7 +9,7 @@ project(SmashSoda LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Force C++17 (matching the subdirectory requirement)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Detect architecture for output directories
