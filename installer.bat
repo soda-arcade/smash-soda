@@ -54,7 +54,7 @@ echo Press any key to continue...
 pause >nul
 
 :: --------- Config ----------
-set "BRANCH=master"
+set "BRANCH=fix/installer-atl-cmake-guard"
 set "REPO_URL=https://github.com/trybuchet/smash-soda.git"
 set "SMASH_GLASS_URL=https://github.com/trybuchet/smash-glass/releases/download/1.0.0/smash-glass-v1.00.zip"
 set "VIGEMBUS_URL=https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe"
@@ -265,18 +265,55 @@ if "%STEP_INSTALL_BUILD_TOOLS%"=="0" (
 )
 
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+set "VS_INSTALLER=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe"
 set "VSINSTALL="
+set "VSINSTALL_COMPLETE="
 
-:: Initial detection
+set "VS_ADDS=--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.ATL --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended"
+
 if exist "%VSWHERE%" (
   for /f "usebackq tokens=*" %%i in (`
     "%VSWHERE%" -latest -products * ^
-    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
+    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.ATL ^
     -property installationPath
+  `) do set "VSINSTALL_COMPLETE=%%i"
+  for /f "usebackq tokens=*" %%i in (`
+    "%VSWHERE%" -latest -products * -property installationPath
   `) do set "VSINSTALL=%%i"
 )
 
-if not defined VSINSTALL (
+if defined VSINSTALL_COMPLETE (
+  set "VSINSTALL=!VSINSTALL_COMPLETE!"
+  echo Existing Visual Studio C++ toolchain with ATL detected. Skipping install.
+  goto :vs_ready
+)
+if defined VSINSTALL goto :vs_modify
+goto :vs_fresh_install
+
+:vs_modify
+echo.
+echo A Visual Studio install was found, but it is missing C++ components
+echo required to build Smash Soda (for example ATL). Adding them to the
+echo existing install. This may take several minutes. Please wait...
+echo "%VSINSTALL%"
+if not exist "%VS_INSTALLER%" (
+  echo WARNING: Visual Studio Installer not found at:
+  echo "%VS_INSTALLER%"
+  echo Cannot add the missing components automatically. If the build fails,
+  echo open the Visual Studio Installer, choose Modify, and add
+  echo "C++ ATL for latest build tools".
+  goto :vs_ready
+)
+"%VS_INSTALLER%" modify --installPath "%VSINSTALL%" --quiet --norestart %VS_ADDS%
+set "VS_MODIFY_RC=!errorlevel!"
+if not "!VS_MODIFY_RC!"=="0" if not "!VS_MODIFY_RC!"=="3010" (
+  echo WARNING: Visual Studio modify failed with exit code !VS_MODIFY_RC!.
+  echo If the build fails on missing ATL headers, open the Visual Studio
+  echo Installer, choose Modify, and add "C++ ATL for latest build tools".
+)
+goto :vs_ready
+
+:vs_fresh_install
   echo Visual Studio Build Tools not found. Installing...
   echo This will take several minutes. Please wait...
   echo.
@@ -285,7 +322,7 @@ if not defined VSINSTALL (
   if %errorlevel% equ 0 (
     echo Using winget to install Visual Studio Build Tools 2026 with ATL support...
     winget install -e --id Microsoft.VisualStudio.BuildTools ^
-      --override "--wait --quiet --norestart --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.ATL --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended"
+      --override "--wait --quiet --norestart %VS_ADDS%"
     set "WINGET_RC=!errorlevel!"
     if not "!WINGET_RC!"=="0" if not "!WINGET_RC!"=="3010" (
       echo WARNING: winget install failed with exit code !WINGET_RC!.
@@ -298,12 +335,7 @@ if not defined VSINSTALL (
       )
 
       echo Running Visual Studio Build Tools installer with ATL support...
-      "%VS_BOOTSTRAP%" --wait --quiet --norestart ^
-        --add Microsoft.VisualStudio.Workload.VCTools ^
-        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
-        --add Microsoft.VisualStudio.Component.VC.ATL ^
-        --add Microsoft.VisualStudio.Component.Windows11SDK.22621 ^
-        --includeRecommended
+      "%VS_BOOTSTRAP%" --wait --quiet --norestart %VS_ADDS%
       set "VSBT_RC=!errorlevel!"
       if not "!VSBT_RC!"=="0" if not "!VSBT_RC!"=="3010" (
         echo ERROR: Visual Studio Build Tools installer failed with exit code !VSBT_RC!.
@@ -321,12 +353,7 @@ if not defined VSINSTALL (
     )
     
     echo Running Visual Studio Build Tools installer with ATL support...
-    "%VS_BOOTSTRAP%" --wait --quiet --norestart ^
-      --add Microsoft.VisualStudio.Workload.VCTools ^
-      --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
-      --add Microsoft.VisualStudio.Component.VC.ATL ^
-      --add Microsoft.VisualStudio.Component.Windows11SDK.22621 ^
-      --includeRecommended
+    "%VS_BOOTSTRAP%" --wait --quiet --norestart %VS_ADDS%
     set "VSBT_RC=!errorlevel!"
     if not "!VSBT_RC!"=="0" if not "!VSBT_RC!"=="3010" (
       echo ERROR: Visual Studio Build Tools installer failed with exit code !VSBT_RC!.
@@ -355,13 +382,15 @@ if not defined VSINSTALL (
   if exist "%VSWHERE%" (
     for /f "usebackq tokens=*" %%i in (`
       "%VSWHERE%" -latest -products * ^
-      -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
+      -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.ATL ^
       -property installationPath
     `) do set "VSINSTALL=%%i"
   )
 
   if not defined VSINSTALL goto wait_vs
-)
+goto :vs_ready
+
+:vs_ready
 
 echo.
 echo Visual Studio Build Tools detected at:
