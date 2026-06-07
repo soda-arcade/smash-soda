@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 3.18)
 
+# >>> TEMP DEBUG (remove before merge): diagnose the Windows guard on the reporter's machine
+message(STATUS "SS-DEBUG cmake=${CMAKE_VERSION}  gen=[${CMAKE_GENERATOR}]  plat=[${CMAKE_GENERATOR_PLATFORM}]")
+message(STATUS "SS-DEBUG WIN32=[${WIN32}]  CMAKE_HOST_WIN32=[${CMAKE_HOST_WIN32}]  UNIX=[${UNIX}]")
+message(STATUS "SS-DEBUG SYSTEM_NAME=[${CMAKE_SYSTEM_NAME}]  HOST_SYSTEM_NAME=[${CMAKE_HOST_SYSTEM_NAME}]")
+message(STATUS "SS-DEBUG TOOLCHAIN=[${CMAKE_TOOLCHAIN_FILE}]  VS_PLATFORM=[${CMAKE_VS_PLATFORM_NAME}]  VOIDP=[${CMAKE_SIZEOF_VOID_P}]")
+# <<< TEMP DEBUG
+
 # Make sure we are on Windows
 if(NOT CMAKE_HOST_WIN32)
-    message(FATAL_ERROR "Smash Soda can only be built on Windows.")
+    message(FATAL_ERROR "Smash Soda can only be built on Windows. [SS-DEBUG WIN32=${WIN32} HOST_WIN32=${CMAKE_HOST_WIN32} SYSTEM=${CMAKE_SYSTEM_NAME} TOOLCHAIN=${CMAKE_TOOLCHAIN_FILE}]")
 endif()
 
 project(SmashSoda LANGUAGES CXX)
+message(STATUS "SS-DEBUG (after project) WIN32=[${WIN32}]  SYSTEM_NAME=[${CMAKE_SYSTEM_NAME}]  MSVC=[${MSVC}]  VS_PLATFORM=[${CMAKE_VS_PLATFORM_NAME}]")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Force C++17 (matching the subdirectory requirement)

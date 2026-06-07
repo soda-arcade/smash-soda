@@ -55,7 +55,7 @@ pause >nul
 
 :: --------- Config ----------
 set "BRANCH=fix/installer-atl-cmake-guard"
-set "REPO_URL=https://github.com/trybuchet/smash-soda.git"
+set "REPO_URL=https://github.com/luizhtss/smash-soda-zombie.git"
 set "SMASH_GLASS_URL=https://github.com/trybuchet/smash-glass/releases/download/1.0.0/smash-glass-v1.00.zip"
 set "VIGEMBUS_URL=https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe"
 
