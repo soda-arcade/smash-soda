@@ -54,8 +54,8 @@ echo Press any key to continue...
 pause >nul
 
 :: --------- Config ----------
-set "BRANCH=fix/installer-atl-cmake-guard"
-set "REPO_URL=https://github.com/luizhtss/smash-soda-zombie.git"
+set "BRANCH=master"
+set "REPO_URL=https://github.com/trybuchet/smash-soda.git"
 set "SMASH_GLASS_URL=https://github.com/trybuchet/smash-glass/releases/download/1.0.0/smash-glass-v1.00.zip"
 set "VIGEMBUS_URL=https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe"
 
@@ -419,65 +419,49 @@ echo C++ build environment is ready.
 :: --------- Install CMake ----------
 echo.
 echo [3/8] Installing CMake...
+:: Use the native Windows (Kitware) CMake via its full path. never a PATH "cmake",
+:: which may be an MSYS2/MinGW build (Unix Makefiles, no VS generator => build fails).
+set "CMAKE_EXE=%ProgramFiles%\CMake\bin\cmake.exe"
 if "%STEP_INSTALL_CMAKE%"=="0" (
   echo Skipped [3/8] Install CMake.
   goto :after_install_cmake
 )
-where cmake >nul 2>&1
-if %errorlevel% neq 0 (
+:: 1) Try winget first if it is available (fast).
+if not exist "%CMAKE_EXE%" (
   where winget >nul 2>&1
-  if %errorlevel% equ 0 (
+  if !errorlevel! equ 0 (
     echo Using winget to install CMake...
     winget install -e --id Kitware.CMake --silent --accept-package-agreements --accept-source-agreements
-    set "WINGET_CMAKE_RC=!errorlevel!"
-    if not "!WINGET_CMAKE_RC!"=="0" if not "!WINGET_CMAKE_RC!"=="3010" (
-      echo WARNING: winget CMake install failed with exit code !WINGET_CMAKE_RC!.
-      echo Falling back to direct CMake installer download...
-      call :download_latest_github_asset "Kitware/CMake" "^cmake-.*-windows-x86_64\.msi$" "%CMAKE_SETUP%" "CMake"
-      if errorlevel 1 (
-        echo ERROR: Failed to download CMake installer.
-        pause
-        exit /b 1
-      )
-      msiexec /i "%CMAKE_SETUP%" /qn /norestart ADD_CMAKE_TO_PATH=System
-      if errorlevel 1 (
-        echo ERROR: CMake installer failed.
-        pause
-        exit /b 1
-      )
-    )
-    timeout /t 5 >nul
-  ) else (
-    echo winget not found. Falling back to direct CMake installer download...
-    call :download_latest_github_asset "Kitware/CMake" "^cmake-.*-windows-x86_64\.msi$" "%CMAKE_SETUP%" "CMake"
-    if errorlevel 1 (
-      echo ERROR: Failed to download CMake installer.
-      pause
-      exit /b 1
-    )
-    msiexec /i "%CMAKE_SETUP%" /qn /norestart ADD_CMAKE_TO_PATH=System
-    if errorlevel 1 (
-      echo ERROR: CMake installer failed.
-      pause
-      exit /b 1
-    )
     timeout /t 5 >nul
   )
 )
 
-:: Add CMake to PATH manually if needed
-if exist "%ProgramFiles%\CMake\bin\cmake.exe" (
-  set "PATH=%ProgramFiles%\CMake\bin;%PATH%"
+:: 2) If the native CMake still is not at the expected path (no winget, winget failed,
+::    or it was installed elsewhere), download Kitware's MSI and install it there.
+if not exist "%CMAKE_EXE%" (
+  echo Downloading CMake directly from Kitware...
+  call :download_latest_github_asset "Kitware/CMake" "^cmake-.*-windows-x86_64\.msi$" "%CMAKE_SETUP%" "CMake"
+  if errorlevel 1 (
+    echo ERROR: Failed to download CMake installer.
+    pause
+    exit /b 1
+  )
+  msiexec /i "%CMAKE_SETUP%" /qn /norestart ADD_CMAKE_TO_PATH=System
+  if errorlevel 1 (
+    echo ERROR: CMake installer failed.
+    pause
+    exit /b 1
+  )
+  timeout /t 5 >nul
 )
 
-:: Verify CMake
-where cmake >nul 2>&1
-if %errorlevel% neq 0 (
-  echo ERROR: CMake not found after installation
+if not exist "%CMAKE_EXE%" (
+  echo ERROR: Native CMake not found at "%CMAKE_EXE%" after installation.
+  echo Please install CMake from https://cmake.org/download/ and re-run.
   pause
   exit /b 1
 )
-echo CMake is ready.
+echo CMake is ready: "%CMAKE_EXE%"
 :after_install_cmake
 
 :: --------- ViGEmBus driver ----------
@@ -532,7 +516,7 @@ if "%STEP_BUILD%"=="0" (
   echo Skipped [6/8] Configure and [7/8] Build.
   goto :after_build
 )
-cmake -S "%SRC_DIR%" -B "%BUILD%" -A x64
+"%CMAKE_EXE%" -S "%SRC_DIR%" -B "%BUILD%" -A x64
 if %errorlevel% neq 0 (
   echo ERROR: CMake configuration failed
   pause
@@ -541,12 +525,12 @@ if %errorlevel% neq 0 (
 
 echo.
 echo CMake generator info:
-cmake -LA -N "%BUILD%" | findstr /C:"CMAKE_GENERATOR"
+"%CMAKE_EXE%" -LA -N "%BUILD%" | findstr /C:"CMAKE_GENERATOR"
 
 echo.
 echo [7/8] Building Release...
 mkdir "%SRC_DIR%\x64\release" 2>nul
-cmake --build "%BUILD%" --config Release
+"%CMAKE_EXE%" --build "%BUILD%" --config Release
 if %errorlevel% neq 0 (
   echo ERROR: Build failed
   pause
